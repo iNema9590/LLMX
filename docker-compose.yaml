@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ai_network
+    environment:
+      - OLLAMA_NUM_PARALLEL=4  # Set the number of parallel requests
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false  # Disable security for easy access (not recommended for production)
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - ai_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+
+networks:
+  ai_network:
+    driver: bridge
+
+volumes:
+  ollama_data:
+  elasticsearch_data:
+
