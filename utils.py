@@ -38,17 +38,17 @@ def retrieve_documents(es_client, index_name, query, top_k=5):
     return [hit["_source"] for hit in response["hits"]["hits"]]
 
 
-def generate_response(query, documents, model="llama3"):
+def generate_response(query, documents, model="llama3.3"):
     """
     Generate a response using the Ollama API for a given subset of documents.
     """
     url = "http://localhost:11434/api/generate"
 
     # Combine the documents into a single context
-    context = "\n\n".join([f"Title: {doc['title']}\nAbstract: {doc['abstract']}" for doc in documents])
+    context = "\n\n".join([f"{doc['title']}. {doc['abstract']}" for doc in documents])
 
     # Prepare the prompt for Llama3
-    prompt = f"Given the contet answer the question. Context:\n{context}\n\nQuestion: {query}\nAnswer:"
+    prompt = f"Learn from the whole context and answer the question. No need to refer to the context answer like you knew. \n Context:\n{context}\n\nQuestion: {query}\nAnswer:"
 
     # Send the prompt to Llama3
     data = {
