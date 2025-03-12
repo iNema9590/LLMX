@@ -3,6 +3,7 @@ import numpy as np
 import pickle
 from sentence_transformers import SentenceTransformer
 import re
+from tqdm import tqdm
 # Load dataset
 data=pd.read_csv('data/recipes.csv')
 features_drop = ['recipe_url', 'input_db_index', 'food_kg_locator', 'food_com_unique_id', 'submit_date', 'last_changed_date', 'author_id', 'rating', 'recipe_id', 'serves', 'units' ]
@@ -48,17 +49,32 @@ data.rename(columns = {'new_ingredients': 'ingredients', 'new_directions' : 'dir
 data["text"] =data["title"] +". Ingredients:" + data["ingredients"] + ". Instructions:" +data["directions"]
 documents = data["text"].tolist()
 # Load a local embedding model (e.g., sentence-transformers)
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Generate embeddings
-embeddings = model.encode(documents, convert_to_numpy=True, show_progress_bar=True)
+# embeddings = model.encode(documents, convert_to_numpy=True, show_progress_bar=True)
+
+
+#Generate nomic embeddings
+import requests
+url = "http://localhost:11434/api/embeddings"
+embeddings=[]
+for i in tqdm(documents):
+    data = {
+        "model": "nomic-embed-text",
+        "prompt": i
+    }
+
+    embeddings.append(requests.post(url, json=data).json()['embedding'])
+
+embeddings=np.array(embeddings)
 
 # Save documents separately
-with open("data/documents.pkl", "wb") as f:
-    pickle.dump(documents, f)
+# with open("data/documents.pkl", "wb") as f:
+#     pickle.dump(documents, f)
 
 # Save embeddings separately
-with open("data/embeddings.pkl", "wb") as f:
+with open("data/embeddings_nomic.pkl", "wb") as f:
     pickle.dump(embeddings, f)
 
-print("Documents and embeddings saved successfully.")
+print("Embeddings of nomic saved successfully.")
