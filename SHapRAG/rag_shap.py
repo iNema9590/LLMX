@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 def compute_logprob(
     query: str,
-    ground_truth_answer: str,
+    ground_truth_answer: None,
     model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
     context=None,
     max_new_tokens: int = 30,
@@ -41,7 +41,6 @@ def compute_logprob(
 
     # Tokenize the prompt and answer
     prompt_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
-    answer_ids = tokenizer(ground_truth_answer, return_tensors="pt", add_special_tokens=False).input_ids.to(device)
 
     log_probs = []
 
@@ -51,6 +50,8 @@ def compute_logprob(
             output_text = tokenizer.decode(generated[0][prompt_ids.shape[1]:], skip_special_tokens=True)
         return output_text
     else:
+        answer_ids = tokenizer(ground_truth_answer, return_tensors="pt", add_special_tokens=False).input_ids.to(device)
+
         for i in range(answer_ids.shape[1]):
             input_ids = torch.cat([prompt_ids, answer_ids[:, :i]], dim=1)
 
