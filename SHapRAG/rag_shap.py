@@ -17,9 +17,9 @@ warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 def compute_logprob(
     query: str,
-    ground_truth_answer: None,
-    model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-    context=None,
+    ground_truth_answer: str = None,
+    model_name: str = "meta-llama/Meta-Llama-3.1-8B-Instruct",
+    context: str = None,
     max_new_tokens: int = 30,
     response: bool = False
 ):
@@ -27,28 +27,37 @@ def compute_logprob(
 
     # Load tokenizer and model
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16 if device == "cuda" else torch.float32).to(device)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype=torch.float16 if device == "cuda" else torch.float32
+    ).to(device)
     model.eval()
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # TinyLlama Chat Prompt Format
+    # Construct chat messages using Hugging Face chat template
+    messages = [{"role": "system", "content": "You are a helpful assistant."}]
     if context:
-        prompt = f"<|system|>\nYou are a helpful assistant.\n<|user|>\n Given the context: {context}. answer the query:{query}\n<|assistant|>\n"
+        messages.append({"role": "user", "content": f"Given the context: {context}. Briefly answer the query: {query}"})
     else:
-        prompt = f"<|system|>\nYou are a helpful assistant.\n<|user|>\n{query}\n<|assistant|>\n"
+        messages.append({"role": "user", "content": query})
 
-    # Tokenize the prompt and answer
-    prompt_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
+    # Tokenize prompt using chat template
+    prompt_ids = tokenizer.apply_chat_template(
+        messages,
+        add_generation_prompt=not ground_truth_answer,
+        return_tensors="pt"
+    ).to(device)
 
     log_probs = []
 
-    if response:   
+    if response:
         with torch.no_grad():
             generated = model.generate(prompt_ids, max_new_tokens=max_new_tokens, do_sample=False, pad_token_id=tokenizer.eos_token_id)
             output_text = tokenizer.decode(generated[0][prompt_ids.shape[1]:], skip_special_tokens=True)
-        return output_text
+        cleaned_text = output_text.lstrip().removeprefix("assistant").lstrip(": \n")
+        return cleaned_text
     else:
         answer_ids = tokenizer(ground_truth_answer, return_tensors="pt", add_special_tokens=False).input_ids.to(device)
 
@@ -64,8 +73,6 @@ def compute_logprob(
             log_probs.append(log_prob)
 
         total_log_prob = sum(log_probs)
-        # prob = math.exp(total_log_prob)
-
         return total_log_prob
 
 class ShapleyAttributor:
@@ -508,3 +515,45 @@ class ShapleyAttributor:
         if verbose and result is not None:
             print(f"Method '{method_name}' finished in {end_time - start_time:.2f}s.")
         return result
+    
+
+
+
+# attributor = ShapleyAttributor(
+#         items=documents,
+#         query=query,
+#         target_response=target_response,
+#         llm_caller=compute_logprob # Use your actual llm_caller
+#     )
+
+# print("\n--- Computing ContextCite (Surrogate Weights) ---")
+# cc_weights = attributor.compute(method_name="contextcite", num_samples=16, lasso_alpha=0.01)
+# if cc_weights is not None: print("ContextCite Weights:", np.round(cc_weights, 4))
+
+# print("\n--- Computing Weakly Supervised Shapley (WSS) ---")
+# wss_values, wss_surrogate_weights = attributor.compute(method_name="wss", num_samples=16, lasso_alpha=0.01, return_weights=True)
+# if wss_values is not None:
+#     print("WSS Values:", np.round(wss_values, 4))
+#     print("WSS Surrogate Weights:", np.round(wss_surrogate_weights, 4))
+
+# print("\n--- Computing TMC-Shapley ---")
+# tmc_values = attributor.compute(method_name="tmc") # 5*n iterations
+# if tmc_values is not None: print("TMC Values:", np.round(tmc_values, 4))
+
+# if beta_dist: # Only if scipy is available
+#     print("\n--- Computing Beta-Shapley (U-shaped, more weight to ends) ---")
+#     # For U-shaped, alpha and beta < 1
+#     beta_u_values = attributor.compute(method_name="betashap", num_iterations=attributor.n_items, beta_a=0.5, beta_b=0.5)
+#     if beta_u_values is not None: print("BetaShap (U-shaped) Values:", np.round(beta_u_values, 4))
+
+#     # print("\n--- Computing Beta-Shapley (Uniform, equivalent to standard MC) ---")
+#     # beta_uniform_values = attributor.compute(method_name="betashap", num_iterations=attributor.n_items, beta_a=1.0, beta_b=1.0)
+#     # if beta_uniform_values is not None: print("BetaShap (Uniform) Values:", np.round(beta_uniform_values, 4))
+# print("\n--- Computing Leave-One-Out (LOO) ---")
+# loo_values = attributor.compute(method_name="loo") 
+# if loo_values is not None: 
+#     print("LOO Values:", np.round(loo_values, 4))
+
+# print("\n--- Computing Exact Shapley ---")
+# exact_values = attributor.compute(method_name="exact", exact_confirm=False) # Disable confirm for n=5 demo
+# if exact_values is not None: print("Exact Values:", np.round(exact_values, 4))
