@@ -14,8 +14,8 @@ import faiss
 from scipy.stats import spearmanr, pearsonr
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
+import gc
 from sentence_transformers import SentenceTransformer
-
 splits = {'train': 'question-answer-passages/train-00000-of-00001.parquet', 'test': 'question-answer-passages/test-00000-of-00001.parquet'}
 df = pd.read_parquet("hf://datasets/enelpol/rag-mini-bioasq/" + splits["train"])
 
@@ -67,150 +67,156 @@ def retrieve_documents(query, k=5):
     scores, indices = faiss_index.search(query_embedding, k)
     return [df1['passage'][i] for i in indices[0]], scores
 
-num_questions_to_run = 2
+num_questions_to_run = 30 # Keep small for testing
 print(f"Running experiments for {num_questions_to_run} questions...")
-UTILITY_CACHE_PATH = "../Experiment_data/bioask_utilities.pkl"
-# Parameters for attribution methods
-NUM_RETRIEVED_DOCS =4 
+
+# Parameters
+NUM_RETRIEVED_DOCS = 8
 SEED = 42
-# LLM_MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0" # Use a small, fast model for this demo
-model_path = "meta-llama/Llama-3.2-1B-Instruct"  # Or your desired model
-model = AutoModelForCausalLM.from_pretrained(
+
+# Initialize Accelerator ONCE
+accelerator_main = Accelerator(mixed_precision="bf16") 
+
+if accelerator_main.is_main_process:
+    print(f"Main Script: Loading model...")
+model_path = "meta-llama/Llama-3.2-1B-Instruct" # Example, ensure this path is correct
+model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
-    torch_dtype=torch.float32,
-    # device_map="auto" could also be used if you prefer Transformers to handle initial placement,
-    # but accelerator.prepare() will still manage the final device assignment per process.
+    torch_dtype=torch.bfloat16,
 )
 tokenizer = AutoTokenizer.from_pretrained(model_path)
-# Store metrics for each question and method
+
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+    model_cpu.config.pad_token_id = tokenizer.pad_token_id
+    if hasattr(model_cpu, 'generation_config') and model_cpu.generation_config is not None: # Check if generation_config exists
+         model_cpu.generation_config.pad_token_id = tokenizer.pad_token_id
+
+if accelerator_main.is_main_process:
+    print(f"Main Script: Preparing model with Accelerator...")
+prepared_model = accelerator_main.prepare(model_cpu)
+unwrapped_prepared_model = accelerator_main.unwrap_model(prepared_model)
+unwrapped_prepared_model.eval()
+if accelerator_main.is_main_process:
+    print(f"Main Script: Model prepared and set to eval.")
+
 all_metrics_data = []
 
-for i in tqdm(range(num_questions_to_run), desc="Processing Questions"):
-    query = df.question[i]
-    print(f"\n--- Question {i+1}/{num_questions_to_run}: {query} ---")
-
-    # 2. RAG Pipeline: Retrieve Documents
+for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=not accelerator_main.is_main_process):
+    query = df.question[i][:10]
+    if accelerator_main.is_main_process:
+        print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
     docs, scores = retrieve_documents(query=query, k=NUM_RETRIEVED_DOCS)
-    if not docs or len(docs) < NUM_RETRIEVED_DOCS:
-        print(f"  Skipping query due to insufficient documents retrieved ({len(docs)}).")
-        continue
 
+    utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache"
+    utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
+    current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
+    
+    if accelerator_main.is_main_process: # Only main process creates directories
+        os.makedirs(os.path.dirname(current_utility_path), exist_ok=True)
+        print(f"  Instantiating ShapleyExperimentHarness for Q{i} (n={len(docs)} docs)...")
+    
+    # Synchronize before creating harness instance to ensure directory exists for all if utility_path is used by others
+    accelerator_main.wait_for_everyone() 
 
-    # 3. Instantiate ShapleyExperimentHarness
-    #    This will pre-compute all utilities (2^N LLM calls)
-    print(f"  Instantiating ShapleyExperimentHarness for n={len(docs)} docs...")
     harness = ShapleyExperimentHarness(
-            items=docs,
-            query=query,
-            model=model,         # Pass the loaded model
-            tokenizer=tokenizer, # Pass the loaded tokenizer
-            verbose=True,
-            utility_path=UTILITY_CACHE_PATH
-        )
+        items=docs,
+        query=query,
+        prepared_model_for_harness=prepared_model,
+        tokenizer_for_harness=tokenizer,
+        accelerator_for_harness=accelerator_main,
+        verbose=True, # Verbose can be True, but most prints inside harness are main_process guarded
+        utility_path=current_utility_path
+    )
             
-        # 4. Compute Attributions using various methods
     results_for_query = {}
-    current_accelerator = harness.accelerator
-    # Exact Shapley (Ground Truth)
-    if current_accelerator.is_main_process:
-        print(f"    Computing Exact Shapley...")
+    # Computation of attributions should only happen on the main process
+    # as they modify `results_for_query` which is then used to populate `all_metrics_data`.
+    # `all_metrics_data` is a simple list on the main process.
+    if accelerator_main.is_main_process:
         results_for_query["Exact"] = harness.compute_exact_shap()
 
+        m_samples_map = {"S": 32, "M": 64, "L": 100} # Example sample sizes
+        T_iterations_map = {"S": 64, "M": 100}  # Example iterations
 
-        # Approximate Methods
-        m_samples = 64
-        T_iterations = 100 # Fewer iterations for faster demo loop
+        for size_key, num_s in m_samples_map.items():
+            if 2**len(docs) < num_s and size_key != "M": # Avoid sampling more than possible, except for a default
+                actual_samples = max(1, 2**len(docs)-1 if 2**len(docs)>0 else 1) # Ensure at least 1 sample if possible
+            else:
+                actual_samples = num_s
+
+            if actual_samples > 0: # Ensure positive number of samples
+                results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, lasso_alpha=0.0, seed=SEED)
+                
+                results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, lasso_alpha=0.0, seed=SEED)
+
+        for size_key, num_t in T_iterations_map.items():
+            results_for_query[f"TMC{num_t}"] = harness.compute_tmc_shap(num_iterations=num_t, performance_tolerance=0.001, seed=SEED)
         
-        print(f"    Computing ContextCite (m={m_samples})...")
-        results_for_query["ContextCite64"] = harness.compute_contextcite_weights(num_samples=m_samples, lasso_alpha=0.0, seed=SEED)
+        if beta_dist: # beta_dist needs to be defined or imported (e.g., from scipy.stats)
+            results_for_query["BetaShap (U)"] = harness.compute_beta_shap(num_iterations=T_iterations_map['M'], beta_a=0.5, beta_b=0.5, seed=SEED)
 
-        print(f"    Computing ContextCite (m={32})...")
-        results_for_query["ContextCite32"] = harness.compute_contextcite_weights(num_samples=m_samples, lasso_alpha=0.0, seed=SEED)
-        
-        print(f"    Computing ContextCite (m={100})...")
-        results_for_query["ContextCite100"] = harness.compute_contextcite_weights(num_samples=m_samples, lasso_alpha=0.0, seed=SEED)
-        
-        print(f"    Computing WSS (m={32})...")
-        results_for_query["WSS32"] = harness.compute_wss(num_samples=32, lasso_alpha=0.0, seed=SEED)
-
-        print(f"    Computing WSS (m={m_samples})...")
-        results_for_query["WSS64"] = harness.compute_wss(num_samples=m_samples, lasso_alpha=0.0, seed=SEED)
-        
-        print(f"    Computing WSS (m={100})...")
-        results_for_query["WSS100"] = harness.compute_wss(num_samples=100, lasso_alpha=0.0, seed=SEED)
-
-
-        print(f"    Computing TMC (T={64})...")
-        results_for_query["TMC64"] = harness.compute_tmc_shap(num_iterations=T_iterations, performance_tolerance=0.001, seed=SEED)
-        print(f"    Computing TMC (T={T_iterations})...")
-        results_for_query["TMC"] = harness.compute_tmc_shap(num_iterations=T_iterations, performance_tolerance=0.001, seed=SEED)
-        
-        if beta_dist:
-            print(f"    Computing BetaShap (U-shaped, T={T_iterations})...")
-            results_for_query["BetaShap (U)"] = harness.compute_beta_shap(num_iterations=T_iterations, beta_a=0.5, beta_b=0.5, seed=SEED)
-
-        print(f"    Computing LOO...")
         results_for_query["LOO"] = harness.compute_loo()
 
-        # 5. Calculate and Store Metrics for this query
         exact_scores = results_for_query.get("Exact")
         if exact_scores is not None:
             for method, approx_scores in results_for_query.items():
                 if method != "Exact" and approx_scores is not None:
                     if len(approx_scores) == len(exact_scores):
-                        # Handle potential constant arrays for correlation
                         if np.all(exact_scores == exact_scores[0]) or np.all(approx_scores == approx_scores[0]):
                             pearson_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
                             spearman_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
                         else:
-                          
                             pearson_c, _ = pearsonr(exact_scores, approx_scores)
                             spearman_c, _ = spearmanr(exact_scores, approx_scores)
-             
                         
                         all_metrics_data.append({
-                            "Question_Index": i,
-                            "Query": query,
-                            "Method": method,
-                            "Pearson": pearson_c,
-                            "Spearman": spearman_c
+                            "Question_Index": i, "Query": query, "Method": method,
+                            "Pearson": pearson_c, "Spearman": spearman_c, "Num_Items": len(docs)
                         })
                     else:
-                            print(f"    Score length mismatch for method {method} (Exact: {len(exact_scores)}, Approx: {len(approx_scores)}). Skipping metrics.")
+                        print(f"    Score length mismatch for method {method} (Exact: {len(exact_scores)}, Approx: {len(approx_scores)}). Skipping metrics.")
         else:
-            print(f"    Skipping metric calculation for Q{i} as Exact Shapley was not computed.")
+            print(f"    Skipping metric calculation for Q{i} as Exact Shapley was not computed or failed.")
     
-    # Optional: Brief sleep to avoid overwhelming resources if LLM is remote
-    # time.sleep(0.1)
+    accelerator_main.wait_for_everyone() 
+    del harness
+   
+    if torch.cuda.is_available():
+        if accelerator_main.is_main_process: # Print from one process
+            print(f"Attempting to empty CUDA cache on rank {accelerator_main.process_index} after Q{i}")
+        torch.cuda.empty_cache()
+        gc.collect()
+        if accelerator_main.is_main_process:
+            print(f"CUDA cache empty attempt complete on rank {accelerator_main.process_index}.")
+    accelerator_main.wait_for_everyone()
 
 
-# 6. Aggregate and Report Average Metrics
-if all_metrics_data:
-    metrics_df_all_questions = pd.DataFrame(all_metrics_data)
-    
-    print("\n\n--- Average Correlation Metrics Across All Questions ---")
-    # Group by method and calculate mean, std for Pearson and Spearman
-    average_metrics = metrics_df_all_questions.groupby("Method").agg(
-        Avg_Pearson=("Pearson", "mean"),
-        Avg_Spearman=("Spearman", "mean"),
-        Num_Valid_Queries=("Query", "nunique") # Count how many queries had valid metrics for this method
-    ).sort_values(by="Avg_Spearman", ascending=False)
-    
-    print(average_metrics.round(4))
+# Aggregate and Report Average Metrics (Only on main process)
+if accelerator_main.is_main_process:
+    if all_metrics_data:
+        metrics_df_all_questions = pd.DataFrame(all_metrics_data)
+        
+        print("\n\n--- Average Correlation Metrics Across All Questions ---")
+        average_metrics = metrics_df_all_questions.groupby("Method").agg(
+            Avg_Pearson=("Pearson", "mean"),
+            Avg_Spearman=("Spearman", "mean"),
+            Num_Valid_Queries=("Query", "nunique")
+        ).sort_values(by="Avg_Spearman", ascending=False)
+        
+        print(average_metrics.round(4))
 
-    # You can also save metrics_df_all_questions to a CSV for detailed analysis
-    metrics_df_all_questions.to_csv("../Experiment_data/shapley_rag_experiment_details.csv", index=False)
-    average_metrics.to_csv("../Experiment_data/shapley_rag_experiment_summary.csv")
-    current_accelerator.wait_for_everyone()
-else:
-    print("\nNo metrics were collected. This might be due to Exact Shapley not being run or errors.")
-    current_accelerator.wait_for_everyone()
+        details_path = "../Experiment_data/bioask_results/shapley_rag_experiment_details.csv"
+        summary_path = "../Experiment_data/bioask_results/shapley_rag_experiment_summary.csv"
+        os.makedirs(os.path.dirname(details_path), exist_ok=True)
+        
+        metrics_df_all_questions.to_csv(details_path, index=False)
+        average_metrics.to_csv(summary_path)
+    else:
+        print("\nNo metrics were collected. This might be due to all calculations failing or only non-main processes running sections.")
 
-if current_accelerator.is_main_process:
-    print(f"Total pre-computed/loaded utilities: {len(harness.all_true_utilities)}")
-
-# import torch.distributed as dist
-
-# if dist.is_initialized():
-#     dist.destroy_process_group()
+# Final synchronization before script ends
+accelerator_main.wait_for_everyone()
+if accelerator_main.is_main_process:
+    print("Script finished.")

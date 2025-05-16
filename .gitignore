@@ -1,4 +1,5 @@
 /data/
+/Experiment_data/
 __pycache__/
 google-credentials.json
 .git-credentials
