@@ -1,7 +1,10 @@
 import numpy as np
+import os
 import random
 import math
+import pickle
 import itertools
+
 from collections import defaultdict
 from sklearn.linear_model import Lasso, LinearRegression
 import torch
@@ -21,36 +24,26 @@ from accelerate import Accelerator
 # import torch.multiprocessing as mp # Not explicitly needed with accelerate launch
 
 class ShapleyExperimentHarness:
-    def __init__(self, items, query, model, tokenizer, verbose=False):
-        self.accelerator = Accelerator(mixed_precision='fp16') # Or your desired precision
+    def __init__(self, items, query, 
+                 prepared_model_for_harness, tokenizer_for_harness, accelerator_for_harness, 
+                 verbose=False, utility_path=None):
+        self.accelerator = accelerator_for_harness # Use the passed-in accelerator
         self.items = items
         self.query = query
-        # Model is passed in, assumed to be loaded on CPU or with device_map="auto"
-        self.tokenizer = tokenizer
+        self.model = prepared_model_for_harness # Use the ALREADY PREPARED model
+        self.tokenizer = tokenizer_for_harness
         self.verbose = verbose
         self.n_items = len(items)
-        self.device = self.accelerator.device # Device for the current process
+        self.device = self.accelerator.device # Device from the passed accelerator
 
-        # Prepare model for distributed execution (moves to self.device)
-        # This is where self.model might become a DDP-wrapped model
-        self.model = self.accelerator.prepare(model)
-        self.model.eval() # Call eval on the (potentially wrapped) model
+        # Model is already prepared and in eval mode, so no self.accelerator.prepare(model) here
+        # and no self.model.eval() here, assuming it was done outside.
 
+        # Tokenizer pad token logic is fine if tokenizer is passed per instance
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
-            # If tokenizer's pad_token_id changed, update model config's pad_token_id
-            # Access the original model's config using .module if DDP is used
-            
-            # Get the actual underlying model
-            unwrapped_model = self.accelerator.unwrap_model(self.model)
-
-            if unwrapped_model.config.pad_token_id is None and self.tokenizer.pad_token_id is not None:
-                unwrapped_model.config.pad_token_id = self.tokenizer.pad_token_id
-            # Also, ensure the generation config is updated if it exists and is separate
-            if hasattr(unwrapped_model, 'generation_config') and unwrapped_model.generation_config.pad_token_id is None and self.tokenizer.pad_token_id is not None:
-                 unwrapped_model.generation_config.pad_token_id = self.tokenizer.pad_token_id
-
-
+            # Config updates were done when model_cpu was prepared outside
+        
         self._factorials = {k: math.factorial(k) for k in range(self.n_items + 1)}
 
         if self.verbose and self.accelerator.is_main_process:
@@ -58,9 +51,104 @@ class ShapleyExperimentHarness:
         self.target_response = self._llm_generate_response(context_str="\n\n".join(self.items))
         if self.verbose and self.accelerator.is_main_process:
             print(f"Target response: '{self.target_response}'")
+        loaded_utilities = False
+        if utility_path and self.accelerator.is_main_process: # Only main process tries to load initially
+            if os.path.exists(utility_path):
+                try:
+                    self.all_true_utilities = self.load_utilities(utility_path) # Main process loads
+                    if self.verbose:
+                        print(f"Successfully loaded utilities from {utility_path}. "
+                              f"Found {len(self.all_true_utilities)} entries.")
+                    if len(self.all_true_utilities) != 2**self.n_items:
+                        print(f"Warning: Loaded utilities count ({len(self.all_true_utilities)}) "
+                              f"does not match expected ({2**self.n_items}) for n_items={self.n_items}. "
+                              "This might be for a different 'items' set or an incomplete computation.")
+                    loaded_utilities = True
+                except Exception as e:
+                    print(f"Warning: Failed to load utilities from {utility_path}: {e}. Will recompute.")
+            else:
+                if self.verbose:
+                    print(f"Utility file {utility_path} not found. Will precompute utilities.")
 
-        self.all_true_utilities = self._precompute_all_utilities()
+        # Broadcast loaded status and utilities if loaded by main process
+        load_status_broadcast = [loaded_utilities]
+        if self.accelerator.is_main_process:
+            utilities_to_broadcast = [self.all_true_utilities if loaded_utilities else None]
+        else:
+            utilities_to_broadcast = [None]
 
+        broadcast_object_list(load_status_broadcast) # Broadcast if utilities were loaded
+        loaded_utilities_on_all_procs = load_status_broadcast[0]
+
+        if loaded_utilities_on_all_procs:
+            broadcast_object_list(utilities_to_broadcast) # Broadcast the actual utilities
+            self.all_true_utilities = utilities_to_broadcast[0]
+            if self.all_true_utilities is None and self.verbose and not self.accelerator.is_main_process:
+                print(f"Rank {self.accelerator.process_index}: Received None for utilities after broadcast, expected loaded utilities.")
+                self.all_true_utilities = {} # Fallback
+            if self.verbose and self.accelerator.is_main_process:
+                print("Broadcasted loaded utilities to all processes.")
+        else:
+            if self.verbose and self.accelerator.is_main_process:
+                print("Pre-computing utilities as they were not loaded.")
+            self.all_true_utilities = self._precompute_all_utilities()
+            # Optionally save after computing if utility_path was given but file didn't exist
+            if utility_path and self.accelerator.is_main_process and not os.path.exists(utility_path):
+                if self.verbose:
+                    print(f"Saving newly computed utilities to {utility_path}")
+                self.save_utilities(utility_path)
+
+    def save_utilities(self, file_path: str, method: str = "pickle"):
+        """
+        Saves the self.all_true_utilities dictionary to a file.
+        Only the main process should execute this to avoid race conditions.
+        Args:
+            file_path (str): The path to save the utilities.
+            method (str): "pickle" or "json". JSON keys (tuples) will be stringified.
+        """
+        if not self.accelerator.is_main_process:
+            # self.accelerator.wait_for_everyone() # Ensure main process has data before others might proceed
+            return
+
+        if self.verbose:
+            print(f"Main process: Saving utilities to {file_path} using {method}...")
+        with open(file_path, "wb") as f:
+            pickle.dump(self.all_true_utilities, f)
+        if self.verbose:
+            print(f"Main process: Successfully saved {len(self.all_true_utilities)} utilities to {file_path}.")
+
+    @classmethod # Make it a class method so it can be called without an instance if needed for raw loading
+    def load_utilities_static(cls, file_path: str, method: str = "pickle") -> dict:
+        """
+        Loads a utilities dictionary from a file.
+        This is a static/class method and does not require an instance.
+        Args:
+            file_path (str): The path to load the utilities from.
+            method (str): "pickle" or "json". JSON keys will be converted back to tuples.
+        Returns:
+            dict: The loaded utilities dictionary.
+        """
+        loaded_utilities = {}
+        if not os.path.exists(file_path):
+            # print(f"Utility file {file_path} not found for loading.")
+            raise FileNotFoundError(f"Utility file {file_path} not found for loading.")
+
+
+        with open(file_path, "rb") as f:
+            loaded_utilities = pickle.load(f)
+            
+        return loaded_utilities
+
+    def load_utilities(self, file_path: str, method: str = "pickle") -> dict:
+        """Instance method wrapper for load_utilities_static for convenience"""
+        # This method might not be strictly necessary if loading is done in __init__ via static method
+        # But can be useful if an instance wants to load utilities post-init.
+        if not self.accelerator.is_main_process:
+             raise RuntimeError("load_utilities instance method should ideally be called by main process, then broadcast results.")
+        
+        self.all_true_utilities = ShapleyExperimentHarness.load_utilities_static(file_path, method)
+        return self.all_true_utilities
+    
     def _precompute_all_utilities(self) -> dict[tuple, float]:
         all_ablations_tuples = list(itertools.product([0, 1], repeat=self.n_items))
         num_total_subsets = len(all_ablations_tuples)
@@ -166,24 +254,51 @@ class ShapleyExperimentHarness:
 
         input_ids = tokenized["input_ids"].to(self.device)
         attention_mask = tokenized["attention_mask"].to(self.device)
-
-        # --- KEY CHANGE FOR .generate() ---
-        # Always call .generate() on the UNWRAPPED model when using DDP
         unwrapped_model = self.accelerator.unwrap_model(self.model)
+        generated_ids = None # Initialize
+        outputs_dict = None # Initialize for potential outputs if model returns dict
 
         with torch.no_grad():
-            generated_ids = unwrapped_model.generate( # Call on unwrapped_model
+            # For some models, generate might return a dict or other structures
+            # We are interested in the sequence of generated IDs.
+            outputs_gen = unwrapped_model.generate(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 max_new_tokens=max_new_tokens,
                 do_sample=False,
                 pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
-                             else unwrapped_model.config.eos_token_id, # Use unwrapped_model.config here too
+                             else unwrapped_model.config.eos_token_id,
                 temperature=1.0,
-                top_p=1.0
+                top_p=1.0,
+                # output_scores=False, # Ensure auxiliary outputs that consume memory are off
+                # return_dict_in_generate=False, # Ensure simplest output if possible
             )
+            # Handle different return types of generate
+            if isinstance(outputs_gen, torch.Tensor):
+                generated_ids = outputs_gen
+            elif isinstance(outputs_gen, dict) and "sequences" in outputs_gen: # Common for GenerateOutput
+                generated_ids = outputs_gen["sequences"]
+            elif hasattr(outputs_gen, 'sequences'): # For GenerateOutput like objects
+                generated_ids = outputs_gen.sequences
+            else:
+                # Fallback or error if unexpected output
+                print(f"Warning: Unexpected output type from model.generate: {type(outputs_gen)}")
+                # Try to find a tensor that looks like token IDs
+                if isinstance(outputs_gen, (list, tuple)) and len(outputs_gen) > 0 and isinstance(outputs_gen[0], torch.Tensor):
+                    generated_ids = outputs_gen[0] # Guessing the first tensor is it
+                else: # Cannot determine, return empty or raise error
+                    del input_ids, attention_mask, unwrapped_model, outputs_gen
+                    torch.cuda.empty_cache() # Attempt to clear if things are really messy
+                    return ""
+
+
         response_text = self.tokenizer.decode(generated_ids[0][input_ids.shape[1]:], skip_special_tokens=True)
         cleaned_text = response_text.lstrip().removeprefix("assistant").lstrip(": \n").strip()
+
+        # Explicitly delete tensors
+        del input_ids, attention_mask, generated_ids, unwrapped_model, outputs_gen
+        # Kv-cache is harder to delete explicitly without model support for it.
+        # torch.cuda.empty_cache() # Generally avoid frequent calls, but can test here
         return cleaned_text
 
     def _llm_compute_logprob(self, context_str: str) -> float:
@@ -196,35 +311,41 @@ class ShapleyExperimentHarness:
         prompt_ids = self.tokenizer.apply_chat_template(
             messages, add_generation_prompt=True, return_tensors="pt"
         ).to(self.device)
-
         answer_ids = self.tokenizer(self.target_response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
 
         if answer_ids.shape[1] == 0:
+            del prompt_ids, answer_ids # Delete even here
             return 0.0 if not self.target_response else -float('inf')
 
         total_log_prob = 0.0
         current_input_ids = prompt_ids.clone()
-
-        unwrapped_model = self.accelerator.unwrap_model(self.model) # Get unwrapped for config
+        unwrapped_model = self.accelerator.unwrap_model(self.model)
         max_len = getattr(unwrapped_model.config, 'max_position_embeddings', 512)
+        
+        outputs = None # Initialize
+        logits = None # Initialize
 
         for i in range(answer_ids.shape[1]):
             with torch.no_grad():
-                # For the standard forward pass model(...), using self.model (DDP wrapped) is fine
-                # DDP handles forwarding the __call__ which maps to the forward method.
-                outputs = self.model(input_ids=current_input_ids)
+                outputs = self.model(input_ids=current_input_ids) # DDP wrapped model is fine for forward
                 logits = outputs.logits[:, -1, :]
 
             next_token_id = answer_ids[0, i].item()
             log_prob_next_token = F.log_softmax(logits, dim=-1)[0, next_token_id].item()
             total_log_prob += log_prob_next_token
-
-            current_input_ids = torch.cat([current_input_ids, answer_ids[:, i:i+1]], dim=1)
+            
+            # Create next_token_tensor on the correct device before cat
+            next_token_tensor = answer_ids[:, i:i+1].to(current_input_ids.device)
+            current_input_ids = torch.cat([current_input_ids, next_token_tensor], dim=1)
+            del next_token_tensor # Delete intermediate tensor
 
             if current_input_ids.shape[1] >= max_len:
-                if self.verbose and self.accelerator.is_local_main_process:
-                    print(f"Warning (Proc {self.accelerator.process_index}): Input length {current_input_ids.shape[1]} exceeded max model length ({max_len}) during logprob. Prob may be truncated.")
+                # ... (warning print) ...
                 break
+        
+        # Explicitly delete tensors
+        del prompt_ids, answer_ids, current_input_ids, unwrapped_model, outputs, logits
+        # torch.cuda.empty_cache() # Test this too, but it's aggressive per logprob call
         return total_log_prob
     
 
