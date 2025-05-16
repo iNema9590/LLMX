@@ -67,17 +67,17 @@ def retrieve_documents(query, k=5):
     scores, indices = faiss_index.search(query_embedding, k)
     return [df1['passage'][i] for i in indices[0]], scores
 
-num_questions_to_run = 30
+num_questions_to_run = 2
 print(f"Running experiments for {num_questions_to_run} questions...")
-
+UTILITY_CACHE_PATH = "../Experiment_data/bioask_utilities.pkl"
 # Parameters for attribution methods
-NUM_RETRIEVED_DOCS =9 
+NUM_RETRIEVED_DOCS =4 
 SEED = 42
 # LLM_MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0" # Use a small, fast model for this demo
 model_path = "meta-llama/Llama-3.2-1B-Instruct"  # Or your desired model
 model = AutoModelForCausalLM.from_pretrained(
     model_path,
-    torch_dtype=torch.bfloat16,
+    torch_dtype=torch.float32,
     # device_map="auto" could also be used if you prefer Transformers to handle initial placement,
     # but accelerator.prepare() will still manage the final device assignment per process.
 )
@@ -105,7 +105,8 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions"):
             query=query,
             model=model,         # Pass the loaded model
             tokenizer=tokenizer, # Pass the loaded tokenizer
-            verbose=True
+            verbose=True,
+            utility_path=UTILITY_CACHE_PATH
         )
             
         # 4. Compute Attributions using various methods
@@ -126,6 +127,9 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions"):
 
         print(f"    Computing ContextCite (m={32})...")
         results_for_query["ContextCite32"] = harness.compute_contextcite_weights(num_samples=m_samples, lasso_alpha=0.0, seed=SEED)
+        
+        print(f"    Computing ContextCite (m={100})...")
+        results_for_query["ContextCite100"] = harness.compute_contextcite_weights(num_samples=m_samples, lasso_alpha=0.0, seed=SEED)
         
         print(f"    Computing WSS (m={32})...")
         results_for_query["WSS32"] = harness.compute_wss(num_samples=32, lasso_alpha=0.0, seed=SEED)
@@ -204,7 +208,7 @@ else:
     current_accelerator.wait_for_everyone()
 
 if current_accelerator.is_main_process:
-    print("All processes finished.")
+    print(f"Total pre-computed/loaded utilities: {len(harness.all_true_utilities)}")
 
 # import torch.distributed as dist
 
