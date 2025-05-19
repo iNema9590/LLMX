@@ -22,7 +22,7 @@ df1['passage']=df1['passage'].str.replace(r'[\n]', ' ', regex=True)
 df['question']=df['question'].str.replace(r'[\n]', ' ', regex=True)
 df = df[df['relevant_passage_ids'].apply(len) >= 10].reset_index(drop=True)
 
-num_questions_to_run = 20 # Keep small for testing
+num_questions_to_run = 20
 print(f"Running experiments for {num_questions_to_run} questions...")
 
 # Parameters
@@ -30,11 +30,11 @@ NUM_RETRIEVED_DOCS = 9
 SEED = 42
 
 # Initialize Accelerator ONCE
-accelerator_main = Accelerator(mixed_precision="fp16") 
+accelerator_main = Accelerator(mixed_precision="fp16")
 
 if accelerator_main.is_main_process:
     print(f"Main Script: Loading model...")
-model_path = "meta-llama/Llama-3.2-3B-Instruct" # Example, ensure this path is correct
+model_path = "meta-llama/Llama-3.2-1B-Instruct" # Example, ensure this path is correct
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
     torch_dtype=torch.float16
