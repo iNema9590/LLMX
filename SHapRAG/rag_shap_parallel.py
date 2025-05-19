@@ -167,8 +167,6 @@ class ShapleyExperimentHarness:
                     utility = self._llm_compute_logprob(context_str=context_str)
                     local_results_for_this_process[v_tuple] = utility
 
-
-
         object_payload_for_gather = [local_results_for_this_process]
         gathered_list_of_dicts = gather_object(object_payload_for_gather)
 
@@ -330,7 +328,7 @@ class ShapleyExperimentHarness:
         
         # Explicitly delete tensors
         del prompt_ids, answer_ids, current_input_ids, unwrapped_model, outputs, logits
-        # torch.cuda.empty_cache() # Test this too, but it's aggressive per logprob call
+        torch.cuda.empty_cache() # Test this too, but it's aggressive per logprob call
         return total_log_prob
     
 
