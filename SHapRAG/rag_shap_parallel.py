@@ -117,17 +117,9 @@ class ShapleyExperimentHarness:
         if self.verbose:
             print(f"Main process: Successfully saved {len(self.all_true_utilities)} utilities to {file_path}.")
 
-    @classmethod # Make it a class method so it can be called without an instance if needed for raw loading
+    @classmethod 
     def load_utilities_static(cls, file_path: str, method: str = "pickle") -> dict:
-        """
-        Loads a utilities dictionary from a file.
-        This is a static/class method and does not require an instance.
-        Args:
-            file_path (str): The path to load the utilities from.
-            method (str): "pickle" or "json". JSON keys will be converted back to tuples.
-        Returns:
-            dict: The loaded utilities dictionary.
-        """
+
         loaded_utilities = {}
         if not os.path.exists(file_path):
             # print(f"Utility file {file_path} not found for loading.")
@@ -172,16 +164,11 @@ class ShapleyExperimentHarness:
                 for v_tuple in progress_bar:
                     v_np = np.array(v_tuple)
                     context_str = self._get_ablated_context_from_vector(v_np)
-                    try:
-                        utility = self._llm_compute_logprob(context_str=context_str)
-                        local_results_for_this_process[v_tuple] = utility
-                    except Exception as e:
-                        if self.verbose: # Basic error logging per process
-                            print(f"Error on process {self.accelerator.process_index} for subset {v_tuple}: {e}")
-                        local_results_for_this_process[v_tuple] = -float('inf') # Mark as failed
+                    utility = self._llm_compute_logprob(context_str=context_str)
+                    local_results_for_this_process[v_tuple] = utility
 
-        # Each process wraps its dictionary in a list for gather_object.
-        # In this environment, gather_object([local_dict]) results in [dict_rank0, dict_rank1, ...]
+
+
         object_payload_for_gather = [local_results_for_this_process]
         gathered_list_of_dicts = gather_object(object_payload_for_gather)
 
@@ -206,7 +193,6 @@ class ShapleyExperimentHarness:
             if self.verbose:
                 computed_count = len(final_utilities_on_main)
                 failed_count = sum(1 for u in final_utilities_on_main.values() if u == -float('inf'))
-                print(f"Pre-computation aggregation complete on main process.")
                 print(f"Total utilities aggregated: {computed_count}/{num_total_subsets}")
                 if failed_count > 0:
                     print(f"Warning (Main Proc): {failed_count} utility computations resulted in errors (-inf).")
@@ -236,7 +222,6 @@ class ShapleyExperimentHarness:
 
         if self.verbose and self.accelerator.is_main_process:
             final_size = len(complete_utilities if complete_utilities else {})
-            print(f"All processes synchronized. Final size of utility map on main process: {final_size}")
 
         return complete_utilities if complete_utilities is not None else {}
 
@@ -298,7 +283,7 @@ class ShapleyExperimentHarness:
         # Explicitly delete tensors
         del input_ids, attention_mask, generated_ids, unwrapped_model, outputs_gen
         # Kv-cache is harder to delete explicitly without model support for it.
-        # torch.cuda.empty_cache() # Generally avoid frequent calls, but can test here
+        torch.cuda.empty_cache() # Generally avoid frequent calls, but can test here
         return cleaned_text
 
     def _llm_compute_logprob(self, context_str: str) -> float:
@@ -447,224 +432,219 @@ class ShapleyExperimentHarness:
 
     def compute_exact_shap(self):
         if self.verbose and self.accelerator.is_main_process:
-            print("Computing Exact Shapley (using pre-computed utilities)...")
         # self.all_true_utilities is available and identical on all processes
-        return self._calculate_shapley_from_cached_dict(self.all_true_utilities)
+            return self._calculate_shapley_from_cached_dict(self.all_true_utilities)
 
     def compute_contextcite_weights(self, num_samples: int, lasso_alpha: float, seed: int = None):
-        if self.verbose and self.accelerator.is_main_process:
-            print(f"Computing ContextCite Weights (m={num_samples}, using pre-computed utilities)...")
-        if seed is not None: random.seed(seed); np.random.seed(seed) # Seed for all processes for consistent sampling
+        if self.accelerator.is_main_process:
 
-        sampled_tuples = self._sample_ablations_from_all(num_samples)
-        if not sampled_tuples:
-            if self.verbose and self.accelerator.is_main_process: print("Error: No tuples sampled for ContextCite.");
-            return np.zeros(self.n_items) # Return zero array or handle as error
+            if seed is not None: random.seed(seed); np.random.seed(seed) # Seed for all processes for consistent sampling
 
-        utilities_for_samples = [self.all_true_utilities.get(v_tuple, -float('inf')) for v_tuple in sampled_tuples]
+            sampled_tuples = self._sample_ablations_from_all(num_samples)
+            if not sampled_tuples:
+                if self.verbose and self.accelerator.is_main_process: print("Error: No tuples sampled for ContextCite.");
+                return np.zeros(self.n_items) # Return zero array or handle as error
 
-        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
-        if not valid_indices:
-            if self.verbose and self.accelerator.is_main_process: print("Error: All sampled precomputed utilities failed. Cannot train surrogate for ContextCite.");
-            return np.zeros(self.n_items)
+            utilities_for_samples = [self.all_true_utilities.get(v_tuple, -float('inf')) for v_tuple in sampled_tuples]
 
-        if len(valid_indices) < len(sampled_tuples) and self.verbose and self.accelerator.is_main_process:
-            print(f"Warning: {len(sampled_tuples) - len(valid_indices)} precomputed utilities were -inf, using {len(valid_indices)} for ContextCite surrogate.")
+            valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
+            if not valid_indices:
+                if self.verbose and self.accelerator.is_main_process: print("Error: All sampled precomputed utilities failed. Cannot train surrogate for ContextCite.");
+                return np.zeros(self.n_items)
 
-        sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
-        utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
+            if len(valid_indices) < len(sampled_tuples) and self.verbose and self.accelerator.is_main_process:
+                print(f"Warning: {len(sampled_tuples) - len(valid_indices)} precomputed utilities were -inf, using {len(valid_indices)} for ContextCite surrogate.")
 
-        _, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
+            sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
+            utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
+
+            _, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
         return weights
 
     # ... (Apply similar guards for verbose printing and tqdm in other public methods like compute_wss, compute_tmc_shap, etc.) ...
     # For brevity, I'll just show compute_wss as an example of further tqdm guarding. Other methods would follow suit.
 
     def compute_wss(self, num_samples: int, lasso_alpha: float, seed: int = None, return_weights: bool = False):
-        if self.verbose and self.accelerator.is_main_process:
-            print(f"Computing Weakly Supervised Shapley (m={num_samples}, using pre-computed utilities)...")
-        if seed is not None: random.seed(seed); np.random.seed(seed)
+        if self.accelerator.is_main_process:
+            if seed is not None: random.seed(seed); np.random.seed(seed)
 
-        sampled_tuples = self._sample_ablations_from_all(num_samples)
-        if not sampled_tuples:
-            if self.verbose and self.accelerator.is_main_process: print("Error: No tuples sampled for WSS.");
-            return (np.zeros(self.n_items), np.zeros(self.n_items)) if return_weights else np.zeros(self.n_items)
+            sampled_tuples = self._sample_ablations_from_all(num_samples)
+            if not sampled_tuples:
+                if self.verbose and self.accelerator.is_main_process: print("Error: No tuples sampled for WSS.");
+                return (np.zeros(self.n_items), np.zeros(self.n_items)) if return_weights else np.zeros(self.n_items)
 
-        utilities_for_samples = [self.all_true_utilities.get(v_tuple, -float('inf')) for v_tuple in sampled_tuples]
-        
-        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
-        if not valid_indices:
-            if self.verbose and self.accelerator.is_main_process: print("Error: All sampled precomputed utilities failed for WSS. Cannot train surrogate.");
-            return (np.zeros(self.n_items), np.zeros(self.n_items)) if return_weights else np.zeros(self.n_items)
-
-        if len(valid_indices) < len(sampled_tuples) and self.verbose and self.accelerator.is_main_process:
-            print(f"Warning: {len(sampled_tuples) - len(valid_indices)} precomputed utilities were -inf, using {len(valid_indices)} for WSS surrogate.")
+            utilities_for_samples = [self.all_true_utilities.get(v_tuple, -float('inf')) for v_tuple in sampled_tuples]
             
-        sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
-        utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
-        known_utilities_for_hybrid = {v_tuple: self.all_true_utilities[v_tuple] for v_tuple in sampled_tuples_for_train}
-        
-        surrogate_model, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
+            valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
+            if not valid_indices:
+                if self.verbose and self.accelerator.is_main_process: print("Error: All sampled precomputed utilities failed for WSS. Cannot train surrogate.");
+                return (np.zeros(self.n_items), np.zeros(self.n_items)) if return_weights else np.zeros(self.n_items)
 
-        hybrid_utilities = {}
-        all_ablations_X = np.array(list(itertools.product([0, 1], repeat=self.n_items)), dtype=int)
-        
-        # Prediction can be done by all, it's fast.
-        all_predictions = surrogate_model.predict(all_ablations_X)
-        
-        for i_pred in range(all_ablations_X.shape[0]): # Corrected loop variable name
-            v_tuple = tuple(all_ablations_X[i_pred])
-            hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
-        
-        shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) # _calculate_shapley has tqdm guard
+            if len(valid_indices) < len(sampled_tuples) and self.verbose and self.accelerator.is_main_process:
+                print(f"Warning: {len(sampled_tuples) - len(valid_indices)} precomputed utilities were -inf, using {len(valid_indices)} for WSS surrogate.")
+                
+            sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
+            utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
+            known_utilities_for_hybrid = {v_tuple: self.all_true_utilities[v_tuple] for v_tuple in sampled_tuples_for_train}
+            
+            surrogate_model, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
+
+            hybrid_utilities = {}
+            all_ablations_X = np.array(list(itertools.product([0, 1], repeat=self.n_items)), dtype=int)
+            
+            # Prediction can be done by all, it's fast.
+            all_predictions = surrogate_model.predict(all_ablations_X)
+            
+            for i_pred in range(all_ablations_X.shape[0]): # Corrected loop variable name
+                v_tuple = tuple(all_ablations_X[i_pred])
+                hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
+            
+            shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) # _calculate_shapley has tqdm guard
         
         return (shapley_values_wss, weights) if return_weights else shapley_values_wss
 
     def compute_tmc_shap(self, num_iterations: int, performance_tolerance: float, seed: int = None):
-        if self.verbose and self.accelerator.is_main_process:
-            print(f"Computing TMC-Shapley (T={num_iterations}, using pre-computed utilities)...")
-        if seed is not None: random.seed(seed); np.random.seed(seed)
+        if self.accelerator.is_main_process:
+            if seed is not None: random.seed(seed); np.random.seed(seed)
 
-        shapley_values = np.zeros(self.n_items)
-        marginal_counts = np.zeros(self.n_items, dtype=int)
+            shapley_values = np.zeros(self.n_items)
+            marginal_counts = np.zeros(self.n_items, dtype=int)
 
-        v_empty_tuple = tuple(np.zeros(self.n_items, dtype=int))
-        v_full_tuple = tuple(np.ones(self.n_items, dtype=int))
-        v_empty_util = self.all_true_utilities.get(v_empty_tuple, -float('inf'))
-        v_full_util = self.all_true_utilities.get(v_full_tuple, -float('inf'))
+            v_empty_tuple = tuple(np.zeros(self.n_items, dtype=int))
+            v_full_tuple = tuple(np.ones(self.n_items, dtype=int))
+            v_empty_util = self.all_true_utilities.get(v_empty_tuple, -float('inf'))
+            v_full_util = self.all_true_utilities.get(v_full_tuple, -float('inf'))
 
-        if v_empty_util == -float('inf') or v_full_util == -float('inf'):
-             if self.verbose and self.accelerator.is_main_process:
-                 print("Warning: Truncation disabled in TMC due to endpoint utility failure in pre-computation.")
-             performance_tolerance = float('inf') # Disable truncation
+            if v_empty_util == -float('inf') or v_full_util == -float('inf'):
+                if self.verbose and self.accelerator.is_main_process:
+                    print("Warning: Truncation disabled in TMC due to endpoint utility failure in pre-computation.")
+                performance_tolerance = float('inf') # Disable truncation
 
-        indices = list(range(self.n_items))
-        
-        pbar_iter = range(num_iterations)
-        if self.verbose and self.accelerator.is_main_process:
-            pbar_iter = tqdm(pbar_iter, desc="TMC Iterations (from cache)", leave=False)
-        
-        for t in pbar_iter:
-            permutation = random.sample(indices, self.n_items)
-            v_prev_util = v_empty_util
-            current_subset_indices_list = [] # Store indices of items in current subset
+            indices = list(range(self.n_items))
+            
+            pbar_iter = range(num_iterations)
+            if self.verbose and self.accelerator.is_main_process:
+                pbar_iter = tqdm(pbar_iter, desc="TMC Iterations (from cache)", leave=False)
+            
+            for t in pbar_iter:
+                permutation = random.sample(indices, self.n_items)
+                v_prev_util = v_empty_util
+                current_subset_indices_list = [] # Store indices of items in current subset
 
-            for item_idx_to_add in permutation:
-                current_subset_indices_list.append(item_idx_to_add)
-                # No need to sort if constructing v_curr_np directly from indices
-                
-                v_curr_np = np.zeros(self.n_items, dtype=int)
-                if current_subset_indices_list: # Ensure list is not empty before indexing
-                    v_curr_np[current_subset_indices_list] = 1
-                v_curr_tuple = tuple(v_curr_np)
-                
-                can_truncate = False
-                if v_prev_util != -float('inf') and v_full_util != -float('inf'): # Check if valid utilities for truncation
-                    is_near_full_set_performance = abs(v_full_util - v_prev_util) < performance_tolerance
-                    can_truncate = t > 0 and is_near_full_set_performance # Original paper: t > min_iter
-                
-                if can_truncate: 
-                    v_curr_util = v_prev_util 
-                else:
-                    v_curr_util = self.all_true_utilities.get(v_curr_tuple, -float('inf'))
+                for item_idx_to_add in permutation:
+                    current_subset_indices_list.append(item_idx_to_add)
+                    # No need to sort if constructing v_curr_np directly from indices
+                    
+                    v_curr_np = np.zeros(self.n_items, dtype=int)
+                    if current_subset_indices_list: # Ensure list is not empty before indexing
+                        v_curr_np[current_subset_indices_list] = 1
+                    v_curr_tuple = tuple(v_curr_np)
+                    
+                    can_truncate = False
+                    if v_prev_util != -float('inf') and v_full_util != -float('inf'): # Check if valid utilities for truncation
+                        is_near_full_set_performance = abs(v_full_util - v_prev_util) < performance_tolerance
+                        can_truncate = t > 0 and is_near_full_set_performance # Original paper: t > min_iter
+                    
+                    if can_truncate: 
+                        v_curr_util = v_prev_util 
+                    else:
+                        v_curr_util = self.all_true_utilities.get(v_curr_tuple, -float('inf'))
 
-                marginal_contribution = 0.0
-                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
-                    marginal_contribution = v_curr_util - v_prev_util
-                
-                k_count = marginal_counts[item_idx_to_add] + 1
-                shapley_values[item_idx_to_add] = ( (k_count - 1) / k_count ) * shapley_values[item_idx_to_add] + \
-                                                  ( 1 / k_count ) * marginal_contribution
-                marginal_counts[item_idx_to_add] = k_count
-                
-                v_prev_util = v_curr_util # This should be v_curr_util (utility of current set)
+                    marginal_contribution = 0.0
+                    if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
+                        marginal_contribution = v_curr_util - v_prev_util
+                    
+                    k_count = marginal_counts[item_idx_to_add] + 1
+                    shapley_values[item_idx_to_add] = ( (k_count - 1) / k_count ) * shapley_values[item_idx_to_add] + \
+                                                    ( 1 / k_count ) * marginal_contribution
+                    marginal_counts[item_idx_to_add] = k_count
+                    
+                    v_prev_util = v_curr_util # This should be v_curr_util (utility of current set)
         return shapley_values
 
     def compute_beta_shap(self, num_iterations: int, beta_a: float, beta_b: float, seed: int = None):
         if beta_dist is None: raise ImportError("BetaShap requires scipy.")
-        if self.verbose and self.accelerator.is_main_process:
-            print(f"Computing Beta-Shapley (T={num_iterations}, α={beta_a}, β={beta_b}, using pre-computed utilities)...")
-        if seed is not None: random.seed(seed); np.random.seed(seed)
+        if self.accelerator.is_main_process:
+            if seed is not None: random.seed(seed); np.random.seed(seed)
 
-        weighted_marginal_sums = np.zeros(self.n_items)
-        total_weights_for_item = np.zeros(self.n_items)
+            weighted_marginal_sums = np.zeros(self.n_items)
+            total_weights_for_item = np.zeros(self.n_items)
 
-        v_empty_tuple = tuple(np.zeros(self.n_items, dtype=int))
-        v_empty_util = self.all_true_utilities.get(v_empty_tuple, -float('inf'))
-        
-        indices = list(range(self.n_items))
-        
-        pbar_iter = range(num_iterations)
-        if self.verbose and self.accelerator.is_main_process:
-            pbar_iter = tqdm(pbar_iter, desc="BetaShap Iterations (from cache)", leave=False)
+            v_empty_tuple = tuple(np.zeros(self.n_items, dtype=int))
+            v_empty_util = self.all_true_utilities.get(v_empty_tuple, -float('inf'))
+            
+            indices = list(range(self.n_items))
+            
+            pbar_iter = range(num_iterations)
+            if self.verbose and self.accelerator.is_main_process:
+                pbar_iter = tqdm(pbar_iter, desc="BetaShap Iterations (from cache)", leave=False)
 
-        for _ in pbar_iter:
-            permutation = random.sample(indices, self.n_items)
-            v_prev_util = v_empty_util
-            current_subset_indices_list = [] 
+            for _ in pbar_iter:
+                permutation = random.sample(indices, self.n_items)
+                v_prev_util = v_empty_util
+                current_subset_indices_list = [] 
 
-            for k_minus_1, item_idx_to_add in enumerate(permutation): # k_minus_1 is the size of the set *before* adding item_idx_to_add
-                current_subset_indices_list.append(item_idx_to_add)
-                # No need to sort for v_curr_np construction
-                
-                v_curr_np = np.zeros(self.n_items, dtype=int)
-                if current_subset_indices_list:
-                    v_curr_np[current_subset_indices_list] = 1
-                v_curr_tuple = tuple(v_curr_np)
-                
-                v_curr_util = self.all_true_utilities.get(v_curr_tuple, -float('inf'))
-                
-                marginal_contribution = 0.0
-                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
-                     marginal_contribution = v_curr_util - v_prev_util
-                
-                if self.n_items > 1:
-                    x_pos = k_minus_1 / (self.n_items - 1) # Position based on size of S (set before adding i)
-                elif self.n_items == 1: # Only one item
-                    x_pos = 0.0 # Or 0.5, depends on interpretation for single item; 0 is |S|=0
-                else: # No items
-                    x_pos = 0.5 # Default, though loop won't run
+                for k_minus_1, item_idx_to_add in enumerate(permutation): # k_minus_1 is the size of the set *before* adding item_idx_to_add
+                    current_subset_indices_list.append(item_idx_to_add)
+                    # No need to sort for v_curr_np construction
+                    
+                    v_curr_np = np.zeros(self.n_items, dtype=int)
+                    if current_subset_indices_list:
+                        v_curr_np[current_subset_indices_list] = 1
+                    v_curr_tuple = tuple(v_curr_np)
+                    
+                    v_curr_util = self.all_true_utilities.get(v_curr_tuple, -float('inf'))
+                    
+                    marginal_contribution = 0.0
+                    if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
+                        marginal_contribution = v_curr_util - v_prev_util
+                    
+                    if self.n_items > 1:
+                        x_pos = k_minus_1 / (self.n_items - 1) # Position based on size of S (set before adding i)
+                    elif self.n_items == 1: # Only one item
+                        x_pos = 0.0 # Or 0.5, depends on interpretation for single item; 0 is |S|=0
+                    else: # No items
+                        x_pos = 0.5 # Default, though loop won't run
 
-                weight = 1.0 # Default weight
-                try:
-                    if self.n_items > 0: # Avoid issues with n_items=0 or pdf definition at edges for certain beta params
-                        if self.n_items == 1 and (beta_a <= 1 or beta_b <= 1): # For single item, pdf can be inf at 0 or 1
-                             # Standard BetaShap often implies uniform weighting if beta params would cause issues
-                             weight = 1.0
-                        else:
-                             weight = beta_dist.pdf(x_pos, beta_a, beta_b)
-                    if not np.isfinite(weight): # Catch inf/nan from pdf
-                        # A large finite number if inf, or 1.0 as a fallback
-                        weight = 1e6 if np.isinf(weight) else 1.0
-                except Exception: # Catch any other errors from pdf calculation
-                    weight = 1.0
-                
-                if v_curr_util != -float('inf') and v_prev_util != -float('inf'): # Only add if MC is valid
-                    weighted_marginal_sums[item_idx_to_add] += weight * marginal_contribution
-                    total_weights_for_item[item_idx_to_add] += weight
-                
-                v_prev_util = v_curr_util
-                
-        shapley_values = np.zeros(self.n_items)
-        non_zero_weights_mask = total_weights_for_item > 1e-9 # Avoid division by zero
-        shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
+                    weight = 1.0 # Default weight
+                    try:
+                        if self.n_items > 0: # Avoid issues with n_items=0 or pdf definition at edges for certain beta params
+                            if self.n_items == 1 and (beta_a <= 1 or beta_b <= 1): # For single item, pdf can be inf at 0 or 1
+                                # Standard BetaShap often implies uniform weighting if beta params would cause issues
+                                weight = 1.0
+                            else:
+                                weight = beta_dist.pdf(x_pos, beta_a, beta_b)
+                        if not np.isfinite(weight): # Catch inf/nan from pdf
+                            # A large finite number if inf, or 1.0 as a fallback
+                            weight = 1e6 if np.isinf(weight) else 1.0
+                    except Exception: # Catch any other errors from pdf calculation
+                        weight = 1.0
+                    
+                    if v_curr_util != -float('inf') and v_prev_util != -float('inf'): # Only add if MC is valid
+                        weighted_marginal_sums[item_idx_to_add] += weight * marginal_contribution
+                        total_weights_for_item[item_idx_to_add] += weight
+                    
+                    v_prev_util = v_curr_util
+                    
+            shapley_values = np.zeros(self.n_items)
+            non_zero_weights_mask = total_weights_for_item > 1e-9 # Avoid division by zero
+            shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
         return shapley_values
 
     def compute_loo(self):
-        if self.verbose and self.accelerator.is_main_process:
-            print(f"Computing LOO (n={self.n_items}, using pre-computed utilities)...")
-        loo_scores = np.zeros(self.n_items)
-        v_all_tuple = tuple(np.ones(self.n_items, dtype=int))
-        util_all = self.all_true_utilities.get(v_all_tuple, -float('inf'))
+        if self.accelerator.is_main_process:
+            loo_scores = np.zeros(self.n_items)
+            v_all_tuple = tuple(np.ones(self.n_items, dtype=int))
+            util_all = self.all_true_utilities.get(v_all_tuple, -float('inf'))
 
-        for i in range(self.n_items):
-            v_loo_list = list(v_all_tuple) # Start with all items
-            v_loo_list[i] = 0 # Remove item i
-            v_loo_tuple = tuple(v_loo_list)
-            util_loo = self.all_true_utilities.get(v_loo_tuple, -float('inf'))
-            
-            if util_all == -float('inf') and util_loo == -float('inf'): loo_scores[i] = 0.0 # Both failed, no diff
-            elif util_loo == -float('inf'): loo_scores[i] = np.inf # Removing item made it "infinitely" worse (or revealed full set was bad)
-            elif util_all == -float('inf'): loo_scores[i] = -np.inf # Full set failed, but LOO set succeeded
-            else: loo_scores[i] = util_all - util_loo
+            for i in range(self.n_items):
+                v_loo_list = list(v_all_tuple) # Start with all items
+                v_loo_list[i] = 0 # Remove item i
+                v_loo_tuple = tuple(v_loo_list)
+                util_loo = self.all_true_utilities.get(v_loo_tuple, -float('inf'))
+                
+                if util_all == -float('inf') and util_loo == -float('inf'): loo_scores[i] = 0.0 # Both failed, no diff
+                elif util_loo == -float('inf'): loo_scores[i] = np.inf # Removing item made it "infinitely" worse (or revealed full set was bad)
+                elif util_all == -float('inf'): loo_scores[i] = -np.inf # Full set failed, but LOO set succeeded
+                else: loo_scores[i] = util_all - util_loo
         return loo_scores
