@@ -223,7 +223,7 @@ class ShapleyExperimentHarness:
 
         return complete_utilities if complete_utilities is not None else {}
 
-    def _llm_generate_response(self, context_str: str, max_new_tokens: int = 50) -> str:
+    def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
             messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}"})
@@ -287,48 +287,56 @@ class ShapleyExperimentHarness:
     def _llm_compute_logprob(self, context_str: str) -> float:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
-            messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}"})
+            messages.append({"role": "user", "content": f"Given the context: {context_str}. In few sentences, answer the query: {self.query}"})
         else:
             messages.append({"role": "user", "content": self.query})
 
-        prompt_ids = self.tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True, return_tensors="pt"
-        ).to(self.device)
+        prompt_templated = self.tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True, tokenize=False
+        )
+
         answer_ids = self.tokenizer(self.target_response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
 
         if answer_ids.shape[1] == 0:
-            del prompt_ids, answer_ids # Delete even here
             return 0.0 if not self.target_response else -float('inf')
 
-        total_log_prob = 0.0
-        current_input_ids = prompt_ids.clone()
+        prompt_tokens = self.tokenizer(prompt_templated, return_tensors="pt").to(self.device)
+
+        input_ids = torch.cat([prompt_tokens.input_ids, answer_ids], dim=1)
+
+        # Check model's max length
         unwrapped_model = self.accelerator.unwrap_model(self.model)
-        max_len = getattr(unwrapped_model.config, 'max_position_embeddings', 512)
+        max_model_len = getattr(unwrapped_model.config, 'max_position_embeddings', 512)
         
-        outputs = None # Initialize
-        logits = None # Initialize
+        if input_ids.shape[1] > max_model_len:
+            if self.verbose and self.accelerator.is_main_process:
+                print(f"Warning (logprob): Combined input length {input_ids.shape[1]} exceeds model max length {max_model_len}. Result may be inaccurate or OOM.")
+            # Optionally truncate or return -inf
+            # input_ids = input_ids[:, :max_model_len]
+            # Or:
+            del prompt_tokens, answer_ids, input_ids, unwrapped_model
+            torch.cuda.empty_cache()
+            return -float('inf')
 
-        for i in range(answer_ids.shape[1]):
-            with torch.no_grad():
-                outputs = self.model(input_ids=current_input_ids) # DDP wrapped model is fine for forward
-                logits = outputs.logits[:, -1, :]
+        with torch.no_grad():
+            outputs = self.model(input_ids=input_ids) # Pass the full sequence
+            logits = outputs.logits
 
-            next_token_id = answer_ids[0, i].item()
-            log_prob_next_token = F.log_softmax(logits, dim=-1)[0, next_token_id].item()
-            total_log_prob += log_prob_next_token
-            
-            # Create next_token_tensor on the correct device before cat
-            next_token_tensor = answer_ids[:, i:i+1].to(current_input_ids.device)
-            current_input_ids = torch.cat([current_input_ids, next_token_tensor], dim=1)
-            del next_token_tensor # Delete intermediate tensor
 
-            if current_input_ids.shape[1] >= max_len:
-                # ... (warning print) ...
-                break
+        shift_logits = logits[..., prompt_tokens.input_ids.shape[1]-1:-1, :].contiguous()
+        shift_labels = answer_ids.contiguous()
+
+        # Calculate loss only for the answer part
+        log_probs = F.log_softmax(shift_logits, dim=-1)
         
-        # Explicitly delete tensors
-        del prompt_ids, answer_ids, current_input_ids, unwrapped_model, outputs, logits
-        torch.cuda.empty_cache() # Test this too, but it's aggressive per logprob call
+        # Gather the log-probabilities of the actual answer tokens
+        # shift_labels need to be (batch, seq_len, 1) for gather
+        answer_log_probs = torch.gather(log_probs, 2, shift_labels.unsqueeze(-1)).squeeze(-1)
+        
+        total_log_prob = answer_log_probs.sum().item()
+
+        del prompt_tokens, answer_ids, input_ids, outputs, logits, shift_logits, shift_labels, answer_log_probs, unwrapped_model
+        torch.cuda.empty_cache()
         return total_log_prob
     
 

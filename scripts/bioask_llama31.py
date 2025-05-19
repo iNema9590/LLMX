@@ -75,14 +75,14 @@ NUM_RETRIEVED_DOCS = 9
 SEED = 42
 
 # Initialize Accelerator ONCE
-accelerator_main = Accelerator(mixed_precision="bf16") 
+accelerator_main = Accelerator(mixed_precision="fp16") 
 
 if accelerator_main.is_main_process:
     print(f"Main Script: Loading model...")
 model_path = "meta-llama/Llama-3.1-8B-Instruct" # Example, ensure this path is correct
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
-    torch_dtype=torch.bfloat16,
+    torch_dtype=torch.float16,
 )
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 
@@ -90,7 +90,7 @@ if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
     model_cpu.config.pad_token_id = tokenizer.pad_token_id
     if hasattr(model_cpu, 'generation_config') and model_cpu.generation_config is not None: # Check if generation_config exists
-         model_cpu.generation_config.pad_token_id = tokenizer.pad_token_id
+        model_cpu.generation_config.pad_token_id = tokenizer.pad_token_id
 
 if accelerator_main.is_main_process:
     print(f"Main Script: Preparing model with Accelerator...")
@@ -182,7 +182,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     
     accelerator_main.wait_for_everyone() 
     del harness
-   
+
     if torch.cuda.is_available():
         if accelerator_main.is_main_process: # Print from one process
             print(f"Attempting to empty CUDA cache on rank {accelerator_main.process_index} after Q{i}")
