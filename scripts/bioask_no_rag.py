@@ -6,16 +6,12 @@ sys.path.append(parent_dir)
 
 from SHapRAG import*
 import pandas as pd
-import pickle
-import requests
 import numpy as np
 from tqdm import tqdm
-import faiss
 from scipy.stats import spearmanr, pearsonr
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import gc
-from sentence_transformers import SentenceTransformer
 splits = {'train': 'question-answer-passages/train-00000-of-00001.parquet', 'test': 'question-answer-passages/test-00000-of-00001.parquet'}
 df = pd.read_parquet("hf://datasets/enelpol/rag-mini-bioasq/" + splits["train"])
 
@@ -24,50 +20,7 @@ df1.set_index('id', inplace=True)
 
 df1['passage']=df1['passage'].str.replace(r'[\n]', ' ', regex=True)
 df['question']=df['question'].str.replace(r'[\n]', ' ', regex=True)
-# df = df[df['relevant_passage_ids'].apply(len) >= 10]
-# def gen_embs(qtext, model="nomic"):
-#     if model=="nomic":
-    
-#         data = {
-#             "model": "nomic-embed-text",
-#             "prompt": qtext
-#         }
-#         return np.array(requests.post('http://localhost:11434/api/embeddings', json=data).json()['embedding'])
-#     else:
-#         return SentenceTransformer("abhinand/MedEmbed-large-v0.1").encode([qtext], convert_to_numpy=True)
-    
-# with open("/data/embed_bioasq_medemb.pkl", "rb") as f:
-#     embeddings = pickle.load(f)
-
-# def normalize_embeddings(embeddings):
-#     return embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
-
-# embeddings = normalize_embeddings(embeddings)
-
-# def index_documents(method="faiss", index_name="recipes_nomic", es_host="http://localhost:9200"):
-#     if method == "faiss":
-#         dimension = embeddings.shape[1]
-#         index = faiss.IndexFlatL2(dimension)
-#         index.add(embeddings)
-#         faiss.write_index(index, "/data/bioasq_nomic_faiss.index")
-#         print("FAISS index saved.")
-#         return index
-#     elif method == "elasticsearch":
-#         es = Elasticsearch(es_host)
-#         mapping = {"mappings": {"properties": {"text": {"type": "text"}, "vector": {"type": "dense_vector", "dims": embeddings.shape[1]}}}}
-#         es.indices.create(index=index_name, body=mapping, ignore=400)
-#         for i, (text, vector) in enumerate(zip(documents, embeddings)):
-#             es.index(index=index_name, id=i, body={"text": text, "vector": vector.tolist()})
-#         print("Elasticsearch index created.")
-#         return es
-# # index_documents(method="faiss", index_name="bioasq_nomic_faiss", es_host="http://localhost:9200")
-# faiss_index = faiss.read_index("/data/medemb_bioasq_faiss.index")
-
-# def retrieve_documents(query, k=5):
-#     query_embedding = gen_embs(query, model="medemb")
-#     query_embedding = normalize_embeddings(query_embedding.reshape(1, -1))
-#     scores, indices = faiss_index.search(query_embedding, k)
-#     return [df1['passage'][i] for i in indices[0]], scores
+df = df[df['relevant_passage_ids'].apply(len) >= 10].reset_index(drop=True)
 
 num_questions_to_run = 20 # Keep small for testing
 print(f"Running experiments for {num_questions_to_run} questions...")
@@ -77,14 +30,14 @@ NUM_RETRIEVED_DOCS = 9
 SEED = 42
 
 # Initialize Accelerator ONCE
-accelerator_main = Accelerator(mixed_precision="bf16") 
+accelerator_main = Accelerator(mixed_precision="fp16") 
 
 if accelerator_main.is_main_process:
     print(f"Main Script: Loading model...")
-model_path = "meta-llama/Llama-3.2-1B-Instruct" # Example, ensure this path is correct
+model_path = "meta-llama/Llama-3.2-3B-Instruct" # Example, ensure this path is correct
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
-    torch_dtype=torch.bfloat16,
+    torch_dtype=torch.float16
 )
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 
@@ -109,7 +62,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     if accelerator_main.is_main_process:
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
-    docs=df1.passage[df.relevant_passage_ids[i]].tolist()
+    docs=df1.passage[df.relevant_passage_ids[i][:NUM_RETRIEVED_DOCS]].tolist()
 
     utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
