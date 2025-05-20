@@ -12,6 +12,9 @@ from scipy.stats import spearmanr, pearsonr
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import gc
+import time
+
+start = time.time()
 splits = {'train': 'question-answer-passages/train-00000-of-00001.parquet', 'test': 'question-answer-passages/test-00000-of-00001.parquet'}
 df = pd.read_parquet("hf://datasets/enelpol/rag-mini-bioasq/" + splits["train"])
 
@@ -22,11 +25,11 @@ df1['passage']=df1['passage'].str.replace(r'[\n]', ' ', regex=True)
 df['question']=df['question'].str.replace(r'[\n]', ' ', regex=True)
 df = df[df['relevant_passage_ids'].apply(len) >= 10].reset_index(drop=True)
 
-num_questions_to_run = 20
+num_questions_to_run = 100
 print(f"Running experiments for {num_questions_to_run} questions...")
 
 # Parameters
-NUM_RETRIEVED_DOCS = 9
+NUM_RETRIEVED_DOCS = 10
 SEED = 42
 
 # Initialize Accelerator ONCE
@@ -34,7 +37,7 @@ accelerator_main = Accelerator(mixed_precision="fp16")
 
 if accelerator_main.is_main_process:
     print(f"Main Script: Loading model...")
-model_path = "meta-llama/Llama-3.2-1B-Instruct" # Example, ensure this path is correct
+model_path = "meta-llama/Llama-3.2-3B-Instruct" # Example, ensure this path is correct
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
     torch_dtype=torch.float16
@@ -64,7 +67,12 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
 
     docs=df1.passage[df.relevant_passage_ids[i][:NUM_RETRIEVED_DOCS]].tolist()
 
-    utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache"
+    # experiment with copies
+    numbers = random.sample(range(1, len(docs)), 3)
+    docs[numbers[0]]=docs[numbers[1]]
+    docs[numbers[2]]=docs[numbers[1]]
+
+    utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache3bcp"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
     
@@ -86,14 +94,12 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     )
             
     results_for_query = {}
-    # Computation of attributions should only happen on the main process
-    # as they modify `results_for_query` which is then used to populate `all_metrics_data`.
-    # `all_metrics_data` is a simple list on the main process.
+
     if accelerator_main.is_main_process:
         results_for_query["Exact"] = harness.compute_exact_shap()
 
         m_samples_map = {"S": 32, "M": 64, "L": 100} # Example sample sizes
-        T_iterations_map = {"S": 64, "M": 64, "L":100}  # Example iterations
+        T_iterations_map = {"S": 32, "M": 64, "L":100}  # Example iterations
 
         for size_key, num_s in m_samples_map.items():
             if 2**len(docs) < num_s and size_key != "L": # Avoid sampling more than possible, except for a default
@@ -162,8 +168,8 @@ if accelerator_main.is_main_process:
         
         print(average_metrics.round(4))
 
-        details_path = "../Experiment_data/bioask_results/shapley_rag_experiment_details.csv"
-        summary_path = "../Experiment_data/bioask_results/shapley_rag_experiment_summary.csv"
+        details_path = "../Experiment_data/bioask_results/shapley_rag_experiment_details3bcp.csv"
+        summary_path = "../Experiment_data/bioask_results/shapley_rag_experiment_summary3bcp.csv"
         os.makedirs(os.path.dirname(details_path), exist_ok=True)
         
         metrics_df_all_questions.to_csv(details_path, index=False)
@@ -188,3 +194,5 @@ else:
 
 if accelerator_main.is_main_process:
     print("Script fully exited.")
+end = time.time()
+print(f"Execution time: {end - start:.4f} seconds")
