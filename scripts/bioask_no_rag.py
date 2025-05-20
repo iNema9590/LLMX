@@ -18,6 +18,7 @@ start = time.time()
 splits = {'train': 'question-answer-passages/train-00000-of-00001.parquet', 'test': 'question-answer-passages/test-00000-of-00001.parquet'}
 df = pd.read_parquet("hf://datasets/enelpol/rag-mini-bioasq/" + splits["train"])
 
+
 df1 = pd.read_parquet("hf://datasets/enelpol/rag-mini-bioasq/text-corpus/test-00000-of-00001.parquet")
 df1.set_index('id', inplace=True)
 

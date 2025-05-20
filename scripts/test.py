@@ -10,7 +10,7 @@ current_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 
-from SHapRAG import*
+from SHapRAG import *
 # It's good practice to have an if __name__ == "__main__": block
 # even when using accelerate launch, as it clarifies the entry point for each process.
 if __name__ == "__main__":
