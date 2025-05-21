@@ -1,0 +1,1301 @@
+Question_Index,Query,Method,Pearson,Spearman,Num_Items
+0,What is the association between cell phone use and glioblastoma?,ContextCite32,0.9934654959103411,0.5515151515151515,10
+0,What is the association between cell phone use and glioblastoma?,WSS32,0.9934185421379222,0.5515151515151515,10
+0,What is the association between cell phone use and glioblastoma?,ContextCite64,0.9959995283850371,0.5151515151515151,10
+0,What is the association between cell phone use and glioblastoma?,WSS64,0.9961590757291473,0.5030303030303029,10
+0,What is the association between cell phone use and glioblastoma?,ContextCite100,0.9981440148581746,0.6484848484848483,10
+0,What is the association between cell phone use and glioblastoma?,WSS100,0.9981813813351499,0.5393939393939393,10
+0,What is the association between cell phone use and glioblastoma?,TMC32,0.9990776036786343,0.7454545454545454,10
+0,What is the association between cell phone use and glioblastoma?,BetaShap (U)32,0.9957227250730729,0.5151515151515151,10
+0,What is the association between cell phone use and glioblastoma?,TMC64,0.9996677225581498,0.8545454545454544,10
+0,What is the association between cell phone use and glioblastoma?,BetaShap (U)64,0.9952835032371137,0.6,10
+0,What is the association between cell phone use and glioblastoma?,TMC100,0.9999103197920567,0.9393939393939393,10
+0,What is the association between cell phone use and glioblastoma?,BetaShap (U)100,0.9960229494025876,0.709090909090909,10
+0,What is the association between cell phone use and glioblastoma?,LOO,0.9951225338830745,0.12727272727272726,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,ContextCite32,0.8709917854879217,0.8787878787878788,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,WSS32,0.8702853583516046,0.8787878787878788,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,ContextCite64,0.9788055317572716,0.9515151515151514,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,WSS64,0.9767102358762559,0.9757575757575757,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,ContextCite100,0.9654113589609834,0.9515151515151514,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,WSS100,0.968919128690833,0.9515151515151514,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,TMC32,0.9533139046065989,0.8909090909090909,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,BetaShap (U)32,0.721351326917873,0.5272727272727272,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,TMC64,0.9636076088239454,0.8666666666666665,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,BetaShap (U)64,0.8222053114830721,0.6121212121212121,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,TMC100,0.983403523522505,0.9636363636363635,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,BetaShap (U)100,0.8252410467023331,0.8060606060606059,10
+1,Which disease of the central nervous system is characterized by the presence of Lewy bodies?,LOO,0.6872426209894792,0.1515151515151515,10
+2,The NoSAS Score can be used for screening of which disorders?,ContextCite32,0.6231826926185087,0.5757575757575757,10
+2,The NoSAS Score can be used for screening of which disorders?,WSS32,0.6236513827517839,0.5757575757575757,10
+2,The NoSAS Score can be used for screening of which disorders?,ContextCite64,0.9832635105947076,0.7575757575757575,10
+2,The NoSAS Score can be used for screening of which disorders?,WSS64,0.9811681937645694,0.7333333333333332,10
+2,The NoSAS Score can be used for screening of which disorders?,ContextCite100,0.9642806537334383,0.8545454545454544,10
+2,The NoSAS Score can be used for screening of which disorders?,WSS100,0.9590440401890803,0.8909090909090909,10
+2,The NoSAS Score can be used for screening of which disorders?,TMC32,0.9362877714619073,0.9151515151515152,10
+2,The NoSAS Score can be used for screening of which disorders?,BetaShap (U)32,0.7628578697680324,0.6848484848484848,10
+2,The NoSAS Score can be used for screening of which disorders?,TMC64,0.9882890069356394,0.9878787878787878,10
+2,The NoSAS Score can be used for screening of which disorders?,BetaShap (U)64,0.9456154588885838,0.7333333333333332,10
+2,The NoSAS Score can be used for screening of which disorders?,TMC100,0.9945764480076426,0.9393939393939393,10
+2,The NoSAS Score can be used for screening of which disorders?,BetaShap (U)100,0.9552567011121831,0.6484848484848483,10
+2,The NoSAS Score can be used for screening of which disorders?,LOO,0.7637635446280926,0.7696969696969697,10
+3,What species is associated with Tetrodotoxin?,ContextCite32,0.9675085455828881,0.9151515151515152,10
+3,What species is associated with Tetrodotoxin?,WSS32,0.9671382254900883,0.9151515151515152,10
+3,What species is associated with Tetrodotoxin?,ContextCite64,0.9909240939756676,0.9030303030303028,10
+3,What species is associated with Tetrodotoxin?,WSS64,0.9910056583744971,0.9030303030303028,10
+3,What species is associated with Tetrodotoxin?,ContextCite100,0.9942817790039028,0.9393939393939393,10
+3,What species is associated with Tetrodotoxin?,WSS100,0.9943774872238272,0.9393939393939393,10
+3,What species is associated with Tetrodotoxin?,TMC32,0.9976439741182634,0.9757575757575757,10
+3,What species is associated with Tetrodotoxin?,BetaShap (U)32,0.9471673776504388,0.9151515151515152,10
+3,What species is associated with Tetrodotoxin?,TMC64,0.9978748575110712,0.9636363636363635,10
+3,What species is associated with Tetrodotoxin?,BetaShap (U)64,0.9857200727303641,0.9636363636363635,10
+3,What species is associated with Tetrodotoxin?,TMC100,0.9979790635061027,0.9636363636363635,10
+3,What species is associated with Tetrodotoxin?,BetaShap (U)100,0.9879513848473527,0.9878787878787878,10
+3,What species is associated with Tetrodotoxin?,LOO,0.9776133681399312,0.8909090909090909,10
+4,Does a selective sweep increase genetic variation?,ContextCite32,0.9874551278328536,0.8909090909090909,10
+4,Does a selective sweep increase genetic variation?,WSS32,0.9872093238480364,0.8909090909090909,10
+4,Does a selective sweep increase genetic variation?,ContextCite64,0.9957674597616344,0.9636363636363635,10
+4,Does a selective sweep increase genetic variation?,WSS64,0.9953866681168894,0.9393939393939393,10
+4,Does a selective sweep increase genetic variation?,ContextCite100,0.996721898030628,0.9636363636363635,10
+4,Does a selective sweep increase genetic variation?,WSS100,0.9968925474390498,0.9030303030303028,10
+4,Does a selective sweep increase genetic variation?,TMC32,0.9881416277657593,0.8545454545454544,10
+4,Does a selective sweep increase genetic variation?,BetaShap (U)32,0.7428694375489734,0.5878787878787878,10
+4,Does a selective sweep increase genetic variation?,TMC64,0.9977761080367722,0.9030303030303028,10
+4,Does a selective sweep increase genetic variation?,BetaShap (U)64,0.8540256035181988,0.7575757575757575,10
+4,Does a selective sweep increase genetic variation?,TMC100,0.9985716784702642,0.9151515151515152,10
+4,Does a selective sweep increase genetic variation?,BetaShap (U)100,0.9238167039450961,0.7818181818181817,10
+4,Does a selective sweep increase genetic variation?,LOO,0.9852793003371332,0.709090909090909,10
+5,List markers for autophagy.,ContextCite32,0.8140679120156895,0.709090909090909,10
+5,List markers for autophagy.,WSS32,0.8158885441048573,0.7696969696969697,10
+5,List markers for autophagy.,ContextCite64,0.9287693919235742,0.9515151515151514,10
+5,List markers for autophagy.,WSS64,0.9309760567088601,0.9393939393939393,10
+5,List markers for autophagy.,ContextCite100,0.9459731414837388,0.9272727272727272,10
+5,List markers for autophagy.,WSS100,0.9470638516941778,0.9636363636363635,10
+5,List markers for autophagy.,TMC32,0.9765019308298897,0.9393939393939393,10
+5,List markers for autophagy.,BetaShap (U)32,0.8009098264598802,0.8666666666666665,10
+5,List markers for autophagy.,TMC64,0.9907425236738905,0.9636363636363635,10
+5,List markers for autophagy.,BetaShap (U)64,0.8938168474263493,0.9151515151515152,10
+5,List markers for autophagy.,TMC100,0.9948041110182042,0.9878787878787878,10
+5,List markers for autophagy.,BetaShap (U)100,0.9007531545417184,0.9393939393939393,10
+5,List markers for autophagy.,LOO,0.7741232142353331,0.7939393939393938,10
+6,Can a circRNA be translated into protein?,ContextCite32,0.9945023421688417,0.7333333333333332,10
+6,Can a circRNA be translated into protein?,WSS32,0.994521950249203,0.7333333333333332,10
+6,Can a circRNA be translated into protein?,ContextCite64,0.9973799340393016,0.8909090909090909,10
+6,Can a circRNA be translated into protein?,WSS64,0.9976120777547048,0.9151515151515152,10
+6,Can a circRNA be translated into protein?,ContextCite100,0.9988803814466125,0.9151515151515152,10
+6,Can a circRNA be translated into protein?,WSS100,0.9989794894339085,0.9151515151515152,10
+6,Can a circRNA be translated into protein?,TMC32,0.998513696558858,0.9393939393939393,10
+6,Can a circRNA be translated into protein?,BetaShap (U)32,0.9699070269718587,0.8181818181818182,10
+6,Can a circRNA be translated into protein?,TMC64,0.9997575283331716,0.9636363636363635,10
+6,Can a circRNA be translated into protein?,BetaShap (U)64,0.9929622206715619,0.8666666666666665,10
+6,Can a circRNA be translated into protein?,TMC100,0.9998559564883795,0.9515151515151514,10
+6,Can a circRNA be translated into protein?,BetaShap (U)100,0.9927010636306703,0.8060606060606059,10
+6,Can a circRNA be translated into protein?,LOO,0.9931338807643872,0.7696969696969697,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",ContextCite32,0.16797300140086435,0.24848484848484845,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",WSS32,0.16674575498655045,0.24848484848484845,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",ContextCite64,0.7866854576866917,0.6606060606060605,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",WSS64,0.8250715552952692,0.7454545454545454,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",ContextCite100,0.8641143467989065,0.7333333333333332,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",WSS100,0.855980401618622,0.709090909090909,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",TMC32,0.4226234743811015,0.2606060606060606,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",BetaShap (U)32,0.19716719430425036,0.22424242424242422,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",TMC64,0.7525405419698303,0.6121212121212121,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",BetaShap (U)64,0.475414217018991,0.49090909090909085,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",TMC100,0.7535334815483892,0.5636363636363636,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",BetaShap (U)100,0.5239510089584821,0.5636363636363636,10
+7,"There is no drug available to prevent HIV infection, Pre-exposure prophylaxis (PrEP), yes or no?",LOO,0.6409410506722851,0.34545454545454546,10
+8,What is Hemophilic Pseudotumor?,ContextCite32,0.9493045095564533,0.8060606060606059,10
+8,What is Hemophilic Pseudotumor?,WSS32,0.9498801590331892,0.8060606060606059,10
+8,What is Hemophilic Pseudotumor?,ContextCite64,0.9914996104569325,0.7818181818181817,10
+8,What is Hemophilic Pseudotumor?,WSS64,0.991127534321221,0.8060606060606059,10
+8,What is Hemophilic Pseudotumor?,ContextCite100,0.9866347962272928,0.9151515151515152,10
+8,What is Hemophilic Pseudotumor?,WSS100,0.9833079909621698,0.9393939393939393,10
+8,What is Hemophilic Pseudotumor?,TMC32,0.9961644622329222,0.9636363636363635,10
+8,What is Hemophilic Pseudotumor?,BetaShap (U)32,0.9834379734844436,0.8545454545454544,10
+8,What is Hemophilic Pseudotumor?,TMC64,0.9988243257550604,0.9878787878787878,10
+8,What is Hemophilic Pseudotumor?,BetaShap (U)64,0.9892992460774152,0.8909090909090909,10
+8,What is Hemophilic Pseudotumor?,TMC100,0.9990225202527561,0.9757575757575757,10
+8,What is Hemophilic Pseudotumor?,BetaShap (U)100,0.991665759204968,0.9515151515151514,10
+8,What is Hemophilic Pseudotumor?,LOO,0.7667881957634415,0.9151515151515152,10
+9,What are the targets of avapritinib?,ContextCite32,0.7880665374212029,0.7333333333333332,10
+9,What are the targets of avapritinib?,WSS32,0.7823742821211523,0.7333333333333332,10
+9,What are the targets of avapritinib?,ContextCite64,0.9415856093919782,0.8787878787878788,10
+9,What are the targets of avapritinib?,WSS64,0.934896802150149,0.8787878787878788,10
+9,What are the targets of avapritinib?,ContextCite100,0.9623835255137116,0.8666666666666665,10
+9,What are the targets of avapritinib?,WSS100,0.9537974394889156,0.8303030303030302,10
+9,What are the targets of avapritinib?,TMC32,0.8411621353964134,0.7696969696969697,10
+9,What are the targets of avapritinib?,BetaShap (U)32,0.49000348855460124,0.38181818181818183,10
+9,What are the targets of avapritinib?,TMC64,0.9551344814003302,0.9393939393939393,10
+9,What are the targets of avapritinib?,BetaShap (U)64,0.8181203749931558,0.7939393939393938,10
+9,What are the targets of avapritinib?,TMC100,0.9786332544345744,0.9272727272727272,10
+9,What are the targets of avapritinib?,BetaShap (U)100,0.8589044035604886,0.8303030303030302,10
+9,What are the targets of avapritinib?,LOO,0.4922239139275813,0.5151515151515151,10
+10,What is the function of Circular RNA (circRNA)?,ContextCite32,0.9726869890392692,0.9030303030303028,10
+10,What is the function of Circular RNA (circRNA)?,WSS32,0.9724064536233346,0.9030303030303028,10
+10,What is the function of Circular RNA (circRNA)?,ContextCite64,0.9868023401302416,0.7212121212121211,10
+10,What is the function of Circular RNA (circRNA)?,WSS64,0.9858345384988122,0.7212121212121211,10
+10,What is the function of Circular RNA (circRNA)?,ContextCite100,0.9907446873021443,0.7696969696969697,10
+10,What is the function of Circular RNA (circRNA)?,WSS100,0.9903500266396575,0.7454545454545454,10
+10,What is the function of Circular RNA (circRNA)?,TMC32,0.9961222591847331,0.8909090909090909,10
+10,What is the function of Circular RNA (circRNA)?,BetaShap (U)32,0.943515068314664,0.8424242424242423,10
+10,What is the function of Circular RNA (circRNA)?,TMC64,0.9989350897084527,0.9878787878787878,10
+10,What is the function of Circular RNA (circRNA)?,BetaShap (U)64,0.9560338247074767,0.8666666666666665,10
+10,What is the function of Circular RNA (circRNA)?,TMC100,0.9995172483904512,0.9999999999999999,10
+10,What is the function of Circular RNA (circRNA)?,BetaShap (U)100,0.9693918692341212,0.8666666666666665,10
+10,What is the function of Circular RNA (circRNA)?,LOO,0.9709351585555444,0.7212121212121211,10
+11,Where is X-ray free electron laser used?,ContextCite32,0.9811682388138407,0.8666666666666665,10
+11,Where is X-ray free electron laser used?,WSS32,0.9809460623006729,0.8666666666666665,10
+11,Where is X-ray free electron laser used?,ContextCite64,0.993689727870847,0.9030303030303028,10
+11,Where is X-ray free electron laser used?,WSS64,0.9930871338024703,0.9030303030303028,10
+11,Where is X-ray free electron laser used?,ContextCite100,0.9946552794481438,0.9393939393939393,10
+11,Where is X-ray free electron laser used?,WSS100,0.9937518734141313,0.9393939393939393,10
+11,Where is X-ray free electron laser used?,TMC32,0.9953363754834641,0.9636363636363635,10
+11,Where is X-ray free electron laser used?,BetaShap (U)32,0.9881051355936719,0.9878787878787878,10
+11,Where is X-ray free electron laser used?,TMC64,0.9975396913886205,0.9999999999999999,10
+11,Where is X-ray free electron laser used?,BetaShap (U)64,0.9934517077868366,0.9999999999999999,10
+11,Where is X-ray free electron laser used?,TMC100,0.9992652052546094,0.9999999999999999,10
+11,Where is X-ray free electron laser used?,BetaShap (U)100,0.9953946690537764,0.9999999999999999,10
+11,Where is X-ray free electron laser used?,LOO,0.9881347876334057,0.9757575757575757,10
+12,What is holoprosencephaly?,ContextCite32,0.976056130274145,0.8424242424242423,10
+12,What is holoprosencephaly?,WSS32,0.9767693762579652,0.8424242424242423,10
+12,What is holoprosencephaly?,ContextCite64,0.9913687925756743,0.8303030303030302,10
+12,What is holoprosencephaly?,WSS64,0.9922257890379268,0.8909090909090909,10
+12,What is holoprosencephaly?,ContextCite100,0.9880989039111445,0.8787878787878788,10
+12,What is holoprosencephaly?,WSS100,0.9884134081121395,0.8787878787878788,10
+12,What is holoprosencephaly?,TMC32,0.9934077903422802,0.9636363636363635,10
+12,What is holoprosencephaly?,BetaShap (U)32,0.9214622627759272,0.8181818181818182,10
+12,What is holoprosencephaly?,TMC64,0.9959609152713552,0.9878787878787878,10
+12,What is holoprosencephaly?,BetaShap (U)64,0.9439968001317375,0.8909090909090909,10
+12,What is holoprosencephaly?,TMC100,0.9981885375748348,0.9999999999999999,10
+12,What is holoprosencephaly?,BetaShap (U)100,0.9513260952577979,0.8909090909090909,10
+12,What is holoprosencephaly?,LOO,0.9431506443669951,0.8666666666666665,10
+13,What is Pseudomelanosis duodeni?,ContextCite32,0.9716430083552634,0.9636363636363635,10
+13,What is Pseudomelanosis duodeni?,WSS32,0.9721762240994043,0.9636363636363635,10
+13,What is Pseudomelanosis duodeni?,ContextCite64,0.9867695063321092,0.9393939393939393,10
+13,What is Pseudomelanosis duodeni?,WSS64,0.9875312319541113,0.9393939393939393,10
+13,What is Pseudomelanosis duodeni?,ContextCite100,0.9864087395484813,0.9272727272727272,10
+13,What is Pseudomelanosis duodeni?,WSS100,0.9884560233427067,0.9272727272727272,10
+13,What is Pseudomelanosis duodeni?,TMC32,0.9913082886572089,0.9757575757575757,10
+13,What is Pseudomelanosis duodeni?,BetaShap (U)32,0.9371792152045271,0.8181818181818182,10
+13,What is Pseudomelanosis duodeni?,TMC64,0.9935359238139349,0.9878787878787878,10
+13,What is Pseudomelanosis duodeni?,BetaShap (U)64,0.9465810434549778,0.8787878787878788,10
+13,What is Pseudomelanosis duodeni?,TMC100,0.9985629638012596,0.9878787878787878,10
+13,What is Pseudomelanosis duodeni?,BetaShap (U)100,0.9343651297714044,0.8787878787878788,10
+13,What is Pseudomelanosis duodeni?,LOO,0.9825443424130839,0.9393939393939393,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,ContextCite32,0.9983827871215069,0.9393939393939393,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,WSS32,0.998424532311846,0.9515151515151514,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,ContextCite64,0.9994216506006296,0.9393939393939393,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,WSS64,0.9994765484624958,0.9393939393939393,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,ContextCite100,0.9997582121657219,0.9878787878787878,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,WSS100,0.9998137431882347,0.9878787878787878,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,TMC32,0.9993760317820544,0.9151515151515152,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,BetaShap (U)32,0.9883588591332914,0.8666666666666665,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,TMC64,0.9996554065560868,0.9393939393939393,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,BetaShap (U)64,0.9921072212338472,0.9272727272727272,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,TMC100,0.9997538740015771,0.9272727272727272,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,BetaShap (U)100,0.9904745412504276,0.9272727272727272,10
+14,What is the multisystem inflammatory syndrome in children (MIS-C) associated with COVID-19?,LOO,0.9945956504394794,0.5030303030303029,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,ContextCite32,0.9046142278368817,0.7333333333333332,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,WSS32,0.9050419470543679,0.7333333333333332,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,ContextCite64,0.9593280226176285,0.9272727272727272,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,WSS64,0.9582434037348176,0.8787878787878788,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,ContextCite100,0.9798771714855352,0.9272727272727272,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,WSS100,0.9820684344757192,0.9515151515151514,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,TMC32,0.9855362672031432,0.9393939393939393,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,BetaShap (U)32,0.7763966474125671,0.9030303030303028,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,TMC64,0.9930153272445092,0.9515151515151514,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,BetaShap (U)64,0.8551918192075765,0.9636363636363635,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,TMC100,0.9972021284807719,0.9515151515151514,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,BetaShap (U)100,0.8484270242599528,0.9636363636363635,10
+15,Which are the enzymes involved in the control of tubulin acetylation?,LOO,0.8423423629665666,0.7333333333333332,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,ContextCite32,0.47699539210586694,0.4666666666666666,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,WSS32,0.4833963407897801,0.4666666666666666,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,ContextCite64,0.7835914073616111,0.8060606060606059,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,WSS64,0.7920120540914798,0.8181818181818182,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,ContextCite100,0.897878540749367,0.9272727272727272,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,WSS100,0.8899075512276073,0.8787878787878788,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,TMC32,0.9305851365109908,0.9393939393939393,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,BetaShap (U)32,0.9273783956461616,0.9515151515151514,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,TMC64,0.9347297165966475,0.9393939393939393,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,BetaShap (U)64,0.9476527633576604,0.9030303030303028,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,TMC100,0.9729357714140453,0.9393939393939393,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,BetaShap (U)100,0.9572125626317035,0.9151515151515152,10
+16,Is Growth factor independence 1b (GFI1B) important for hematopoiesis?,LOO,0.5052616849086846,0.34545454545454546,10
+17,What is measured through the NOMe-Seq methodology?,ContextCite32,0.9926930699448089,0.6121212121212121,10
+17,What is measured through the NOMe-Seq methodology?,WSS32,0.992641646294254,0.6606060606060605,10
+17,What is measured through the NOMe-Seq methodology?,ContextCite64,0.999003524873846,0.7939393939393938,10
+17,What is measured through the NOMe-Seq methodology?,WSS64,0.9986852480634022,0.7696969696969697,10
+17,What is measured through the NOMe-Seq methodology?,ContextCite100,0.9990555183212899,0.8545454545454544,10
+17,What is measured through the NOMe-Seq methodology?,WSS100,0.9985123834835687,0.8545454545454544,10
+17,What is measured through the NOMe-Seq methodology?,TMC32,0.9985381758357922,0.9515151515151514,10
+17,What is measured through the NOMe-Seq methodology?,BetaShap (U)32,0.9637003647284316,0.8545454545454544,10
+17,What is measured through the NOMe-Seq methodology?,TMC64,0.9998890243486166,0.9878787878787878,10
+17,What is measured through the NOMe-Seq methodology?,BetaShap (U)64,0.9733133535151041,0.9515151515151514,10
+17,What is measured through the NOMe-Seq methodology?,TMC100,0.9999089058527001,0.9878787878787878,10
+17,What is measured through the NOMe-Seq methodology?,BetaShap (U)100,0.9828157458679145,0.9757575757575757,10
+17,What is measured through the NOMe-Seq methodology?,LOO,0.9812546312522987,0.4545454545454545,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,ContextCite32,0.9829782203229326,0.8909090909090909,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,WSS32,0.9827671042073668,0.8909090909090909,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,ContextCite64,0.993337047040031,0.9272727272727272,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,WSS64,0.9935917118979314,0.9272727272727272,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,ContextCite100,0.9968534971149905,0.9515151515151514,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,WSS100,0.9959902870830151,0.9272727272727272,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,TMC32,0.9975950147103025,0.9757575757575757,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,BetaShap (U)32,0.9602018451821908,0.7818181818181817,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,TMC64,0.9988287675192663,0.9878787878787878,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,BetaShap (U)64,0.967824325373503,0.8303030303030302,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,TMC100,0.9993574053031593,0.9878787878787878,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,BetaShap (U)100,0.9728155563472137,0.7939393939393938,10
+18,What is known about the Digit Ratio (2D:4D) cancer?,LOO,0.9590262754792697,0.8545454545454544,10
+19,How does Rif1 regulate DNA replication?,ContextCite32,0.995488795574667,0.7212121212121211,10
+19,How does Rif1 regulate DNA replication?,WSS32,0.9954261497647681,0.7212121212121211,10
+19,How does Rif1 regulate DNA replication?,ContextCite64,0.9976539864325145,0.8666666666666665,10
+19,How does Rif1 regulate DNA replication?,WSS64,0.9979294045750864,0.8666666666666665,10
+19,How does Rif1 regulate DNA replication?,ContextCite100,0.9978225994617527,0.7939393939393938,10
+19,How does Rif1 regulate DNA replication?,WSS100,0.9983027743079648,0.8424242424242423,10
+19,How does Rif1 regulate DNA replication?,TMC32,0.9994565296310092,0.8909090909090909,10
+19,How does Rif1 regulate DNA replication?,BetaShap (U)32,0.991296023970553,0.8060606060606059,10
+19,How does Rif1 regulate DNA replication?,TMC64,0.9995762945847133,0.9515151515151514,10
+19,How does Rif1 regulate DNA replication?,BetaShap (U)64,0.992952389476065,0.8303030303030302,10
+19,How does Rif1 regulate DNA replication?,TMC100,0.9997043268497829,0.9515151515151514,10
+19,How does Rif1 regulate DNA replication?,BetaShap (U)100,0.9940054622684444,0.8666666666666665,10
+19,How does Rif1 regulate DNA replication?,LOO,0.9984160996381573,0.7454545454545454,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,ContextCite32,0.9843450692215883,0.9515151515151514,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,WSS32,0.9845420964754605,0.9515151515151514,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,ContextCite64,0.9953614417552414,0.9878787878787878,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,WSS64,0.9957362604603633,0.9878787878787878,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,ContextCite100,0.9914562061194047,0.9878787878787878,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,WSS100,0.9908905033889385,0.9757575757575757,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,TMC32,0.9903966838554092,0.9636363636363635,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,BetaShap (U)32,0.8568500445911061,0.8303030303030302,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,TMC64,0.9957308644329906,0.9636363636363635,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,BetaShap (U)64,0.9518799658243075,0.9151515151515152,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,TMC100,0.9974259604209108,0.9878787878787878,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,BetaShap (U)100,0.9652932273953493,0.9515151515151514,10
+20,Summarize the function of DEAH helicase DHX36 and its role in G-quadruplex-dependent processes.,LOO,0.9839925704320429,0.9515151515151514,10
+21,What is the Drosophila melanogaster Groucho protein?,ContextCite32,0.9713067430907528,0.6848484848484848,10
+21,What is the Drosophila melanogaster Groucho protein?,WSS32,0.9715150321214698,0.6848484848484848,10
+21,What is the Drosophila melanogaster Groucho protein?,ContextCite64,0.9918076381536415,0.9636363636363635,10
+21,What is the Drosophila melanogaster Groucho protein?,WSS64,0.9902975771836091,0.9272727272727272,10
+21,What is the Drosophila melanogaster Groucho protein?,ContextCite100,0.9910305784820329,0.8181818181818182,10
+21,What is the Drosophila melanogaster Groucho protein?,WSS100,0.9903643590554756,0.7818181818181817,10
+21,What is the Drosophila melanogaster Groucho protein?,TMC32,0.9966332975458911,0.9515151515151514,10
+21,What is the Drosophila melanogaster Groucho protein?,BetaShap (U)32,0.9120741810748366,0.6727272727272726,10
+21,What is the Drosophila melanogaster Groucho protein?,TMC64,0.9966888990061538,0.9878787878787878,10
+21,What is the Drosophila melanogaster Groucho protein?,BetaShap (U)64,0.9426651327179282,0.7333333333333332,10
+21,What is the Drosophila melanogaster Groucho protein?,TMC100,0.9984985151919831,0.9515151515151514,10
+21,What is the Drosophila melanogaster Groucho protein?,BetaShap (U)100,0.9582015353599186,0.6969696969696969,10
+21,What is the Drosophila melanogaster Groucho protein?,LOO,0.9663773832589732,0.7333333333333332,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,ContextCite32,0.9988150626063159,0.8787878787878788,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,WSS32,0.9987861054983826,0.8787878787878788,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,ContextCite64,0.9994984595952925,0.9030303030303028,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,WSS64,0.9994903477227792,0.9030303030303028,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,ContextCite100,0.9996160804919192,0.9272727272727272,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,WSS100,0.9995903745907937,0.9030303030303028,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,TMC32,0.9996053995541705,0.9878787878787878,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,BetaShap (U)32,0.9825630323473109,0.9999999999999999,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,TMC64,0.9998925108862522,0.9999999999999999,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,BetaShap (U)64,0.9935194712955876,0.9999999999999999,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,TMC100,0.9999070363052149,0.9878787878787878,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,BetaShap (U)100,0.9951270284443213,0.9878787878787878,10
+22,Please list the drugs associated with Drug-Induced Hypophosphatemia.,LOO,0.9975017648024826,0.6848484848484848,10
+23,Is H4K20 methylation associated with DNA replication?,ContextCite32,0.9841186687492534,0.7939393939393938,10
+23,Is H4K20 methylation associated with DNA replication?,WSS32,0.9843423687677972,0.7939393939393938,10
+23,Is H4K20 methylation associated with DNA replication?,ContextCite64,0.9915722102596852,0.9151515151515152,10
+23,Is H4K20 methylation associated with DNA replication?,WSS64,0.9921901339598744,0.9151515151515152,10
+23,Is H4K20 methylation associated with DNA replication?,ContextCite100,0.9894529242593066,0.9030303030303028,10
+23,Is H4K20 methylation associated with DNA replication?,WSS100,0.9900333264199468,0.9030303030303028,10
+23,Is H4K20 methylation associated with DNA replication?,TMC32,0.9797120784284225,0.7333333333333332,10
+23,Is H4K20 methylation associated with DNA replication?,BetaShap (U)32,0.6268988499666769,-0.006060606060606061,10
+23,Is H4K20 methylation associated with DNA replication?,TMC64,0.9941659860917337,0.8787878787878788,10
+23,Is H4K20 methylation associated with DNA replication?,BetaShap (U)64,0.7269534417622585,0.10303030303030303,10
+23,Is H4K20 methylation associated with DNA replication?,TMC100,0.9963952164096567,0.8787878787878788,10
+23,Is H4K20 methylation associated with DNA replication?,BetaShap (U)100,0.7920166667578251,0.2121212121212121,10
+23,Is H4K20 methylation associated with DNA replication?,LOO,0.9815259326266648,0.7939393939393938,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,ContextCite32,0.9032703276619826,0.3939393939393939,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,WSS32,0.904490402079391,0.3939393939393939,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,ContextCite64,0.9600726985599279,0.7575757575757575,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,WSS64,0.9603544505898154,0.7575757575757575,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,ContextCite100,0.974648933689624,0.7939393939393938,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,WSS100,0.9728464599536648,0.7575757575757575,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,TMC32,0.9857369588008331,0.9878787878787878,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,BetaShap (U)32,0.8310136891342454,0.33333333333333326,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,TMC64,0.9930167547843133,0.9757575757575757,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,BetaShap (U)64,0.9354809310977903,0.8181818181818182,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,TMC100,0.9963975215076758,0.9636363636363635,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,BetaShap (U)100,0.9570281202152705,0.9151515151515152,10
+24,Between which types of DNA bases are mutational biases introduced due to directional mutation pressure?,LOO,0.8381773313982689,0.34545454545454546,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,ContextCite32,0.9785611720017546,0.8787878787878788,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,WSS32,0.9783795786671108,0.8787878787878788,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,ContextCite64,0.9829939547990971,0.8545454545454544,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,WSS64,0.9797133007800662,0.8060606060606059,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,ContextCite100,0.9919503633725519,0.8424242424242423,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,WSS100,0.9907723234566204,0.8424242424242423,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,TMC32,0.9865136732797309,0.9636363636363635,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,BetaShap (U)32,0.9173309491501017,0.6242424242424242,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,TMC64,0.9958499971972228,0.9636363636363635,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,BetaShap (U)64,0.9666908985137215,0.8060606060606059,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,TMC100,0.9996323298914795,0.9757575757575757,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,BetaShap (U)100,0.9811963300864419,0.8666666666666665,10
+25,Which genes are associated with autosomal dominant Charcot-Marie-Tooth?,LOO,0.9884023785301842,0.8545454545454544,10
+26,List components of the CRSP/Med complex.,ContextCite32,0.9850239105078579,0.8303030303030302,10
+26,List components of the CRSP/Med complex.,WSS32,0.9848232423058938,0.8303030303030302,10
+26,List components of the CRSP/Med complex.,ContextCite64,0.9971945546116041,0.9030303030303028,10
+26,List components of the CRSP/Med complex.,WSS64,0.9973771157645612,0.9515151515151514,10
+26,List components of the CRSP/Med complex.,ContextCite100,0.9959816986544195,0.8060606060606059,10
+26,List components of the CRSP/Med complex.,WSS100,0.9961789219928524,0.8666666666666665,10
+26,List components of the CRSP/Med complex.,TMC32,0.9974270280409696,0.9999999999999999,10
+26,List components of the CRSP/Med complex.,BetaShap (U)32,0.9559367101762021,0.8909090909090909,10
+26,List components of the CRSP/Med complex.,TMC64,0.9982601525570927,0.9515151515151514,10
+26,List components of the CRSP/Med complex.,BetaShap (U)64,0.9618951897645476,0.8909090909090909,10
+26,List components of the CRSP/Med complex.,TMC100,0.9983296454398313,0.9515151515151514,10
+26,List components of the CRSP/Med complex.,BetaShap (U)100,0.9761897081726937,0.9272727272727272,10
+26,List components of the CRSP/Med complex.,LOO,0.9855352114221118,0.6121212121212121,10
+27,For the constructions of which organs has 3D printing been tested?,ContextCite32,0.9914199214731818,0.9636363636363635,10
+27,For the constructions of which organs has 3D printing been tested?,WSS32,0.9913015759764776,0.9636363636363635,10
+27,For the constructions of which organs has 3D printing been tested?,ContextCite64,0.9942632052430908,0.9999999999999999,10
+27,For the constructions of which organs has 3D printing been tested?,WSS64,0.9950324915248618,0.9999999999999999,10
+27,For the constructions of which organs has 3D printing been tested?,ContextCite100,0.9945282820716584,0.9515151515151514,10
+27,For the constructions of which organs has 3D printing been tested?,WSS100,0.9944204204175136,0.9515151515151514,10
+27,For the constructions of which organs has 3D printing been tested?,TMC32,0.9944716195137818,0.9636363636363635,10
+27,For the constructions of which organs has 3D printing been tested?,BetaShap (U)32,0.9561960467418119,0.8909090909090909,10
+27,For the constructions of which organs has 3D printing been tested?,TMC64,0.9985102340228994,0.9878787878787878,10
+27,For the constructions of which organs has 3D printing been tested?,BetaShap (U)64,0.9700087227220936,0.9515151515151514,10
+27,For the constructions of which organs has 3D printing been tested?,TMC100,0.9993763605621525,0.9999999999999999,10
+27,For the constructions of which organs has 3D printing been tested?,BetaShap (U)100,0.9735814668212582,0.9515151515151514,10
+27,For the constructions of which organs has 3D printing been tested?,LOO,0.9765314513503887,0.9272727272727272,10
+28,Which gene is the paralog of yeast UPC2?,ContextCite32,0.9937649806023687,0.4666666666666666,10
+28,Which gene is the paralog of yeast UPC2?,WSS32,0.9937226461927046,0.4545454545454545,10
+28,Which gene is the paralog of yeast UPC2?,ContextCite64,0.9982607248439171,0.9030303030303028,10
+28,Which gene is the paralog of yeast UPC2?,WSS64,0.9982152231427857,0.9030303030303028,10
+28,Which gene is the paralog of yeast UPC2?,ContextCite100,0.9990796727434649,0.9515151515151514,10
+28,Which gene is the paralog of yeast UPC2?,WSS100,0.9991300514697332,0.9515151515151514,10
+28,Which gene is the paralog of yeast UPC2?,TMC32,0.9797910379323481,0.4787878787878787,10
+28,Which gene is the paralog of yeast UPC2?,BetaShap (U)32,0.7002315876276088,0.6,10
+28,Which gene is the paralog of yeast UPC2?,TMC64,0.9938945387070895,0.6242424242424242,10
+28,Which gene is the paralog of yeast UPC2?,BetaShap (U)64,0.8702832660626811,0.5757575757575757,10
+28,Which gene is the paralog of yeast UPC2?,TMC100,0.9953924067447786,0.709090909090909,10
+28,Which gene is the paralog of yeast UPC2?,BetaShap (U)100,0.9449023624496872,0.6969696969696969,10
+28,Which gene is the paralog of yeast UPC2?,LOO,0.9932628066644916,0.43030303030303024,10
+29,Which disease can be treated with Relugolix.,ContextCite32,0.8941135165801459,0.7818181818181817,10
+29,Which disease can be treated with Relugolix.,WSS32,0.8925643463234577,0.7818181818181817,10
+29,Which disease can be treated with Relugolix.,ContextCite64,0.9819249130615941,0.9515151515151514,10
+29,Which disease can be treated with Relugolix.,WSS64,0.9781636500558589,0.9515151515151514,10
+29,Which disease can be treated with Relugolix.,ContextCite100,0.9679027901474861,0.9515151515151514,10
+29,Which disease can be treated with Relugolix.,WSS100,0.966359501272804,0.9636363636363635,10
+29,Which disease can be treated with Relugolix.,TMC32,0.9068637433891539,0.9515151515151514,10
+29,Which disease can be treated with Relugolix.,BetaShap (U)32,0.8583616971734274,0.6121212121212121,10
+29,Which disease can be treated with Relugolix.,TMC64,0.9609843830404426,0.9272727272727272,10
+29,Which disease can be treated with Relugolix.,BetaShap (U)64,0.8948642106262589,0.7939393939393938,10
+29,Which disease can be treated with Relugolix.,TMC100,0.9646627719647958,0.9515151515151514,10
+29,Which disease can be treated with Relugolix.,BetaShap (U)100,0.904839712567739,0.8181818181818182,10
+29,Which disease can be treated with Relugolix.,LOO,0.8938670881812032,0.6121212121212121,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,ContextCite32,0.9877874745344088,0.9030303030303028,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,WSS32,0.98798448072612,0.9030303030303028,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,ContextCite64,0.9912638801594806,0.9878787878787878,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,WSS64,0.9915222435709127,0.9878787878787878,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,ContextCite100,0.9884647916866944,0.9515151515151514,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,WSS100,0.9897915760711884,0.9515151515151514,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,TMC32,0.9940112545088575,0.9878787878787878,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,BetaShap (U)32,0.8305186825248574,0.10303030303030303,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,TMC64,0.9972106913563882,0.9878787878787878,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,BetaShap (U)64,0.9362073026203759,0.8060606060606059,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,TMC100,0.9988147182315212,0.9999999999999999,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,BetaShap (U)100,0.9563587966245845,0.8060606060606059,10
+30,Has field-programmable gate array (FPGA) technology been used to solve sequence alignment problems?,LOO,0.9787121289780867,0.9757575757575757,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,ContextCite32,0.9940148165306367,0.9636363636363635,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,WSS32,0.993936309364186,0.9636363636363635,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,ContextCite64,0.993411661356502,0.9636363636363635,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,WSS64,0.9932389336981474,0.9636363636363635,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,ContextCite100,0.995346550940172,0.9393939393939393,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,WSS100,0.9952842884658946,0.9393939393939393,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,TMC32,0.9972919110173923,0.9757575757575757,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,BetaShap (U)32,0.8975110426005385,0.709090909090909,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,TMC64,0.9982514397785616,0.9757575757575757,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,BetaShap (U)64,0.9700837140284853,0.8181818181818182,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,TMC100,0.9992824881707675,0.9878787878787878,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,BetaShap (U)100,0.977946257348937,0.8424242424242423,10
+31,Which are the main functions of the human HuR (ELAVL1) protein in fibroblasts?,LOO,0.9733241440855382,0.309090909090909,10
+32,Which chromosome contains the TLR7 locus in the human genome?,ContextCite32,0.9847782883843058,0.7575757575757575,10
+32,Which chromosome contains the TLR7 locus in the human genome?,WSS32,0.9845021249671213,0.7454545454545454,10
+32,Which chromosome contains the TLR7 locus in the human genome?,ContextCite64,0.9900563394439893,0.8545454545454544,10
+32,Which chromosome contains the TLR7 locus in the human genome?,WSS64,0.9895027045020443,0.8545454545454544,10
+32,Which chromosome contains the TLR7 locus in the human genome?,ContextCite100,0.9959792388057258,0.9515151515151514,10
+32,Which chromosome contains the TLR7 locus in the human genome?,WSS100,0.9962349850532972,0.9515151515151514,10
+32,Which chromosome contains the TLR7 locus in the human genome?,TMC32,0.9984881930923738,0.9030303030303028,10
+32,Which chromosome contains the TLR7 locus in the human genome?,BetaShap (U)32,0.9624822959430138,0.5878787878787878,10
+32,Which chromosome contains the TLR7 locus in the human genome?,TMC64,0.9976069840841276,0.9515151515151514,10
+32,Which chromosome contains the TLR7 locus in the human genome?,BetaShap (U)64,0.9704937460311885,0.6848484848484848,10
+32,Which chromosome contains the TLR7 locus in the human genome?,TMC100,0.9987475683443698,0.9757575757575757,10
+32,Which chromosome contains the TLR7 locus in the human genome?,BetaShap (U)100,0.9880377027666307,0.7939393939393938,10
+32,Which chromosome contains the TLR7 locus in the human genome?,LOO,0.962913752744205,0.7333333333333332,10
+33,Which syndromes are associated with heterochromia iridum?,ContextCite32,0.9834534651459864,0.9515151515151514,10
+33,Which syndromes are associated with heterochromia iridum?,WSS32,0.9834748279962904,0.9515151515151514,10
+33,Which syndromes are associated with heterochromia iridum?,ContextCite64,0.9910690284922706,0.9393939393939393,10
+33,Which syndromes are associated with heterochromia iridum?,WSS64,0.9913248479810243,0.9515151515151514,10
+33,Which syndromes are associated with heterochromia iridum?,ContextCite100,0.9949766776657546,0.9757575757575757,10
+33,Which syndromes are associated with heterochromia iridum?,WSS100,0.9948649842960496,0.9636363636363635,10
+33,Which syndromes are associated with heterochromia iridum?,TMC32,0.9970089618889542,0.9393939393939393,10
+33,Which syndromes are associated with heterochromia iridum?,BetaShap (U)32,0.9589407399216564,0.7454545454545454,10
+33,Which syndromes are associated with heterochromia iridum?,TMC64,0.9987077895663345,0.9999999999999999,10
+33,Which syndromes are associated with heterochromia iridum?,BetaShap (U)64,0.9820998259835836,0.9030303030303028,10
+33,Which syndromes are associated with heterochromia iridum?,TMC100,0.9991912478170704,0.9878787878787878,10
+33,Which syndromes are associated with heterochromia iridum?,BetaShap (U)100,0.9903251313749794,0.9878787878787878,10
+33,Which syndromes are associated with heterochromia iridum?,LOO,0.9902376906474464,0.9272727272727272,10
+34,List the components of mTOR Complex 2 (mTORC2).,ContextCite32,0.9847249690947759,0.7212121212121211,10
+34,List the components of mTOR Complex 2 (mTORC2).,WSS32,0.9844053725420077,0.7212121212121211,10
+34,List the components of mTOR Complex 2 (mTORC2).,ContextCite64,0.9941235345633745,0.8060606060606059,10
+34,List the components of mTOR Complex 2 (mTORC2).,WSS64,0.9943776183188104,0.8060606060606059,10
+34,List the components of mTOR Complex 2 (mTORC2).,ContextCite100,0.9919557828412816,0.8666666666666665,10
+34,List the components of mTOR Complex 2 (mTORC2).,WSS100,0.9916269918920283,0.8666666666666665,10
+34,List the components of mTOR Complex 2 (mTORC2).,TMC32,0.9955508829241325,0.9272727272727272,10
+34,List the components of mTOR Complex 2 (mTORC2).,BetaShap (U)32,0.9312580997682779,0.709090909090909,10
+34,List the components of mTOR Complex 2 (mTORC2).,TMC64,0.998152445898221,0.9636363636363635,10
+34,List the components of mTOR Complex 2 (mTORC2).,BetaShap (U)64,0.9706286811657139,0.9515151515151514,10
+34,List the components of mTOR Complex 2 (mTORC2).,TMC100,0.9986901070587187,0.9757575757575757,10
+34,List the components of mTOR Complex 2 (mTORC2).,BetaShap (U)100,0.9807278658820112,0.9151515151515152,10
+34,List the components of mTOR Complex 2 (mTORC2).,LOO,0.9604795232519778,0.5757575757575757,10
+35,What is known about prostate cancer screening in the UK ?,ContextCite32,0.9850503720244864,0.9393939393939393,10
+35,What is known about prostate cancer screening in the UK ?,WSS32,0.9853042456126461,0.9393939393939393,10
+35,What is known about prostate cancer screening in the UK ?,ContextCite64,0.9870895992077007,0.8909090909090909,10
+35,What is known about prostate cancer screening in the UK ?,WSS64,0.9872584239556724,0.8909090909090909,10
+35,What is known about prostate cancer screening in the UK ?,ContextCite100,0.9934505574110082,0.9515151515151514,10
+35,What is known about prostate cancer screening in the UK ?,WSS100,0.993099094483188,0.9515151515151514,10
+35,What is known about prostate cancer screening in the UK ?,TMC32,0.9937080394760073,0.9151515151515152,10
+35,What is known about prostate cancer screening in the UK ?,BetaShap (U)32,0.9507757931894338,0.8787878787878788,10
+35,What is known about prostate cancer screening in the UK ?,TMC64,0.998597423236019,0.9636363636363635,10
+35,What is known about prostate cancer screening in the UK ?,BetaShap (U)64,0.9744864981470345,0.8787878787878788,10
+35,What is known about prostate cancer screening in the UK ?,TMC100,0.9990183812052218,0.9878787878787878,10
+35,What is known about prostate cancer screening in the UK ?,BetaShap (U)100,0.9780329301859509,0.8787878787878788,10
+35,What is known about prostate cancer screening in the UK ?,LOO,0.9771092726363008,0.9757575757575757,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,ContextCite32,0.9785044406910332,0.8424242424242423,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,WSS32,0.9782739194259811,0.8424242424242423,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,ContextCite64,0.9931869388767294,0.9515151515151514,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,WSS64,0.9932240546571547,0.9515151515151514,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,ContextCite100,0.9942920414303648,0.9515151515151514,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,WSS100,0.994642944657485,0.9515151515151514,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,TMC32,0.9965263922983096,0.9757575757575757,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,BetaShap (U)32,0.9457848827284588,0.9030303030303028,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,TMC64,0.9986162247856184,0.9636363636363635,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,BetaShap (U)64,0.9843264210606409,0.9272727272727272,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,TMC100,0.9985818153320489,0.9636363636363635,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,BetaShap (U)100,0.9871634836231662,0.9757575757575757,10
+36,Is selenium deficiency involved in autoimmune thyroid disease?,LOO,0.9866388012593384,0.7818181818181817,10
+37,Is ospemifene effective for treatment of dyspareunia?,ContextCite32,0.9248128071886282,0.8424242424242423,10
+37,Is ospemifene effective for treatment of dyspareunia?,WSS32,0.9246396792289039,0.8424242424242423,10
+37,Is ospemifene effective for treatment of dyspareunia?,ContextCite64,0.9719243058600016,0.8424242424242423,10
+37,Is ospemifene effective for treatment of dyspareunia?,WSS64,0.9691523688723083,0.8424242424242423,10
+37,Is ospemifene effective for treatment of dyspareunia?,ContextCite100,0.9815163505482495,0.8424242424242423,10
+37,Is ospemifene effective for treatment of dyspareunia?,WSS100,0.9778349427430906,0.8424242424242423,10
+37,Is ospemifene effective for treatment of dyspareunia?,TMC32,0.9856560616225558,0.8787878787878788,10
+37,Is ospemifene effective for treatment of dyspareunia?,BetaShap (U)32,0.7705746171465396,0.6848484848484848,10
+37,Is ospemifene effective for treatment of dyspareunia?,TMC64,0.9954622299457605,0.8909090909090909,10
+37,Is ospemifene effective for treatment of dyspareunia?,BetaShap (U)64,0.8676132821418693,0.7212121212121211,10
+37,Is ospemifene effective for treatment of dyspareunia?,TMC100,0.9969590516173626,0.8666666666666665,10
+37,Is ospemifene effective for treatment of dyspareunia?,BetaShap (U)100,0.8806726468117357,0.6969696969696969,10
+37,Is ospemifene effective for treatment of dyspareunia?,LOO,0.975868651416345,0.7212121212121211,10
+38,Which is the role of mediator in genome organization?,ContextCite32,0.9985809465871283,0.7939393939393938,10
+38,Which is the role of mediator in genome organization?,WSS32,0.9985857037676845,0.7939393939393938,10
+38,Which is the role of mediator in genome organization?,ContextCite64,0.9994464992862914,0.9515151515151514,10
+38,Which is the role of mediator in genome organization?,WSS64,0.9994610248921573,0.9515151515151514,10
+38,Which is the role of mediator in genome organization?,ContextCite100,0.9996592069928857,0.9757575757575757,10
+38,Which is the role of mediator in genome organization?,WSS100,0.9996431920554507,0.9757575757575757,10
+38,Which is the role of mediator in genome organization?,TMC32,0.9994215345883638,0.8787878787878788,10
+38,Which is the role of mediator in genome organization?,BetaShap (U)32,0.9956505847009212,0.7212121212121211,10
+38,Which is the role of mediator in genome organization?,TMC64,0.9998740568986775,0.9757575757575757,10
+38,Which is the role of mediator in genome organization?,BetaShap (U)64,0.9976635550819327,0.8424242424242423,10
+38,Which is the role of mediator in genome organization?,TMC100,0.9999571829384263,0.9999999999999999,10
+38,Which is the role of mediator in genome organization?,BetaShap (U)100,0.9988733319767359,0.8787878787878788,10
+38,Which is the role of mediator in genome organization?,LOO,0.9978873484784472,0.43030303030303024,10
+39,What is the mechanisms of action of Evinacumab?,ContextCite32,0.9526387826466586,0.9393939393939393,10
+39,What is the mechanisms of action of Evinacumab?,WSS32,0.95221862630245,0.9030303030303028,10
+39,What is the mechanisms of action of Evinacumab?,ContextCite64,0.9884291771864748,0.9515151515151514,10
+39,What is the mechanisms of action of Evinacumab?,WSS64,0.9881453670823938,0.9515151515151514,10
+39,What is the mechanisms of action of Evinacumab?,ContextCite100,0.9854392914021742,0.9272727272727272,10
+39,What is the mechanisms of action of Evinacumab?,WSS100,0.9868470227517064,0.9272727272727272,10
+39,What is the mechanisms of action of Evinacumab?,TMC32,0.9836578091339804,0.8787878787878788,10
+39,What is the mechanisms of action of Evinacumab?,BetaShap (U)32,0.6786205473766067,0.5878787878787878,10
+39,What is the mechanisms of action of Evinacumab?,TMC64,0.9946444934386065,0.9757575757575757,10
+39,What is the mechanisms of action of Evinacumab?,BetaShap (U)64,0.8771392353106411,0.709090909090909,10
+39,What is the mechanisms of action of Evinacumab?,TMC100,0.995298933698531,0.9393939393939393,10
+39,What is the mechanisms of action of Evinacumab?,BetaShap (U)100,0.9231327911685633,0.6606060606060605,10
+39,What is the mechanisms of action of Evinacumab?,LOO,0.9639705378042398,0.709090909090909,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,ContextCite32,0.9808762889470242,0.8303030303030302,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,WSS32,0.9810093135851794,0.8303030303030302,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,ContextCite64,0.9895122555182359,0.8545454545454544,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,WSS64,0.9903048118557569,0.8545454545454544,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,ContextCite100,0.989941376944279,0.8303030303030302,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,WSS100,0.9904277624210381,0.8545454545454544,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,TMC32,0.9939976840690381,0.8424242424242423,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,BetaShap (U)32,0.8879453927674252,0.7696969696969697,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,TMC64,0.997961146984686,0.9636363636363635,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,BetaShap (U)64,0.9732944079525254,0.8666666666666665,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,TMC100,0.998693046132275,0.9636363636363635,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,BetaShap (U)100,0.9772358054894195,0.9393939393939393,10
+40,Is long QT syndrome a cause for sudden cardiac death in athletes?,LOO,0.9716691130933404,0.709090909090909,10
+41,Which genes are affected in ROMANO-WARD syndrome?,ContextCite32,0.9922608983047989,0.9999999999999999,10
+41,Which genes are affected in ROMANO-WARD syndrome?,WSS32,0.992361929768217,0.9999999999999999,10
+41,Which genes are affected in ROMANO-WARD syndrome?,ContextCite64,0.994380920080217,0.9757575757575757,10
+41,Which genes are affected in ROMANO-WARD syndrome?,WSS64,0.9935242626349443,0.9757575757575757,10
+41,Which genes are affected in ROMANO-WARD syndrome?,ContextCite100,0.9916080689204375,0.9636363636363635,10
+41,Which genes are affected in ROMANO-WARD syndrome?,WSS100,0.9920754835959411,0.9636363636363635,10
+41,Which genes are affected in ROMANO-WARD syndrome?,TMC32,0.9842971668793248,0.9030303030303028,10
+41,Which genes are affected in ROMANO-WARD syndrome?,BetaShap (U)32,0.2728462793206286,0.406060606060606,10
+41,Which genes are affected in ROMANO-WARD syndrome?,TMC64,0.9935559265992473,0.9151515151515152,10
+41,Which genes are affected in ROMANO-WARD syndrome?,BetaShap (U)64,0.7718881575612023,0.7212121212121211,10
+41,Which genes are affected in ROMANO-WARD syndrome?,TMC100,0.9938993058669175,0.9030303030303028,10
+41,Which genes are affected in ROMANO-WARD syndrome?,BetaShap (U)100,0.8833014451823606,0.6848484848484848,10
+41,Which genes are affected in ROMANO-WARD syndrome?,LOO,0.8890018431491276,0.9515151515151514,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,ContextCite32,0.9906025147444919,0.8787878787878788,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,WSS32,0.9906195257358668,0.8787878787878788,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,ContextCite64,0.9955089964013908,0.8060606060606059,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,WSS64,0.9954722399294363,0.8060606060606059,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,ContextCite100,0.99511503539615,0.6363636363636362,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,WSS100,0.995269659602977,0.5878787878787878,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,TMC32,0.9986396380725185,0.9515151515151514,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,BetaShap (U)32,0.9578876738334595,0.7939393939393938,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,TMC64,0.9996674412804961,0.9757575757575757,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,BetaShap (U)64,0.9789595794721189,0.7333333333333332,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,TMC100,0.9997856750083934,0.9757575757575757,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,BetaShap (U)100,0.986386374044008,0.7818181818181817,10
+42,How does PRDM9 recognize the specific DNA motifs for meiotic recombination?,LOO,0.9917456542397971,0.6363636363636362,10
+43,Can clonidine be used to reduce agitation in children.,ContextCite32,0.9192951933211152,0.9151515151515152,10
+43,Can clonidine be used to reduce agitation in children.,WSS32,0.9174532031187637,0.9151515151515152,10
+43,Can clonidine be used to reduce agitation in children.,ContextCite64,0.9888632966353436,0.9878787878787878,10
+43,Can clonidine be used to reduce agitation in children.,WSS64,0.9873538895570894,0.9757575757575757,10
+43,Can clonidine be used to reduce agitation in children.,ContextCite100,0.9861189449007582,0.9757575757575757,10
+43,Can clonidine be used to reduce agitation in children.,WSS100,0.981823896408634,0.9515151515151514,10
+43,Can clonidine be used to reduce agitation in children.,TMC32,0.9154822646498351,0.9393939393939393,10
+43,Can clonidine be used to reduce agitation in children.,BetaShap (U)32,0.5445235816714388,0.8060606060606059,10
+43,Can clonidine be used to reduce agitation in children.,TMC64,0.9583218988261873,0.8909090909090909,10
+43,Can clonidine be used to reduce agitation in children.,BetaShap (U)64,0.8858324645298533,0.8666666666666665,10
+43,Can clonidine be used to reduce agitation in children.,TMC100,0.967068829076685,0.8666666666666665,10
+43,Can clonidine be used to reduce agitation in children.,BetaShap (U)100,0.9492116487273502,0.8666666666666665,10
+43,Can clonidine be used to reduce agitation in children.,LOO,0.8916867362625267,0.7212121212121211,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,ContextCite32,0.8790054814019471,0.9030303030303028,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,WSS32,0.8826131913113011,0.9030303030303028,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,ContextCite64,0.9278995103801752,0.9393939393939393,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,WSS64,0.9229020079400208,0.9030303030303028,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,ContextCite100,0.9576040622676331,0.9878787878787878,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,WSS100,0.9443016904128285,0.9999999999999999,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,TMC32,0.9399425526873632,0.8545454545454544,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,BetaShap (U)32,0.8874922997750854,0.9151515151515152,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,TMC64,0.9767150350606579,0.9515151515151514,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,BetaShap (U)64,0.9147419182576189,0.9151515151515152,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,TMC100,0.9902028778018546,0.9515151515151514,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,BetaShap (U)100,0.919887185198148,0.9151515151515152,10
+44,What is evaluated with the Hydrocephalus Outcome Questionnaire?,LOO,0.7547291052028092,0.8303030303030302,10
+45,Which is the most prevalent form of arrhythmia worldwide?,ContextCite32,0.9456840943367513,0.8909090909090909,10
+45,Which is the most prevalent form of arrhythmia worldwide?,WSS32,0.9466605426228463,0.8909090909090909,10
+45,Which is the most prevalent form of arrhythmia worldwide?,ContextCite64,0.9423314603428972,0.8181818181818182,10
+45,Which is the most prevalent form of arrhythmia worldwide?,WSS64,0.9457483623282945,0.8060606060606059,10
+45,Which is the most prevalent form of arrhythmia worldwide?,ContextCite100,0.9767823599196854,0.9272727272727272,10
+45,Which is the most prevalent form of arrhythmia worldwide?,WSS100,0.9792225288623411,0.9272727272727272,10
+45,Which is the most prevalent form of arrhythmia worldwide?,TMC32,0.9734230229788261,0.8424242424242423,10
+45,Which is the most prevalent form of arrhythmia worldwide?,BetaShap (U)32,0.6504846651170307,0.8181818181818182,10
+45,Which is the most prevalent form of arrhythmia worldwide?,TMC64,0.9845745553891386,0.9151515151515152,10
+45,Which is the most prevalent form of arrhythmia worldwide?,BetaShap (U)64,0.8243475258420291,0.8787878787878788,10
+45,Which is the most prevalent form of arrhythmia worldwide?,TMC100,0.989439363901876,0.9151515151515152,10
+45,Which is the most prevalent form of arrhythmia worldwide?,BetaShap (U)100,0.904302013495438,0.8909090909090909,10
+45,Which is the most prevalent form of arrhythmia worldwide?,LOO,0.5711928303426455,0.5878787878787878,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,ContextCite32,0.8550073887124645,0.6969696969696969,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,WSS32,0.853751447663314,0.6848484848484848,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,ContextCite64,0.935126048820372,0.8181818181818182,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,WSS64,0.9351479742598369,0.8181818181818182,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,ContextCite100,0.8891546504803116,0.49090909090909085,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,WSS100,0.8820489600932028,0.49090909090909085,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,TMC32,0.9198414264523921,0.9515151515151514,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,BetaShap (U)32,0.5146720201426858,0.6848484848484848,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,TMC64,0.9669206328843173,0.9757575757575757,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,BetaShap (U)64,0.6279849607566564,0.7818181818181817,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,TMC100,0.98378821291047,0.9636363636363635,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,BetaShap (U)100,0.7453007955210202,0.7818181818181817,10
+46,What is the inheritance of the glucose-6-phosphate dehydrogenase (G6PD) deficiency?,LOO,0.7510313091293109,0.5636363636363636,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,ContextCite32,0.7424897389868076,0.5878787878787878,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,WSS32,0.7405112258801367,0.5878787878787878,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,ContextCite64,0.8901480157585657,0.8787878787878788,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,WSS64,0.8994114177214636,0.8909090909090909,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,ContextCite100,0.9636711626919514,0.9030303030303028,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,WSS100,0.9702067532081465,0.8787878787878788,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,TMC32,0.9380356057291002,0.8787878787878788,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,BetaShap (U)32,0.7610566042703654,0.7212121212121211,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,TMC64,0.9575780581693294,0.8909090909090909,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,BetaShap (U)64,0.8209742697567368,0.6969696969696969,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,TMC100,0.9620058598901753,0.9393939393939393,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,BetaShap (U)100,0.8549651413047885,0.8909090909090909,10
+47,What organ is associated with a Gleason pattern or Gleason Score?,LOO,0.7677311275773891,0.7575757575757575,10
+48,What is the treatment of choice  for gastric lymphoma?,ContextCite32,0.9739894113461957,0.9515151515151514,10
+48,What is the treatment of choice  for gastric lymphoma?,WSS32,0.9736771761818255,0.9757575757575757,10
+48,What is the treatment of choice  for gastric lymphoma?,ContextCite64,0.9921231406914488,0.9393939393939393,10
+48,What is the treatment of choice  for gastric lymphoma?,WSS64,0.9926717350488026,0.9515151515151514,10
+48,What is the treatment of choice  for gastric lymphoma?,ContextCite100,0.9867961815356027,0.9393939393939393,10
+48,What is the treatment of choice  for gastric lymphoma?,WSS100,0.9855296570678153,0.9515151515151514,10
+48,What is the treatment of choice  for gastric lymphoma?,TMC32,0.9899415980094024,0.9636363636363635,10
+48,What is the treatment of choice  for gastric lymphoma?,BetaShap (U)32,0.956811566952448,0.8666666666666665,10
+48,What is the treatment of choice  for gastric lymphoma?,TMC64,0.996314568238774,0.9393939393939393,10
+48,What is the treatment of choice  for gastric lymphoma?,BetaShap (U)64,0.9647781467899614,0.8909090909090909,10
+48,What is the treatment of choice  for gastric lymphoma?,TMC100,0.9974902895620062,0.9272727272727272,10
+48,What is the treatment of choice  for gastric lymphoma?,BetaShap (U)100,0.9677509239110846,0.8060606060606059,10
+48,What is the treatment of choice  for gastric lymphoma?,LOO,0.9630000540068039,0.7939393939393938,10
+49,What is herceptin?,ContextCite32,0.9323761745608219,0.4666666666666666,10
+49,What is herceptin?,WSS32,0.933022057613044,0.49090909090909085,10
+49,What is herceptin?,ContextCite64,0.9529140273469093,0.5393939393939393,10
+49,What is herceptin?,WSS64,0.9555525649617723,0.6,10
+49,What is herceptin?,ContextCite100,0.9738643949057064,0.7575757575757575,10
+49,What is herceptin?,WSS100,0.9714659374968425,0.6969696969696969,10
+49,What is herceptin?,TMC32,0.9953541670882332,0.9999999999999999,10
+49,What is herceptin?,BetaShap (U)32,0.7926074208663006,0.8060606060606059,10
+49,What is herceptin?,TMC64,0.9977391483171587,0.9878787878787878,10
+49,What is herceptin?,BetaShap (U)64,0.9059398371278793,0.7818181818181817,10
+49,What is herceptin?,TMC100,0.9979290965000015,0.9515151515151514,10
+49,What is herceptin?,BetaShap (U)100,0.8934041641417013,0.7333333333333332,10
+49,What is herceptin?,LOO,0.9088510984892534,0.406060606060606,10
+50,What symptoms characterize the Muenke syndrome?,ContextCite32,0.985583226667526,0.9151515151515152,10
+50,What symptoms characterize the Muenke syndrome?,WSS32,0.985557405231364,0.9151515151515152,10
+50,What symptoms characterize the Muenke syndrome?,ContextCite64,0.9973258291692932,0.9636363636363635,10
+50,What symptoms characterize the Muenke syndrome?,WSS64,0.9977079586997135,0.9636363636363635,10
+50,What symptoms characterize the Muenke syndrome?,ContextCite100,0.996626794517822,0.9999999999999999,10
+50,What symptoms characterize the Muenke syndrome?,WSS100,0.9969886786553661,0.9999999999999999,10
+50,What symptoms characterize the Muenke syndrome?,TMC32,0.9990273137425094,0.9636363636363635,10
+50,What symptoms characterize the Muenke syndrome?,BetaShap (U)32,0.9852200611596598,0.8909090909090909,10
+50,What symptoms characterize the Muenke syndrome?,TMC64,0.9990426604733637,0.9757575757575757,10
+50,What symptoms characterize the Muenke syndrome?,BetaShap (U)64,0.9919331962755502,0.9030303030303028,10
+50,What symptoms characterize the Muenke syndrome?,TMC100,0.9993350549275496,0.9999999999999999,10
+50,What symptoms characterize the Muenke syndrome?,BetaShap (U)100,0.9918970154119249,0.9272727272727272,10
+50,What symptoms characterize the Muenke syndrome?,LOO,0.9924070898028649,0.9515151515151514,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,ContextCite32,0.9864199062747727,0.7212121212121211,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,WSS32,0.9864899294020786,0.7212121212121211,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,ContextCite64,0.9792357727916524,0.6242424242424242,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,WSS64,0.9796887770990919,0.6,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,ContextCite100,0.9858959278520274,0.6969696969696969,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,WSS100,0.9861447354814458,0.6969696969696969,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,TMC32,0.9921120945360933,0.8787878787878788,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,BetaShap (U)32,0.7751343398303953,0.8909090909090909,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,TMC64,0.9985827974628527,0.9272727272727272,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,BetaShap (U)64,0.948239501780822,0.8787878787878788,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,TMC100,0.9975835790067034,0.9878787878787878,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,BetaShap (U)100,0.9517247489628462,0.9515151515151514,10
+51,Which is the most widely used model for the study of multiple sclerosis (MS)?,LOO,0.9656172534317488,0.32121212121212117,10
+52,How does ranolazine affect calcium handling in the heart,ContextCite32,0.9798376088257639,0.8181818181818182,10
+52,How does ranolazine affect calcium handling in the heart,WSS32,0.9797574083232962,0.8181818181818182,10
+52,How does ranolazine affect calcium handling in the heart,ContextCite64,0.9979934960406651,0.9272727272727272,10
+52,How does ranolazine affect calcium handling in the heart,WSS64,0.9979182155518809,0.9030303030303028,10
+52,How does ranolazine affect calcium handling in the heart,ContextCite100,0.9960993882594149,0.9272727272727272,10
+52,How does ranolazine affect calcium handling in the heart,WSS100,0.9954792083905644,0.9272727272727272,10
+52,How does ranolazine affect calcium handling in the heart,TMC32,0.9977241384430178,0.9272727272727272,10
+52,How does ranolazine affect calcium handling in the heart,BetaShap (U)32,0.9626459430789394,0.7575757575757575,10
+52,How does ranolazine affect calcium handling in the heart,TMC64,0.999811668611286,0.9878787878787878,10
+52,How does ranolazine affect calcium handling in the heart,BetaShap (U)64,0.9831817348886397,0.9272727272727272,10
+52,How does ranolazine affect calcium handling in the heart,TMC100,0.9995091414996037,0.9515151515151514,10
+52,How does ranolazine affect calcium handling in the heart,BetaShap (U)100,0.9829934512945282,0.9151515151515152,10
+52,How does ranolazine affect calcium handling in the heart,LOO,0.988510709685517,0.6969696969696969,10
+53,Why does cranberry juice help combat urinary tract infections?,ContextCite32,0.9883128294750655,0.8545454545454544,10
+53,Why does cranberry juice help combat urinary tract infections?,WSS32,0.9883161870911437,0.8545454545454544,10
+53,Why does cranberry juice help combat urinary tract infections?,ContextCite64,0.9968713733636784,0.9757575757575757,10
+53,Why does cranberry juice help combat urinary tract infections?,WSS64,0.996745498990149,0.9757575757575757,10
+53,Why does cranberry juice help combat urinary tract infections?,ContextCite100,0.9954137619250494,0.9636363636363635,10
+53,Why does cranberry juice help combat urinary tract infections?,WSS100,0.9950002177991115,0.9757575757575757,10
+53,Why does cranberry juice help combat urinary tract infections?,TMC32,0.9834259873973582,0.9030303030303028,10
+53,Why does cranberry juice help combat urinary tract infections?,BetaShap (U)32,0.8575950047050882,0.6727272727272726,10
+53,Why does cranberry juice help combat urinary tract infections?,TMC64,0.9981262647895979,0.9878787878787878,10
+53,Why does cranberry juice help combat urinary tract infections?,BetaShap (U)64,0.9088597105172618,0.709090909090909,10
+53,Why does cranberry juice help combat urinary tract infections?,TMC100,0.9983346471400256,0.9636363636363635,10
+53,Why does cranberry juice help combat urinary tract infections?,BetaShap (U)100,0.9446297897172797,0.7575757575757575,10
+53,Why does cranberry juice help combat urinary tract infections?,LOO,0.9525042517939882,0.4545454545454545,10
+54,How are cryptic unstable transcripts (CUTs) defined?,ContextCite32,0.991859543160013,0.6121212121212121,10
+54,How are cryptic unstable transcripts (CUTs) defined?,WSS32,0.9918558766753482,0.6121212121212121,10
+54,How are cryptic unstable transcripts (CUTs) defined?,ContextCite64,0.9921932544889959,0.6606060606060605,10
+54,How are cryptic unstable transcripts (CUTs) defined?,WSS64,0.9919440452834831,0.709090909090909,10
+54,How are cryptic unstable transcripts (CUTs) defined?,ContextCite100,0.9937709480381871,0.6606060606060605,10
+54,How are cryptic unstable transcripts (CUTs) defined?,WSS100,0.9932641037000344,0.6242424242424242,10
+54,How are cryptic unstable transcripts (CUTs) defined?,TMC32,0.9980733732686474,0.8787878787878788,10
+54,How are cryptic unstable transcripts (CUTs) defined?,BetaShap (U)32,0.9820517756720701,0.8424242424242423,10
+54,How are cryptic unstable transcripts (CUTs) defined?,TMC64,0.9993935661799127,0.9757575757575757,10
+54,How are cryptic unstable transcripts (CUTs) defined?,BetaShap (U)64,0.9895523299915696,0.9272727272727272,10
+54,How are cryptic unstable transcripts (CUTs) defined?,TMC100,0.9994675559531021,0.9757575757575757,10
+54,How are cryptic unstable transcripts (CUTs) defined?,BetaShap (U)100,0.9936734905572369,0.9393939393939393,10
+54,How are cryptic unstable transcripts (CUTs) defined?,LOO,0.9874371258080128,0.05454545454545454,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,ContextCite32,0.9993819596262586,0.8424242424242423,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,WSS32,0.9993774815064421,0.8424242424242423,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,ContextCite64,0.9995833644056658,0.8545454545454544,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,WSS64,0.999561565230943,0.8545454545454544,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,ContextCite100,0.9998035418910589,0.9393939393939393,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,WSS100,0.9998068784528577,0.9393939393939393,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,TMC32,0.9997049486812803,0.8060606060606059,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,BetaShap (U)32,0.990894048055676,0.6242424242424242,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,TMC64,0.9998826652073955,0.9393939393939393,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,BetaShap (U)64,0.9984709521191159,0.8545454545454544,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,TMC100,0.999915790280705,0.9393939393939393,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,BetaShap (U)100,0.9989069642053645,0.9757575757575757,10
+55,What is Abbreviated Injury Scale (AIS) used to determine?,LOO,0.9992244608127128,0.8060606060606059,10
+56,Tumor-treating fields are effective for treatment of which cancers?,ContextCite32,0.9216924141651588,0.7939393939393938,10
+56,Tumor-treating fields are effective for treatment of which cancers?,WSS32,0.9196643421897357,0.7939393939393938,10
+56,Tumor-treating fields are effective for treatment of which cancers?,ContextCite64,0.9365435774784514,0.9393939393939393,10
+56,Tumor-treating fields are effective for treatment of which cancers?,WSS64,0.9388863511159575,0.9393939393939393,10
+56,Tumor-treating fields are effective for treatment of which cancers?,ContextCite100,0.8887563441784925,0.8666666666666665,10
+56,Tumor-treating fields are effective for treatment of which cancers?,WSS100,0.901393926879014,0.9030303030303028,10
+56,Tumor-treating fields are effective for treatment of which cancers?,TMC32,0.9432237979000377,0.9272727272727272,10
+56,Tumor-treating fields are effective for treatment of which cancers?,BetaShap (U)32,0.8977535891448495,0.709090909090909,10
+56,Tumor-treating fields are effective for treatment of which cancers?,TMC64,0.9807426002325301,0.9515151515151514,10
+56,Tumor-treating fields are effective for treatment of which cancers?,BetaShap (U)64,0.9390072675797443,0.7939393939393938,10
+56,Tumor-treating fields are effective for treatment of which cancers?,TMC100,0.9661063112536302,0.9636363636363635,10
+56,Tumor-treating fields are effective for treatment of which cancers?,BetaShap (U)100,0.9546602517676446,0.8545454545454544,10
+56,Tumor-treating fields are effective for treatment of which cancers?,LOO,0.5575376695383304,0.5393939393939393,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,ContextCite32,0.9945521742384973,0.6,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,WSS32,0.9945815233158449,0.6,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,ContextCite64,0.9957948945775992,0.7454545454545454,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,WSS64,0.996134989407875,0.6969696969696969,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,ContextCite100,0.9976507716155316,0.709090909090909,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,WSS100,0.9978184103724164,0.6969696969696969,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,TMC32,0.9993900496535968,0.8424242424242423,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,BetaShap (U)32,0.998073506044839,0.8303030303030302,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,TMC64,0.9998387225425399,0.9878787878787878,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,BetaShap (U)64,0.9991410965769214,0.9393939393939393,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,TMC100,0.9999120116492193,0.9878787878787878,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,BetaShap (U)100,0.9994780223125325,0.9757575757575757,10
+57,Which properties of the mRNA does N6-methyladenosine (m6A) affect?,LOO,0.9901490058032084,0.5151515151515151,10
+58,Is arimoclomol a co-inducer of the heat shock response?,ContextCite32,0.7107082982137118,0.7333333333333332,10
+58,Is arimoclomol a co-inducer of the heat shock response?,WSS32,0.7151424497003442,0.7333333333333332,10
+58,Is arimoclomol a co-inducer of the heat shock response?,ContextCite64,0.8261230164609629,0.8303030303030302,10
+58,Is arimoclomol a co-inducer of the heat shock response?,WSS64,0.827693922436772,0.8303030303030302,10
+58,Is arimoclomol a co-inducer of the heat shock response?,ContextCite100,0.8476905417513415,0.8303030303030302,10
+58,Is arimoclomol a co-inducer of the heat shock response?,WSS100,0.8552338144536719,0.8787878787878788,10
+58,Is arimoclomol a co-inducer of the heat shock response?,TMC32,0.9091653642189517,0.9636363636363635,10
+58,Is arimoclomol a co-inducer of the heat shock response?,BetaShap (U)32,0.8919259421389225,0.9030303030303028,10
+58,Is arimoclomol a co-inducer of the heat shock response?,TMC64,0.9117317919417656,0.9878787878787878,10
+58,Is arimoclomol a co-inducer of the heat shock response?,BetaShap (U)64,0.9575796914556484,0.9030303030303028,10
+58,Is arimoclomol a co-inducer of the heat shock response?,TMC100,0.9731187331408732,0.9878787878787878,10
+58,Is arimoclomol a co-inducer of the heat shock response?,BetaShap (U)100,0.9681299507583037,0.9393939393939393,10
+58,Is arimoclomol a co-inducer of the heat shock response?,LOO,0.491444880451333,0.5272727272727272,10
+59,What is 2d 4d ratio in athletes.,ContextCite32,0.8375829260142627,0.8060606060606059,10
+59,What is 2d 4d ratio in athletes.,WSS32,0.8398113968960723,0.8060606060606059,10
+59,What is 2d 4d ratio in athletes.,ContextCite64,0.9712691582919882,0.9393939393939393,10
+59,What is 2d 4d ratio in athletes.,WSS64,0.9684012700030389,0.9030303030303028,10
+59,What is 2d 4d ratio in athletes.,ContextCite100,0.9782171749149531,0.9515151515151514,10
+59,What is 2d 4d ratio in athletes.,WSS100,0.9747065050083417,0.9272727272727272,10
+59,What is 2d 4d ratio in athletes.,TMC32,0.8538156304204626,0.8909090909090909,10
+59,What is 2d 4d ratio in athletes.,BetaShap (U)32,0.17835154039798218,0.4545454545454545,10
+59,What is 2d 4d ratio in athletes.,TMC64,0.9088635338022817,0.9151515151515152,10
+59,What is 2d 4d ratio in athletes.,BetaShap (U)64,0.26271480782591555,0.6242424242424242,10
+59,What is 2d 4d ratio in athletes.,TMC100,0.9353685882253153,0.9393939393939393,10
+59,What is 2d 4d ratio in athletes.,BetaShap (U)100,0.4371673390852182,0.7818181818181817,10
+59,What is 2d 4d ratio in athletes.,LOO,0.806737397454582,0.5636363636363636,10
+60,Which is the substrate of the haspin kinase during mitosis?,ContextCite32,0.8215897279320495,0.6484848484848483,10
+60,Which is the substrate of the haspin kinase during mitosis?,WSS32,0.8237304338070982,0.6484848484848483,10
+60,Which is the substrate of the haspin kinase during mitosis?,ContextCite64,0.836954879812283,0.6606060606060605,10
+60,Which is the substrate of the haspin kinase during mitosis?,WSS64,0.8278099723783384,0.6848484848484848,10
+60,Which is the substrate of the haspin kinase during mitosis?,ContextCite100,0.8508975910233032,0.7333333333333332,10
+60,Which is the substrate of the haspin kinase during mitosis?,WSS100,0.850825450711826,0.7575757575757575,10
+60,Which is the substrate of the haspin kinase during mitosis?,TMC32,0.946558656919105,0.9151515151515152,10
+60,Which is the substrate of the haspin kinase during mitosis?,BetaShap (U)32,0.710843754012142,0.7939393939393938,10
+60,Which is the substrate of the haspin kinase during mitosis?,TMC64,0.9420671655634377,0.9636363636363635,10
+60,Which is the substrate of the haspin kinase during mitosis?,BetaShap (U)64,0.8644343086206407,0.8545454545454544,10
+60,Which is the substrate of the haspin kinase during mitosis?,TMC100,0.9623584211896341,0.9515151515151514,10
+60,Which is the substrate of the haspin kinase during mitosis?,BetaShap (U)100,0.9039557362181374,0.8303030303030302,10
+60,Which is the substrate of the haspin kinase during mitosis?,LOO,0.682561194869667,0.6,10
+61,What is the importance of Janus Kinases in dermatology?,ContextCite32,0.9862809366032661,0.6969696969696969,10
+61,What is the importance of Janus Kinases in dermatology?,WSS32,0.9862879115961771,0.6969696969696969,10
+61,What is the importance of Janus Kinases in dermatology?,ContextCite64,0.9970634842754892,0.9030303030303028,10
+61,What is the importance of Janus Kinases in dermatology?,WSS64,0.9976050639794904,0.8424242424242423,10
+61,What is the importance of Janus Kinases in dermatology?,ContextCite100,0.9965230240084039,0.7696969696969697,10
+61,What is the importance of Janus Kinases in dermatology?,WSS100,0.9958670835081889,0.6969696969696969,10
+61,What is the importance of Janus Kinases in dermatology?,TMC32,0.996161111446769,0.8666666666666665,10
+61,What is the importance of Janus Kinases in dermatology?,BetaShap (U)32,0.9712320106877232,0.8666666666666665,10
+61,What is the importance of Janus Kinases in dermatology?,TMC64,0.9978968696954411,0.9636363636363635,10
+61,What is the importance of Janus Kinases in dermatology?,BetaShap (U)64,0.9748302452339612,0.9030303030303028,10
+61,What is the importance of Janus Kinases in dermatology?,TMC100,0.9987080618422329,0.9515151515151514,10
+61,What is the importance of Janus Kinases in dermatology?,BetaShap (U)100,0.9772134477235073,0.8909090909090909,10
+61,What is the importance of Janus Kinases in dermatology?,LOO,0.992535488918818,0.8545454545454544,10
+62,Describe the mechanism of action of a drug Elagolix.,ContextCite32,0.9871946307808828,0.6969696969696969,10
+62,Describe the mechanism of action of a drug Elagolix.,WSS32,0.9863713763029673,0.7696969696969697,10
+62,Describe the mechanism of action of a drug Elagolix.,ContextCite64,0.9924051322302312,0.8545454545454544,10
+62,Describe the mechanism of action of a drug Elagolix.,WSS64,0.9920707436258419,0.8181818181818182,10
+62,Describe the mechanism of action of a drug Elagolix.,ContextCite100,0.994135450921827,0.8787878787878788,10
+62,Describe the mechanism of action of a drug Elagolix.,WSS100,0.9942122469161261,0.8545454545454544,10
+62,Describe the mechanism of action of a drug Elagolix.,TMC32,0.9962476807047526,0.8424242424242423,10
+62,Describe the mechanism of action of a drug Elagolix.,BetaShap (U)32,0.9655228094050833,0.28484848484848485,10
+62,Describe the mechanism of action of a drug Elagolix.,TMC64,0.9983022481568385,0.9030303030303028,10
+62,Describe the mechanism of action of a drug Elagolix.,BetaShap (U)64,0.9670835710406908,0.4666666666666666,10
+62,Describe the mechanism of action of a drug Elagolix.,TMC100,0.9989331919202418,0.8666666666666665,10
+62,Describe the mechanism of action of a drug Elagolix.,BetaShap (U)100,0.9661829423836816,0.5393939393939393,10
+62,Describe the mechanism of action of a drug Elagolix.,LOO,0.9870293699424405,0.4666666666666666,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,ContextCite32,0.9814350530926632,0.8545454545454544,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,WSS32,0.9815107108822096,0.8545454545454544,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,ContextCite64,0.983407550103294,0.8424242424242423,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,WSS64,0.984394999719693,0.7939393939393938,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,ContextCite100,0.981169656397869,0.9030303030303028,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,WSS100,0.9815918139063463,0.8424242424242423,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,TMC32,0.9914052752968299,0.8787878787878788,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,BetaShap (U)32,0.9137972129318112,0.5878787878787878,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,TMC64,0.9952451574384766,0.8787878787878788,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,BetaShap (U)64,0.9419746504266493,0.6848484848484848,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,TMC100,0.9975477078943409,0.9151515151515152,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,BetaShap (U)100,0.9527191926140608,0.6969696969696969,10
+63,Is recommended the use of perioperative treatment with thyroid hormone therapy in patients undergoing coronary artery bypass grafting?,LOO,0.9130884316710468,0.8787878787878788,10
+64,Is enzastaurin effective treatment of glioblastoma?,ContextCite32,0.9947947564501103,0.6,10
+64,Is enzastaurin effective treatment of glioblastoma?,WSS32,0.9947563498481713,0.6,10
+64,Is enzastaurin effective treatment of glioblastoma?,ContextCite64,0.9984193825101987,0.6606060606060605,10
+64,Is enzastaurin effective treatment of glioblastoma?,WSS64,0.9985473617339691,0.6363636363636362,10
+64,Is enzastaurin effective treatment of glioblastoma?,ContextCite100,0.9986345830507797,0.6242424242424242,10
+64,Is enzastaurin effective treatment of glioblastoma?,WSS100,0.9986521711241918,0.6121212121212121,10
+64,Is enzastaurin effective treatment of glioblastoma?,TMC32,0.9996545920541209,0.9151515151515152,10
+64,Is enzastaurin effective treatment of glioblastoma?,BetaShap (U)32,0.9896481051526317,0.7333333333333332,10
+64,Is enzastaurin effective treatment of glioblastoma?,TMC64,0.9997485764838714,0.9151515151515152,10
+64,Is enzastaurin effective treatment of glioblastoma?,BetaShap (U)64,0.9959424416200704,0.6969696969696969,10
+64,Is enzastaurin effective treatment of glioblastoma?,TMC100,0.9998833535173224,0.9515151515151514,10
+64,Is enzastaurin effective treatment of glioblastoma?,BetaShap (U)100,0.9968156003369849,0.6727272727272726,10
+64,Is enzastaurin effective treatment of glioblastoma?,LOO,0.9968573209858714,0.28484848484848485,10
+65,Have microRNAs been implicated in pharmacogenomics? ,ContextCite32,0.7455467584509989,0.49090909090909085,10
+65,Have microRNAs been implicated in pharmacogenomics? ,WSS32,0.7438791782102634,0.49090909090909085,10
+65,Have microRNAs been implicated in pharmacogenomics? ,ContextCite64,0.8810344089773707,0.8666666666666665,10
+65,Have microRNAs been implicated in pharmacogenomics? ,WSS64,0.8685987865812399,0.8181818181818182,10
+65,Have microRNAs been implicated in pharmacogenomics? ,ContextCite100,0.8936870511178928,0.8787878787878788,10
+65,Have microRNAs been implicated in pharmacogenomics? ,WSS100,0.907219927704159,0.8787878787878788,10
+65,Have microRNAs been implicated in pharmacogenomics? ,TMC32,0.9092493597632104,0.7939393939393938,10
+65,Have microRNAs been implicated in pharmacogenomics? ,BetaShap (U)32,0.2501075994424873,0.33333333333333326,10
+65,Have microRNAs been implicated in pharmacogenomics? ,TMC64,0.9770171946837481,0.9393939393939393,10
+65,Have microRNAs been implicated in pharmacogenomics? ,BetaShap (U)64,0.5322114682527707,0.49090909090909085,10
+65,Have microRNAs been implicated in pharmacogenomics? ,TMC100,0.9918288319144858,0.9757575757575757,10
+65,Have microRNAs been implicated in pharmacogenomics? ,BetaShap (U)100,0.5949539009507291,0.5151515151515151,10
+65,Have microRNAs been implicated in pharmacogenomics? ,LOO,0.6560289864136761,0.709090909090909,10
+66,Are piRNAs involved in gene silencing?,ContextCite32,0.7721414537315745,0.7575757575757575,10
+66,Are piRNAs involved in gene silencing?,WSS32,0.7717257935267413,0.7575757575757575,10
+66,Are piRNAs involved in gene silencing?,ContextCite64,0.8658512394892535,0.7333333333333332,10
+66,Are piRNAs involved in gene silencing?,WSS64,0.855865754372096,0.7333333333333332,10
+66,Are piRNAs involved in gene silencing?,ContextCite100,0.8982146850801216,0.7939393939393938,10
+66,Are piRNAs involved in gene silencing?,WSS100,0.893906440523325,0.8060606060606059,10
+66,Are piRNAs involved in gene silencing?,TMC32,0.7345410545994745,0.8303030303030302,10
+66,Are piRNAs involved in gene silencing?,BetaShap (U)32,0.24628759478095946,0.38181818181818183,10
+66,Are piRNAs involved in gene silencing?,TMC64,0.883944532173927,0.9030303030303028,10
+66,Are piRNAs involved in gene silencing?,BetaShap (U)64,0.4630520550189289,0.6242424242424242,10
+66,Are piRNAs involved in gene silencing?,TMC100,0.9120358565197352,0.8909090909090909,10
+66,Are piRNAs involved in gene silencing?,BetaShap (U)100,0.6111384304090284,0.6606060606060605,10
+66,Are piRNAs involved in gene silencing?,LOO,0.42569133719874386,-0.04242424242424241,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,ContextCite32,0.9032551717352487,0.7575757575757575,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,WSS32,0.9013848991906875,0.7575757575757575,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,ContextCite64,0.9276866141548692,0.6606060606060605,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,WSS64,0.9305402302228002,0.6606060606060605,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,ContextCite100,0.9219547288905076,0.6969696969696969,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,WSS100,0.9245905253308379,0.6848484848484848,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,TMC32,0.911887345596085,0.8545454545454544,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,BetaShap (U)32,0.9746873139495578,0.9151515151515152,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,TMC64,0.9760342769361787,0.6727272727272726,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,BetaShap (U)64,0.9969327076064091,0.9878787878787878,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,TMC100,0.9844317564794757,0.8303030303030302,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,BetaShap (U)100,0.9925019073464365,0.9757575757575757,10
+67,Is methotrexate used for the treatment of Rheumatoid Arthritis (RA)?,LOO,0.43659685039513857,0.13939393939393938,10
+68,Which cells express CIDEC protein in humans?,ContextCite32,0.883536027874253,0.6727272727272726,10
+68,Which cells express CIDEC protein in humans?,WSS32,0.8836116352744416,0.6484848484848483,10
+68,Which cells express CIDEC protein in humans?,ContextCite64,0.8928679603219093,0.7939393939393938,10
+68,Which cells express CIDEC protein in humans?,WSS64,0.8986313767062558,0.7939393939393938,10
+68,Which cells express CIDEC protein in humans?,ContextCite100,0.9417870651520267,0.8303030303030302,10
+68,Which cells express CIDEC protein in humans?,WSS100,0.9426193931817466,0.8787878787878788,10
+68,Which cells express CIDEC protein in humans?,TMC32,0.6295814366846517,0.7696969696969697,10
+68,Which cells express CIDEC protein in humans?,BetaShap (U)32,0.03278217455304022,0.04242424242424241,10
+68,Which cells express CIDEC protein in humans?,TMC64,0.8907941466721703,0.9151515151515152,10
+68,Which cells express CIDEC protein in humans?,BetaShap (U)64,0.6110677080194322,0.6848484848484848,10
+68,Which cells express CIDEC protein in humans?,TMC100,0.9530651936250005,0.9151515151515152,10
+68,Which cells express CIDEC protein in humans?,BetaShap (U)100,0.8093405913415372,0.6848484848484848,10
+68,Which cells express CIDEC protein in humans?,LOO,0.7095647115665069,0.11515151515151514,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,ContextCite32,0.9998982718779164,0.5151515151515151,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,WSS32,0.999896596169696,0.4787878787878787,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,ContextCite64,0.9999128841142997,0.6606060606060605,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,WSS64,0.9999310087741216,0.6484848484848483,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,ContextCite100,0.9999026125383986,0.7818181818181817,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,WSS100,0.999901928563939,0.8303030303030302,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,TMC32,0.9999654673100097,0.9393939393939393,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,BetaShap (U)32,0.9989294909267544,0.7212121212121211,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,TMC64,0.9999832470455605,0.9757575757575757,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,BetaShap (U)64,0.9995548583578615,0.7333333333333332,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,TMC100,0.9999865195369864,0.9393939393939393,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,BetaShap (U)100,0.999632102142491,0.7454545454545454,10
+69,Which are the problems associated with the use of PD-L1 as immunotherapy biomarker?,LOO,0.9997441828209706,0.4666666666666666,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,ContextCite32,0.8673555911468865,0.7939393939393938,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,WSS32,0.8674722116579084,0.7939393939393938,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,ContextCite64,0.9571494282778346,0.8787878787878788,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,WSS64,0.9614903171038044,0.8787878787878788,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,ContextCite100,0.972507476085192,0.9515151515151514,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,WSS100,0.9726614424126013,0.9151515151515152,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,TMC32,0.9433227608399418,0.9515151515151514,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,BetaShap (U)32,0.7550038387033666,0.6484848484848483,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,TMC64,0.9791391320518892,0.9636363636363635,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,BetaShap (U)64,0.9427418274501781,0.9030303030303028,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,TMC100,0.9909772023299467,0.9636363636363635,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,BetaShap (U)100,0.9494800072938836,0.9878787878787878,10
+70,Is tirilazad effective for treatment of aneurysmal subarachnoid haemorrhage?,LOO,0.8496553450620232,0.5878787878787878,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,ContextCite32,0.9693757175323864,0.8303030303030302,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,WSS32,0.9696514531765483,0.8303030303030302,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,ContextCite64,0.9798397224344603,0.8424242424242423,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,WSS64,0.9798052413696374,0.8424242424242423,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,ContextCite100,0.9727291458657036,0.9030303030303028,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,WSS100,0.9704565102398249,0.8666666666666665,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,TMC32,0.9336660534920039,0.8787878787878788,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,BetaShap (U)32,0.250146988679123,0.49090909090909085,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,TMC64,0.9871566358726268,0.9757575757575757,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,BetaShap (U)64,0.5899901966094571,0.7575757575757575,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,TMC100,0.9892661458685105,0.9515151515151514,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,BetaShap (U)100,0.7960273409530644,0.8303030303030302,10
+71,Which animal bite can cause Capnocytophaga canimorsus infection?,LOO,0.9217679851987761,0.6969696969696969,10
+72,Does RNA polymerase II have RNA cleavage activity?,ContextCite32,0.9439281683769402,0.8545454545454544,10
+72,Does RNA polymerase II have RNA cleavage activity?,WSS32,0.9431611601546211,0.8545454545454544,10
+72,Does RNA polymerase II have RNA cleavage activity?,ContextCite64,0.9808520173311461,0.9030303030303028,10
+72,Does RNA polymerase II have RNA cleavage activity?,WSS64,0.9806069263342441,0.9030303030303028,10
+72,Does RNA polymerase II have RNA cleavage activity?,ContextCite100,0.9854644976069099,0.8909090909090909,10
+72,Does RNA polymerase II have RNA cleavage activity?,WSS100,0.9845695755859938,0.8909090909090909,10
+72,Does RNA polymerase II have RNA cleavage activity?,TMC32,0.9524009413182737,0.8545454545454544,10
+72,Does RNA polymerase II have RNA cleavage activity?,BetaShap (U)32,0.7122608436635977,0.7939393939393938,10
+72,Does RNA polymerase II have RNA cleavage activity?,TMC64,0.9823407830727864,0.9515151515151514,10
+72,Does RNA polymerase II have RNA cleavage activity?,BetaShap (U)64,0.7749439986597721,0.8303030303030302,10
+72,Does RNA polymerase II have RNA cleavage activity?,TMC100,0.9921769973879908,0.9515151515151514,10
+72,Does RNA polymerase II have RNA cleavage activity?,BetaShap (U)100,0.8542860743696514,0.8303030303030302,10
+72,Does RNA polymerase II have RNA cleavage activity?,LOO,0.8774612128663015,0.7212121212121211,10
+73,What is Trypan blue used for?,ContextCite32,0.9796404946976316,0.9272727272727272,10
+73,What is Trypan blue used for?,WSS32,0.9791643541426625,0.9272727272727272,10
+73,What is Trypan blue used for?,ContextCite64,0.9954112731807242,0.9636363636363635,10
+73,What is Trypan blue used for?,WSS64,0.9964799124709923,0.9636363636363635,10
+73,What is Trypan blue used for?,ContextCite100,0.9947230829717173,0.9515151515151514,10
+73,What is Trypan blue used for?,WSS100,0.9949462499850544,0.9393939393939393,10
+73,What is Trypan blue used for?,TMC32,0.9960079201946708,0.9030303030303028,10
+73,What is Trypan blue used for?,BetaShap (U)32,0.9546582913533169,0.9393939393939393,10
+73,What is Trypan blue used for?,TMC64,0.9977553521324628,0.9151515151515152,10
+73,What is Trypan blue used for?,BetaShap (U)64,0.9874969122447904,0.9393939393939393,10
+73,What is Trypan blue used for?,TMC100,0.9986843373414636,0.9151515151515152,10
+73,What is Trypan blue used for?,BetaShap (U)100,0.9854439148026615,0.9030303030303028,10
+73,What is Trypan blue used for?,LOO,0.9858757949215818,0.9393939393939393,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,ContextCite32,0.9840891707584136,0.9999999999999999,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,WSS32,0.9842421648193822,0.9999999999999999,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,ContextCite64,0.9923134617201577,0.9878787878787878,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,WSS64,0.9939005573447157,0.9999999999999999,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,ContextCite100,0.9949081081824155,0.9757575757575757,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,WSS100,0.9958673014077052,0.9757575757575757,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,TMC32,0.991952870839431,0.9272727272727272,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,BetaShap (U)32,0.9174242739629015,0.6,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,TMC64,0.9981339512395238,0.9515151515151514,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,BetaShap (U)64,0.9484729359169422,0.7212121212121211,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,TMC100,0.9983727331668889,0.9515151515151514,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,BetaShap (U)100,0.944787341146277,0.7212121212121211,10
+74,Is there any genetic determinant of hair pigmentation that could be useful in forensic analyses?,LOO,0.9763888109661379,0.709090909090909,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,ContextCite32,0.8985103706087985,0.6363636363636362,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,WSS32,0.8996285197014818,0.6363636363636362,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,ContextCite64,0.946160761754612,0.7696969696969697,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,WSS64,0.948361411050682,0.7333333333333332,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,ContextCite100,0.9710791603959044,0.7939393939393938,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,WSS100,0.9670868945020845,0.6969696969696969,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,TMC32,0.9914221083803213,0.9515151515151514,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,BetaShap (U)32,0.7354168405582118,0.7818181818181817,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,TMC64,0.9950995896203356,0.9515151515151514,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,BetaShap (U)64,0.8204656468559595,0.8424242424242423,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,TMC100,0.9978917877876528,0.9999999999999999,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,BetaShap (U)100,0.8595636422599964,0.8545454545454544,10
+75,What is the lay name of the treatment for CCSVI (chronic cerebro-spinal venous insufficiency)  in multiple sclerosis.,LOO,0.9465017907755218,0.8424242424242423,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,ContextCite32,0.9448817160333665,0.9151515151515152,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,WSS32,0.9454481509747829,0.9393939393939393,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,ContextCite64,0.9332471888864737,0.9030303030303028,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,WSS64,0.9426298664456709,0.9030303030303028,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,ContextCite100,0.9338548108915165,0.9151515151515152,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,WSS100,0.9457615534491925,0.9151515151515152,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,TMC32,0.9832945256830228,0.9757575757575757,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,BetaShap (U)32,0.9231798729360398,0.9878787878787878,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,TMC64,0.9768584193333342,0.9878787878787878,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,BetaShap (U)64,0.9719154936295075,0.9878787878787878,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,TMC100,0.9779520588017421,0.9999999999999999,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,BetaShap (U)100,0.9765694470933016,0.9878787878787878,10
+76,Is phospholamban a regulatory/inhibitory protein of the Ca ATPase SERCA?,LOO,0.7847167155774196,0.6848484848484848,10
+77,Is galcanezumab effective for treatment of migraine?,ContextCite32,0.9960710600421077,0.9757575757575757,10
+77,Is galcanezumab effective for treatment of migraine?,WSS32,0.996230871880175,0.9757575757575757,10
+77,Is galcanezumab effective for treatment of migraine?,ContextCite64,0.9967323564129441,0.9878787878787878,10
+77,Is galcanezumab effective for treatment of migraine?,WSS64,0.9967259810383325,0.9878787878787878,10
+77,Is galcanezumab effective for treatment of migraine?,ContextCite100,0.9981498021203157,0.9999999999999999,10
+77,Is galcanezumab effective for treatment of migraine?,WSS100,0.9984180000406498,0.9999999999999999,10
+77,Is galcanezumab effective for treatment of migraine?,TMC32,0.9990952839101963,0.9515151515151514,10
+77,Is galcanezumab effective for treatment of migraine?,BetaShap (U)32,0.9827791675040791,0.6121212121212121,10
+77,Is galcanezumab effective for treatment of migraine?,TMC64,0.9992831291215041,0.9515151515151514,10
+77,Is galcanezumab effective for treatment of migraine?,BetaShap (U)64,0.986011843111475,0.6606060606060605,10
+77,Is galcanezumab effective for treatment of migraine?,TMC100,0.9997238647656006,0.9878787878787878,10
+77,Is galcanezumab effective for treatment of migraine?,BetaShap (U)100,0.988125873125113,0.7212121212121211,10
+77,Is galcanezumab effective for treatment of migraine?,LOO,0.9928691111322862,0.9757575757575757,10
+78,Which drug can be reversed with idarucizumab?,ContextCite32,0.5284188175838008,0.4666666666666666,10
+78,Which drug can be reversed with idarucizumab?,WSS32,0.5330421256270659,0.4666666666666666,10
+78,Which drug can be reversed with idarucizumab?,ContextCite64,0.5398864267023648,0.5151515151515151,10
+78,Which drug can be reversed with idarucizumab?,WSS64,0.5325598018962215,0.5151515151515151,10
+78,Which drug can be reversed with idarucizumab?,ContextCite100,0.5677742812384658,0.49090909090909085,10
+78,Which drug can be reversed with idarucizumab?,WSS100,0.5721292760702733,0.49090909090909085,10
+78,Which drug can be reversed with idarucizumab?,TMC32,0.6606152855098377,0.7212121212121211,10
+78,Which drug can be reversed with idarucizumab?,BetaShap (U)32,0.3926601583566821,0.35757575757575755,10
+78,Which drug can be reversed with idarucizumab?,TMC64,0.83386336162403,0.6969696969696969,10
+78,Which drug can be reversed with idarucizumab?,BetaShap (U)64,0.5551214192255319,0.43030303030303024,10
+78,Which drug can be reversed with idarucizumab?,TMC100,0.8448413498078666,0.7333333333333332,10
+78,Which drug can be reversed with idarucizumab?,BetaShap (U)100,0.6918516016247426,0.6242424242424242,10
+78,Which drug can be reversed with idarucizumab?,LOO,0.5183817391783168,0.38181818181818183,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,ContextCite32,0.9980936368805874,0.9636363636363635,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,WSS32,0.9980744153325192,0.9636363636363635,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,ContextCite64,0.9987689267267963,0.7939393939393938,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,WSS64,0.9988253890776415,0.7939393939393938,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,ContextCite100,0.9985805789634477,0.8909090909090909,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,WSS100,0.9987544590169415,0.8909090909090909,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,TMC32,0.9988278349302271,0.9151515151515152,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,BetaShap (U)32,0.9913267876606799,0.9393939393939393,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,TMC64,0.9996295895285412,0.9757575757575757,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,BetaShap (U)64,0.9964005201157438,0.9636363636363635,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,TMC100,0.9997212313513534,0.9878787878787878,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,BetaShap (U)100,0.9976139766128117,0.9636363636363635,10
+79,Proteomic analyses have revealed proteins associated with the triple-negative breast cancers. List some proposed proteins.,LOO,0.9920615801112685,0.8666666666666665,10
+80,What is Jackhammer esophagus?,ContextCite32,0.9918829288124006,0.9030303030303028,10
+80,What is Jackhammer esophagus?,WSS32,0.9919693455653497,0.9030303030303028,10
+80,What is Jackhammer esophagus?,ContextCite64,0.9828928824140215,0.8666666666666665,10
+80,What is Jackhammer esophagus?,WSS64,0.9844436775521045,0.8666666666666665,10
+80,What is Jackhammer esophagus?,ContextCite100,0.9816664236876922,0.8424242424242423,10
+80,What is Jackhammer esophagus?,WSS100,0.9827736010779904,0.8424242424242423,10
+80,What is Jackhammer esophagus?,TMC32,0.9657141321652664,0.9272727272727272,10
+80,What is Jackhammer esophagus?,BetaShap (U)32,0.6349205345161169,0.7696969696969697,10
+80,What is Jackhammer esophagus?,TMC64,0.9882402448138093,0.9636363636363635,10
+80,What is Jackhammer esophagus?,BetaShap (U)64,0.7800961855925189,0.8181818181818182,10
+80,What is Jackhammer esophagus?,TMC100,0.9913879333583376,0.9393939393939393,10
+80,What is Jackhammer esophagus?,BetaShap (U)100,0.809889181048264,0.8909090909090909,10
+80,What is Jackhammer esophagus?,LOO,0.9687567195054769,0.9393939393939393,10
+81,From which tissue was the NCI-H520 cell-line derived?,ContextCite32,0.6486401666210624,0.7939393939393938,10
+81,From which tissue was the NCI-H520 cell-line derived?,WSS32,0.6515581098217655,0.7575757575757575,10
+81,From which tissue was the NCI-H520 cell-line derived?,ContextCite64,0.9547993634630461,0.9393939393939393,10
+81,From which tissue was the NCI-H520 cell-line derived?,WSS64,0.9623280428784491,0.9393939393939393,10
+81,From which tissue was the NCI-H520 cell-line derived?,ContextCite100,0.9545524523734743,0.9030303030303028,10
+81,From which tissue was the NCI-H520 cell-line derived?,WSS100,0.9558698910036458,0.9030303030303028,10
+81,From which tissue was the NCI-H520 cell-line derived?,TMC32,0.9748813780678335,0.9757575757575757,10
+81,From which tissue was the NCI-H520 cell-line derived?,BetaShap (U)32,0.9410756505616057,0.8545454545454544,10
+81,From which tissue was the NCI-H520 cell-line derived?,TMC64,0.9853222437671415,0.9515151515151514,10
+81,From which tissue was the NCI-H520 cell-line derived?,BetaShap (U)64,0.9702069443003655,0.9272727272727272,10
+81,From which tissue was the NCI-H520 cell-line derived?,TMC100,0.986791507301365,0.9636363636363635,10
+81,From which tissue was the NCI-H520 cell-line derived?,BetaShap (U)100,0.94884833624097,0.9515151515151514,10
+81,From which tissue was the NCI-H520 cell-line derived?,LOO,0.8047666602160176,0.7454545454545454,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,ContextCite32,0.9723502872561064,0.7696969696969697,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,WSS32,0.9727284700757131,0.7696969696969697,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,ContextCite64,0.9974823838792517,0.9151515151515152,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,WSS64,0.997813651640967,0.9515151515151514,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,ContextCite100,0.9953658015613911,0.8303030303030302,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,WSS100,0.9942408922741057,0.8303030303030302,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,TMC32,0.9934326984324843,0.9515151515151514,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,BetaShap (U)32,0.9666354324290662,0.9151515151515152,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,TMC64,0.9972873270907345,0.9757575757575757,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,BetaShap (U)64,0.9797322161129437,0.9393939393939393,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,TMC100,0.9990322423130572,0.9999999999999999,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,BetaShap (U)100,0.9842424040516625,0.9636363636363635,10
+82,Is there a role of proton beam therapy in medulloblastoma treatment?,LOO,0.9728137343478237,0.6242424242424242,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,ContextCite32,0.7894939359746954,0.7454545454545454,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,WSS32,0.78790046606867,0.7454545454545454,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,ContextCite64,0.5835027085186014,0.5272727272727272,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,WSS64,0.575084436959612,0.4787878787878787,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,ContextCite100,0.7868355718807746,0.8181818181818182,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,WSS100,0.7943092825111692,0.8787878787878788,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,TMC32,0.9087413422462792,0.8666666666666665,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,BetaShap (U)32,0.8325240074672715,0.7575757575757575,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,TMC64,0.9367999153983391,0.8545454545454544,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,BetaShap (U)64,0.9298768839794771,0.8424242424242423,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,TMC100,0.9443715353148721,0.8303030303030302,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,BetaShap (U)100,0.9339451595683158,0.7575757575757575,10
+83,Is cystatin C or cystatin 3 used as a biomarker of kidney function?,LOO,0.21410754721019964,0.3939393939393939,10
+84,Which two interleukins are inhibited by Ustekinumab?,ContextCite32,0.8498484169396575,0.5878787878787878,10
+84,Which two interleukins are inhibited by Ustekinumab?,WSS32,0.8503194644991063,0.5878787878787878,10
+84,Which two interleukins are inhibited by Ustekinumab?,ContextCite64,0.8996569030330025,0.7454545454545454,10
+84,Which two interleukins are inhibited by Ustekinumab?,WSS64,0.8919322797386597,0.7454545454545454,10
+84,Which two interleukins are inhibited by Ustekinumab?,ContextCite100,0.94004412321895,0.7696969696969697,10
+84,Which two interleukins are inhibited by Ustekinumab?,WSS100,0.9350314264936206,0.7696969696969697,10
+84,Which two interleukins are inhibited by Ustekinumab?,TMC32,0.9846986038181246,0.8060606060606059,10
+84,Which two interleukins are inhibited by Ustekinumab?,BetaShap (U)32,0.8750192770942748,0.6848484848484848,10
+84,Which two interleukins are inhibited by Ustekinumab?,TMC64,0.9882313760729092,0.8666666666666665,10
+84,Which two interleukins are inhibited by Ustekinumab?,BetaShap (U)64,0.9374749530862645,0.8666666666666665,10
+84,Which two interleukins are inhibited by Ustekinumab?,TMC100,0.9850907254322566,0.8424242424242423,10
+84,Which two interleukins are inhibited by Ustekinumab?,BetaShap (U)100,0.9427183938890019,0.8909090909090909,10
+84,Which two interleukins are inhibited by Ustekinumab?,LOO,0.5879896303573946,0.5030303030303029,10
+85,Which are the main causes of fetal echogenic bowel?,ContextCite32,0.9464001409080134,0.8424242424242423,10
+85,Which are the main causes of fetal echogenic bowel?,WSS32,0.9474980387463683,0.8424242424242423,10
+85,Which are the main causes of fetal echogenic bowel?,ContextCite64,0.9752768817193777,0.9272727272727272,10
+85,Which are the main causes of fetal echogenic bowel?,WSS64,0.9820875759918053,0.9636363636363635,10
+85,Which are the main causes of fetal echogenic bowel?,ContextCite100,0.9764105095894098,0.9393939393939393,10
+85,Which are the main causes of fetal echogenic bowel?,WSS100,0.9755378867432721,0.9030303030303028,10
+85,Which are the main causes of fetal echogenic bowel?,TMC32,0.9878912654992008,0.9878787878787878,10
+85,Which are the main causes of fetal echogenic bowel?,BetaShap (U)32,0.9203707826142994,0.9515151515151514,10
+85,Which are the main causes of fetal echogenic bowel?,TMC64,0.9778724134932667,0.9878787878787878,10
+85,Which are the main causes of fetal echogenic bowel?,BetaShap (U)64,0.9186812450402299,0.9030303030303028,10
+85,Which are the main causes of fetal echogenic bowel?,TMC100,0.9911435234682605,0.9757575757575757,10
+85,Which are the main causes of fetal echogenic bowel?,BetaShap (U)100,0.9330494938045726,0.9030303030303028,10
+85,Which are the main causes of fetal echogenic bowel?,LOO,0.6362332032225623,0.4545454545454545,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,ContextCite32,0.9667404698109667,0.9636363636363635,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,WSS32,0.9649298010212328,0.9636363636363635,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,ContextCite64,0.9882073040063358,0.9393939393939393,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,WSS64,0.9929546115338532,0.9636363636363635,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,ContextCite100,0.9928325692386831,0.9636363636363635,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,WSS100,0.9922966582259667,0.9757575757575757,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,TMC32,0.9774998231698429,0.9030303030303028,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,BetaShap (U)32,0.6347483705745296,0.6727272727272726,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,TMC64,0.987703067249092,0.9393939393939393,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,BetaShap (U)64,0.8947340296661253,0.8787878787878788,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,TMC100,0.9903017758626187,0.9393939393939393,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,BetaShap (U)100,0.9331114932363073,0.8787878787878788,10
+86,What is the prognostic role of thyroid hormone in patients with heart failure?,LOO,0.9281346244639156,0.7696969696969697,10
+87,Which molecule is inhibited by encorafenib?,ContextCite32,0.6867711781504948,0.29696969696969694,10
+87,Which molecule is inhibited by encorafenib?,WSS32,0.685480946972077,0.29696969696969694,10
+87,Which molecule is inhibited by encorafenib?,ContextCite64,0.8864351731455306,0.5151515151515151,10
+87,Which molecule is inhibited by encorafenib?,WSS64,0.8841548351423334,0.4666666666666666,10
+87,Which molecule is inhibited by encorafenib?,ContextCite100,0.91323716210079,0.6969696969696969,10
+87,Which molecule is inhibited by encorafenib?,WSS100,0.9167309865761395,0.7212121212121211,10
+87,Which molecule is inhibited by encorafenib?,TMC32,0.9500611899926121,0.9272727272727272,10
+87,Which molecule is inhibited by encorafenib?,BetaShap (U)32,0.6686024962906639,0.8545454545454544,10
+87,Which molecule is inhibited by encorafenib?,TMC64,0.9829673176456437,0.9393939393939393,10
+87,Which molecule is inhibited by encorafenib?,BetaShap (U)64,0.9170253100786008,0.8424242424242423,10
+87,Which molecule is inhibited by encorafenib?,TMC100,0.9846151725684265,0.9878787878787878,10
+87,Which molecule is inhibited by encorafenib?,BetaShap (U)100,0.9531702380104616,0.8545454545454544,10
+87,Which molecule is inhibited by encorafenib?,LOO,0.5699948872296474,0.3939393939393939,10
+88,What is commotio cordis?,ContextCite32,0.962702837103285,0.9030303030303028,10
+88,What is commotio cordis?,WSS32,0.9628914798444457,0.9030303030303028,10
+88,What is commotio cordis?,ContextCite64,0.9725475853434583,0.9030303030303028,10
+88,What is commotio cordis?,WSS64,0.973802416226594,0.9030303030303028,10
+88,What is commotio cordis?,ContextCite100,0.9712875791402938,0.9030303030303028,10
+88,What is commotio cordis?,WSS100,0.971182762116304,0.9393939393939393,10
+88,What is commotio cordis?,TMC32,0.9839635617100448,0.9757575757575757,10
+88,What is commotio cordis?,BetaShap (U)32,0.7614225240621257,0.8424242424242423,10
+88,What is commotio cordis?,TMC64,0.9956825787425294,0.9757575757575757,10
+88,What is commotio cordis?,BetaShap (U)64,0.8382739120666662,0.8909090909090909,10
+88,What is commotio cordis?,TMC100,0.9980647950391976,0.9999999999999999,10
+88,What is commotio cordis?,BetaShap (U)100,0.911172372548491,0.9151515151515152,10
+88,What is commotio cordis?,LOO,0.9233564388334874,0.8787878787878788,10
+89,Which gene is involved in CADASIL?,ContextCite32,0.7591851800841978,0.7454545454545454,10
+89,Which gene is involved in CADASIL?,WSS32,0.7594379444560857,0.7454545454545454,10
+89,Which gene is involved in CADASIL?,ContextCite64,0.8186293129504405,0.8424242424242423,10
+89,Which gene is involved in CADASIL?,WSS64,0.8190995929432554,0.8424242424242423,10
+89,Which gene is involved in CADASIL?,ContextCite100,0.8316029067904286,0.8545454545454544,10
+89,Which gene is involved in CADASIL?,WSS100,0.8247348613777041,0.8545454545454544,10
+89,Which gene is involved in CADASIL?,TMC32,0.8136806726152727,0.7939393939393938,10
+89,Which gene is involved in CADASIL?,BetaShap (U)32,0.688126728461848,0.7696969696969697,10
+89,Which gene is involved in CADASIL?,TMC64,0.8270498502987839,0.8303030303030302,10
+89,Which gene is involved in CADASIL?,BetaShap (U)64,0.7114953513120609,0.8060606060606059,10
+89,Which gene is involved in CADASIL?,TMC100,0.8645728800407595,0.8424242424242423,10
+89,Which gene is involved in CADASIL?,BetaShap (U)100,0.8106754647822543,0.8181818181818182,10
+89,Which gene is involved in CADASIL?,LOO,0.4072207635396541,0.41818181818181815,10
+90,Is dupilumab effective for treatment of asthma?,ContextCite32,0.996412577894365,0.8909090909090909,10
+90,Is dupilumab effective for treatment of asthma?,WSS32,0.9964103549974328,0.8909090909090909,10
+90,Is dupilumab effective for treatment of asthma?,ContextCite64,0.9971651825241872,0.8060606060606059,10
+90,Is dupilumab effective for treatment of asthma?,WSS64,0.9972056922271437,0.8060606060606059,10
+90,Is dupilumab effective for treatment of asthma?,ContextCite100,0.9990154854677926,0.8787878787878788,10
+90,Is dupilumab effective for treatment of asthma?,WSS100,0.9987961005194567,0.8666666666666665,10
+90,Is dupilumab effective for treatment of asthma?,TMC32,0.9990646355656211,0.8909090909090909,10
+90,Is dupilumab effective for treatment of asthma?,BetaShap (U)32,0.9837146975906518,0.7818181818181817,10
+90,Is dupilumab effective for treatment of asthma?,TMC64,0.9996936170750966,0.9757575757575757,10
+90,Is dupilumab effective for treatment of asthma?,BetaShap (U)64,0.983786463261757,0.8060606060606059,10
+90,Is dupilumab effective for treatment of asthma?,TMC100,0.9997030879293968,0.9878787878787878,10
+90,Is dupilumab effective for treatment of asthma?,BetaShap (U)100,0.9862389838557662,0.8060606060606059,10
+90,Is dupilumab effective for treatment of asthma?,LOO,0.9963532291689209,0.8666666666666665,10
+91,Is there a mouse model for Fanconi anemia?,ContextCite32,0.9953515502330907,0.8303030303030302,10
+91,Is there a mouse model for Fanconi anemia?,WSS32,0.9954103954670206,0.8303030303030302,10
+91,Is there a mouse model for Fanconi anemia?,ContextCite64,0.992925675775614,0.8666666666666665,10
+91,Is there a mouse model for Fanconi anemia?,WSS64,0.9936572894990603,0.9151515151515152,10
+91,Is there a mouse model for Fanconi anemia?,ContextCite100,0.9963154149639126,0.8909090909090909,10
+91,Is there a mouse model for Fanconi anemia?,WSS100,0.9960905089220151,0.9030303030303028,10
+91,Is there a mouse model for Fanconi anemia?,TMC32,0.9897333054618072,0.9757575757575757,10
+91,Is there a mouse model for Fanconi anemia?,BetaShap (U)32,0.9011223352910401,0.5636363636363636,10
+91,Is there a mouse model for Fanconi anemia?,TMC64,0.9925496324426677,0.9636363636363635,10
+91,Is there a mouse model for Fanconi anemia?,BetaShap (U)64,0.9565901859229511,0.5151515151515151,10
+91,Is there a mouse model for Fanconi anemia?,TMC100,0.9968987665343507,0.9878787878787878,10
+91,Is there a mouse model for Fanconi anemia?,BetaShap (U)100,0.9838249257040377,0.7696969696969697,10
+91,Is there a mouse model for Fanconi anemia?,LOO,0.996123720891133,0.8787878787878788,10
+92,What is the general function of H3K79 methylation?,ContextCite32,0.9849122393431929,0.7818181818181817,10
+92,What is the general function of H3K79 methylation?,WSS32,0.9848050802942333,0.7818181818181817,10
+92,What is the general function of H3K79 methylation?,ContextCite64,0.992591880120968,0.9151515151515152,10
+92,What is the general function of H3K79 methylation?,WSS64,0.9928182300817807,0.9151515151515152,10
+92,What is the general function of H3K79 methylation?,ContextCite100,0.994789330603477,0.9393939393939393,10
+92,What is the general function of H3K79 methylation?,WSS100,0.9961565091694041,0.9393939393939393,10
+92,What is the general function of H3K79 methylation?,TMC32,0.9875582356713752,0.8666666666666665,10
+92,What is the general function of H3K79 methylation?,BetaShap (U)32,0.9099750813398897,0.6727272727272726,10
+92,What is the general function of H3K79 methylation?,TMC64,0.99837184379259,0.9636363636363635,10
+92,What is the general function of H3K79 methylation?,BetaShap (U)64,0.937439038313513,0.6242424242424242,10
+92,What is the general function of H3K79 methylation?,TMC100,0.9978436571062247,0.9636363636363635,10
+92,What is the general function of H3K79 methylation?,BetaShap (U)100,0.9501810657514754,0.6606060606060605,10
+92,What is the general function of H3K79 methylation?,LOO,0.9883357358158915,0.9151515151515152,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,ContextCite32,0.9887270132769933,0.8545454545454544,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,WSS32,0.988673658528038,0.8545454545454544,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,ContextCite64,0.9933840846630084,0.9393939393939393,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,WSS64,0.9933473089498501,0.9393939393939393,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,ContextCite100,0.9962867234057049,0.9151515151515152,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,WSS100,0.9958688490470085,0.9151515151515152,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,TMC32,0.9982286346921252,0.9999999999999999,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,BetaShap (U)32,0.9863491499404874,0.9515151515151514,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,TMC64,0.9984795937676227,0.9999999999999999,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,BetaShap (U)64,0.9928723917985189,0.9878787878787878,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,TMC100,0.9993027210548423,0.9999999999999999,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,BetaShap (U)100,0.9942616568400711,0.9757575757575757,10
+93,Which transcription factors are involved in E-cadherin repression during EMT?,LOO,0.9906554077927123,0.9999999999999999,10
+94,Which gene has been implicated in Majeed Syndrome?,ContextCite32,0.8147595007039387,0.8060606060606059,10
+94,Which gene has been implicated in Majeed Syndrome?,WSS32,0.8163662663697024,0.8303030303030302,10
+94,Which gene has been implicated in Majeed Syndrome?,ContextCite64,0.7649253617928354,0.7696969696969697,10
+94,Which gene has been implicated in Majeed Syndrome?,WSS64,0.7738772509505516,0.7696969696969697,10
+94,Which gene has been implicated in Majeed Syndrome?,ContextCite100,0.7402519100560312,0.7333333333333332,10
+94,Which gene has been implicated in Majeed Syndrome?,WSS100,0.731951830890571,0.7333333333333332,10
+94,Which gene has been implicated in Majeed Syndrome?,TMC32,-0.1565494184372129,-0.28484848484848485,10
+94,Which gene has been implicated in Majeed Syndrome?,BetaShap (U)32,-0.30221177588536347,-0.4787878787878787,10
+94,Which gene has been implicated in Majeed Syndrome?,TMC64,0.39847029832250697,0.3696969696969697,10
+94,Which gene has been implicated in Majeed Syndrome?,BetaShap (U)64,-0.12131693683498518,-0.23636363636363633,10
+94,Which gene has been implicated in Majeed Syndrome?,TMC100,0.5010502014778365,0.5878787878787878,10
+94,Which gene has been implicated in Majeed Syndrome?,BetaShap (U)100,0.11317573872231809,0.09090909090909088,10
+94,Which gene has been implicated in Majeed Syndrome?,LOO,0.5909295515489134,0.49090909090909085,10
+95,What is targeted by Palbociclib?,ContextCite32,0.7635675021756861,0.7575757575757575,10
+95,What is targeted by Palbociclib?,WSS32,0.7693172735207233,0.7575757575757575,10
+95,What is targeted by Palbociclib?,ContextCite64,0.8888296238217532,0.8424242424242423,10
+95,What is targeted by Palbociclib?,WSS64,0.8825196548054796,0.8303030303030302,10
+95,What is targeted by Palbociclib?,ContextCite100,0.8812988233511097,0.7818181818181817,10
+95,What is targeted by Palbociclib?,WSS100,0.8682654062882416,0.7696969696969697,10
+95,What is targeted by Palbociclib?,TMC32,0.21409306703460068,0.19999999999999998,10
+95,What is targeted by Palbociclib?,BetaShap (U)32,0.10164428463452069,0.07878787878787878,10
+95,What is targeted by Palbociclib?,TMC64,0.505927422715085,0.2606060606060606,10
+95,What is targeted by Palbociclib?,BetaShap (U)64,0.26771428737274083,0.22424242424242422,10
+95,What is targeted by Palbociclib?,TMC100,0.5142253314347042,0.32121212121212117,10
+95,What is targeted by Palbociclib?,BetaShap (U)100,0.23401266678766752,0.006060606060606061,10
+95,What is targeted by Palbociclib?,LOO,0.3659248366262375,0.18787878787878787,10
+96,What protein is encoded by the GRN gene?,ContextCite32,0.7839731030998264,0.8303030303030302,10
+96,What protein is encoded by the GRN gene?,WSS32,0.7849442709564597,0.8303030303030302,10
+96,What protein is encoded by the GRN gene?,ContextCite64,0.9717138738961294,0.8181818181818182,10
+96,What protein is encoded by the GRN gene?,WSS64,0.9711831612270084,0.8181818181818182,10
+96,What protein is encoded by the GRN gene?,ContextCite100,0.959336745836519,0.7939393939393938,10
+96,What protein is encoded by the GRN gene?,WSS100,0.9638872931982797,0.7939393939393938,10
+96,What protein is encoded by the GRN gene?,TMC32,0.9565462522147619,0.8181818181818182,10
+96,What protein is encoded by the GRN gene?,BetaShap (U)32,0.8364681011713284,0.7454545454545454,10
+96,What protein is encoded by the GRN gene?,TMC64,0.9802218926368772,0.9272727272727272,10
+96,What protein is encoded by the GRN gene?,BetaShap (U)64,0.9678384495617637,0.8909090909090909,10
+96,What protein is encoded by the GRN gene?,TMC100,0.9845453854623576,0.9151515151515152,10
+96,What protein is encoded by the GRN gene?,BetaShap (U)100,0.9758982058761922,0.8545454545454544,10
+96,What protein is encoded by the GRN gene?,LOO,0.728954647951205,0.7818181818181817,10
+97,Which growth factors are known to be involved in the induction of EMT?,ContextCite32,0.866391472091179,0.7818181818181817,10
+97,Which growth factors are known to be involved in the induction of EMT?,WSS32,0.8653553578895057,0.7818181818181817,10
+97,Which growth factors are known to be involved in the induction of EMT?,ContextCite64,0.9204301061272072,0.7696969696969697,10
+97,Which growth factors are known to be involved in the induction of EMT?,WSS64,0.9205057372475519,0.7696969696969697,10
+97,Which growth factors are known to be involved in the induction of EMT?,ContextCite100,0.9378445224834121,0.8060606060606059,10
+97,Which growth factors are known to be involved in the induction of EMT?,WSS100,0.9233766754773235,0.7454545454545454,10
+97,Which growth factors are known to be involved in the induction of EMT?,TMC32,0.9682159583144788,0.9151515151515152,10
+97,Which growth factors are known to be involved in the induction of EMT?,BetaShap (U)32,0.424209580083311,0.34545454545454546,10
+97,Which growth factors are known to be involved in the induction of EMT?,TMC64,0.9876971385888188,0.8909090909090909,10
+97,Which growth factors are known to be involved in the induction of EMT?,BetaShap (U)64,0.515456071049726,0.43030303030303024,10
+97,Which growth factors are known to be involved in the induction of EMT?,TMC100,0.9814580803328956,0.8060606060606059,10
+97,Which growth factors are known to be involved in the induction of EMT?,BetaShap (U)100,0.4819273003811626,0.4666666666666666,10
+97,Which growth factors are known to be involved in the induction of EMT?,LOO,0.7119717323674097,0.8909090909090909,10
+98,Can ATAC-Seq be employed in single-cell mode?,ContextCite32,0.9683565870289466,0.9515151515151514,10
+98,Can ATAC-Seq be employed in single-cell mode?,WSS32,0.968428898095736,0.9515151515151514,10
+98,Can ATAC-Seq be employed in single-cell mode?,ContextCite64,0.9766585556460585,0.8545454545454544,10
+98,Can ATAC-Seq be employed in single-cell mode?,WSS64,0.9774167768885501,0.8909090909090909,10
+98,Can ATAC-Seq be employed in single-cell mode?,ContextCite100,0.9759164274101512,0.7818181818181817,10
+98,Can ATAC-Seq be employed in single-cell mode?,WSS100,0.975678127080467,0.7575757575757575,10
+98,Can ATAC-Seq be employed in single-cell mode?,TMC32,0.991094863501016,0.9636363636363635,10
+98,Can ATAC-Seq be employed in single-cell mode?,BetaShap (U)32,0.9044266539031518,0.9757575757575757,10
+98,Can ATAC-Seq be employed in single-cell mode?,TMC64,0.995738973160025,0.9515151515151514,10
+98,Can ATAC-Seq be employed in single-cell mode?,BetaShap (U)64,0.9374528157570083,0.9757575757575757,10
+98,Can ATAC-Seq be employed in single-cell mode?,TMC100,0.9980624517009691,0.9878787878787878,10
+98,Can ATAC-Seq be employed in single-cell mode?,BetaShap (U)100,0.9369057153188968,0.9636363636363635,10
+98,Can ATAC-Seq be employed in single-cell mode?,LOO,0.9112426585096177,0.8303030303030302,10
+99,What is Neisseria adhesin A?,ContextCite32,0.9990056870267018,0.9393939393939393,10
+99,What is Neisseria adhesin A?,WSS32,0.9989733986031301,0.9393939393939393,10
+99,What is Neisseria adhesin A?,ContextCite64,0.9992211245463555,0.7939393939393938,10
+99,What is Neisseria adhesin A?,WSS64,0.9992340343599412,0.7939393939393938,10
+99,What is Neisseria adhesin A?,ContextCite100,0.9992001114883778,0.7575757575757575,10
+99,What is Neisseria adhesin A?,WSS100,0.9992061075821232,0.8545454545454544,10
+99,What is Neisseria adhesin A?,TMC32,0.9993527083134174,0.9151515151515152,10
+99,What is Neisseria adhesin A?,BetaShap (U)32,0.9906066570467529,0.9272727272727272,10
+99,What is Neisseria adhesin A?,TMC64,0.9997988756740618,0.9515151515151514,10
+99,What is Neisseria adhesin A?,BetaShap (U)64,0.9934034543785141,0.9151515151515152,10
+99,What is Neisseria adhesin A?,TMC100,0.9999235872817115,0.9878787878787878,10
+99,What is Neisseria adhesin A?,BetaShap (U)100,0.996151763190572,0.9151515151515152,10
+99,What is Neisseria adhesin A?,LOO,0.9980168352382625,0.6484848484848483,10
