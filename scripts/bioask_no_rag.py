@@ -59,7 +59,8 @@ if accelerator_main.is_main_process:
     print(f"Main Script: Model prepared and set to eval.")
 
 all_metrics_data = []
-
+n_tmcs=[]
+n_betas=[]
 for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=not accelerator_main.is_main_process):
     query = df.question[i]
     if accelerator_main.is_main_process:
@@ -68,11 +69,11 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     docs=df1.passage[df.relevant_passage_ids[i][:NUM_RETRIEVED_DOCS]].tolist()
 
     # experiment with copies
-    numbers = random.sample(range(1, len(docs)), 3)
-    docs[numbers[0]]=docs[numbers[1]]
-    docs[numbers[2]]=docs[numbers[1]]
+    # numbers = random.sample(range(1, len(docs)), 3)
+    # docs[numbers[0]]=docs[numbers[1]]
+    # docs[numbers[2]]=docs[numbers[1]]
 
-    utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache3bcp"
+    utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache3b"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
     
@@ -99,7 +100,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         results_for_query["Exact"] = harness.compute_exact_shap()
 
         m_samples_map = {"S": 32, "M": 64, "L": 100} # Example sample sizes
-        T_iterations_map = {"S": 32, "M": 64, "L":100}  # Example iterations
+        T_iterations_map = {"S": 5, "M": 10, "L":20}  # Example iterations
 
         for size_key, num_s in m_samples_map.items():
             if 2**len(docs) < num_s and size_key != "L": # Avoid sampling more than possible, except for a default
@@ -108,15 +109,19 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                 actual_samples = num_s
 
             if actual_samples > 0: # Ensure positive number of samples
-                results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, lasso_alpha=0.0, seed=SEED)
+                results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="uniform", lasso_alpha=0.01, seed=SEED)
                 
-                results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, lasso_alpha=0.0, seed=SEED)
+                results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, lasso_alpha=0.01, seed=SEED, sampling="kernelshap_weighted")
 
         for size_key, num_t in T_iterations_map.items():
-            results_for_query[f"TMC{num_t}"] = harness.compute_tmc_shap(num_iterations=num_t, performance_tolerance=0.001, seed=SEED)
+            res_tmc, n_tmc = harness.compute_tmc_shap(num_iterations=num_t, performance_tolerance=0.001, return_utility_lookups=True, seed=SEED)
+            results_for_query[f"TMC{num_t}"] = res_tmc
+            n_tmcs.append(n_tmc)
         
             if beta_dist: # beta_dist needs to be defined or imported (e.g., from scipy.stats)
-                results_for_query[f"BetaShap (U){num_t}"] = harness.compute_beta_shap(num_iterations=num_t, beta_a=0.5, beta_b=0.5, seed=SEED)
+                res_beta, n_beta= harness.compute_beta_shap(num_iterations=num_t, beta_a=0.5, beta_b=0.5, return_utility_lookups=True, seed=SEED)
+                results_for_query[f"BetaShap (U){num_t}"] = res_beta
+                n_betas.append(n_beta)
 
         results_for_query["LOO"] = harness.compute_loo()
 
@@ -158,7 +163,8 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
 if accelerator_main.is_main_process:
     if all_metrics_data:
         metrics_df_all_questions = pd.DataFrame(all_metrics_data)
-        
+        print(f"Avg utilities for TMC: {np.array(n_tmcs).reshape(-1,3).mean(axis=0)}")
+        print(f"Avg utilities for Beta: {np.array(n_betas).reshape(-1,3).mean(axis=0)}")
         print("\n\n--- Average Correlation Metrics Across All Questions ---")
         average_metrics = metrics_df_all_questions.groupby("Method").agg(
             Avg_Pearson=("Pearson", "mean"),
@@ -168,8 +174,8 @@ if accelerator_main.is_main_process:
         
         print(average_metrics.round(4))
 
-        details_path = "../Experiment_data/bioask_results/shapley_rag_experiment_details3bcp.csv"
-        summary_path = "../Experiment_data/bioask_results/shapley_rag_experiment_summary3bcp.csv"
+        details_path = "../Experiment_data/bioask_results/shapley_rag_experiment_details3b.csv"
+        summary_path = "../Experiment_data/bioask_results/shapley_rag_experiment_summary3b.csv"
         os.makedirs(os.path.dirname(details_path), exist_ok=True)
         
         metrics_df_all_questions.to_csv(details_path, index=False)

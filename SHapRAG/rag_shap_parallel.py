@@ -5,7 +5,6 @@ import math
 import pickle
 import itertools
 
-from collections import defaultdict
 from sklearn.linear_model import Lasso, LinearRegression
 import torch
 import torch.nn.functional as F
@@ -13,7 +12,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 # from accelerate import PartialState # Not used directly in this refactor
 from accelerate.utils import gather_object, broadcast_object_list 
 from tqdm.auto import tqdm
-import time
 # import pandas as pd # Not used in the provided snippet
 import warnings
 from sklearn.exceptions import ConvergenceWarning
@@ -21,8 +19,6 @@ warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 from scipy.stats import beta as beta_dist
 from accelerate import Accelerator
-# import torch.multiprocessing as mp # Not explicitly needed with accelerate launch
-
 class ShapleyExperimentHarness:
     def __init__(self, items, query, 
                  prepared_model_for_harness, tokenizer_for_harness, accelerator_for_harness, 
@@ -413,6 +409,99 @@ class ShapleyExperimentHarness:
             else: # Sample all remaining unique tuples if not enough for requested 'remaining_to_sample'
                 sampled_tuples_set.update(other_tuples)
         return list(sampled_tuples_set)
+    
+    def _sample_ablations_kernelshap_weighted(self, num_samples: int, seed: int = None) -> list[tuple]:
+        """
+        Samples unique binary ablation vector tuples using KernelSHAP-style weights.
+        Ensures empty and full sets are included if num_samples allows.
+        """
+        if seed is not None:
+            random.seed(seed)
+            # np.random.seed(seed) # Not strictly needed if only using random.choices
+
+        max_possible = 2**self.n_items
+        if num_samples > max_possible:
+            num_samples = max_possible
+        if num_samples == 0:
+            return []
+
+        all_available_tuples = list(self.all_true_utilities.keys())
+        if not all_available_tuples:
+             if self.verbose: print("Warning: all_true_utilities is empty, cannot sample.")
+             return []
+
+        sampled_tuples_set = set()
+        
+        # 1. Explicitly include empty and full sets if num_samples allows
+        empty_v_tuple = tuple(np.zeros(self.n_items, dtype=int))
+        full_v_tuple = tuple(np.ones(self.n_items, dtype=int))
+
+        if num_samples >= 1 and empty_v_tuple in self.all_true_utilities:
+            sampled_tuples_set.add(empty_v_tuple)
+        if num_samples >= 2 and full_v_tuple in self.all_true_utilities and empty_v_tuple != full_v_tuple:
+            sampled_tuples_set.add(full_v_tuple)
+
+        remaining_to_sample = num_samples - len(sampled_tuples_set)
+
+        if remaining_to_sample > 0:
+            # Filter out already selected tuples for weighted sampling
+            candidate_tuples = [t for t in all_available_tuples if t not in sampled_tuples_set]
+            if not candidate_tuples and remaining_to_sample > 0:
+                 if self.verbose: print(f"Warning: No more unique candidates to sample from for KernelSHAP weighted. Needed {remaining_to_sample} more.")
+                 return list(sampled_tuples_set)
+
+            # Calculate KernelSHAP weights only for the candidates
+            n_kernel = self.n_items
+            candidate_weights = []
+            for v_tuple in candidate_tuples:
+                z = sum(v_tuple)
+                if z == 0 or z == n_kernel: # Should have been filtered by `not in sampled_tuples_set`
+                    # This case is mostly for conceptual completeness if endpoints weren't pre-added
+                    # For robust sampling, give them a very small chance if they are candidates here
+                    # (which they shouldn't be if already added)
+                    weight = 0.00001 
+                else:
+                    denominator = z * (n_kernel - z)
+                    if denominator == 0: weight = 1.0 # Should not happen for n_kernel > 1
+                    else: weight = (n_kernel - 1) / denominator
+                candidate_weights.append(weight)
+            
+            if not candidate_weights or sum(candidate_weights) == 0:
+                # Fallback to uniform sampling if all weights are zero (unlikely) or no candidates
+                if self.verbose and candidate_tuples: print("Warning: All candidate weights are zero for KernelSHAP sampling. Falling back to uniform.")
+                if len(candidate_tuples) >= remaining_to_sample:
+                    sampled_from_candidates = random.sample(candidate_tuples, remaining_to_sample)
+                    sampled_tuples_set.update(sampled_from_candidates)
+                else:
+                    sampled_tuples_set.update(candidate_tuples) # Add all remaining if less than needed
+            else:
+                # Perform weighted sampling *without replacement*
+                # random.choices does sampling *with* replacement. We need without.
+                # A common way is to sample indices based on weights, then remove.
+                num_to_actually_sample = min(remaining_to_sample, len(candidate_tuples))
+                
+                # Normalize weights for probability distribution
+                total_weight = sum(candidate_weights)
+                probabilities = [w / total_weight for w in candidate_weights]
+                
+                # Sample indices based on probabilities
+                # np.random.choice allows sampling without replacement
+                if seed is not None: np.random.seed(seed) # Ensure numpy's RNG is also seeded
+                
+                chosen_indices = np.random.choice(
+                    len(candidate_tuples), 
+                    size=num_to_actually_sample, 
+                    replace=False, 
+                    p=probabilities
+                )
+                for idx in chosen_indices:
+                    sampled_tuples_set.add(candidate_tuples[idx])
+        
+        if len(sampled_tuples_set) < num_samples and self.verbose:
+            print(f"Warning: KernelSHAP sampling resulted in {len(sampled_tuples_set)} unique samples, "
+                  f"less than requested {num_samples}. This might happen if num_samples is close to 2^n.")
+
+        return list(sampled_tuples_set)
 
     def _train_surrogate(self, ablations: list[tuple], utilities: list[float], lasso_alpha: float) -> tuple:
         X = np.array(ablations)
@@ -432,24 +521,17 @@ class ShapleyExperimentHarness:
         model.fit(X, y)
         return model, model.coef_, model.intercept_
 
-    # --- Public Methods: These use self.all_true_utilities, which is now synced ---
-    # Calculations are CPU-bound. They will run on all processes if called by all.
-    # Print statements and tqdm are guarded to run primarily on the main process.
-
     def compute_exact_shap(self):
         if self.verbose and self.accelerator.is_main_process:
         # self.all_true_utilities is available and identical on all processes
             return self._calculate_shapley_from_cached_dict(self.all_true_utilities)
 
-    def compute_contextcite_weights(self, num_samples: int, lasso_alpha: float, seed: int = None):
+    def compute_contextcite_weights(self, num_samples: int, lasso_alpha: float, seed: int = None,  sampling="uniform"):
         if self.accelerator.is_main_process:
 
             if seed is not None: random.seed(seed); np.random.seed(seed) # Seed for all processes for consistent sampling
 
-            sampled_tuples = self._sample_ablations_from_all(num_samples)
-            if not sampled_tuples:
-                if self.verbose and self.accelerator.is_main_process: print("Error: No tuples sampled for ContextCite.");
-                return np.zeros(self.n_items) # Return zero array or handle as error
+            sampled_tuples = self._sample_ablations_from_all(num_samples) if sampling=="uniform" else self._sample_ablations_kernelshap_weighted(num_samples, seed=seed)
 
             utilities_for_samples = [self.all_true_utilities.get(v_tuple, -float('inf')) for v_tuple in sampled_tuples]
 
@@ -467,14 +549,11 @@ class ShapleyExperimentHarness:
             _, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
         return weights
 
-    # ... (Apply similar guards for verbose printing and tqdm in other public methods like compute_wss, compute_tmc_shap, etc.) ...
-    # For brevity, I'll just show compute_wss as an example of further tqdm guarding. Other methods would follow suit.
-
-    def compute_wss(self, num_samples: int, lasso_alpha: float, seed: int = None, return_weights: bool = False):
+    def compute_wss(self, num_samples: int, lasso_alpha: float, seed: int = None,  sampling="kernelshap_weighted", return_weights: bool = False):
         if self.accelerator.is_main_process:
             if seed is not None: random.seed(seed); np.random.seed(seed)
 
-            sampled_tuples = self._sample_ablations_from_all(num_samples)
+            sampled_tuples = self._sample_ablations_from_all(num_samples) if sampling=="uniform" else self._sample_ablations_kernelshap_weighted(num_samples, seed=seed)
             if not sampled_tuples:
                 if self.verbose and self.accelerator.is_main_process: print("Error: No tuples sampled for WSS.");
                 return (np.zeros(self.n_items), np.zeros(self.n_items)) if return_weights else np.zeros(self.n_items)
@@ -509,133 +588,148 @@ class ShapleyExperimentHarness:
         
         return (shapley_values_wss, weights) if return_weights else shapley_values_wss
 
-    def compute_tmc_shap(self, num_iterations: int, performance_tolerance: float, seed: int = None):
-        if self.accelerator.is_main_process:
-            if seed is not None: random.seed(seed); np.random.seed(seed)
+    def compute_tmc_shap(self, num_iterations: int, performance_tolerance: float, seed: int = None,
+                         return_utility_lookups: bool = True): 
+        
+        if self.verbose: print(f"Computing TMC-Shapley (T={num_iterations}, using pre-computed utilities)...")
+        if seed is not None: random.seed(seed); np.random.seed(seed)
 
-            shapley_values = np.zeros(self.n_items)
-            marginal_counts = np.zeros(self.n_items, dtype=int)
+        shapley_values = np.zeros(self.n_items)
+        marginal_counts = np.zeros(self.n_items, dtype=int)
+        
+        # Keep track of unique subset tuples for which utility was looked up
+        unique_utility_lookups_tracker = set()
 
-            v_empty_tuple = tuple(np.zeros(self.n_items, dtype=int))
-            v_full_tuple = tuple(np.ones(self.n_items, dtype=int))
-            v_empty_util = self.all_true_utilities.get(v_empty_tuple, -float('inf'))
-            v_full_util = self.all_true_utilities.get(v_full_tuple, -float('inf'))
+        v_empty_tuple = tuple(np.zeros(self.n_items, dtype=int))
+        v_full_tuple = tuple(np.ones(self.n_items, dtype=int))
+        
+        v_empty_util = self.all_true_utilities.get(v_empty_tuple, -float('inf'))
+        v_full_util = self.all_true_utilities.get(v_full_tuple, -float('inf'))
+        
+        # Add empty and full set to tracker as their utilities are "used"
+        if v_empty_tuple in self.all_true_utilities: unique_utility_lookups_tracker.add(v_empty_tuple)
+        if v_full_tuple in self.all_true_utilities: unique_utility_lookups_tracker.add(v_full_tuple)
 
-            if v_empty_util == -float('inf') or v_full_util == -float('inf'):
-                if self.verbose and self.accelerator.is_main_process:
-                    print("Warning: Truncation disabled in TMC due to endpoint utility failure in pre-computation.")
-                performance_tolerance = float('inf') # Disable truncation
 
-            indices = list(range(self.n_items))
-            
-            pbar_iter = range(num_iterations)
-            if self.verbose and self.accelerator.is_main_process:
-                pbar_iter = tqdm(pbar_iter, desc="TMC Iterations (from cache)", leave=False)
-            
-            for t in pbar_iter:
-                permutation = random.sample(indices, self.n_items)
-                v_prev_util = v_empty_util
-                current_subset_indices_list = [] # Store indices of items in current subset
+        if v_empty_util == -float('inf') or v_full_util == -float('inf'):
+             if self.verbose: print("Warning: Truncation disabled in TMC due to endpoint utility failure in pre-computation.")
+             effective_tolerance = float('inf') # Disable truncation effectively
+        else:
+             effective_tolerance = performance_tolerance
 
-                for item_idx_to_add in permutation:
-                    current_subset_indices_list.append(item_idx_to_add)
-                    # No need to sort if constructing v_curr_np directly from indices
-                    
-                    v_curr_np = np.zeros(self.n_items, dtype=int)
-                    if current_subset_indices_list: # Ensure list is not empty before indexing
-                        v_curr_np[current_subset_indices_list] = 1
-                    v_curr_tuple = tuple(v_curr_np)
-                    
-                    can_truncate = False
-                    if v_prev_util != -float('inf') and v_full_util != -float('inf'): # Check if valid utilities for truncation
-                        is_near_full_set_performance = abs(v_full_util - v_prev_util) < performance_tolerance
-                        can_truncate = t > 0 and is_near_full_set_performance # Original paper: t > min_iter
-                    
-                    if can_truncate: 
-                        v_curr_util = v_prev_util 
-                    else:
-                        v_curr_util = self.all_true_utilities.get(v_curr_tuple, -float('inf'))
 
-                    marginal_contribution = 0.0
-                    if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
-                        marginal_contribution = v_curr_util - v_prev_util
-                    
-                    k_count = marginal_counts[item_idx_to_add] + 1
-                    shapley_values[item_idx_to_add] = ( (k_count - 1) / k_count ) * shapley_values[item_idx_to_add] + \
-                                                    ( 1 / k_count ) * marginal_contribution
-                    marginal_counts[item_idx_to_add] = k_count
-                    
-                    v_prev_util = v_curr_util # This should be v_curr_util (utility of current set)
-        return shapley_values
+        indices = list(range(self.n_items))
+        pbar = tqdm(range(num_iterations), desc="TMC Iterations (from cache)", disable=not self.verbose, leave=False)
+        
+        for t in pbar:
+            permutation = random.sample(indices, self.n_items)
+            v_prev_util = v_empty_util
+            # Start with an empty set vector for each permutation
+            current_subset_np = np.zeros(self.n_items, dtype=int) 
 
-    def compute_beta_shap(self, num_iterations: int, beta_a: float, beta_b: float, seed: int = None):
-        if beta_dist is None: raise ImportError("BetaShap requires scipy.")
-        if self.accelerator.is_main_process:
-            if seed is not None: random.seed(seed); np.random.seed(seed)
-
-            weighted_marginal_sums = np.zeros(self.n_items)
-            total_weights_for_item = np.zeros(self.n_items)
-
-            v_empty_tuple = tuple(np.zeros(self.n_items, dtype=int))
-            v_empty_util = self.all_true_utilities.get(v_empty_tuple, -float('inf'))
-            
-            indices = list(range(self.n_items))
-            
-            pbar_iter = range(num_iterations)
-            if self.verbose and self.accelerator.is_main_process:
-                pbar_iter = tqdm(pbar_iter, desc="BetaShap Iterations (from cache)", leave=False)
-
-            for _ in pbar_iter:
-                permutation = random.sample(indices, self.n_items)
-                v_prev_util = v_empty_util
-                current_subset_indices_list = [] 
-
-                for k_minus_1, item_idx_to_add in enumerate(permutation): # k_minus_1 is the size of the set *before* adding item_idx_to_add
-                    current_subset_indices_list.append(item_idx_to_add)
-                    # No need to sort for v_curr_np construction
-                    
-                    v_curr_np = np.zeros(self.n_items, dtype=int)
-                    if current_subset_indices_list:
-                        v_curr_np[current_subset_indices_list] = 1
-                    v_curr_tuple = tuple(v_curr_np)
-                    
+            for item_idx_to_add in permutation:
+                # This v_curr_np represents S_prev U {item_idx_to_add}
+                v_curr_np = current_subset_np.copy() 
+                v_curr_np[item_idx_to_add] = 1
+                v_curr_tuple = tuple(v_curr_np)
+                
+                can_truncate = False
+                if v_prev_util != -float('inf') and v_full_util != -float('inf'):
+                    is_near_full_set_performance = abs(v_full_util - v_prev_util) < effective_tolerance
+                    # Original Data Shapley paper suggests t > min_iterations (e.g. 1 or small number)
+                    # Using t > 0 is a common simplification.
+                    can_truncate = t > 0 and is_near_full_set_performance 
+                
+                if can_truncate: 
+                    v_curr_util = v_prev_util # No new utility lookup needed
+                else:
+                    # This is a utility lookup
                     v_curr_util = self.all_true_utilities.get(v_curr_tuple, -float('inf'))
-                    
-                    marginal_contribution = 0.0
-                    if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
-                        marginal_contribution = v_curr_util - v_prev_util
-                    
-                    if self.n_items > 1:
-                        x_pos = k_minus_1 / (self.n_items - 1) # Position based on size of S (set before adding i)
-                    elif self.n_items == 1: # Only one item
-                        x_pos = 0.0 # Or 0.5, depends on interpretation for single item; 0 is |S|=0
-                    else: # No items
-                        x_pos = 0.5 # Default, though loop won't run
+                    if v_curr_tuple in self.all_true_utilities: # Only count if key exists
+                        unique_utility_lookups_tracker.add(v_curr_tuple)
 
-                    weight = 1.0 # Default weight
-                    try:
-                        if self.n_items > 0: # Avoid issues with n_items=0 or pdf definition at edges for certain beta params
-                            if self.n_items == 1 and (beta_a <= 1 or beta_b <= 1): # For single item, pdf can be inf at 0 or 1
-                                # Standard BetaShap often implies uniform weighting if beta params would cause issues
-                                weight = 1.0
-                            else:
-                                weight = beta_dist.pdf(x_pos, beta_a, beta_b)
-                        if not np.isfinite(weight): # Catch inf/nan from pdf
-                            # A large finite number if inf, or 1.0 as a fallback
-                            weight = 1e6 if np.isinf(weight) else 1.0
-                    except Exception: # Catch any other errors from pdf calculation
-                        weight = 1.0
-                    
-                    if v_curr_util != -float('inf') and v_prev_util != -float('inf'): # Only add if MC is valid
-                        weighted_marginal_sums[item_idx_to_add] += weight * marginal_contribution
-                        total_weights_for_item[item_idx_to_add] += weight
-                    
-                    v_prev_util = v_curr_util
-                    
-            shapley_values = np.zeros(self.n_items)
-            non_zero_weights_mask = total_weights_for_item > 1e-9 # Avoid division by zero
-            shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
-        return shapley_values
+                marginal_contribution = 0.0
+                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
+                    marginal_contribution = v_curr_util - v_prev_util
+                
+                k_count = marginal_counts[item_idx_to_add] + 1
+                shapley_values[item_idx_to_add] = ( (k_count - 1) / k_count ) * shapley_values[item_idx_to_add] + \
+                                                  ( 1 / k_count ) * marginal_contribution
+                marginal_counts[item_idx_to_add] = k_count
+                
+                v_prev_util = v_curr_util 
+                current_subset_np = v_curr_np # The current set S_prev U {i} becomes S_prev for the next step
+        
+        unique_lookups_count = len(unique_utility_lookups_tracker)
+        if self.verbose: print(f"  TMC made {unique_lookups_count} unique utility lookups from pre-computed cache.")
+
+        if return_utility_lookups:
+            return shapley_values, unique_lookups_count
+        else:
+            return shapley_values
+
+    def compute_beta_shap(self, num_iterations: int, beta_a: float, beta_b: float, seed: int = None,
+                          return_utility_lookups: bool = False): # Added flag
+        if beta_dist is None: raise ImportError("BetaShap requires scipy.")
+        if self.verbose: print(f"Computing Beta-Shapley (T={num_iterations}, α={beta_a}, β={beta_b}, using pre-computed utilities)...")
+        if seed is not None: random.seed(seed); np.random.seed(seed)
+
+        weighted_marginal_sums = np.zeros(self.n_items)
+        total_weights_for_item = np.zeros(self.n_items)
+        unique_utility_lookups_tracker = set() # Tracker
+
+        v_empty_tuple = tuple(np.zeros(self.n_items, dtype=int))
+        v_empty_util = self.all_true_utilities.get(v_empty_tuple, -float('inf'))
+        if v_empty_tuple in self.all_true_utilities: unique_utility_lookups_tracker.add(v_empty_tuple)
+        
+        indices = list(range(self.n_items))
+        pbar = tqdm(range(num_iterations), desc="BetaShap Iterations (from cache)", disable=not self.verbose, leave=False)
+
+        for _ in pbar:
+            permutation = random.sample(indices, self.n_items)
+            v_prev_util = v_empty_util
+            current_subset_np = np.zeros(self.n_items, dtype=int)
+
+            for k_minus_1, item_idx_to_add in enumerate(permutation):
+                v_curr_np = current_subset_np.copy()
+                v_curr_np[item_idx_to_add] = 1
+                v_curr_tuple = tuple(v_curr_np)
+                
+                v_curr_util = self.all_true_utilities.get(v_curr_tuple, -float('inf'))
+                if v_curr_tuple in self.all_true_utilities: unique_utility_lookups_tracker.add(v_curr_tuple)
+                
+                marginal_contribution = 0.0
+                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
+                     marginal_contribution = v_curr_util - v_prev_util
+                
+                # ... (Beta weight calculation remains the same) ...
+                if self.n_items > 1: x_pos = k_minus_1 / (self.n_items - 1)
+                else: x_pos = 0.5 
+                try:
+                    if self.n_items == 1 and (beta_a < 1 or beta_b < 1): weight = 1.0
+                    elif self.n_items > 0: weight = beta_dist.pdf(x_pos, beta_a, beta_b)
+                    else: weight = 1.0
+                    if not np.isfinite(weight): weight = 1.0 if beta_a == 1 and beta_b == 1 else 1e6
+                except Exception: weight = 1.0
+                
+                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
+                    weighted_marginal_sums[item_idx_to_add] += weight * marginal_contribution
+                    total_weights_for_item[item_idx_to_add] += weight
+                
+                v_prev_util = v_curr_util
+                current_subset_np = v_curr_np
+                
+        shapley_values = np.zeros(self.n_items)
+        non_zero_weights_mask = total_weights_for_item > 1e-9
+        shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
+        
+        unique_lookups_count = len(unique_utility_lookups_tracker)
+        if self.verbose: print(f"  BetaShap made {unique_lookups_count} unique utility lookups from pre-computed cache.")
+
+        if return_utility_lookups:
+            return shapley_values, unique_lookups_count
+        else:
+            return shapley_values
 
     def compute_loo(self):
         if self.accelerator.is_main_process:
