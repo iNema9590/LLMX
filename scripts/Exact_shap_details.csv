@@ -1,0 +1,8 @@
+query,scores,doc_flags
+"""Girls Girls"", was released by Atlantic Records founded by who?","[29.6217944  -0.20727646 -0.20727646 -5.68428929 -6.84001207 -0.06008969
+ -3.23071357  3.83400302 -1.34389863 42.70382594]","['P', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'P']"
+What is the name of the character in Quantico played by the same actor who starred in Tower Block?,"[ 9.65393317e+01  7.28096317e-01 -1.67411476e+00 -1.09713323e+00
+ -1.96465239e+00  2.31911643e+01  1.15460876e+00  5.39590015e-01
+ -5.21324112e-02 -5.21324112e-02]","['P', 'N', 'N', 'N', 'N', 'P', 'N', 'N', 'N', 'N']"
+ How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,"[ 7.28458438  4.61024789  1.12222367  4.46217897  6.01809617  9.01740065
+ 51.42986124 -3.03477679  3.25840788  3.25840788]","['N', 'P', 'P', 'N', 'N', 'N', 'N', 'N', 'N', 'N']"

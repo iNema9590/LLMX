@@ -24,10 +24,11 @@ start = time.time()
 # df = pd.read_parquet("hf://datasets/enelpol/rag-mini-bioasq/" + splits["train"])
 
 # Construct full path to CSV file in same folder
-csv_path = os.path.join(current_dir, 'hotpotQA_sample.csv')
+# csv_path = os.path.join(current_dir, 'hotpotQA_sample.csv')
+csv_path = os.path.join(current_dir, 'hotpotQA_sample_flagged.csv')
 
 df = pd.read_csv(csv_path)
-
+df_exact_shap = pd.DataFrame(columns = ["query", "scores", "doc_flags"])
 print("Data Loaded!")
 
 # df1 = pd.read_parquet("hf://datasets/enelpol/rag-mini-bioasq/text-corpus/test-00000-of-00001.parquet")
@@ -84,12 +85,12 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
     
     docs= eval(df['context'].loc[i])
+    flags = eval(df["documents_flag"].loc[i])
 
     # experiment with copies
-    numbers = random.sample(range(1, len(docs)), 3)
-    
-    docs[numbers[0]]=docs[numbers[1]]
-    docs[numbers[2]]=docs[numbers[1]]
+    # numbers = random.sample(range(1, len(docs)), 3)
+    # docs[numbers[0]]=docs[numbers[1]]
+    # docs[numbers[2]]=docs[numbers[1]]
 
 
     utility_cache_base_dir = f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/utilities_cache3bcp"
@@ -141,8 +142,13 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         results_for_query["LOO"] = harness.compute_loo()
 
         exact_scores = results_for_query.get("Exact")
-        print("RESULT FOR QUERY: ", results_for_query)
-        print("EXACT SCORES: ", exact_scores)
+        # print("TYPE EXACT SHAP OUTPUT: ", type(exact_scores))
+        # df_exact_shap.loc[i] = [query, list(exact_scores), list(flags)]
+        df_exact_shap.loc[i, "query"] = query
+        df_exact_shap.loc[i, "scores"] = np.array(exact_scores)
+        df_exact_shap.loc[i, "doc_flags"] = flags
+        print("RESULT EXACT SHAPE ", df_exact_shap)
+        # print("EXACT SCORES: ", exact_scores)
         if exact_scores is not None: # proceed if the ground truth scores are avaialble for this query
             positive_exact_score = np.clip(exact_scores, a_min=0.0, a_max=None) # FOR NDGC SCORE COMPUTATION
             for method, approx_scores in results_for_query.items(): # Iterate over each method and its attributed scores
@@ -173,6 +179,8 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                             "Pearson": pearson_c, "Spearman": spearman_c, "NDCG" : ndgc_scoring, "KendallTau" : kendall_c,
                             "Num_Items": len(docs), 
                         })
+
+                        # print("CHECK ALL RESULTS: ", all_metrics_data)
                     else:
                         print(f"    Score length mismatch for method {method} (Exact: {len(exact_scores)}, Approx: {len(approx_scores)}). Skipping metrics.")
         else:
@@ -190,6 +198,11 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
             print(f"CUDA cache empty attempt complete on rank {accelerator_main.process_index}.")
     accelerator_main.wait_for_everyone()
 
+# SAVE EXACT SHAP RESULTS FOR ANALYSIS
+df_exact_shap.to_csv("scripts/Exact_shap_details.csv", index=False)
+
+# Save
+df_exact_shap.to_json("scripts/Exact_shap_detail.json", orient="records", lines=True)
 
 # Aggregate and Report Average Metrics (Only on main process)
 if accelerator_main.is_main_process:
