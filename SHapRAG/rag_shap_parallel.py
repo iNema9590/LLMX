@@ -6,18 +6,18 @@ import pickle
 import itertools
 
 from sklearn.linear_model import Lasso, LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from collections import defaultdict
 import torch
 import torch.nn.functional as F
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from accelerate import Accelerator
 from accelerate.utils import gather_object, broadcast_object_list 
 from tqdm.auto import tqdm
-# import pandas as pd # Not used in the provided snippet
 import warnings
 from sklearn.exceptions import ConvergenceWarning
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 from scipy.stats import beta as beta_dist
-from accelerate import Accelerator
 class ShapleyExperimentHarness:
     def __init__(self, items, query, 
                  prepared_model_for_harness, tokenizer_for_harness, accelerator_for_harness, 
@@ -195,7 +195,7 @@ class ShapleyExperimentHarness:
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
-            messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}"})
+            messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}. Be concise and short."})
         else:
             messages.append({"role": "user", "content": self.query})
 
@@ -216,10 +216,10 @@ class ShapleyExperimentHarness:
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 max_new_tokens=max_new_tokens,
-                do_sample=False,
+                do_sample=True,
                 pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
                              else unwrapped_model.config.eos_token_id,
-                temperature=1.0,
+                temperature=0.1,
                 top_p=1.0,
     
             )
@@ -231,7 +231,6 @@ class ShapleyExperimentHarness:
             elif hasattr(outputs_gen, 'sequences'): # For GenerateOutput like objects
                 generated_ids = outputs_gen.sequences
             else:
-                # Fallback or error if unexpected output
                 print(f"Warning: Unexpected output type from model.generate: {type(outputs_gen)}")
                 # Try to find a tensor that looks like token IDs
                 if isinstance(outputs_gen, (list, tuple)) and len(outputs_gen) > 0 and isinstance(outputs_gen[0], torch.Tensor):
@@ -253,7 +252,7 @@ class ShapleyExperimentHarness:
     def _llm_compute_logprob(self, context_str: str) -> float:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
-            messages.append({"role": "user", "content": f"Given the context: {context_str}. In few sentences, answer the query: {self.query}"})
+            messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}. Be concise and short."})
         else:
             messages.append({"role": "user", "content": self.query})
 
@@ -270,16 +269,13 @@ class ShapleyExperimentHarness:
 
         input_ids = torch.cat([prompt_tokens.input_ids, answer_ids], dim=1)
 
-        # Check model's max length
         unwrapped_model = self.accelerator.unwrap_model(self.model)
         max_model_len = getattr(unwrapped_model.config, 'max_position_embeddings', 512)
         
         if input_ids.shape[1] > max_model_len:
             if self.verbose and self.accelerator.is_main_process:
                 print(f"Warning (logprob): Combined input length {input_ids.shape[1]} exceeds model max length {max_model_len}. Result may be inaccurate or OOM.")
-            # Optionally truncate or return -inf
-            # input_ids = input_ids[:, :max_model_len]
-            # Or:
+        
             del prompt_tokens, answer_ids, input_ids, unwrapped_model
             torch.cuda.empty_cache()
             return -float('inf')
@@ -292,11 +288,8 @@ class ShapleyExperimentHarness:
         shift_logits = logits[..., prompt_tokens.input_ids.shape[1]-1:-1, :].contiguous()
         shift_labels = answer_ids.contiguous()
 
-        # Calculate loss only for the answer part
         log_probs = F.log_softmax(shift_logits, dim=-1)
-        
-        # Gather the log-probabilities of the actual answer tokens
-        # shift_labels need to be (batch, seq_len, 1) for gather
+ 
         answer_log_probs = torch.gather(log_probs, 2, shift_labels.unsqueeze(-1)).squeeze(-1)
         
         total_log_prob = answer_log_probs.sum().item()
@@ -421,10 +414,8 @@ class ShapleyExperimentHarness:
             candidate_weights = []
             for v_tuple in candidate_tuples:
                 z = sum(v_tuple)
-                if z == 0 or z == n_kernel: # Should have been filtered by `not in sampled_tuples_set`
-                    # This case is mostly for conceptual completeness if endpoints weren't pre-added
-                    # For robust sampling, give them a very small chance if they are candidates here
-                    # (which they shouldn't be if already added)
+                if z == 0 or z == n_kernel:
+
                     weight = 0.00001 
                 else:
                     denominator = z * (n_kernel - z)
@@ -441,17 +432,14 @@ class ShapleyExperimentHarness:
                 else:
                     sampled_tuples_set.update(candidate_tuples) # Add all remaining if less than needed
             else:
-                # Perform weighted sampling *without replacement*
-                # random.choices does sampling *with* replacement. We need without.
-                # A common way is to sample indices based on weights, then remove.
+  
                 num_to_actually_sample = min(remaining_to_sample, len(candidate_tuples))
                 
                 # Normalize weights for probability distribution
                 total_weight = sum(candidate_weights)
                 probabilities = [w / total_weight for w in candidate_weights]
                 
-                # Sample indices based on probabilities
-                # np.random.choice allows sampling without replacement
+          
                 if seed is not None: np.random.seed(seed) # Ensure numpy's RNG is also seeded
                 
                 chosen_indices = np.random.choice(
@@ -469,23 +457,72 @@ class ShapleyExperimentHarness:
 
         return list(sampled_tuples_set)
 
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], lasso_alpha: float) -> tuple:
-        X = np.array(ablations)
-        y = np.array(utilities)
-        if X.shape[0] == 0:
-            if self.verbose and self.accelerator.is_main_process:
-                 print("Error: Cannot train surrogate with zero samples.")
-            # Return a model-like object that predicts zeros or mean, and zero coefficients
-            dummy_coeffs = np.zeros(X.shape[1] if X.ndim > 1 and X.shape[1] > 0 else self.n_items)
-            class DummyModel:
-                def __init__(self, intercept, coef): self.intercept_ = intercept; self.coef_ = coef
-                def predict(self, X_pred): return np.full(X_pred.shape[0], self.intercept_) + X_pred @ self.coef_
-            return DummyModel(0.0, dummy_coeffs), dummy_coeffs, 0.0
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], lasso_alpha: float, eval=False) -> tuple:
+        X_train = np.array(ablations)
+        y_train = np.array(utilities)
 
-        if lasso_alpha == 0: model = LinearRegression(fit_intercept=True)
-        else: model = Lasso(alpha=lasso_alpha, fit_intercept=True, random_state=42, max_iter=2000)
-        model.fit(X, y)
-        return model, model.coef_, model.intercept_
+        X_test=np.array(list(self.all_true_utilities.keys()))
+        y_test=np.array(list(self.all_true_utilities.values()))
+
+        # Train the model
+        if lasso_alpha == 0:
+            model = LinearRegression(fit_intercept=True)
+        else:
+            model = Lasso(alpha=lasso_alpha, fit_intercept=True, random_state=42, max_iter=2000)
+
+        model.fit(X_train, y_train)
+        coefficients = model.coef_
+        intercept = model.intercept_
+
+        # --- Evaluation Part (on main process only) ---
+        if eval:
+            if hasattr(self, 'accelerator') and not self.accelerator.is_main_process:
+                # self.accelerator.wait_for_everyone() # Ensure main process completes if others depend on it
+                return model, coefficients, intercept
+
+            # Predict on the same training data for evaluation
+            y_pred = model.predict(X_test)
+
+            # Overall MSE
+            overall_mse = mean_squared_error(y_test, y_pred)
+            if hasattr(self, 'verbose') and self.verbose: # Check if self.verbose exists
+                print(f"Overall Mean Squared Error (MSE): {overall_mse:.6f}")
+
+            # MSE by subset size
+            mse_by_size = defaultdict(list)
+            predictions_by_size = defaultdict(list)
+            true_values_by_size = defaultdict(list)
+
+            for i, ablation_vector in enumerate(X_test):
+                subset_size = int(np.sum(ablation_vector))
+                true_values_by_size[subset_size].append(y_test[i])
+                predictions_by_size[subset_size].append(y_pred[i])
+
+            if hasattr(self, 'verbose') and self.verbose:
+                print("\nMSE by Subset Size (Number of Active Items):")
+                print("------------------------------------------")
+                print("| Size | Num Subsets | MSE        |")
+                print("|------|-------------|------------|")
+
+            sorted_sizes = sorted(true_values_by_size.keys())
+            for size in sorted_sizes:
+                true_vals_s = np.array(true_values_by_size[size])
+                pred_vals_s = np.array(predictions_by_size[size])
+                num_subsets_at_size = len(true_vals_s)
+
+                if num_subsets_at_size > 0:
+                    mse_s = mean_squared_error(true_vals_s, pred_vals_s)
+                    if hasattr(self, 'verbose') and self.verbose:
+                        print(f"| {size:<4} | {num_subsets_at_size:<11} | {mse_s:<10.6f} |")
+                # else: # Should not happen if size is a key from X_train
+                #     if hasattr(self, 'verbose') and self.verbose:
+                #         print(f"| {size:<4} | {num_subsets_at_size:<11} | {'N/A':<10} |")
+            
+            if hasattr(self, 'verbose') and self.verbose:
+                print("------------------------------------------\n")
+        
+        # self.accelerator.wait_for_everyone() # If other processes need to wait for main's print
+        return model, coefficients, intercept
 
     def compute_exact_shap(self):
         if self.verbose and self.accelerator.is_main_process:
@@ -511,11 +548,11 @@ class ShapleyExperimentHarness:
 
             sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
             utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
-
+            print("Calling surrogate for CS")
             _, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
         return weights
 
-    def compute_wss(self, num_samples: int, lasso_alpha: float, seed: int = None,  sampling="kernelshap_weighted", return_weights: bool = False):
+    def compute_wss(self, num_samples: int, lasso_alpha: float, seed: int = None,  sampling="kernelshap_weighted", return_weights: bool = False, use_hybrid_utilities: bool = False):
         if self.accelerator.is_main_process:
             if seed is not None: random.seed(seed); np.random.seed(seed)
 
@@ -537,7 +574,7 @@ class ShapleyExperimentHarness:
             sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
             utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
             known_utilities_for_hybrid = {v_tuple: self.all_true_utilities[v_tuple] for v_tuple in sampled_tuples_for_train}
-            
+            print("Calling surrogate for WSS")
             surrogate_model, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
 
             hybrid_utilities = {}
@@ -546,13 +583,21 @@ class ShapleyExperimentHarness:
             # Prediction can be done by all, it's fast.
             all_predictions = surrogate_model.predict(all_ablations_X)
             
-            for i_pred in range(all_ablations_X.shape[0]): # Corrected loop variable name
-                v_tuple = tuple(all_ablations_X[i_pred])
-                hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
+            if use_hybrid_utilities:
+                for i_pred in range(all_ablations_X.shape[0]):
+                    v_tuple = tuple(all_ablations_X[i_pred])
+                    # Use the true utility if it was part of the m valid training samples, else predict
+                    hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
+            else:
+                for i_pred in range(all_ablations_X.shape[0]):
+                    v_tuple = tuple(all_ablations_X[i_pred])
+                    hybrid_utilities[v_tuple] = all_predictions[i_pred]
+            # --- END OF MODIFIED PART ---
             
-            shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) # _calculate_shapley has tqdm guard
+            # Assuming _calculate_shapley_from_cached_dict is your general Shapley calculator
+            shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) 
         
-        return (shapley_values_wss, weights) if return_weights else shapley_values_wss
+            return (shapley_values_wss, weights) if return_weights else shapley_values_wss
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                           max_unique_lookups: int, # Budget for utility lookups
@@ -631,8 +676,7 @@ class ShapleyExperimentHarness:
         pbar.close()
         final_lookups_count = len(unique_utility_lookups_tracker)
 
-        return shapley_values # Just return Shapley values
-
+        return shapley_values 
 
     def compute_beta_shap(self, num_iterations_max: int, beta_a: float, beta_b: float, 
                            max_unique_lookups: int, # Budget for utility lookups

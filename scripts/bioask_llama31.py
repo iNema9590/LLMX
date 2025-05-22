@@ -117,7 +117,6 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         os.makedirs(os.path.dirname(current_utility_path), exist_ok=True)
         print(f"  Instantiating ShapleyExperimentHarness for Q{i} (n={len(docs)} docs)...")
     
-    # Synchronize before creating harness instance to ensure directory exists for all if utility_path is used by others
     accelerator_main.wait_for_everyone() 
 
     harness = ShapleyExperimentHarness(
@@ -131,9 +130,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     )
             
     results_for_query = {}
-    # Computation of attributions should only happen on the main process
-    # as they modify `results_for_query` which is then used to populate `all_metrics_data`.
-    # `all_metrics_data` is a simple list on the main process.
+
     if accelerator_main.is_main_process:
         results_for_query["Exact"] = harness.compute_exact_shap()
 
