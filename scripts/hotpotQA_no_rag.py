@@ -12,11 +12,12 @@ from SHapRAG import *
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from scipy.stats import spearmanr, pearsonr
+from scipy.stats import spearmanr, pearsonr, rankdata, kendalltau
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import gc
 import time
+from sklearn.metrics import ndcg_score
 
 start = time.time()
 # splits = {'train': 'question-answer-passages/train-00000-of-00001.parquet', 'test': 'question-answer-passages/test-00000-of-00001.parquet'}
@@ -36,7 +37,7 @@ print("Data Loaded!")
 # df['question']=df['question'].str.replace(r'[\n]', ' ', regex=True)
 # df = df[df['relevant_passage_ids'].apply(len) >= 10].reset_index(drop=True)
 
-num_questions_to_run = 100
+num_questions_to_run = 3
 print(f"Running experiments for {num_questions_to_run} questions...")
 
 # Parameters
@@ -46,13 +47,15 @@ DATASET_NAME = "hotpotQA"
 PRECISION = "bf16"
 
 # Initialize Accelerator ONCE
-accelerator_main = Accelerator(mixed_precision="bf16")
+accelerator_main = Accelerator(mixed_precision=PRECISION)
 
 if accelerator_main.is_main_process:
     print(f"Main Script: Loading model...")
 model_path = "Qwen/Qwen2.5-3B-Instruct" # Example, ensure this path is correct
 # model_path = "meta-llama/Llama-3.2-3B-Instruct" # Example, ensure this path is correct
 # model_path = "meta-llama/Llama-3.1-8B-Instruct" # Example, ensure this path is correct
+MODEL_NAME = model_path.split('/')[0]
+
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
     torch_dtype=torch.float16,
@@ -89,7 +92,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     docs[numbers[2]]=docs[numbers[1]]
 
 
-    utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache3bcp"
+    utility_cache_base_dir = f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/utilities_cache3bcp"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
     
@@ -138,20 +141,37 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         results_for_query["LOO"] = harness.compute_loo()
 
         exact_scores = results_for_query.get("Exact")
-        if exact_scores is not None:
-            for method, approx_scores in results_for_query.items():
+        print("RESULT FOR QUERY: ", results_for_query)
+        print("EXACT SCORES: ", exact_scores)
+        if exact_scores is not None: # proceed if the ground truth scores are avaialble for this query
+            positive_exact_score = np.clip(exact_scores, a_min=0.0, a_max=None) # FOR NDGC SCORE COMPUTATION
+            for method, approx_scores in results_for_query.items(): # Iterate over each method and its attributed scores
                 if method != "Exact" and approx_scores is not None:
                     if len(approx_scores) == len(exact_scores):
-                        if np.all(exact_scores == exact_scores[0]) or np.all(approx_scores == approx_scores[0]):
-                            pearson_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
+                        if np.all(exact_scores == exact_scores[0]) or np.all(approx_scores == approx_scores[0]): # check if all elements in exact_scores / approx_scores are the same [1,1,1,1,1] => correlation becomes undefined in that case
+                            # spearman and pearson correlations rely on variance, so if the values are constant (no variance) we get an error or no result
+                            # if both vectors are consta    nt but they are almost the same we have correlation =1, if they are different (one is [1,1,1] the other is [2,2,2]) we set correlation to 0.0
+                            pearson_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0 
                             spearman_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
+                            kendall_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
                         else:
-                            pearson_c, _ = pearsonr(exact_scores, approx_scores)
-                            spearman_c, _ = spearmanr(exact_scores, approx_scores)
+                            pearson_c, _ = pearsonr(exact_scores, approx_scores) #pearson measures linear correlation
+                            spearman_c, _ = spearmanr(exact_scores, approx_scores) # spearman measures rank correlation (how well the order matches)
+
+                            exact_ranks = rankdata(-np.array(exact_scores), method="average") # rank scores with the smallest =1 and when there is a tie assign the average rank
+                            approx_ranks = rankdata(-np.array(approx_scores), method = "average")
+                            kendall_c, _ = kendalltau(exact_ranks, approx_ranks) # return tau and pval (if pval is < 0.005 we can say that correlation is statistically significant) 
+                        
+                        ndgc_scoring  = ndcg_score(
+                            [positive_exact_score], 
+                            [approx_scores],
+                            k = 3 # focus on top k document scoring
+                        )
                         
                         all_metrics_data.append({
                             "Question_Index": i, "Query": query, "Method": method,
-                            "Pearson": pearson_c, "Spearman": spearman_c, "Num_Items": len(docs)
+                            "Pearson": pearson_c, "Spearman": spearman_c, "NDCG" : ndgc_scoring, "KendallTau" : kendall_c,
+                            "Num_Items": len(docs), 
                         })
                     else:
                         print(f"    Score length mismatch for method {method} (Exact: {len(exact_scores)}, Approx: {len(approx_scores)}). Skipping metrics.")
@@ -180,13 +200,15 @@ if accelerator_main.is_main_process:
         average_metrics = metrics_df_all_questions.groupby("Method").agg(
             Avg_Pearson=("Pearson", "mean"),
             Avg_Spearman=("Spearman", "mean"),
+            Avg_Kendall =("KendallTau", "mean"),
+            Avg_NDCG = ("NDCG", "mean"),
             Num_Valid_Queries=("Query", "nunique")
         ).sort_values(by="Avg_Spearman", ascending=False)
         
         print(average_metrics.round(4))
 
-        details_path = f"../Experiment_data/{DATASET_NAME}/shapley_rag_experiment_details3bcp.csv"
-        summary_path = f"../Experiment_data/{DATASET_NAME}/shapley_rag_experiment_summary3bcp.csv"
+        details_path = f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/shapley_rag_experiment_details3bcp.csv"
+        summary_path = f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/shapley_rag_experiment_summary3bcp.csv"
         os.makedirs(os.path.dirname(details_path), exist_ok=True)
         
         metrics_df_all_questions.to_csv(details_path, index=False)
