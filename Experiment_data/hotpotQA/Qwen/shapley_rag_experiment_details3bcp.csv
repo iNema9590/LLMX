@@ -1,0 +1,40 @@
+Question_Index,Query,Method,Pearson,Spearman,NDCG,KendallTau,Num_Items
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",ContextCite32,0.989808436757612,0.8424242424242423,0.9554553343455998,0.7333333333333333,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",WSS32,0.9899540610110946,0.8424242424242423,0.9554553343455998,0.7333333333333333,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",BetaShap (U)32,0.9389836052734537,0.5878787878787878,0.9653271664473035,0.4666666666666666,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",TMC32,0.9882069969895987,0.6484848484848483,0.9653271664473035,0.6,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",ContextCite64,0.983603971940552,0.6969696969696969,0.9554553343455998,0.6,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",WSS64,0.9842314623299322,0.709090909090909,0.9554553343455998,0.6444444444444444,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",BetaShap (U)64,0.9340552045924475,0.4424242424242424,0.9653271664473035,0.3333333333333333,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",TMC64,0.9841186502479752,0.6727272727272726,0.997951409745604,0.5111111111111111,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",ContextCite100,0.9906986093441374,0.6606060606060605,0.9554553343455998,0.5555555555555555,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",WSS100,0.9916983396006898,0.7454545454545454,0.9554553343455998,0.6444444444444444,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",BetaShap (U)100,0.6814984954660118,0.5878787878787878,0.9554553343455998,0.4666666666666666,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",TMC100,0.9881123392801405,0.6242424242424242,0.997951409745604,0.4222222222222222,10
+0,"""Girls Girls"", was released by Atlantic Records founded by who?",LOO,0.9820820773590115,0.33333333333333326,0.9554553343455998,0.24444444444444444,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,ContextCite32,0.9966780559069303,0.7939393939393938,0.9772204436504507,0.6444444444444444,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,WSS32,0.9966236675468467,0.7939393939393938,0.9772204436504507,0.6444444444444444,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,BetaShap (U)32,0.9004719139225621,0.6606060606060605,0.9977294488330772,0.5111111111111111,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,TMC32,0.9788613156256228,0.709090909090909,0.9977294488330772,0.5555555555555555,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,ContextCite64,0.9984599692139178,0.8060606060606059,0.98767316593828,0.6,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,WSS64,0.9982772671236494,0.7818181818181817,0.98767316593828,0.6,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,BetaShap (U)64,0.8842956824059206,0.8303030303030302,0.9977294488330772,0.6888888888888888,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,TMC64,0.9883771338335757,0.7939393939393938,0.9977294488330772,0.6444444444444444,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,ContextCite100,0.9990365265674961,0.8666666666666665,1.0,0.7777777777777777,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,WSS100,0.9991504590429444,0.8424242424242423,1.0,0.7333333333333333,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,BetaShap (U)100,0.909397108658455,0.6,0.98767316593828,0.4666666666666666,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,TMC100,0.9932909945834957,0.6969696969696969,0.98767316593828,0.5111111111111111,10
+1,What is the name of the character in Quantico played by the same actor who starred in Tower Block?,LOO,0.9887404499674645,0.6606060606060605,0.9977294488330772,0.5111111111111111,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,ContextCite32,0.985635926016031,0.8787878787878788,0.9999198883863566,0.7333333333333333,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,WSS32,0.9856986987843857,0.8787878787878788,0.9999198883863566,0.7333333333333333,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,BetaShap (U)32,0.916218559333653,0.7212121212121211,0.9686106045738497,0.5555555555555555,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,TMC32,0.9891075129239397,0.9393939393939393,1.0,0.8666666666666666,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,ContextCite64,0.9900391913914488,0.8181818181818182,0.9999198883863566,0.6444444444444444,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,WSS64,0.9917727872128297,0.8181818181818182,0.9999198883863566,0.6444444444444444,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,BetaShap (U)64,0.9058641774727572,0.7696969696969697,0.9935027365711229,0.6444444444444444,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,TMC64,0.9933410128141101,0.8909090909090909,0.9935027365711229,0.7777777777777777,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,ContextCite100,0.9941760675299061,0.9030303030303028,0.9999198883863566,0.7777777777777777,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,WSS100,0.9935163049380514,0.9030303030303028,0.9999198883863566,0.7777777777777777,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,BetaShap (U)100,0.8601296753470364,0.7575757575757575,0.9935027365711229,0.5555555555555555,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,TMC100,0.9934076421484374,0.9030303030303028,0.9999198883863566,0.7777777777777777,10
+2, How many MLB teams did the baseball player who had 61 home runs in 1961 play for?,LOO,0.9649825841735774,0.9272727272727272,0.9999198883863566,0.8222222222222221,10

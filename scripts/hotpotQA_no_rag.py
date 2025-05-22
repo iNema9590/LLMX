@@ -38,7 +38,7 @@ print("Data Loaded!")
 # df['question']=df['question'].str.replace(r'[\n]', ' ', regex=True)
 # df = df[df['relevant_passage_ids'].apply(len) >= 10].reset_index(drop=True)
 
-num_questions_to_run = 3
+num_questions_to_run = 100
 print(f"Running experiments for {num_questions_to_run} questions...")
 
 # Parameters
@@ -128,27 +128,20 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
             else:
                 actual_samples = num_s
 
-            if actual_samples > 0: # Ensure positive number of samples
-                results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, lasso_alpha=0.0, seed=SEED)
-                
-                results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, lasso_alpha=0.0, seed=SEED)
-
-        for size_key, num_t in T_iterations_map.items():
-            results_for_query[f"TMC{num_t}"] = harness.compute_tmc_shap(num_iterations=num_t, performance_tolerance=0.001, seed=SEED)
+            if actual_samples > 0: 
+                results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="uniform", lasso_alpha=0.01, seed=SEED)
+                results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, lasso_alpha=0.01, seed=SEED, sampling="uniform")
+                results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)
+                results_for_query[f"TMC{actual_samples}"] = harness.compute_tmc_shap(num_iterations_max=T_iterations_map[size_key], performance_tolerance=0.001, max_unique_lookups=actual_samples, seed=SEED)
         
-            if beta_dist: # beta_dist needs to be defined or imported (e.g., from scipy.stats)
-                results_for_query[f"BetaShap (U){num_t}"] = harness.compute_beta_shap(num_iterations=num_t, beta_a=0.5, beta_b=0.5, seed=SEED)
-
         results_for_query["LOO"] = harness.compute_loo()
 
         exact_scores = results_for_query.get("Exact")
-        # print("TYPE EXACT SHAP OUTPUT: ", type(exact_scores))
-        # df_exact_shap.loc[i] = [query, list(exact_scores), list(flags)]
+
         df_exact_shap.loc[i, "query"] = query
         df_exact_shap.loc[i, "scores"] = np.array(exact_scores)
         df_exact_shap.loc[i, "doc_flags"] = flags
-        print("RESULT EXACT SHAPE ", df_exact_shap)
-        # print("EXACT SCORES: ", exact_scores)
+
         if exact_scores is not None: # proceed if the ground truth scores are avaialble for this query
             positive_exact_score = np.clip(exact_scores, a_min=0.0, a_max=None) # FOR NDGC SCORE COMPUTATION
             for method, approx_scores in results_for_query.items(): # Iterate over each method and its attributed scores
