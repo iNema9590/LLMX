@@ -1,0 +1,1301 @@
+Question_Index,Query,Method,Pearson,Spearman,Num_Items
+0,total number of death row inmates in the us,ContextCite32,0.980727323424145,0.7939393939393938,10
+0,total number of death row inmates in the us,WSS32,0.9743080197528776,0.7454545454545454,10
+0,total number of death row inmates in the us,ContextCite64,0.9801925812630726,0.7696969696969697,10
+0,total number of death row inmates in the us,WSS64,0.9920834335568762,0.9515151515151514,10
+0,total number of death row inmates in the us,ContextCite100,0.9905115404853996,0.8303030303030302,10
+0,total number of death row inmates in the us,WSS100,0.9938756081453716,0.9151515151515152,10
+0,total number of death row inmates in the us,TMC5,0.9714332617893638,0.6242424242424242,10
+0,total number of death row inmates in the us,BetaShap (U)5,0.9547083449493872,0.5636363636363636,10
+0,total number of death row inmates in the us,TMC10,0.9908404399083427,0.8787878787878788,10
+0,total number of death row inmates in the us,BetaShap (U)10,0.9748329670675909,0.8424242424242423,10
+0,total number of death row inmates in the us,TMC20,0.9913774489254517,0.9272727272727272,10
+0,total number of death row inmates in the us,BetaShap (U)20,0.9562236840879793,0.8424242424242423,10
+0,total number of death row inmates in the us,LOO,0.9613941710765275,0.4666666666666666,10
+1,big little lies season 2 how many episodes,ContextCite32,0.886524787734771,0.7454545454545454,10
+1,big little lies season 2 how many episodes,WSS32,0.8835336842917763,0.9030303030303028,10
+1,big little lies season 2 how many episodes,ContextCite64,0.9813569338450153,0.9636363636363635,10
+1,big little lies season 2 how many episodes,WSS64,0.9418948567769165,0.7939393939393938,10
+1,big little lies season 2 how many episodes,ContextCite100,0.9806284146202762,0.9300954818304988,10
+1,big little lies season 2 how many episodes,WSS100,0.9645100800135546,0.9151515151515152,10
+1,big little lies season 2 how many episodes,TMC5,0.9013212318626074,0.9393939393939393,10
+1,big little lies season 2 how many episodes,BetaShap (U)5,0.8154710662750722,0.7818181818181817,10
+1,big little lies season 2 how many episodes,TMC10,0.8750946395494892,0.8787878787878788,10
+1,big little lies season 2 how many episodes,BetaShap (U)10,0.7878422858848375,0.8303030303030302,10
+1,big little lies season 2 how many episodes,TMC20,0.9722793931904774,0.9757575757575757,10
+1,big little lies season 2 how many episodes,BetaShap (U)20,0.9031195345472357,0.8666666666666665,10
+1,big little lies season 2 how many episodes,LOO,0.8531126758595959,0.7575757575757575,10
+2,who sang waiting for a girl like you,ContextCite32,0.9949343562938578,0.9151515151515152,10
+2,who sang waiting for a girl like you,WSS32,0.9938574853112112,0.7696969696969697,10
+2,who sang waiting for a girl like you,ContextCite64,0.9906463669349362,0.7939393939393938,10
+2,who sang waiting for a girl like you,WSS64,0.9948194057419666,0.8424242424242423,10
+2,who sang waiting for a girl like you,ContextCite100,0.9922711448607481,0.8545454545454544,10
+2,who sang waiting for a girl like you,WSS100,0.993412088319226,0.7696969696969697,10
+2,who sang waiting for a girl like you,TMC5,0.7811202976688977,0.309090909090909,10
+2,who sang waiting for a girl like you,BetaShap (U)5,0.030178310404263692,-0.12727272727272726,10
+2,who sang waiting for a girl like you,TMC10,0.9281405053203016,0.406060606060606,10
+2,who sang waiting for a girl like you,BetaShap (U)10,0.6530822902396412,0.18787878787878787,10
+2,who sang waiting for a girl like you,TMC20,0.9728236142691576,0.41818181818181815,10
+2,who sang waiting for a girl like you,BetaShap (U)20,0.7367864777959611,0.17575757575757575,10
+2,who sang waiting for a girl like you,LOO,0.9745494236519638,-0.13939393939393938,10
+3,where do you cross the arctic circle in norway,ContextCite32,0.9250346880718053,0.3404271044608361,10
+3,where do you cross the arctic circle in norway,WSS32,0.8924625779129799,0.6443798763008685,10
+3,where do you cross the arctic circle in norway,ContextCite64,0.9892202611731952,0.8328305948416885,10
+3,where do you cross the arctic circle in norway,WSS64,0.9738428853570313,0.686933264358473,10
+3,where do you cross the arctic circle in norway,ContextCite100,0.9834875115053308,0.7416447632896789,10
+3,where do you cross the arctic circle in norway,WSS100,0.9952982296180309,0.6626170426112704,10
+3,where do you cross the arctic circle in norway,TMC5,0.9554181187486004,0.6139845991168652,10
+3,where do you cross the arctic circle in norway,BetaShap (U)5,0.996008915468362,0.857146816588891,10
+3,where do you cross the arctic circle in norway,TMC10,0.881979709345088,0.7294866524160775,10
+3,where do you cross the arctic circle in norway,BetaShap (U)10,0.866579629739265,0.8632258720256917,10
+3,where do you cross the arctic circle in norway,TMC20,0.9417948051862798,0.8875420937728943,10
+3,where do you cross the arctic circle in norway,BetaShap (U)20,0.8672193313316663,0.9544117035777013,10
+3,where do you cross the arctic circle in norway,LOO,0.511451633802535,0.07317073170731708,10
+4,who is the main character in green eggs and ham,ContextCite32,0.6595471779569607,0.6121212121212121,10
+4,who is the main character in green eggs and ham,WSS32,0.8560736684663799,0.7333333333333332,10
+4,who is the main character in green eggs and ham,ContextCite64,0.8547840277305954,0.8181818181818182,10
+4,who is the main character in green eggs and ham,WSS64,0.9329634954059504,0.7575757575757575,10
+4,who is the main character in green eggs and ham,ContextCite100,0.9197793552246081,0.8545454545454544,10
+4,who is the main character in green eggs and ham,WSS100,0.954676587197498,0.8666666666666665,10
+4,who is the main character in green eggs and ham,TMC5,0.8921528116785449,0.7212121212121211,10
+4,who is the main character in green eggs and ham,BetaShap (U)5,0.8308825093219286,0.7575757575757575,10
+4,who is the main character in green eggs and ham,TMC10,0.9035355249430284,0.7212121212121211,10
+4,who is the main character in green eggs and ham,BetaShap (U)10,0.8189235173096252,0.7575757575757575,10
+4,who is the main character in green eggs and ham,TMC20,0.9522793662815673,0.9030303030303028,10
+4,who is the main character in green eggs and ham,BetaShap (U)20,0.9111572686770437,0.8545454545454544,10
+4,who is the main character in green eggs and ham,LOO,0.467996612534977,0.2727272727272727,10
+5,do veins carry blood to the heart or away,ContextCite32,0.9426295095143664,0.7575757575757575,10
+5,do veins carry blood to the heart or away,WSS32,0.8868927164394439,0.5878787878787878,10
+5,do veins carry blood to the heart or away,ContextCite64,0.9832408095148477,0.8666666666666665,10
+5,do veins carry blood to the heart or away,WSS64,0.9045750922291352,0.6242424242424242,10
+5,do veins carry blood to the heart or away,ContextCite100,0.970603184907072,0.9030303030303028,10
+5,do veins carry blood to the heart or away,WSS100,0.9735122513685367,0.9272727272727272,10
+5,do veins carry blood to the heart or away,TMC5,0.8949877136031175,0.7818181818181817,10
+5,do veins carry blood to the heart or away,BetaShap (U)5,0.8164811088176696,0.9030303030303028,10
+5,do veins carry blood to the heart or away,TMC10,0.927362547964832,0.9272727272727272,10
+5,do veins carry blood to the heart or away,BetaShap (U)10,0.7992818781443208,0.8787878787878788,10
+5,do veins carry blood to the heart or away,TMC20,0.9476873282036502,0.9515151515151514,10
+5,do veins carry blood to the heart or away,BetaShap (U)20,0.8697179832802506,0.8909090909090909,10
+5,do veins carry blood to the heart or away,LOO,0.86241702685539,0.8303030303030302,10
+6,who played charlie bucket in the original charlie and the chocolate factory,ContextCite32,0.8772794453658911,0.8060606060606059,10
+6,who played charlie bucket in the original charlie and the chocolate factory,WSS32,0.9464493828985845,0.8181818181818182,10
+6,who played charlie bucket in the original charlie and the chocolate factory,ContextCite64,0.933281311268923,0.7575757575757575,10
+6,who played charlie bucket in the original charlie and the chocolate factory,WSS64,0.9499497177402033,0.7333333333333332,10
+6,who played charlie bucket in the original charlie and the chocolate factory,ContextCite100,0.9700299617237813,0.8545454545454544,10
+6,who played charlie bucket in the original charlie and the chocolate factory,WSS100,0.9812067690324524,0.9393939393939393,10
+6,who played charlie bucket in the original charlie and the chocolate factory,TMC5,0.9621177353855818,0.8424242424242423,10
+6,who played charlie bucket in the original charlie and the chocolate factory,BetaShap (U)5,0.8964056565758276,0.8060606060606059,10
+6,who played charlie bucket in the original charlie and the chocolate factory,TMC10,0.9597036619224139,0.9151515151515152,10
+6,who played charlie bucket in the original charlie and the chocolate factory,BetaShap (U)10,0.8274882905943133,0.9030303030303028,10
+6,who played charlie bucket in the original charlie and the chocolate factory,TMC20,0.965432528222576,0.9757575757575757,10
+6,who played charlie bucket in the original charlie and the chocolate factory,BetaShap (U)20,0.8892916977068296,0.9757575757575757,10
+6,who played charlie bucket in the original charlie and the chocolate factory,LOO,0.559743080623566,0.32121212121212117,10
+7,what is 1 radian in terms of pi,ContextCite32,0.8944447423545897,0.7454545454545454,10
+7,what is 1 radian in terms of pi,WSS32,0.8277054313793835,0.6727272727272726,10
+7,what is 1 radian in terms of pi,ContextCite64,0.913060273257273,0.790277206784084,10
+7,what is 1 radian in terms of pi,WSS64,0.9533059177987575,0.8787878787878788,10
+7,what is 1 radian in terms of pi,ContextCite100,0.945826734360658,0.8787878787878788,10
+7,what is 1 radian in terms of pi,WSS100,0.9681525279623231,0.8666666666666665,10
+7,what is 1 radian in terms of pi,TMC5,0.8947867404084391,0.8545454545454544,10
+7,what is 1 radian in terms of pi,BetaShap (U)5,0.7798754637565841,0.6121212121212121,10
+7,what is 1 radian in terms of pi,TMC10,0.819603822717952,0.8424242424242423,10
+7,what is 1 radian in terms of pi,BetaShap (U)10,0.5976257082415121,0.4787878787878787,10
+7,what is 1 radian in terms of pi,TMC20,0.8662825367183778,0.8424242424242423,10
+7,what is 1 radian in terms of pi,BetaShap (U)20,0.5003513292217914,0.4545454545454545,10
+7,what is 1 radian in terms of pi,LOO,-0.1470736427186957,0.06666666666666665,10
+8,when does season 5 of bates motel come out,ContextCite32,0.8986231288682328,0.6242424242424242,10
+8,when does season 5 of bates motel come out,WSS32,0.9841570854018603,0.8545454545454544,10
+8,when does season 5 of bates motel come out,ContextCite64,0.9483747576027326,0.7939393939393938,10
+8,when does season 5 of bates motel come out,WSS64,0.9761490314429192,0.8787878787878788,10
+8,when does season 5 of bates motel come out,ContextCite100,0.9788782518707096,0.8545454545454544,10
+8,when does season 5 of bates motel come out,WSS100,0.9816970821076085,0.9636363636363635,10
+8,when does season 5 of bates motel come out,TMC5,0.6238475746598017,0.3939393939393939,10
+8,when does season 5 of bates motel come out,BetaShap (U)5,0.4948553100058103,0.2606060606060606,10
+8,when does season 5 of bates motel come out,TMC10,0.9228043905343194,0.6,10
+8,when does season 5 of bates motel come out,BetaShap (U)10,0.5440535983254603,0.4545454545454545,10
+8,when does season 5 of bates motel come out,TMC20,0.9848556415056696,0.8424242424242423,10
+8,when does season 5 of bates motel come out,BetaShap (U)20,0.7875395860361892,0.5515151515151515,10
+8,when does season 5 of bates motel come out,LOO,0.3697272736925851,0.4424242424242424,10
+9,how many episodes are in series 7 game of thrones,ContextCite32,0.8612868129837151,0.8909090909090909,10
+9,how many episodes are in series 7 game of thrones,WSS32,0.9482632269151684,0.8787878787878788,10
+9,how many episodes are in series 7 game of thrones,ContextCite64,0.95278028292179,0.9483326481409007,10
+9,how many episodes are in series 7 game of thrones,WSS64,0.8951799546147505,0.7818181818181817,10
+9,how many episodes are in series 7 game of thrones,ContextCite100,0.950605452462941,0.8545454545454544,10
+9,how many episodes are in series 7 game of thrones,WSS100,0.9349562031304155,0.8060606060606059,10
+9,how many episodes are in series 7 game of thrones,TMC5,0.8646679780569785,0.6363636363636362,10
+9,how many episodes are in series 7 game of thrones,BetaShap (U)5,0.46924902594348805,0.12727272727272726,10
+9,how many episodes are in series 7 game of thrones,TMC10,0.9055227380044335,0.709090909090909,10
+9,how many episodes are in series 7 game of thrones,BetaShap (U)10,0.6423727075459279,0.406060606060606,10
+9,how many episodes are in series 7 game of thrones,TMC20,0.9427053115515495,0.6242424242424242,10
+9,how many episodes are in series 7 game of thrones,BetaShap (U)20,0.7228902528289981,0.5272727272727272,10
+9,how many episodes are in series 7 game of thrones,LOO,0.7723516973498117,0.6969696969696969,10
+10,who is next in line to be the monarch of england,ContextCite32,0.967688362183974,0.9393939393939393,10
+10,who is next in line to be the monarch of england,WSS32,0.9315385066231172,0.5757575757575757,10
+10,who is next in line to be the monarch of england,ContextCite64,0.9839382674468687,0.8545454545454544,10
+10,who is next in line to be the monarch of england,WSS64,0.9754785983119022,0.7575757575757575,10
+10,who is next in line to be the monarch of england,ContextCite100,0.9781770504450935,0.754658036542014,10
+10,who is next in line to be the monarch of england,WSS100,0.9856754530686381,0.9030303030303028,10
+10,who is next in line to be the monarch of england,TMC5,0.8795453325477749,0.7212121212121211,10
+10,who is next in line to be the monarch of england,BetaShap (U)5,0.9550750413418827,0.6727272727272726,10
+10,who is next in line to be the monarch of england,TMC10,0.8572046434534244,0.7333333333333332,10
+10,who is next in line to be the monarch of england,BetaShap (U)10,0.8038621922147308,0.6848484848484848,10
+10,who is next in line to be the monarch of england,TMC20,0.9276779651332449,0.8424242424242423,10
+10,who is next in line to be the monarch of england,BetaShap (U)20,0.825117106760853,0.8909090909090909,10
+10,who is next in line to be the monarch of england,LOO,0.575445155663674,0.006060606060606061,10
+11,who is in charge of enforcing the pendleton act of 1883,ContextCite32,0.8823391850405085,0.6363636363636362,10
+11,who is in charge of enforcing the pendleton act of 1883,WSS32,0.9457360525344757,0.9272727272727272,10
+11,who is in charge of enforcing the pendleton act of 1883,ContextCite64,0.9362216405338998,0.8024353176576852,10
+11,who is in charge of enforcing the pendleton act of 1883,WSS64,0.961283027937752,0.9636363636363635,10
+11,who is in charge of enforcing the pendleton act of 1883,ContextCite100,0.9591409996055249,0.7818181818181817,10
+11,who is in charge of enforcing the pendleton act of 1883,WSS100,0.9924823099688573,0.9515151515151514,10
+11,who is in charge of enforcing the pendleton act of 1883,TMC5,0.8961126588109312,0.8545454545454544,10
+11,who is in charge of enforcing the pendleton act of 1883,BetaShap (U)5,0.8989772798861545,0.6727272727272726,10
+11,who is in charge of enforcing the pendleton act of 1883,TMC10,0.8944066496236232,0.8787878787878788,10
+11,who is in charge of enforcing the pendleton act of 1883,BetaShap (U)10,0.7918437537154441,0.7818181818181817,10
+11,who is in charge of enforcing the pendleton act of 1883,TMC20,0.9387486247407069,0.9272727272727272,10
+11,who is in charge of enforcing the pendleton act of 1883,BetaShap (U)20,0.8033360254526762,0.8303030303030302,10
+11,who is in charge of enforcing the pendleton act of 1883,LOO,0.7231903368319816,0.35757575757575755,10
+12,what is the name of latest version of android,ContextCite32,0.7734324543533124,0.7818181818181817,10
+12,what is the name of latest version of android,WSS32,0.7338267037265199,0.2606060606060606,10
+12,what is the name of latest version of android,ContextCite64,0.9269999901305209,0.8060606060606059,10
+12,what is the name of latest version of android,WSS64,0.874217186939323,0.5757575757575757,10
+12,what is the name of latest version of android,ContextCite100,0.9067414138044978,0.6606060606060605,10
+12,what is the name of latest version of android,WSS100,0.8765330274571003,0.49090909090909085,10
+12,what is the name of latest version of android,TMC5,0.8237600825363748,0.9272727272727272,10
+12,what is the name of latest version of android,BetaShap (U)5,0.7543931079647778,0.5878787878787878,10
+12,what is the name of latest version of android,TMC10,0.8814009818708176,0.8424242424242423,10
+12,what is the name of latest version of android,BetaShap (U)10,0.6393177006482779,0.6121212121212121,10
+12,what is the name of latest version of android,TMC20,0.9143115452679427,0.8181818181818182,10
+12,what is the name of latest version of android,BetaShap (U)20,0.7131511805027062,0.7333333333333332,10
+12,what is the name of latest version of android,LOO,0.5030002010481566,0.406060606060606,10
+13,why was there so much interest in cuba both before and after the civil war,ContextCite32,0.9983033695344974,0.9393939393939393,10
+13,why was there so much interest in cuba both before and after the civil war,WSS32,0.9993074956631737,0.8545454545454544,10
+13,why was there so much interest in cuba both before and after the civil war,ContextCite64,0.9993409964069422,0.9393939393939393,10
+13,why was there so much interest in cuba both before and after the civil war,WSS64,0.9997858036278503,0.8666666666666665,10
+13,why was there so much interest in cuba both before and after the civil war,ContextCite100,0.9994848350872555,0.9030303030303028,10
+13,why was there so much interest in cuba both before and after the civil war,WSS100,0.9999209030663907,0.9757575757575757,10
+13,why was there so much interest in cuba both before and after the civil war,TMC5,0.9996441771120052,0.8787878787878788,10
+13,why was there so much interest in cuba both before and after the civil war,BetaShap (U)5,0.9966624031264291,0.8787878787878788,10
+13,why was there so much interest in cuba both before and after the civil war,TMC10,0.9997461571613633,0.8909090909090909,10
+13,why was there so much interest in cuba both before and after the civil war,BetaShap (U)10,0.9957212075731275,0.6606060606060605,10
+13,why was there so much interest in cuba both before and after the civil war,TMC20,0.9997824436364435,0.9151515151515152,10
+13,why was there so much interest in cuba both before and after the civil war,BetaShap (U)20,0.9986948632788594,0.7696969696969697,10
+13,why was there so much interest in cuba both before and after the civil war,LOO,0.9961531764498507,0.8424242424242423,10
+14,when did veterans day start being called veterans day,ContextCite32,0.96088715604513,0.8666666666666665,10
+14,when did veterans day start being called veterans day,WSS32,0.8369064589299073,0.8545454545454544,10
+14,when did veterans day start being called veterans day,ContextCite64,0.9505609887869382,0.7416447632896788,10
+14,when did veterans day start being called veterans day,WSS64,0.8403315350322204,0.9030303030303028,10
+14,when did veterans day start being called veterans day,ContextCite100,0.9228203369603156,0.7575757575757575,10
+14,when did veterans day start being called veterans day,WSS100,0.9196784470337487,0.9515151515151514,10
+14,when did veterans day start being called veterans day,TMC5,0.6749136651863568,0.3939393939393939,10
+14,when did veterans day start being called veterans day,BetaShap (U)5,0.868435968667429,0.7333333333333332,10
+14,when did veterans day start being called veterans day,TMC10,0.8502768825999938,0.7939393939393938,10
+14,when did veterans day start being called veterans day,BetaShap (U)10,0.8932251012415423,0.7333333333333332,10
+14,when did veterans day start being called veterans day,TMC20,0.9155485511253785,0.8424242424242423,10
+14,when did veterans day start being called veterans day,BetaShap (U)20,0.8984320989174241,0.7696969696969697,10
+14,when did veterans day start being called veterans day,LOO,0.33317399591785213,0.4666666666666666,10
+15,when did big air snowboarding become an olympic sport,ContextCite32,0.7968435973635217,0.5957474328064633,10
+15,when did big air snowboarding become an olympic sport,WSS32,0.7537998204875282,0.5227987675648555,10
+15,when did big air snowboarding become an olympic sport,ContextCite64,0.9000863540328464,0.7841981513472833,10
+15,when did big air snowboarding become an olympic sport,WSS64,0.9002697115968433,0.7659609850368815,10
+15,when did big air snowboarding become an olympic sport,ContextCite100,0.9263817504249972,0.8024353176576853,10
+15,when did big air snowboarding become an olympic sport,WSS100,0.9408160697543336,0.8936211492096949,10
+15,when did big air snowboarding become an olympic sport,TMC5,0.5967616005829945,0.3039527718400323,10
+15,when did big air snowboarding become an olympic sport,BetaShap (U)5,0.6584556090004807,0.49848254581765294,10
+15,when did big air snowboarding become an olympic sport,TMC10,0.5265389068615506,0.3890595479552414,10
+15,when did big air snowboarding become an olympic sport,BetaShap (U)10,0.24910097807101286,0.24924127290882647,10
+15,when did big air snowboarding become an olympic sport,TMC20,0.6499547532072899,0.5471149893120582,10
+15,when did big air snowboarding become an olympic sport,BetaShap (U)20,0.35143510295343194,0.5349568784384567,10
+15,when did big air snowboarding become an olympic sport,LOO,0.7813073241428713,0.20731707317073175,10
+16,who played in the most world series games,ContextCite32,0.8965201775193001,0.8060606060606059,10
+16,who played in the most world series games,WSS32,0.9392717999602536,0.8666666666666665,10
+16,who played in the most world series games,ContextCite64,0.9451470040638564,0.9030303030303028,10
+16,who played in the most world series games,WSS64,0.9656316539718414,0.9151515151515152,10
+16,who played in the most world series games,ContextCite100,0.9387323060690407,0.8787878787878788,10
+16,who played in the most world series games,WSS100,0.9924989635350208,0.9878787878787878,10
+16,who played in the most world series games,TMC5,0.8105647812228625,0.7454545454545454,10
+16,who played in the most world series games,BetaShap (U)5,0.7747725420802204,0.7696969696969697,10
+16,who played in the most world series games,TMC10,0.8335932104640017,0.8666666666666665,10
+16,who played in the most world series games,BetaShap (U)10,0.74341427213453,0.7818181818181817,10
+16,who played in the most world series games,TMC20,0.9022577631027178,0.9151515151515152,10
+16,who played in the most world series games,BetaShap (U)20,0.7706311504739208,0.8060606060606059,10
+16,who played in the most world series games,LOO,0.43289790329800837,0.1515151515151515,10
+17,who sings i can't stop this feeling anymore,ContextCite32,0.9449853891713575,0.9272727272727272,10
+17,who sings i can't stop this feeling anymore,WSS32,0.778219485880273,0.7454545454545454,10
+17,who sings i can't stop this feeling anymore,ContextCite64,0.9506635722471658,0.9300954818304988,10
+17,who sings i can't stop this feeling anymore,WSS64,0.8787458005897697,0.7696969696969697,10
+17,who sings i can't stop this feeling anymore,ContextCite100,0.9631393890598371,0.8666666666666665,10
+17,who sings i can't stop this feeling anymore,WSS100,0.9688465709225129,0.8666666666666665,10
+17,who sings i can't stop this feeling anymore,TMC5,0.8484788867264421,0.8545454545454544,10
+17,who sings i can't stop this feeling anymore,BetaShap (U)5,0.8612377323848173,0.9030303030303028,10
+17,who sings i can't stop this feeling anymore,TMC10,0.9084844112657922,0.9030303030303028,10
+17,who sings i can't stop this feeling anymore,BetaShap (U)10,0.8370303558881349,0.9515151515151514,10
+17,who sings i can't stop this feeling anymore,TMC20,0.9420026184376052,0.9393939393939393,10
+17,who sings i can't stop this feeling anymore,BetaShap (U)20,0.8972923459897645,0.9030303030303028,10
+17,who sings i can't stop this feeling anymore,LOO,0.7123552804175737,0.7939393939393938,10
+18,who is the month of may named after,ContextCite32,0.7685430606216272,0.6848484848484848,10
+18,who is the month of may named after,WSS32,0.7168148761835894,0.5636363636363636,10
+18,who is the month of may named after,ContextCite64,0.7976416816952261,0.8181818181818182,10
+18,who is the month of may named after,WSS64,0.8364381325166588,0.6242424242424242,10
+18,who is the month of may named after,ContextCite100,0.7438642559993314,0.8909090909090909,10
+18,who is the month of may named after,WSS100,0.8818367776370009,0.709090909090909,10
+18,who is the month of may named after,TMC5,0.8016570336949508,0.6606060606060605,10
+18,who is the month of may named after,BetaShap (U)5,0.7772110912603158,0.7575757575757575,10
+18,who is the month of may named after,TMC10,0.9086871101434119,0.9515151515151514,10
+18,who is the month of may named after,BetaShap (U)10,0.7909516701053494,0.7939393939393938,10
+18,who is the month of may named after,TMC20,0.9328267263865234,0.9393939393939393,10
+18,who is the month of may named after,BetaShap (U)20,0.8441063083823329,0.7939393939393938,10
+18,who is the month of may named after,LOO,0.8794797980227366,0.8545454545454544,10
+19,who has the most petroleum in the world,ContextCite32,0.906877032992363,0.5878787878787878,10
+19,who has the most petroleum in the world,WSS32,0.9647402026175185,0.6969696969696969,10
+19,who has the most petroleum in the world,ContextCite64,0.9810632866758963,0.6,10
+19,who has the most petroleum in the world,WSS64,0.9738156568358305,0.7696969696969697,10
+19,who has the most petroleum in the world,ContextCite100,0.9789523583984137,0.7454545454545454,10
+19,who has the most petroleum in the world,WSS100,0.9736167391916634,0.7818181818181817,10
+19,who has the most petroleum in the world,TMC5,0.7932074621535452,0.5636363636363636,10
+19,who has the most petroleum in the world,BetaShap (U)5,0.45761355467959375,0.16363636363636364,10
+19,who has the most petroleum in the world,TMC10,0.8226180359766672,0.7818181818181817,10
+19,who has the most petroleum in the world,BetaShap (U)10,0.5195275375239583,0.5636363636363636,10
+19,who has the most petroleum in the world,TMC20,0.9125573006514759,0.7818181818181817,10
+19,who has the most petroleum in the world,BetaShap (U)20,0.5837125610449481,0.5030303030303029,10
+19,who has the most petroleum in the world,LOO,0.7883229837417747,0.18787878787878787,10
+20,who is the sister of for king and country,ContextCite32,0.8701375395805923,0.8060606060606059,10
+20,who is the sister of for king and country,WSS32,0.9558659696549074,0.9515151515151514,10
+20,who is the sister of for king and country,ContextCite64,0.9111268843294897,0.8303030303030302,10
+20,who is the sister of for king and country,WSS64,0.9628112420650077,0.9878787878787878,10
+20,who is the sister of for king and country,ContextCite100,0.9580153988609155,0.9151515151515152,10
+20,who is the sister of for king and country,WSS100,0.9818503682996872,0.9999999999999999,10
+20,who is the sister of for king and country,TMC5,0.8911420219719453,0.8424242424242423,10
+20,who is the sister of for king and country,BetaShap (U)5,0.7424719608280785,0.7212121212121211,10
+20,who is the sister of for king and country,TMC10,0.9313629066991169,0.8303030303030302,10
+20,who is the sister of for king and country,BetaShap (U)10,0.7628947783883213,0.5636363636363636,10
+20,who is the sister of for king and country,TMC20,0.9864384607887722,0.9757575757575757,10
+20,who is the sister of for king and country,BetaShap (U)20,0.8383548335200022,0.7818181818181817,10
+20,who is the sister of for king and country,LOO,0.87441165973387,0.7696969696969697,10
+21,who developed the first periodic table with 8 columns,ContextCite32,0.7873322293149216,0.6363636363636362,10
+21,who developed the first periodic table with 8 columns,WSS32,0.6271129129319782,0.5151515151515151,10
+21,who developed the first periodic table with 8 columns,ContextCite64,0.7336617245775843,0.6564911374796382,10
+21,who developed the first periodic table with 8 columns,WSS64,0.9194227432427955,0.8666666666666665,10
+21,who developed the first periodic table with 8 columns,ContextCite100,0.780843046533022,0.8060606060606059,10
+21,who developed the first periodic table with 8 columns,WSS100,0.8936166685346518,0.9393939393939393,10
+21,who developed the first periodic table with 8 columns,TMC5,0.8354544605300354,0.7212121212121211,10
+21,who developed the first periodic table with 8 columns,BetaShap (U)5,0.7804742061573329,0.5757575757575757,10
+21,who developed the first periodic table with 8 columns,TMC10,0.8809651290373706,0.8181818181818182,10
+21,who developed the first periodic table with 8 columns,BetaShap (U)10,0.8683237994483508,0.6484848484848483,10
+21,who developed the first periodic table with 8 columns,TMC20,0.9062685921038875,0.8666666666666665,10
+21,who developed the first periodic table with 8 columns,BetaShap (U)20,0.8713436308993396,0.6,10
+21,who developed the first periodic table with 8 columns,LOO,-0.08302395543260686,0.0303030303030303,10
+22,who plays skyler on lab rats elite force,ContextCite32,0.9191792118959352,0.9393939393939393,10
+22,who plays skyler on lab rats elite force,WSS32,0.8185803251134552,0.9515151515151514,10
+22,who plays skyler on lab rats elite force,ContextCite64,0.9303812368583961,0.8909090909090909,10
+22,who plays skyler on lab rats elite force,WSS64,0.8689278318651201,0.9030303030303028,10
+22,who plays skyler on lab rats elite force,ContextCite100,0.9474576761661619,0.9515151515151514,10
+22,who plays skyler on lab rats elite force,WSS100,0.9549190079466545,0.9151515151515152,10
+22,who plays skyler on lab rats elite force,TMC5,0.8303244989157711,0.8787878787878788,10
+22,who plays skyler on lab rats elite force,BetaShap (U)5,0.8447292467566073,0.6484848484848483,10
+22,who plays skyler on lab rats elite force,TMC10,0.7844477025708066,0.8666666666666665,10
+22,who plays skyler on lab rats elite force,BetaShap (U)10,0.7917501515414244,0.7696969696969697,10
+22,who plays skyler on lab rats elite force,TMC20,0.8760325788109771,0.8666666666666665,10
+22,who plays skyler on lab rats elite force,BetaShap (U)20,0.7817545714664744,0.5757575757575757,10
+22,who plays skyler on lab rats elite force,LOO,0.593266873426989,0.5272727272727272,10
+23,when is season seven of game of thrones coming out,ContextCite32,0.7424201162043835,0.6242424242424242,10
+23,when is season seven of game of thrones coming out,WSS32,0.6636763052683727,0.7333333333333332,10
+23,when is season seven of game of thrones coming out,ContextCite64,0.7592077623000107,0.5757575757575757,10
+23,when is season seven of game of thrones coming out,WSS64,0.7919329412590341,0.8909090909090909,10
+23,when is season seven of game of thrones coming out,ContextCite100,0.8584468902227962,0.7939393939393938,10
+23,when is season seven of game of thrones coming out,WSS100,0.826601571392965,0.9151515151515152,10
+23,when is season seven of game of thrones coming out,TMC5,0.8115819262588794,0.709090909090909,10
+23,when is season seven of game of thrones coming out,BetaShap (U)5,0.7532765695042383,0.7212121212121211,10
+23,when is season seven of game of thrones coming out,TMC10,0.9633196833112326,0.9151515151515152,10
+23,when is season seven of game of thrones coming out,BetaShap (U)10,0.8915434939160997,0.8181818181818182,10
+23,when is season seven of game of thrones coming out,TMC20,0.953649069545583,0.9757575757575757,10
+23,when is season seven of game of thrones coming out,BetaShap (U)20,0.8601681398333029,0.7454545454545454,10
+23,when is season seven of game of thrones coming out,LOO,0.4860525149915591,0.7333333333333332,10
+24,who went home on rupaul's drag race season 10 episode 4,ContextCite32,0.9942939333778475,0.6727272727272726,10
+24,who went home on rupaul's drag race season 10 episode 4,WSS32,0.9956392927301089,0.8787878787878788,10
+24,who went home on rupaul's drag race season 10 episode 4,ContextCite64,0.9944561593225991,0.4666666666666666,10
+24,who went home on rupaul's drag race season 10 episode 4,WSS64,0.9974643840557083,0.9393939393939393,10
+24,who went home on rupaul's drag race season 10 episode 4,ContextCite100,0.9958810273403619,0.735565707852878,10
+24,who went home on rupaul's drag race season 10 episode 4,WSS100,0.9981875733817012,0.9393939393939393,10
+24,who went home on rupaul's drag race season 10 episode 4,TMC5,0.98424643876323,0.7696969696969697,10
+24,who went home on rupaul's drag race season 10 episode 4,BetaShap (U)5,0.9622487338410126,0.35757575757575755,10
+24,who went home on rupaul's drag race season 10 episode 4,TMC10,0.9887046721696111,0.9272727272727272,10
+24,who went home on rupaul's drag race season 10 episode 4,BetaShap (U)10,0.89401925748194,0.6242424242424242,10
+24,who went home on rupaul's drag race season 10 episode 4,TMC20,0.9912996816788028,0.9151515151515152,10
+24,who went home on rupaul's drag race season 10 episode 4,BetaShap (U)20,0.9385940108136718,0.6848484848484848,10
+24,who went home on rupaul's drag race season 10 episode 4,LOO,0.9923069194377836,0.28484848484848485,10
+25,when did nigeria become a federation of 19 states,ContextCite32,0.9649376292743227,0.7939393939393938,10
+25,when did nigeria become a federation of 19 states,WSS32,0.9464340089593412,0.7696969696969697,10
+25,when did nigeria become a federation of 19 states,ContextCite64,0.9818826956271051,0.7818181818181817,10
+25,when did nigeria become a federation of 19 states,WSS64,0.981769630289911,0.9272727272727272,10
+25,when did nigeria become a federation of 19 states,ContextCite100,0.9933371348218233,0.9393939393939393,10
+25,when did nigeria become a federation of 19 states,WSS100,0.989759048766639,0.9878787878787878,10
+25,when did nigeria become a federation of 19 states,TMC5,0.9323535069369376,0.6121212121212121,10
+25,when did nigeria become a federation of 19 states,BetaShap (U)5,0.9034397780668767,0.6484848484848483,10
+25,when did nigeria become a federation of 19 states,TMC10,0.9443807869286496,0.8181818181818182,10
+25,when did nigeria become a federation of 19 states,BetaShap (U)10,0.8007114393884465,0.6727272727272726,10
+25,when did nigeria become a federation of 19 states,TMC20,0.9636776700764738,0.8787878787878788,10
+25,when did nigeria become a federation of 19 states,BetaShap (U)20,0.8215609477567918,0.6606060606060605,10
+25,when did nigeria become a federation of 19 states,LOO,0.9157815974736694,0.38181818181818183,10
+26,when did roller derby first appear in the press,ContextCite32,0.9550754521326459,0.5151515151515151,10
+26,when did roller derby first appear in the press,WSS32,0.9603947467978337,0.33333333333333326,10
+26,when did roller derby first appear in the press,ContextCite64,0.9844943784301609,0.7939393939393938,10
+26,when did roller derby first appear in the press,WSS64,0.9931899903592892,0.7212121212121211,10
+26,when did roller derby first appear in the press,ContextCite100,0.9908293533243622,0.7212121212121211,10
+26,when did roller derby first appear in the press,WSS100,0.9952113486592852,0.7818181818181817,10
+26,when did roller derby first appear in the press,TMC5,0.9724596674918067,0.7939393939393938,10
+26,when did roller derby first appear in the press,BetaShap (U)5,0.8233942720984861,0.38181818181818183,10
+26,when did roller derby first appear in the press,TMC10,0.9810125527077643,0.8060606060606059,10
+26,when did roller derby first appear in the press,BetaShap (U)10,0.8070484278326537,0.5030303030303029,10
+26,when did roller derby first appear in the press,TMC20,0.9915035752083882,0.8545454545454544,10
+26,when did roller derby first appear in the press,BetaShap (U)20,0.7919067097949006,0.10303030303030303,10
+26,when did roller derby first appear in the press,LOO,0.9742843986732868,0.6121212121212121,10
+27,what nba team has the highest winning percentage,ContextCite32,0.8197807895652448,0.5515151515151515,10
+27,what nba team has the highest winning percentage,WSS32,0.8603454100075681,0.5636363636363636,10
+27,what nba team has the highest winning percentage,ContextCite64,0.9429987239865831,0.49696992650327754,10
+27,what nba team has the highest winning percentage,WSS64,0.9301455987937393,0.7212121212121211,10
+27,what nba team has the highest winning percentage,ContextCite100,0.9655274400432264,0.5636363636363636,10
+27,what nba team has the highest winning percentage,WSS100,0.9752332298222729,0.8424242424242423,10
+27,what nba team has the highest winning percentage,TMC5,0.8648682951796889,0.5151515151515151,10
+27,what nba team has the highest winning percentage,BetaShap (U)5,0.9360208670383692,0.6121212121212121,10
+27,what nba team has the highest winning percentage,TMC10,0.837558055882693,0.6969696969696969,10
+27,what nba team has the highest winning percentage,BetaShap (U)10,0.8248467802618735,0.6727272727272726,10
+27,what nba team has the highest winning percentage,TMC20,0.9064010642475387,0.9272727272727272,10
+27,what nba team has the highest winning percentage,BetaShap (U)20,0.7063891850496627,0.7939393939393938,10
+27,what nba team has the highest winning percentage,LOO,0.6335152998562396,0.6969696969696969,10
+28,if there is a random change in the genetics of a small population it is termed,ContextCite32,0.8843448081756247,0.8545454545454544,10
+28,if there is a random change in the genetics of a small population it is termed,WSS32,0.8754660992066851,0.5151515151515151,10
+28,if there is a random change in the genetics of a small population it is termed,ContextCite64,0.9929214053436589,0.9019083851355777,10
+28,if there is a random change in the genetics of a small population it is termed,WSS64,0.9397258949559106,0.6727272727272726,10
+28,if there is a random change in the genetics of a small population it is termed,ContextCite100,0.9930424269492042,0.9567172612055054,10
+28,if there is a random change in the genetics of a small population it is termed,WSS100,0.9625940523165317,0.6606060606060605,10
+28,if there is a random change in the genetics of a small population it is termed,TMC5,0.9165383312666213,0.709090909090909,10
+28,if there is a random change in the genetics of a small population it is termed,BetaShap (U)5,0.9424497860933824,0.6242424242424242,10
+28,if there is a random change in the genetics of a small population it is termed,TMC10,0.9790331589940318,0.8424242424242423,10
+28,if there is a random change in the genetics of a small population it is termed,BetaShap (U)10,0.9694801631207628,0.709090909090909,10
+28,if there is a random change in the genetics of a small population it is termed,TMC20,0.9914699720911061,0.9030303030303028,10
+28,if there is a random change in the genetics of a small population it is termed,BetaShap (U)20,0.6613949656788539,0.709090909090909,10
+28,if there is a random change in the genetics of a small population it is termed,LOO,0.8231895740887706,0.13939393939393938,10
+29,who played vincent in nanny mcphee and the big bang,ContextCite32,0.9831846664491144,0.8666666666666665,10
+29,who played vincent in nanny mcphee and the big bang,WSS32,0.9311680090259957,0.7212121212121211,10
+29,who played vincent in nanny mcphee and the big bang,ContextCite64,0.9912782288836907,0.9393939393939393,10
+29,who played vincent in nanny mcphee and the big bang,WSS64,0.9793056130424522,0.7818181818181817,10
+29,who played vincent in nanny mcphee and the big bang,ContextCite100,0.9865578183690218,0.8787878787878788,10
+29,who played vincent in nanny mcphee and the big bang,WSS100,0.9838006615939802,0.5878787878787878,10
+29,who played vincent in nanny mcphee and the big bang,TMC5,0.7690887896013067,0.7818181818181817,10
+29,who played vincent in nanny mcphee and the big bang,BetaShap (U)5,0.3625466450888953,0.4424242424242424,10
+29,who played vincent in nanny mcphee and the big bang,TMC10,0.7580011720301111,0.8181818181818182,10
+29,who played vincent in nanny mcphee and the big bang,BetaShap (U)10,0.4363062687383345,0.5393939393939393,10
+29,who played vincent in nanny mcphee and the big bang,TMC20,0.8522707150800484,0.7818181818181817,10
+29,who played vincent in nanny mcphee and the big bang,BetaShap (U)20,0.5753626080062696,0.5515151515151515,10
+29,who played vincent in nanny mcphee and the big bang,LOO,0.9808693208737691,0.8424242424242423,10
+30,who played the eldest daughter in the sound of music,ContextCite32,0.9874412764483186,0.7333333333333332,10
+30,who played the eldest daughter in the sound of music,WSS32,0.9714050975068318,0.5636363636363636,10
+30,who played the eldest daughter in the sound of music,ContextCite64,0.9967239521662167,0.9515151515151514,10
+30,who played the eldest daughter in the sound of music,WSS64,0.9954836637201668,0.9393939393939393,10
+30,who played the eldest daughter in the sound of music,ContextCite100,0.9943415135413127,0.9151515151515152,10
+30,who played the eldest daughter in the sound of music,WSS100,0.9972926716385491,0.9636363636363635,10
+30,who played the eldest daughter in the sound of music,TMC5,0.978268892445053,0.7575757575757575,10
+30,who played the eldest daughter in the sound of music,BetaShap (U)5,0.8615360088265076,0.8909090909090909,10
+30,who played the eldest daughter in the sound of music,TMC10,0.9801630931871269,0.9393939393939393,10
+30,who played the eldest daughter in the sound of music,BetaShap (U)10,0.8716118032042164,0.8787878787878788,10
+30,who played the eldest daughter in the sound of music,TMC20,0.9895688961558236,0.9515151515151514,10
+30,who played the eldest daughter in the sound of music,BetaShap (U)20,0.8858498465936475,0.8545454545454544,10
+30,who played the eldest daughter in the sound of music,LOO,0.9673816655100816,0.17575757575757575,10
+31,who plays andy's teacher in parks and rec,ContextCite32,0.9161243484784094,0.23636363636363633,10
+31,who plays andy's teacher in parks and rec,WSS32,0.9423209335658508,0.6606060606060605,10
+31,who plays andy's teacher in parks and rec,ContextCite64,0.9777610128898174,0.7575757575757575,10
+31,who plays andy's teacher in parks and rec,WSS64,0.9831965075809418,0.8909090909090909,10
+31,who plays andy's teacher in parks and rec,ContextCite100,0.9824599830166066,0.8545454545454544,10
+31,who plays andy's teacher in parks and rec,WSS100,0.9935744549456814,0.9151515151515152,10
+31,who plays andy's teacher in parks and rec,TMC5,0.939561161186948,0.6242424242424242,10
+31,who plays andy's teacher in parks and rec,BetaShap (U)5,0.7921678665194181,0.3696969696969697,10
+31,who plays andy's teacher in parks and rec,TMC10,0.9791100276458198,0.6121212121212121,10
+31,who plays andy's teacher in parks and rec,BetaShap (U)10,0.6297826235418956,0.19999999999999998,10
+31,who plays andy's teacher in parks and rec,TMC20,0.9680365016461145,0.5757575757575757,10
+31,who plays andy's teacher in parks and rec,BetaShap (U)20,0.6459474745166275,0.32121212121212117,10
+31,who plays andy's teacher in parks and rec,LOO,0.9359592771471408,0.7696969696969697,10
+32,in which channel fifa world cup will be broadcasted,ContextCite32,0.9454653147482571,0.6727272727272726,10
+32,in which channel fifa world cup will be broadcasted,WSS32,0.9348844597692144,0.5878787878787878,10
+32,in which channel fifa world cup will be broadcasted,ContextCite64,0.9923349509374361,0.8666666666666665,10
+32,in which channel fifa world cup will be broadcasted,WSS64,0.9764388323074285,0.6606060606060605,10
+32,in which channel fifa world cup will be broadcasted,ContextCite100,0.9842467832522293,0.7212121212121211,10
+32,in which channel fifa world cup will be broadcasted,WSS100,0.9966150248014598,0.8666666666666665,10
+32,in which channel fifa world cup will be broadcasted,TMC5,0.9505975290313726,0.9151515151515152,10
+32,in which channel fifa world cup will be broadcasted,BetaShap (U)5,0.9810304554163328,0.8909090909090909,10
+32,in which channel fifa world cup will be broadcasted,TMC10,0.9374101304481164,0.7696969696969697,10
+32,in which channel fifa world cup will be broadcasted,BetaShap (U)10,0.8743163383676077,0.7454545454545454,10
+32,in which channel fifa world cup will be broadcasted,TMC20,0.9733570367591402,0.9151515151515152,10
+32,in which channel fifa world cup will be broadcasted,BetaShap (U)20,0.877599627953003,0.9393939393939393,10
+32,in which channel fifa world cup will be broadcasted,LOO,0.9405653176073159,0.8060606060606059,10
+33,what is a large body of water that flows through land,ContextCite32,0.9074105693262023,0.5410359338752574,10
+33,what is a large body of water that flows through land,WSS32,0.8733569936418946,0.9151515151515152,10
+33,what is a large body of water that flows through land,ContextCite64,0.9122382284298681,0.8066439653301318,10
+33,what is a large body of water that flows through land,WSS64,0.8936187119192693,0.9151515151515152,10
+33,what is a large body of water that flows through land,ContextCite100,0.8769666063832271,0.8753839828992931,10
+33,what is a large body of water that flows through land,WSS100,0.9400075482186445,0.9272727272727272,10
+33,what is a large body of water that flows through land,TMC5,0.6821047099068122,0.49090909090909085,10
+33,what is a large body of water that flows through land,BetaShap (U)5,0.20260390447354912,0.34545454545454546,10
+33,what is a large body of water that flows through land,TMC10,0.7276662808075985,0.6484848484848483,10
+33,what is a large body of water that flows through land,BetaShap (U)10,0.364221939898946,0.5272727272727272,10
+33,what is a large body of water that flows through land,TMC20,0.8184739437730559,0.7696969696969697,10
+33,what is a large body of water that flows through land,BetaShap (U)20,0.45614357279733475,0.6848484848484848,10
+33,what is a large body of water that flows through land,LOO,0.8098407410069008,0.7212121212121211,10
+34,who played all the carly's on general hospital,ContextCite32,0.9191493457657952,0.7333333333333332,10
+34,who played all the carly's on general hospital,WSS32,0.8844201674474216,0.5030303030303029,10
+34,who played all the carly's on general hospital,ContextCite64,0.945624197500522,0.49240349038085235,10
+34,who played all the carly's on general hospital,WSS64,0.884380447386337,0.6,10
+34,who played all the carly's on general hospital,ContextCite100,0.9435397838674991,0.49090909090909085,10
+34,who played all the carly's on general hospital,WSS100,0.9409184317607672,0.5878787878787878,10
+34,who played all the carly's on general hospital,TMC5,0.8879073084239447,0.6363636363636362,10
+34,who played all the carly's on general hospital,BetaShap (U)5,0.9747426943871595,0.6606060606060605,10
+34,who played all the carly's on general hospital,TMC10,0.7888516217275608,0.6363636363636362,10
+34,who played all the carly's on general hospital,BetaShap (U)10,0.8505180710807729,0.7212121212121211,10
+34,who played all the carly's on general hospital,TMC20,0.9276673140725386,0.6121212121212121,10
+34,who played all the carly's on general hospital,BetaShap (U)20,0.8365742881259539,0.6242424242424242,10
+34,who played all the carly's on general hospital,LOO,-0.0824142736686839,-0.06666666666666665,10
+35,an object that has mass and occupies space is known as,ContextCite32,0.9386033135251189,0.8909090909090909,10
+35,an object that has mass and occupies space is known as,WSS32,0.8609812420612268,0.7939393939393938,10
+35,an object that has mass and occupies space is known as,ContextCite64,0.9554438265267015,0.8909090909090909,10
+35,an object that has mass and occupies space is known as,WSS64,0.9011450849995994,0.8545454545454544,10
+35,an object that has mass and occupies space is known as,ContextCite100,0.9512083393108008,0.8909090909090909,10
+35,an object that has mass and occupies space is known as,WSS100,0.9758230589562388,0.9272727272727272,10
+35,an object that has mass and occupies space is known as,TMC5,0.658126676195098,0.6848484848484848,10
+35,an object that has mass and occupies space is known as,BetaShap (U)5,0.7343982008544012,0.9757575757575757,10
+35,an object that has mass and occupies space is known as,TMC10,0.6908814619335069,0.8424242424242423,10
+35,an object that has mass and occupies space is known as,BetaShap (U)10,0.5293177323121367,0.7333333333333332,10
+35,an object that has mass and occupies space is known as,TMC20,0.8395678522509394,0.8666666666666665,10
+35,an object that has mass and occupies space is known as,BetaShap (U)20,0.5338268442260339,0.5151515151515151,10
+35,an object that has mass and occupies space is known as,LOO,-0.0571600045712894,-0.07878787878787878,10
+36,who sang the original blinded by the light,ContextCite32,0.8106349167451727,0.6363636363636362,10
+36,who sang the original blinded by the light,WSS32,0.9335171883964862,0.9757575757575757,10
+36,who sang the original blinded by the light,ContextCite64,0.8822671880482515,0.8181818181818182,10
+36,who sang the original blinded by the light,WSS64,0.8896712563662991,0.7454545454545454,10
+36,who sang the original blinded by the light,ContextCite100,0.9257283360592589,0.8303030303030302,10
+36,who sang the original blinded by the light,WSS100,0.9514635811693225,0.8909090909090909,10
+36,who sang the original blinded by the light,TMC5,0.8602621774927255,0.8545454545454544,10
+36,who sang the original blinded by the light,BetaShap (U)5,0.8198269325375477,0.8666666666666665,10
+36,who sang the original blinded by the light,TMC10,0.9343181745335327,0.9272727272727272,10
+36,who sang the original blinded by the light,BetaShap (U)10,0.935181248654218,0.9272727272727272,10
+36,who sang the original blinded by the light,TMC20,0.9824091312013314,0.9636363636363635,10
+36,who sang the original blinded by the light,BetaShap (U)20,0.9272562351808074,0.9030303030303028,10
+36,who sang the original blinded by the light,LOO,-0.05238227222256164,0.17575757575757575,10
+37,who is the yellow rose of texas named after,ContextCite32,0.9123659899902188,0.3696969696969697,10
+37,who is the yellow rose of texas named after,WSS32,0.9226496842396931,0.8181818181818182,10
+37,who is the yellow rose of texas named after,ContextCite64,0.9785241266625823,0.709090909090909,10
+37,who is the yellow rose of texas named after,WSS64,0.9732568597614314,0.6606060606060605,10
+37,who is the yellow rose of texas named after,ContextCite100,0.988900738433796,0.8424242424242423,10
+37,who is the yellow rose of texas named after,WSS100,0.9880828690513598,0.7333333333333332,10
+37,who is the yellow rose of texas named after,TMC5,0.9884249618738269,0.9636363636363635,10
+37,who is the yellow rose of texas named after,BetaShap (U)5,0.9954022161579523,0.9272727272727272,10
+37,who is the yellow rose of texas named after,TMC10,0.9473501966252507,0.9030303030303028,10
+37,who is the yellow rose of texas named after,BetaShap (U)10,0.9011022491229029,0.7939393939393938,10
+37,who is the yellow rose of texas named after,TMC20,0.9860404466850786,0.9757575757575757,10
+37,who is the yellow rose of texas named after,BetaShap (U)20,0.9158489823568705,0.8424242424242423,10
+37,who is the yellow rose of texas named after,LOO,0.9412448158214725,0.9515151515151514,10
+38,who sings the song i can see clearly now the rain is gone,ContextCite32,0.8954228231747998,0.9636363636363635,10
+38,who sings the song i can see clearly now the rain is gone,WSS32,0.9341361173384589,0.8787878787878788,10
+38,who sings the song i can see clearly now the rain is gone,ContextCite64,0.9586085949221648,0.9151515151515152,10
+38,who sings the song i can see clearly now the rain is gone,WSS64,0.9703859429357319,0.9030303030303028,10
+38,who sings the song i can see clearly now the rain is gone,ContextCite100,0.9485851806726259,0.9030303030303028,10
+38,who sings the song i can see clearly now the rain is gone,WSS100,0.9667943371570437,0.8666666666666665,10
+38,who sings the song i can see clearly now the rain is gone,TMC5,0.7922361227128044,0.5272727272727272,10
+38,who sings the song i can see clearly now the rain is gone,BetaShap (U)5,0.7074224244304069,0.4666666666666666,10
+38,who sings the song i can see clearly now the rain is gone,TMC10,0.7730122889096633,0.8060606060606059,10
+38,who sings the song i can see clearly now the rain is gone,BetaShap (U)10,0.6508872088344506,0.7212121212121211,10
+38,who sings the song i can see clearly now the rain is gone,TMC20,0.9155387824471141,0.8909090909090909,10
+38,who sings the song i can see clearly now the rain is gone,BetaShap (U)20,0.8100385307114348,0.6969696969696969,10
+38,who sings the song i can see clearly now the rain is gone,LOO,0.6769650496883107,0.3696969696969697,10
+39,who was the rfc editor until 1998 just provide the family name,ContextCite32,0.7944701636406069,0.7696969696969697,10
+39,who was the rfc editor until 1998 just provide the family name,WSS32,0.6876020931193507,0.38181818181818183,10
+39,who was the rfc editor until 1998 just provide the family name,ContextCite64,0.923990535942329,0.9151515151515152,10
+39,who was the rfc editor until 1998 just provide the family name,WSS64,0.8728167070790216,0.7818181818181817,10
+39,who was the rfc editor until 1998 just provide the family name,ContextCite100,0.9638458341456032,0.9757575757575757,10
+39,who was the rfc editor until 1998 just provide the family name,WSS100,0.8823643959105019,0.709090909090909,10
+39,who was the rfc editor until 1998 just provide the family name,TMC5,0.5793554606394515,0.7333333333333332,10
+39,who was the rfc editor until 1998 just provide the family name,BetaShap (U)5,0.6176615162571462,0.5515151515151515,10
+39,who was the rfc editor until 1998 just provide the family name,TMC10,0.7090027910484651,0.7575757575757575,10
+39,who was the rfc editor until 1998 just provide the family name,BetaShap (U)10,0.6873636401804439,0.6484848484848483,10
+39,who was the rfc editor until 1998 just provide the family name,TMC20,0.7658018456230276,0.7454545454545454,10
+39,who was the rfc editor until 1998 just provide the family name,BetaShap (U)20,0.757581004811489,0.6242424242424242,10
+39,who was the rfc editor until 1998 just provide the family name,LOO,-0.25785624715419464,-0.3696969696969697,10
+40,what is the number 1 sport in the usa,ContextCite32,0.8452542420296271,0.8787878787878788,10
+40,what is the number 1 sport in the usa,WSS32,0.575239778453235,0.49090909090909085,10
+40,what is the number 1 sport in the usa,ContextCite64,0.8834386888340778,0.9272727272727272,10
+40,what is the number 1 sport in the usa,WSS64,0.8868962667036833,0.8303030303030302,10
+40,what is the number 1 sport in the usa,ContextCite100,0.8887035983955299,0.9240164263936983,10
+40,what is the number 1 sport in the usa,WSS100,0.9329184010171676,0.8424242424242423,10
+40,what is the number 1 sport in the usa,TMC5,0.588420926607043,0.4545454545454545,10
+40,what is the number 1 sport in the usa,BetaShap (U)5,0.6535300894152358,0.2121212121212121,10
+40,what is the number 1 sport in the usa,TMC10,0.6059713457754965,0.4666666666666666,10
+40,what is the number 1 sport in the usa,BetaShap (U)10,0.7199816930302886,0.6,10
+40,what is the number 1 sport in the usa,TMC20,0.7057261061025519,0.6242424242424242,10
+40,what is the number 1 sport in the usa,BetaShap (U)20,0.7864880308855211,0.6121212121212121,10
+40,what is the number 1 sport in the usa,LOO,-0.22217894459924187,-0.309090909090909,10
+41,when was the flight of the bumblebee written,ContextCite32,0.87668660728509,0.8424242424242423,10
+41,when was the flight of the bumblebee written,WSS32,0.8697583098823884,0.8666666666666665,10
+41,when was the flight of the bumblebee written,ContextCite64,0.9625289357064611,0.8328305948416885,10
+41,when was the flight of the bumblebee written,WSS64,0.9479070747870318,0.9515151515151514,10
+41,when was the flight of the bumblebee written,ContextCite100,0.9665315238017366,0.9272727272727272,10
+41,when was the flight of the bumblebee written,WSS100,0.9801941323657417,0.9393939393939393,10
+41,when was the flight of the bumblebee written,TMC5,0.6540673247444777,0.6606060606060605,10
+41,when was the flight of the bumblebee written,BetaShap (U)5,0.640895708155361,0.5636363636363636,10
+41,when was the flight of the bumblebee written,TMC10,0.8315914304713399,0.8303030303030302,10
+41,when was the flight of the bumblebee written,BetaShap (U)10,0.7769882927990055,0.8303030303030302,10
+41,when was the flight of the bumblebee written,TMC20,0.8878950887965471,0.9030303030303028,10
+41,when was the flight of the bumblebee written,BetaShap (U)20,0.971014088166452,0.9272727272727272,10
+41,when was the flight of the bumblebee written,LOO,-0.19234777227532673,-0.406060606060606,10
+42,who plays cullen bohannon in hell on wheels,ContextCite32,0.942961023573837,0.8666666666666665,10
+42,who plays cullen bohannon in hell on wheels,WSS32,0.7549821224886435,0.5515151515151515,10
+42,who plays cullen bohannon in hell on wheels,ContextCite64,0.9266054537984622,0.6727272727272726,10
+42,who plays cullen bohannon in hell on wheels,WSS64,0.918210626798024,0.6727272727272726,10
+42,who plays cullen bohannon in hell on wheels,ContextCite100,0.9323314392621771,0.6363636363636362,10
+42,who plays cullen bohannon in hell on wheels,WSS100,0.9379659667423562,0.6606060606060605,10
+42,who plays cullen bohannon in hell on wheels,TMC5,0.7830140338277993,0.7696969696969697,10
+42,who plays cullen bohannon in hell on wheels,BetaShap (U)5,0.7935934909219107,0.8303030303030302,10
+42,who plays cullen bohannon in hell on wheels,TMC10,0.8184253738916728,0.7333333333333332,10
+42,who plays cullen bohannon in hell on wheels,BetaShap (U)10,0.8045431139482166,0.6606060606060605,10
+42,who plays cullen bohannon in hell on wheels,TMC20,0.8883219889281114,0.7454545454545454,10
+42,who plays cullen bohannon in hell on wheels,BetaShap (U)20,0.9208848075764664,0.6121212121212121,10
+42,who plays cullen bohannon in hell on wheels,LOO,0.3809109585252476,0.1515151515151515,10
+43,when does the new pokemon movie come out,ContextCite32,0.976024364163664,0.7598819296000807,10
+43,when does the new pokemon movie come out,WSS32,0.9771628466675345,0.5349568784384567,10
+43,when does the new pokemon movie come out,ContextCite64,0.9944854155656111,0.7781190959104828,10
+43,when does the new pokemon movie come out,WSS64,0.994693108156427,0.705170430668875,10
+43,when does the new pokemon movie come out,ContextCite100,0.9973121985294923,0.8632258720256917,10
+43,when does the new pokemon movie come out,WSS100,0.996038031389461,0.6504589317376691,10
+43,when does the new pokemon movie come out,TMC5,0.993282005112142,0.7538028741632801,10
+43,when does the new pokemon movie come out,BetaShap (U)5,0.9850189302454334,0.8024353176576853,10
+43,when does the new pokemon movie come out,TMC10,0.9920574911394697,0.8693049274624923,10
+43,when does the new pokemon movie come out,BetaShap (U)10,0.972125758060953,0.7659609850368815,10
+43,when does the new pokemon movie come out,TMC20,0.9952147570838531,0.9544117035777013,10
+43,when does the new pokemon movie come out,BetaShap (U)20,0.9737484956244892,0.8145934285312865,10
+43,when does the new pokemon movie come out,LOO,0.9776381202701057,0.08536585365853659,10
+44,how many oar athletes are in the olympics,ContextCite32,0.9387158094559882,0.9422535927041001,10
+44,how many oar athletes are in the olympics,WSS32,0.9078515117367835,0.4863244349440517,10
+44,how many oar athletes are in the olympics,ContextCite64,0.9561506919437546,0.7659609850368815,10
+44,how many oar athletes are in the olympics,WSS64,0.9568966348581426,0.686933264358473,10
+44,how many oar athletes are in the olympics,ContextCite100,0.976314589016785,0.7963562622208846,10
+44,how many oar athletes are in the olympics,WSS100,0.9693765332171898,0.8206724839680872,10
+44,how many oar athletes are in the olympics,TMC5,0.8854054671571603,0.6930123197952737,10
+44,how many oar athletes are in the olympics,BetaShap (U)5,0.797858338738792,0.6990913752320743,10
+44,how many oar athletes are in the olympics,TMC10,0.9606647848463603,0.9665698144513026,10
+44,how many oar athletes are in the olympics,BetaShap (U)10,0.8741474091296827,0.8145934285312865,10
+44,how many oar athletes are in the olympics,TMC20,0.9726253163814949,0.9848069807617046,10
+44,how many oar athletes are in the olympics,BetaShap (U)20,0.9057935118074956,0.8449887057152897,10
+44,how many oar athletes are in the olympics,LOO,0.723722602874319,0.9146341463414634,10
+45,where is the honda classic played this year,ContextCite32,0.9924256159757594,0.8787878787878788,10
+45,where is the honda classic played this year,WSS32,0.9918063496244329,0.7696969696969697,10
+45,where is the honda classic played this year,ContextCite64,0.9922867404622436,0.7818181818181817,10
+45,where is the honda classic played this year,WSS64,0.9922725515081678,0.8545454545454544,10
+45,where is the honda classic played this year,ContextCite100,0.9915082815341622,0.7112494861056756,10
+45,where is the honda classic played this year,WSS100,0.9977403050369393,0.9757575757575757,10
+45,where is the honda classic played this year,TMC5,0.9814566848907507,0.5757575757575757,10
+45,where is the honda classic played this year,BetaShap (U)5,0.9591563840657312,0.5757575757575757,10
+45,where is the honda classic played this year,TMC10,0.9911791294231208,0.9272727272727272,10
+45,where is the honda classic played this year,BetaShap (U)10,0.9592531889878537,0.8424242424242423,10
+45,where is the honda classic played this year,TMC20,0.9933731255520523,0.9272727272727272,10
+45,where is the honda classic played this year,BetaShap (U)20,0.9621638861338218,0.9151515151515152,10
+45,where is the honda classic played this year,LOO,0.9741485651146469,0.12727272727272726,10
+46,who won the nrl grand final in 2015,ContextCite32,0.9478307137133725,0.7454545454545454,10
+46,who won the nrl grand final in 2015,WSS32,0.9138928354498896,0.7575757575757575,10
+46,who won the nrl grand final in 2015,ContextCite64,0.9861712257578722,0.8181818181818182,10
+46,who won the nrl grand final in 2015,WSS64,0.9524892900654169,0.9030303030303028,10
+46,who won the nrl grand final in 2015,ContextCite100,0.9874740200730904,0.8666666666666665,10
+46,who won the nrl grand final in 2015,WSS100,0.9886991266934412,0.9515151515151514,10
+46,who won the nrl grand final in 2015,TMC5,0.9114269091630303,0.6606060606060605,10
+46,who won the nrl grand final in 2015,BetaShap (U)5,0.9766321055130598,0.6727272727272726,10
+46,who won the nrl grand final in 2015,TMC10,0.8650467656688057,0.709090909090909,10
+46,who won the nrl grand final in 2015,BetaShap (U)10,0.8315463734358607,0.33333333333333326,10
+46,who won the nrl grand final in 2015,TMC20,0.9334437066667656,0.7454545454545454,10
+46,who won the nrl grand final in 2015,BetaShap (U)20,0.8775561310509004,0.5515151515151515,10
+46,who won the nrl grand final in 2015,LOO,0.45331447108706413,0.5151515151515151,10
+47,where was charlie and the choclate factory filmed,ContextCite32,0.986491707577653,0.7939393939393938,10
+47,where was charlie and the choclate factory filmed,WSS32,0.9916225434955582,0.8545454545454544,10
+47,where was charlie and the choclate factory filmed,ContextCite64,0.9912155832052059,0.8303030303030302,10
+47,where was charlie and the choclate factory filmed,WSS64,0.9885137575456998,0.6848484848484848,10
+47,where was charlie and the choclate factory filmed,ContextCite100,0.9926539355032659,0.8909090909090909,10
+47,where was charlie and the choclate factory filmed,WSS100,0.9957392781515925,0.9636363636363635,10
+47,where was charlie and the choclate factory filmed,TMC5,0.9686398619527467,0.35757575757575755,10
+47,where was charlie and the choclate factory filmed,BetaShap (U)5,0.8512581130326289,0.1515151515151515,10
+47,where was charlie and the choclate factory filmed,TMC10,0.9772036363866895,0.7454545454545454,10
+47,where was charlie and the choclate factory filmed,BetaShap (U)10,0.8504483843957664,0.5636363636363636,10
+47,where was charlie and the choclate factory filmed,TMC20,0.9945684387018362,0.8060606060606059,10
+47,where was charlie and the choclate factory filmed,BetaShap (U)20,0.8840142749242105,0.406060606060606,10
+47,where was charlie and the choclate factory filmed,LOO,0.9774574977800267,0.6121212121212121,10
+48,who owns the rights to the song happy birthday,ContextCite32,0.8561077832311458,0.6969696969696969,10
+48,who owns the rights to the song happy birthday,WSS32,0.7117398201044501,0.35757575757575755,10
+48,who owns the rights to the song happy birthday,ContextCite64,0.9792135881864806,0.7575757575757575,10
+48,who owns the rights to the song happy birthday,WSS64,0.9296661496025249,0.8303030303030302,10
+48,who owns the rights to the song happy birthday,ContextCite100,0.9709119013820299,0.8060606060606059,10
+48,who owns the rights to the song happy birthday,WSS100,0.9667216256011631,0.9030303030303028,10
+48,who owns the rights to the song happy birthday,TMC5,0.7611914181506433,0.7454545454545454,10
+48,who owns the rights to the song happy birthday,BetaShap (U)5,0.7557282852347138,0.6848484848484848,10
+48,who owns the rights to the song happy birthday,TMC10,0.8838717706655776,0.7454545454545454,10
+48,who owns the rights to the song happy birthday,BetaShap (U)10,0.6701697290182423,0.6606060606060605,10
+48,who owns the rights to the song happy birthday,TMC20,0.9417337951382115,0.8060606060606059,10
+48,who owns the rights to the song happy birthday,BetaShap (U)20,0.6940129517483832,0.6606060606060605,10
+48,who owns the rights to the song happy birthday,LOO,0.7141041388911495,0.49090909090909085,10
+49,who sang the song every breath you take,ContextCite32,0.7307500840902024,0.7454545454545454,10
+49,who sang the song every breath you take,WSS32,0.4913006148767045,0.406060606060606,10
+49,who sang the song every breath you take,ContextCite64,0.8930335600680916,0.8666666666666665,10
+49,who sang the song every breath you take,WSS64,0.7247166679703182,0.6606060606060605,10
+49,who sang the song every breath you take,ContextCite100,0.8033857672313318,0.7818181818181817,10
+49,who sang the song every breath you take,WSS100,0.8172436217085324,0.7575757575757575,10
+49,who sang the song every breath you take,TMC5,0.6925187447520786,0.7818181818181817,10
+49,who sang the song every breath you take,BetaShap (U)5,0.5855649781811538,0.6848484848484848,10
+49,who sang the song every breath you take,TMC10,0.7382094898815391,0.8545454545454544,10
+49,who sang the song every breath you take,BetaShap (U)10,0.680468904226374,0.8181818181818182,10
+49,who sang the song every breath you take,TMC20,0.8384480091780436,0.9030303030303028,10
+49,who sang the song every breath you take,BetaShap (U)20,0.8478959478916012,0.9030303030303028,10
+49,who sang the song every breath you take,LOO,0.25843555425919607,0.2727272727272727,10
+50,when did the british hand-over sovereignty of hong kong back to china,ContextCite32,0.8694948240659576,0.7818181818181817,10
+50,when did the british hand-over sovereignty of hong kong back to china,WSS32,0.833066090161618,0.8787878787878788,10
+50,when did the british hand-over sovereignty of hong kong back to china,ContextCite64,0.8494695747525958,0.709090909090909,10
+50,when did the british hand-over sovereignty of hong kong back to china,WSS64,0.8492759332512884,0.8666666666666665,10
+50,when did the british hand-over sovereignty of hong kong back to china,ContextCite100,0.9242830199073879,0.8545454545454544,10
+50,when did the british hand-over sovereignty of hong kong back to china,WSS100,0.9377499280136798,0.9151515151515152,10
+50,when did the british hand-over sovereignty of hong kong back to china,TMC5,0.5489891473090999,0.6,10
+50,when did the british hand-over sovereignty of hong kong back to china,BetaShap (U)5,0.4312031694154497,0.5030303030303029,10
+50,when did the british hand-over sovereignty of hong kong back to china,TMC10,0.5307017981758135,0.5757575757575757,10
+50,when did the british hand-over sovereignty of hong kong back to china,BetaShap (U)10,0.2535341885778246,0.24848484848484845,10
+50,when did the british hand-over sovereignty of hong kong back to china,TMC20,0.6601746743245153,0.5151515151515151,10
+50,when did the british hand-over sovereignty of hong kong back to china,BetaShap (U)20,0.5595521956577504,0.4545454545454545,10
+50,when did the british hand-over sovereignty of hong kong back to china,LOO,0.8425890598648343,0.8424242424242423,10
+51,the first life forms to appear on earth were,ContextCite32,0.9571451240076638,0.9515151515151514,10
+51,the first life forms to appear on earth were,WSS32,0.9276139531112669,0.8545454545454544,10
+51,the first life forms to appear on earth were,ContextCite64,0.9833556183699174,0.9515151515151514,10
+51,the first life forms to appear on earth were,WSS64,0.9681633589581302,0.7939393939393938,10
+51,the first life forms to appear on earth were,ContextCite100,0.9938765825925733,0.9515151515151514,10
+51,the first life forms to appear on earth were,WSS100,0.9798294629220607,0.7818181818181817,10
+51,the first life forms to appear on earth were,TMC5,0.8117569407343125,0.7575757575757575,10
+51,the first life forms to appear on earth were,BetaShap (U)5,0.8096546970939393,0.5878787878787878,10
+51,the first life forms to appear on earth were,TMC10,0.9639024085852093,0.8909090909090909,10
+51,the first life forms to appear on earth were,BetaShap (U)10,0.8183007505469169,0.7333333333333332,10
+51,the first life forms to appear on earth were,TMC20,0.9726666999126464,0.9030303030303028,10
+51,the first life forms to appear on earth were,BetaShap (U)20,0.8626860950382284,0.7575757575757575,10
+51,the first life forms to appear on earth were,LOO,0.8246104339670931,0.5515151515151515,10
+52,who played the robot on lost in space 2018,ContextCite32,0.9806315536537287,0.6484848484848483,10
+52,who played the robot on lost in space 2018,WSS32,0.988992958111059,0.6484848484848483,10
+52,who played the robot on lost in space 2018,ContextCite64,0.9979137954471455,0.9636363636363635,10
+52,who played the robot on lost in space 2018,WSS64,0.9915010503508284,0.8181818181818182,10
+52,who played the robot on lost in space 2018,ContextCite100,0.9979721767603212,0.9636363636363635,10
+52,who played the robot on lost in space 2018,WSS100,0.9965446743381599,0.8909090909090909,10
+52,who played the robot on lost in space 2018,TMC5,0.9586814781783577,0.8909090909090909,10
+52,who played the robot on lost in space 2018,BetaShap (U)5,0.9085346108961205,0.3696969696969697,10
+52,who played the robot on lost in space 2018,TMC10,0.9814783158418448,0.9272727272727272,10
+52,who played the robot on lost in space 2018,BetaShap (U)10,0.9002737231514317,0.5272727272727272,10
+52,who played the robot on lost in space 2018,TMC20,0.9907728735855765,0.9272727272727272,10
+52,who played the robot on lost in space 2018,BetaShap (U)20,0.9235640990335016,0.5272727272727272,10
+52,who played the robot on lost in space 2018,LOO,0.978514351682224,0.6121212121212121,10
+53,who came up with britain's got talent,ContextCite32,0.915934580573514,0.8181818181818182,10
+53,who came up with britain's got talent,WSS32,0.7918635075772394,0.6727272727272726,10
+53,who came up with britain's got talent,ContextCite64,0.9459568432019131,0.8424242424242423,10
+53,who came up with britain's got talent,WSS64,0.944616398748159,0.7454545454545454,10
+53,who came up with britain's got talent,ContextCite100,0.926953892503934,0.7212121212121211,10
+53,who came up with britain's got talent,WSS100,0.9561498717126666,0.7575757575757575,10
+53,who came up with britain's got talent,TMC5,0.6675504175391378,0.19999999999999998,10
+53,who came up with britain's got talent,BetaShap (U)5,0.7319637279519186,0.3939393939393939,10
+53,who came up with britain's got talent,TMC10,0.8954407208327605,0.7818181818181817,10
+53,who came up with britain's got talent,BetaShap (U)10,0.7891650141499837,0.8666666666666665,10
+53,who came up with britain's got talent,TMC20,0.9376336493836078,0.9030303030303028,10
+53,who came up with britain's got talent,BetaShap (U)20,0.891820257937675,0.9030303030303028,10
+53,who came up with britain's got talent,LOO,-0.37227051895326424,-0.22424242424242422,10
+54,what year did my pet monster come out,ContextCite32,0.9185573452896956,0.9361745372672995,10
+54,what year did my pet monster come out,WSS32,0.7843597282815774,0.6139845991168652,10
+54,what year did my pet monster come out,ContextCite64,0.9604813698434657,0.9665698144513026,10
+54,what year did my pet monster come out,WSS64,0.8207231804619962,0.6200636545536659,10
+54,what year did my pet monster come out,ContextCite100,0.9459634214996686,0.8389096502784892,10
+54,what year did my pet monster come out,WSS100,0.9179000069664669,0.857146816588891,10
+54,what year did my pet monster come out,TMC5,0.6799084541926563,0.6565379871744698,10
+54,what year did my pet monster come out,BetaShap (U)5,0.6420766556303611,0.5592731001856595,10
+54,what year did my pet monster come out,TMC10,0.7693881811371817,0.5714312110592608,10
+54,what year did my pet monster come out,BetaShap (U)10,0.6043667762166536,0.5653521556224601,10
+54,what year did my pet monster come out,TMC20,0.8149791173378789,0.6930123197952737,10
+54,what year did my pet monster come out,BetaShap (U)20,0.690962519563965,0.43161293601284584,10
+54,what year did my pet monster come out,LOO,-0.08369102916338411,0.012195121951219513,10
+55,who made the beavis and butthead theme song,ContextCite32,0.911690566954593,0.7454545454545454,10
+55,who made the beavis and butthead theme song,WSS32,0.9581559240406887,0.5151515151515151,10
+55,who made the beavis and butthead theme song,ContextCite64,0.9493408020791844,0.6848484848484848,10
+55,who made the beavis and butthead theme song,WSS64,0.9604007247771654,0.29696969696969694,10
+55,who made the beavis and butthead theme song,ContextCite100,0.9849682118577975,0.9030303030303028,10
+55,who made the beavis and butthead theme song,WSS100,0.9800186125529387,0.5393939393939393,10
+55,who made the beavis and butthead theme song,TMC5,0.6664098274569709,0.6969696969696969,10
+55,who made the beavis and butthead theme song,BetaShap (U)5,0.6467882450223449,0.5757575757575757,10
+55,who made the beavis and butthead theme song,TMC10,0.9140315583695412,0.6848484848484848,10
+55,who made the beavis and butthead theme song,BetaShap (U)10,0.9294970363478389,0.5515151515151515,10
+55,who made the beavis and butthead theme song,TMC20,0.9907798323644811,0.7212121212121211,10
+55,who made the beavis and butthead theme song,BetaShap (U)20,0.8660338123955235,0.5878787878787878,10
+55,who made the beavis and butthead theme song,LOO,0.4561310752569333,0.28484848484848485,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,ContextCite32,0.9493101795610464,0.8787878787878788,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,WSS32,0.8048157022432421,0.7575757575757575,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,ContextCite64,0.9858354581946532,0.8424242424242423,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,WSS64,0.901731990439507,0.8545454545454544,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,ContextCite100,0.9824715046315124,0.8666666666666665,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,WSS100,0.9548323511760246,0.7939393939393938,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,TMC5,0.6974180582430565,0.4424242424242424,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,BetaShap (U)5,0.5932569653594656,0.4666666666666666,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,TMC10,0.8700288688283615,0.6121212121212121,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,BetaShap (U)10,0.594389944117047,0.6969696969696969,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,TMC20,0.8868347484341907,0.6969696969696969,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,BetaShap (U)20,0.7205453495304036,0.6969696969696969,10
+56,who has won the 2017 womens singles wimbledon tennis tournament,LOO,-0.5990996880990215,-0.29696969696969694,10
+57,when was the wheel first used in egypt,ContextCite32,0.9780935048599648,0.41818181818181815,10
+57,when was the wheel first used in egypt,WSS32,0.9848607775072343,0.8303030303030302,10
+57,when was the wheel first used in egypt,ContextCite64,0.9959338467295725,0.8666666666666665,10
+57,when was the wheel first used in egypt,WSS64,0.9921092796546752,0.8787878787878788,10
+57,when was the wheel first used in egypt,ContextCite100,0.995238558328379,0.9757575757575757,10
+57,when was the wheel first used in egypt,WSS100,0.9980237630089491,0.9636363636363635,10
+57,when was the wheel first used in egypt,TMC5,0.988484857185813,0.8666666666666665,10
+57,when was the wheel first used in egypt,BetaShap (U)5,0.9010092451575942,0.32121212121212117,10
+57,when was the wheel first used in egypt,TMC10,0.9868463041345478,0.8424242424242423,10
+57,when was the wheel first used in egypt,BetaShap (U)10,0.9498885062829375,0.23636363636363633,10
+57,when was the wheel first used in egypt,TMC20,0.9884381257384004,0.8545454545454544,10
+57,when was the wheel first used in egypt,BetaShap (U)20,0.9430294101135936,0.5272727272727272,10
+57,when was the wheel first used in egypt,LOO,0.9875189550892972,0.6969696969696969,10
+58,which type of organism produces food in an ecosystem,ContextCite32,0.964981608084869,0.8693049274624923,10
+58,which type of organism produces food in an ecosystem,WSS32,0.9429885432385288,0.8303030303030302,10
+58,which type of organism produces food in an ecosystem,ContextCite64,0.9614713911714604,0.8424242424242423,10
+58,which type of organism produces food in an ecosystem,WSS64,0.9756162432437209,0.9272727272727272,10
+58,which type of organism produces food in an ecosystem,ContextCite100,0.948560448548174,0.8181818181818182,10
+58,which type of organism produces food in an ecosystem,WSS100,0.9817218023360179,0.8424242424242423,10
+58,which type of organism produces food in an ecosystem,TMC5,0.730654466385356,0.7939393939393938,10
+58,which type of organism produces food in an ecosystem,BetaShap (U)5,0.35033661855296355,0.5878787878787878,10
+58,which type of organism produces food in an ecosystem,TMC10,0.9426353468516928,0.8909090909090909,10
+58,which type of organism produces food in an ecosystem,BetaShap (U)10,0.6508545322524045,0.8545454545454544,10
+58,which type of organism produces food in an ecosystem,TMC20,0.9446589147411615,0.7454545454545454,10
+58,which type of organism produces food in an ecosystem,BetaShap (U)20,0.8068327339557739,0.8666666666666665,10
+58,which type of organism produces food in an ecosystem,LOO,0.8923694412168807,0.9030303030303028,10
+59,who wrote the song for once in my life,ContextCite32,0.9202712432614591,0.6606060606060605,10
+59,who wrote the song for once in my life,WSS32,0.9781253673532166,0.6606060606060605,10
+59,who wrote the song for once in my life,ContextCite64,0.9337611766153974,0.709090909090909,10
+59,who wrote the song for once in my life,WSS64,0.9747832957932601,0.9636363636363635,10
+59,who wrote the song for once in my life,ContextCite100,0.9719909137895126,0.6606060606060605,10
+59,who wrote the song for once in my life,WSS100,0.981697276356786,0.9636363636363635,10
+59,who wrote the song for once in my life,TMC5,0.6853843149834616,0.8424242424242423,10
+59,who wrote the song for once in my life,BetaShap (U)5,0.676411657193297,0.8303030303030302,10
+59,who wrote the song for once in my life,TMC10,0.8994357682539597,0.8787878787878788,10
+59,who wrote the song for once in my life,BetaShap (U)10,0.7819286595584474,0.9151515151515152,10
+59,who wrote the song for once in my life,TMC20,0.9734806642165383,0.9515151515151514,10
+59,who wrote the song for once in my life,BetaShap (U)20,0.8799874555517717,0.9757575757575757,10
+59,who wrote the song for once in my life,LOO,0.5085261441232035,0.33333333333333326,10
+60,who sang i could not ask for more first,ContextCite32,0.9276447925870946,0.7575757575757575,10
+60,who sang i could not ask for more first,WSS32,0.9085415255053385,0.8666666666666665,10
+60,who sang i could not ask for more first,ContextCite64,0.9843890407431118,0.8303030303030302,10
+60,who sang i could not ask for more first,WSS64,0.9809780430071786,0.8666666666666665,10
+60,who sang i could not ask for more first,ContextCite100,0.9859526144588069,0.9272727272727272,10
+60,who sang i could not ask for more first,WSS100,0.9928649334691768,0.9515151515151514,10
+60,who sang i could not ask for more first,TMC5,0.9193895781470875,0.7696969696969697,10
+60,who sang i could not ask for more first,BetaShap (U)5,0.9428853034178823,0.5272727272727272,10
+60,who sang i could not ask for more first,TMC10,0.8951209156488975,0.8909090909090909,10
+60,who sang i could not ask for more first,BetaShap (U)10,0.8424582993940246,0.7454545454545454,10
+60,who sang i could not ask for more first,TMC20,0.9364202701342541,0.9151515151515152,10
+60,who sang i could not ask for more first,BetaShap (U)20,0.8878976485450367,0.9151515151515152,10
+60,who sang i could not ask for more first,LOO,0.07897441920323293,0.43030303030303024,10
+61,who is the singer of waiting for love,ContextCite32,0.8829425870845234,0.7939393939393938,10
+61,who is the singer of waiting for love,WSS32,0.8799020660515009,0.5515151515151515,10
+61,who is the singer of waiting for love,ContextCite64,0.9670766148405513,0.8787878787878788,10
+61,who is the singer of waiting for love,WSS64,0.9529344413826276,0.8787878787878788,10
+61,who is the singer of waiting for love,ContextCite100,0.9885380737768846,0.9393939393939393,10
+61,who is the singer of waiting for love,WSS100,0.9674039113930729,0.9757575757575757,10
+61,who is the singer of waiting for love,TMC5,0.6155354741171105,0.6848484848484848,10
+61,who is the singer of waiting for love,BetaShap (U)5,0.5092599676331436,0.7696969696969697,10
+61,who is the singer of waiting for love,TMC10,0.903339205982183,0.9272727272727272,10
+61,who is the singer of waiting for love,BetaShap (U)10,0.2579364016900437,0.3939393939393939,10
+61,who is the singer of waiting for love,TMC20,0.9681455766887558,0.9636363636363635,10
+61,who is the singer of waiting for love,BetaShap (U)20,0.44508229603444505,0.41818181818181815,10
+61,who is the singer of waiting for love,LOO,0.2637564545290026,0.6484848484848483,10
+62,who recorded it's a man's world,ContextCite32,0.9395958717705513,0.33333333333333326,10
+62,who recorded it's a man's world,WSS32,0.8824676916341428,0.41818181818181815,10
+62,who recorded it's a man's world,ContextCite64,0.9787227195189251,0.18787878787878787,10
+62,who recorded it's a man's world,WSS64,0.9689460946880593,0.17575757575757575,10
+62,who recorded it's a man's world,ContextCite100,0.9769111993698759,0.23636363636363633,10
+62,who recorded it's a man's world,WSS100,0.9932511737415958,0.5515151515151515,10
+62,who recorded it's a man's world,TMC5,0.9511289089638149,0.6727272727272726,10
+62,who recorded it's a man's world,BetaShap (U)5,0.9842610545470377,0.5151515151515151,10
+62,who recorded it's a man's world,TMC10,0.8709863201759019,0.5757575757575757,10
+62,who recorded it's a man's world,BetaShap (U)10,0.8459120170211244,0.5515151515151515,10
+62,who recorded it's a man's world,TMC20,0.9352310555109534,0.8666666666666665,10
+62,who recorded it's a man's world,BetaShap (U)20,0.8595422887508591,0.6848484848484848,10
+62,who recorded it's a man's world,LOO,0.6252455705468587,0.1515151515151515,10
+63,when does season 14 of grey's anatomy come out,ContextCite32,0.85961326138036,0.7818181818181817,10
+63,when does season 14 of grey's anatomy come out,WSS32,0.7640260959853815,0.6969696969696969,10
+63,when does season 14 of grey's anatomy come out,ContextCite64,0.9488155103592362,0.8666666666666665,10
+63,when does season 14 of grey's anatomy come out,WSS64,0.9548452611731181,0.7454545454545454,10
+63,when does season 14 of grey's anatomy come out,ContextCite100,0.9593169743850005,0.8303030303030302,10
+63,when does season 14 of grey's anatomy come out,WSS100,0.9673759311215189,0.8424242424242423,10
+63,when does season 14 of grey's anatomy come out,TMC5,0.7977202084655436,0.7696969696969697,10
+63,when does season 14 of grey's anatomy come out,BetaShap (U)5,0.7755166402656963,0.7575757575757575,10
+63,when does season 14 of grey's anatomy come out,TMC10,0.933082902571429,0.9393939393939393,10
+63,when does season 14 of grey's anatomy come out,BetaShap (U)10,0.8096053270536995,0.9272727272727272,10
+63,when does season 14 of grey's anatomy come out,TMC20,0.9599367214255874,0.9393939393939393,10
+63,when does season 14 of grey's anatomy come out,BetaShap (U)20,0.8784746501098798,0.7696969696969697,10
+63,when does season 14 of grey's anatomy come out,LOO,-0.1458431305923668,0.09090909090909088,10
+64,when was the last time the detroit lions won a championship,ContextCite32,0.7428425326635972,0.4787878787878787,10
+64,when was the last time the detroit lions won a championship,WSS32,0.8010104335075142,0.709090909090909,10
+64,when was the last time the detroit lions won a championship,ContextCite64,0.8863942184091671,0.6261427099904666,10
+64,when was the last time the detroit lions won a championship,WSS64,0.8869304080173317,0.7696969696969697,10
+64,when was the last time the detroit lions won a championship,ContextCite100,0.8825167633346931,0.6969696969696969,10
+64,when was the last time the detroit lions won a championship,WSS100,0.9689061192215626,0.8787878787878788,10
+64,when was the last time the detroit lions won a championship,TMC5,0.8203536553778351,0.8424242424242423,10
+64,when was the last time the detroit lions won a championship,BetaShap (U)5,0.858893256492191,0.8303030303030302,10
+64,when was the last time the detroit lions won a championship,TMC10,0.767903428372062,0.6606060606060605,10
+64,when was the last time the detroit lions won a championship,BetaShap (U)10,0.7455886955575876,0.7696969696969697,10
+64,when was the last time the detroit lions won a championship,TMC20,0.9485400466789826,0.8303030303030302,10
+64,when was the last time the detroit lions won a championship,BetaShap (U)20,0.7861206103281846,0.8545454545454544,10
+64,when was the last time the detroit lions won a championship,LOO,0.8487764824518558,0.6848484848484848,10
+65,who played general chang in star trek 6,ContextCite32,0.8605415532824854,0.7575757575757575,10
+65,who played general chang in star trek 6,WSS32,0.8470455030974519,0.7939393939393938,10
+65,who played general chang in star trek 6,ContextCite64,0.7883639108742796,0.8303030303030302,10
+65,who played general chang in star trek 6,WSS64,0.8696487582794119,0.8909090909090909,10
+65,who played general chang in star trek 6,ContextCite100,0.9087514803109,0.8424242424242423,10
+65,who played general chang in star trek 6,WSS100,0.9302319603662832,0.9272727272727272,10
+65,who played general chang in star trek 6,TMC5,0.9101077984322078,0.7212121212121211,10
+65,who played general chang in star trek 6,BetaShap (U)5,0.9545759553505578,0.8303030303030302,10
+65,who played general chang in star trek 6,TMC10,0.8825999625277449,0.6848484848484848,10
+65,who played general chang in star trek 6,BetaShap (U)10,0.8806594612265215,0.6969696969696969,10
+65,who played general chang in star trek 6,TMC20,0.944307340113723,0.709090909090909,10
+65,who played general chang in star trek 6,BetaShap (U)20,0.8781841053854121,0.8060606060606059,10
+65,who played general chang in star trek 6,LOO,0.6495455323345717,0.5272727272727272,10
+66,which part of earth is covered with water,ContextCite32,0.9238425083065254,0.5515151515151515,10
+66,which part of earth is covered with water,WSS32,0.9912806339368258,0.8060606060606059,10
+66,which part of earth is covered with water,ContextCite64,0.9845470092715172,0.9151515151515152,10
+66,which part of earth is covered with water,WSS64,0.9914114765217069,0.9393939393939393,10
+66,which part of earth is covered with water,ContextCite100,0.9879341704906646,0.9393939393939393,10
+66,which part of earth is covered with water,WSS100,0.99685722653713,0.9515151515151514,10
+66,which part of earth is covered with water,TMC5,0.9419914420789315,0.5757575757575757,10
+66,which part of earth is covered with water,BetaShap (U)5,0.6713148351665305,0.34545454545454546,10
+66,which part of earth is covered with water,TMC10,0.9745948793326773,0.7939393939393938,10
+66,which part of earth is covered with water,BetaShap (U)10,0.7198714721474009,0.33333333333333326,10
+66,which part of earth is covered with water,TMC20,0.9796986594984782,0.8545454545454544,10
+66,which part of earth is covered with water,BetaShap (U)20,0.8462050535259644,0.7696969696969697,10
+66,which part of earth is covered with water,LOO,0.9828644443575484,0.8545454545454544,10
+67,who's playing han solo in the han solo movie,ContextCite32,0.8911618168584603,0.6121212121212121,10
+67,who's playing han solo in the han solo movie,WSS32,0.8541304615744905,0.6606060606060605,10
+67,who's playing han solo in the han solo movie,ContextCite64,0.9675809776560411,0.5757575757575757,10
+67,who's playing han solo in the han solo movie,WSS64,0.9573863713476561,0.6242424242424242,10
+67,who's playing han solo in the han solo movie,ContextCite100,0.9781315581842102,0.5757575757575757,10
+67,who's playing han solo in the han solo movie,WSS100,0.9951220793360612,0.6484848484848483,10
+67,who's playing han solo in the han solo movie,TMC5,0.9654009841391368,0.6363636363636362,10
+67,who's playing han solo in the han solo movie,BetaShap (U)5,0.9439077004470782,0.6363636363636362,10
+67,who's playing han solo in the han solo movie,TMC10,0.9478813280973799,0.8787878787878788,10
+67,who's playing han solo in the han solo movie,BetaShap (U)10,0.8297498615353419,0.8787878787878788,10
+67,who's playing han solo in the han solo movie,TMC20,0.9625675258445211,0.8545454545454544,10
+67,who's playing han solo in the han solo movie,BetaShap (U)20,0.8732490360068752,0.9030303030303028,10
+67,who's playing han solo in the han solo movie,LOO,0.6998198477651189,0.3696969696969697,10
+68,where did the rule of 72 come from,ContextCite32,0.9985371811551238,0.6848484848484848,10
+68,where did the rule of 72 come from,WSS32,0.9942045147946864,0.6121212121212121,10
+68,where did the rule of 72 come from,ContextCite64,0.9990091787708867,0.8545454545454544,10
+68,where did the rule of 72 come from,WSS64,0.9981692039107617,0.6848484848484848,10
+68,where did the rule of 72 come from,ContextCite100,0.9994181310044001,0.8787878787878788,10
+68,where did the rule of 72 come from,WSS100,0.9987571523096724,0.709090909090909,10
+68,where did the rule of 72 come from,TMC5,0.9984280572614975,0.5878787878787878,10
+68,where did the rule of 72 come from,BetaShap (U)5,0.9958989139799792,0.38181818181818183,10
+68,where did the rule of 72 come from,TMC10,0.9995817330010212,0.7696969696969697,10
+68,where did the rule of 72 come from,BetaShap (U)10,0.9957176412290858,0.6484848484848483,10
+68,where did the rule of 72 come from,TMC20,0.9999183604161866,0.8181818181818182,10
+68,where did the rule of 72 come from,BetaShap (U)20,0.9957479209335944,0.5878787878787878,10
+68,where did the rule of 72 come from,LOO,0.9978247325914887,0.7333333333333332,10
+69,when was the masque of the red death written,ContextCite32,0.7936043580730685,0.7112494861056756,10
+69,when was the masque of the red death written,WSS32,0.8910055778316565,0.8909090909090909,10
+69,when was the masque of the red death written,ContextCite64,0.8980401530095921,0.9030303030303028,10
+69,when was the masque of the red death written,WSS64,0.9241340336776205,0.9272727272727272,10
+69,when was the masque of the red death written,ContextCite100,0.9048581576603587,0.8787878787878788,10
+69,when was the masque of the red death written,WSS100,0.9269168796249035,0.9393939393939393,10
+69,when was the masque of the red death written,TMC5,0.805581619617203,0.7575757575757575,10
+69,when was the masque of the red death written,BetaShap (U)5,0.5759406243979011,0.5272727272727272,10
+69,when was the masque of the red death written,TMC10,0.9333724623334866,0.8303030303030302,10
+69,when was the masque of the red death written,BetaShap (U)10,0.6063362405084936,0.6606060606060605,10
+69,when was the masque of the red death written,TMC20,0.9124046268602759,0.8303030303030302,10
+69,when was the masque of the red death written,BetaShap (U)20,0.6934997017764694,0.709090909090909,10
+69,when was the masque of the red death written,LOO,0.7134780776333239,0.3696969696969697,10
+70,who sings the original version of feeling good,ContextCite32,0.9466668532812751,0.7939393939393938,10
+70,who sings the original version of feeling good,WSS32,0.9463341503805865,0.8545454545454544,10
+70,who sings the original version of feeling good,ContextCite64,0.9942820915289199,0.9151515151515152,10
+70,who sings the original version of feeling good,WSS64,0.9356159148631035,0.8424242424242423,10
+70,who sings the original version of feeling good,ContextCite100,0.9862786286660384,0.7818181818181817,10
+70,who sings the original version of feeling good,WSS100,0.9769083410693399,0.9272727272727272,10
+70,who sings the original version of feeling good,TMC5,0.8808442900651094,0.709090909090909,10
+70,who sings the original version of feeling good,BetaShap (U)5,0.8152099853461456,0.406060606060606,10
+70,who sings the original version of feeling good,TMC10,0.8670035328882393,0.8424242424242423,10
+70,who sings the original version of feeling good,BetaShap (U)10,0.7125154776485527,0.6727272727272726,10
+70,who sings the original version of feeling good,TMC20,0.9403571712072254,0.9030303030303028,10
+70,who sings the original version of feeling good,BetaShap (U)20,0.7950311242125919,0.6848484848484848,10
+70,who sings the original version of feeling good,LOO,0.826555488846048,0.5878787878787878,10
+71,how many fleet of war ships brought by achilles in the shore near troy,ContextCite32,0.8989385971099826,0.8424242424242423,10
+71,how many fleet of war ships brought by achilles in the shore near troy,WSS32,0.942405396933056,0.8303030303030302,10
+71,how many fleet of war ships brought by achilles in the shore near troy,ContextCite64,0.9468222158804285,0.7818181818181817,10
+71,how many fleet of war ships brought by achilles in the shore near troy,WSS64,0.9659398228840296,0.9636363636363635,10
+71,how many fleet of war ships brought by achilles in the shore near troy,ContextCite100,0.9513289891132595,0.8060606060606059,10
+71,how many fleet of war ships brought by achilles in the shore near troy,WSS100,0.9741155777750106,0.9151515151515152,10
+71,how many fleet of war ships brought by achilles in the shore near troy,TMC5,0.8916295182013778,0.8666666666666665,10
+71,how many fleet of war ships brought by achilles in the shore near troy,BetaShap (U)5,0.8725683376648717,0.7212121212121211,10
+71,how many fleet of war ships brought by achilles in the shore near troy,TMC10,0.876271340643506,0.7818181818181817,10
+71,how many fleet of war ships brought by achilles in the shore near troy,BetaShap (U)10,0.8107926601346427,0.5878787878787878,10
+71,how many fleet of war ships brought by achilles in the shore near troy,TMC20,0.9175262249788674,0.8181818181818182,10
+71,how many fleet of war ships brought by achilles in the shore near troy,BetaShap (U)20,0.8710347838176694,0.5636363636363636,10
+71,how many fleet of war ships brought by achilles in the shore near troy,LOO,0.7510664568367411,0.5636363636363636,10
+72,who does black panther marry in the comics,ContextCite32,0.7738022879425528,0.6848484848484848,10
+72,who does black panther marry in the comics,WSS32,0.9509029445836139,0.8787878787878788,10
+72,who does black panther marry in the comics,ContextCite64,0.8531037799299224,0.8181818181818182,10
+72,who does black panther marry in the comics,WSS64,0.9813332596083659,0.9272727272727272,10
+72,who does black panther marry in the comics,ContextCite100,0.9416793224003457,0.8303030303030302,10
+72,who does black panther marry in the comics,WSS100,0.991618138136984,0.9030303030303028,10
+72,who does black panther marry in the comics,TMC5,0.5680200164185049,-0.06666666666666665,10
+72,who does black panther marry in the comics,BetaShap (U)5,0.3865114210267845,-0.01818181818181818,10
+72,who does black panther marry in the comics,TMC10,0.7876573979686096,-0.01818181818181818,10
+72,who does black panther marry in the comics,BetaShap (U)10,0.37129326875918567,-0.17575757575757575,10
+72,who does black panther marry in the comics,TMC20,0.9240496868540226,0.34545454545454546,10
+72,who does black panther marry in the comics,BetaShap (U)20,0.5786698316502837,0.18787878787878787,10
+72,who does black panther marry in the comics,LOO,0.4489071919243057,-0.006060606060606061,10
+73,what is the record for home runs in a season,ContextCite32,0.5884018794175069,0.6848484848484848,10
+73,what is the record for home runs in a season,WSS32,0.8510832439281673,0.7333333333333332,10
+73,what is the record for home runs in a season,ContextCite64,0.8737192515642968,0.9151515151515152,10
+73,what is the record for home runs in a season,WSS64,0.9468183174210272,0.9515151515151514,10
+73,what is the record for home runs in a season,ContextCite100,0.8841000363013212,0.8909090909090909,10
+73,what is the record for home runs in a season,WSS100,0.9401817428338217,0.9272727272727272,10
+73,what is the record for home runs in a season,TMC5,0.6093482208137756,0.6,10
+73,what is the record for home runs in a season,BetaShap (U)5,0.2001168497265699,0.29696969696969694,10
+73,what is the record for home runs in a season,TMC10,0.5730870480305129,0.3696969696969697,10
+73,what is the record for home runs in a season,BetaShap (U)10,0.1618373130836312,0.16363636363636364,10
+73,what is the record for home runs in a season,TMC20,0.871337131699606,0.8424242424242423,10
+73,what is the record for home runs in a season,BetaShap (U)20,0.673504859666564,0.709090909090909,10
+73,what is the record for home runs in a season,LOO,0.6178152217475484,0.6121212121212121,10
+74,how do you say horse meat in french,ContextCite32,0.8304429795042492,0.8909090909090909,10
+74,how do you say horse meat in french,WSS32,0.4115247961114869,0.43030303030303024,10
+74,how do you say horse meat in french,ContextCite64,0.7586601850215708,0.7454545454545454,10
+74,how do you say horse meat in french,WSS64,0.5687648448589541,0.5515151515151515,10
+74,how do you say horse meat in french,ContextCite100,0.8734299795579082,0.8545454545454544,10
+74,how do you say horse meat in french,WSS100,0.519556228239336,0.406060606060606,10
+74,how do you say horse meat in french,TMC5,0.7948052055609436,0.6969696969696969,10
+74,how do you say horse meat in french,BetaShap (U)5,0.5852707447083851,0.5515151515151515,10
+74,how do you say horse meat in french,TMC10,0.8766789201238528,0.7818181818181817,10
+74,how do you say horse meat in french,BetaShap (U)10,0.6295011315752475,0.6484848484848483,10
+74,how do you say horse meat in french,TMC20,0.8696980054187088,0.7939393939393938,10
+74,how do you say horse meat in french,BetaShap (U)20,0.6886723260779034,0.7696969696969697,10
+74,how do you say horse meat in french,LOO,0.6063242010256953,0.406060606060606,10
+75,who is the chief law officer of the government of india,ContextCite32,-0.0377896893527768,-0.11692805857962202,10
+75,who is the chief law officer of the government of india,WSS32,0.016581081324977598,-0.29179466096643103,10
+75,who is the chief law officer of the government of india,ContextCite64,-0.14772853697333702,-0.13719512195121952,10
+75,who is the chief law officer of the government of india,WSS64,-0.008962014551678443,-0.05471149893120582,10
+75,who is the chief law officer of the government of india,ContextCite100,-0.13604292816304367,-0.10942299786241164,10
+75,who is the chief law officer of the government of india,WSS100,0.20078146086041876,0.10942299786241164,10
+75,who is the chief law officer of the government of india,TMC5,0.22366963838963208,0.042553388057604516,10
+75,who is the chief law officer of the government of india,BetaShap (U)5,0.011492517984182375,0.43161293601284584,10
+75,who is the chief law officer of the government of india,TMC10,0.4446337718665961,0.4620082131968491,10
+75,who is the chief law officer of the government of india,BetaShap (U)10,0.6896489463750153,0.6686960980480711,10
+75,who is the chief law officer of the government of india,TMC20,0.5925684866262269,0.480245379507251,10
+75,who is the chief law officer of the government of india,BetaShap (U)20,0.7261192049290847,0.7598819296000807,10
+75,who is the chief law officer of the government of india,LOO,0.10143447446171809,0.060975609756097573,10
+76,when did the original flatliners movie come out,ContextCite32,0.9726548148490646,0.9151515151515152,10
+76,when did the original flatliners movie come out,WSS32,0.8797589965826824,0.9030303030303028,10
+76,when did the original flatliners movie come out,ContextCite64,0.9877066817040935,0.8909090909090909,10
+76,when did the original flatliners movie come out,WSS64,0.9788394600474716,0.9757575757575757,10
+76,when did the original flatliners movie come out,ContextCite100,0.9901941216333531,0.9393939393939393,10
+76,when did the original flatliners movie come out,WSS100,0.98973180949205,0.9636363636363635,10
+76,when did the original flatliners movie come out,TMC5,0.944549896739879,0.7333333333333332,10
+76,when did the original flatliners movie come out,BetaShap (U)5,0.9367370065955053,0.6606060606060605,10
+76,when did the original flatliners movie come out,TMC10,0.905090283554068,0.7454545454545454,10
+76,when did the original flatliners movie come out,BetaShap (U)10,0.8229565819101308,0.6969696969696969,10
+76,when did the original flatliners movie come out,TMC20,0.9506513677142516,0.8545454545454544,10
+76,when did the original flatliners movie come out,BetaShap (U)20,0.8504382606060686,0.7939393939393938,10
+76,when did the original flatliners movie come out,LOO,0.675639508186764,0.5757575757575757,10
+77,who is bright eyes in the loved ones,ContextCite32,0.9843638569578472,0.8787878787878788,10
+77,who is bright eyes in the loved ones,WSS32,0.980005908431172,0.6484848484848483,10
+77,who is bright eyes in the loved ones,ContextCite64,0.9895608018621707,0.8666666666666665,10
+77,who is bright eyes in the loved ones,WSS64,0.9886367503982713,0.6969696969696969,10
+77,who is bright eyes in the loved ones,ContextCite100,0.9900539555662987,0.8787878787878788,10
+77,who is bright eyes in the loved ones,WSS100,0.9883386697792829,0.5272727272727272,10
+77,who is bright eyes in the loved ones,TMC5,0.9761743266793534,0.5878787878787878,10
+77,who is bright eyes in the loved ones,BetaShap (U)5,0.9165817451803817,0.5151515151515151,10
+77,who is bright eyes in the loved ones,TMC10,0.983667464535209,0.5030303030303029,10
+77,who is bright eyes in the loved ones,BetaShap (U)10,0.970449735145788,0.6969696969696969,10
+77,who is bright eyes in the loved ones,TMC20,0.9920689993235084,0.4545454545454545,10
+77,who is bright eyes in the loved ones,BetaShap (U)20,0.9525805275949816,0.6606060606060605,10
+77,who is bright eyes in the loved ones,LOO,0.9729746604270167,0.6848484848484848,10
+78,what was the geeks name in 16 candles,ContextCite32,0.9502075644429865,0.8666666666666665,10
+78,what was the geeks name in 16 candles,WSS32,0.9371531713424549,0.6606060606060605,10
+78,what was the geeks name in 16 candles,ContextCite64,0.9791110711102312,0.8909090909090909,10
+78,what was the geeks name in 16 candles,WSS64,0.9803488232602493,0.7575757575757575,10
+78,what was the geeks name in 16 candles,ContextCite100,0.9943030222843581,0.9057792600832962,10
+78,what was the geeks name in 16 candles,WSS100,0.9862193937823489,0.8181818181818182,10
+78,what was the geeks name in 16 candles,TMC5,0.7935766776675355,0.8666666666666665,10
+78,what was the geeks name in 16 candles,BetaShap (U)5,0.6597998076976952,0.7696969696969697,10
+78,what was the geeks name in 16 candles,TMC10,0.9116573606739761,0.9030303030303028,10
+78,what was the geeks name in 16 candles,BetaShap (U)10,0.7182094511431854,0.7939393939393938,10
+78,what was the geeks name in 16 candles,TMC20,0.9698054973332629,0.9151515151515152,10
+78,what was the geeks name in 16 candles,BetaShap (U)20,0.9225418972326345,0.9272727272727272,10
+78,what was the geeks name in 16 candles,LOO,0.7616415596294126,0.23636363636363633,10
+79,who has scored the most own goals in premier league history,ContextCite32,0.9340698482067837,0.5393939393939393,10
+79,who has scored the most own goals in premier league history,WSS32,0.9217307667331271,0.34545454545454546,10
+79,who has scored the most own goals in premier league history,ContextCite64,0.9624792955556319,0.5878787878787878,10
+79,who has scored the most own goals in premier league history,WSS64,0.9782973709926089,0.4424242424242424,10
+79,who has scored the most own goals in premier league history,ContextCite100,0.9864776068258546,0.7575757575757575,10
+79,who has scored the most own goals in premier league history,WSS100,0.9918743642475816,0.7696969696969697,10
+79,who has scored the most own goals in premier league history,TMC5,0.6953307845551081,0.3939393939393939,10
+79,who has scored the most own goals in premier league history,BetaShap (U)5,-0.26145916739566893,-0.4787878787878787,10
+79,who has scored the most own goals in premier league history,TMC10,0.9391847407802195,0.4424242424242424,10
+79,who has scored the most own goals in premier league history,BetaShap (U)10,-0.13069043126446137,-0.28484848484848485,10
+79,who has scored the most own goals in premier league history,TMC20,0.9711373479287047,0.5878787878787878,10
+79,who has scored the most own goals in premier league history,BetaShap (U)20,-0.12355771797961174,-0.406060606060606,10
+79,who has scored the most own goals in premier league history,LOO,0.9077523127717548,0.6606060606060605,10
+80,what day of the year is mothers day always celebrated,ContextCite32,0.9175475732389796,0.8666666666666665,10
+80,what day of the year is mothers day always celebrated,WSS32,0.9093387775727343,0.8666666666666665,10
+80,what day of the year is mothers day always celebrated,ContextCite64,0.9586850650264053,0.9151515151515152,10
+80,what day of the year is mothers day always celebrated,WSS64,0.934986896139537,0.7939393939393938,10
+80,what day of the year is mothers day always celebrated,ContextCite100,0.9474760408913068,0.8909090909090909,10
+80,what day of the year is mothers day always celebrated,WSS100,0.9310328991578336,0.8303030303030302,10
+80,what day of the year is mothers day always celebrated,TMC5,0.8042001325473641,0.7575757575757575,10
+80,what day of the year is mothers day always celebrated,BetaShap (U)5,0.6386734714641147,0.6242424242424242,10
+80,what day of the year is mothers day always celebrated,TMC10,0.9476376035311306,0.8545454545454544,10
+80,what day of the year is mothers day always celebrated,BetaShap (U)10,0.8030738372767117,0.6969696969696969,10
+80,what day of the year is mothers day always celebrated,TMC20,0.9766059537573232,0.8666666666666665,10
+80,what day of the year is mothers day always celebrated,BetaShap (U)20,0.7833377264106876,0.7818181818181817,10
+80,what day of the year is mothers day always celebrated,LOO,0.7446611412993733,0.41818181818181815,10
+81,when was the first episode of only fools and horses made,ContextCite32,0.8495141001848113,0.5878787878787878,10
+81,when was the first episode of only fools and horses made,WSS32,0.8508270817649073,0.5393939393939393,10
+81,when was the first episode of only fools and horses made,ContextCite64,0.9506137762433432,0.6484848484848483,10
+81,when was the first episode of only fools and horses made,WSS64,0.9634784748963695,0.7818181818181817,10
+81,when was the first episode of only fools and horses made,ContextCite100,0.9599772763091373,0.5757575757575757,10
+81,when was the first episode of only fools and horses made,WSS100,0.9742541533161784,0.7575757575757575,10
+81,when was the first episode of only fools and horses made,TMC5,0.7855781705359728,0.5636363636363636,10
+81,when was the first episode of only fools and horses made,BetaShap (U)5,0.5766392513942521,0.24848484848484845,10
+81,when was the first episode of only fools and horses made,TMC10,0.9158298348887345,0.6,10
+81,when was the first episode of only fools and horses made,BetaShap (U)10,0.4638114867189101,0.34545454545454546,10
+81,when was the first episode of only fools and horses made,TMC20,0.963956872760673,0.8424242424242423,10
+81,when was the first episode of only fools and horses made,BetaShap (U)20,0.6870696030382634,0.7212121212121211,10
+81,when was the first episode of only fools and horses made,LOO,0.568660503477602,0.22424242424242422,10
+82,what was the first bring it on movie,ContextCite32,0.851377853238904,0.8424242424242423,10
+82,what was the first bring it on movie,WSS32,0.7548396513501292,0.8181818181818182,10
+82,what was the first bring it on movie,ContextCite64,0.9433987002831615,0.8303030303030302,10
+82,what was the first bring it on movie,WSS64,0.8683253933385171,0.8909090909090909,10
+82,what was the first bring it on movie,ContextCite100,0.9632710168313668,0.8909090909090909,10
+82,what was the first bring it on movie,WSS100,0.8301429443754147,0.9030303030303028,10
+82,what was the first bring it on movie,TMC5,0.6273851579014192,0.5030303030303029,10
+82,what was the first bring it on movie,BetaShap (U)5,0.6234291478413945,0.32121212121212117,10
+82,what was the first bring it on movie,TMC10,0.7235071438162239,0.6484848484848483,10
+82,what was the first bring it on movie,BetaShap (U)10,0.6106757561377545,0.6484848484848483,10
+82,what was the first bring it on movie,TMC20,0.773467219325076,0.7575757575757575,10
+82,what was the first bring it on movie,BetaShap (U)20,0.6793859258149496,0.709090909090909,10
+82,what was the first bring it on movie,LOO,0.2519972364990247,0.07878787878787878,10
+83,when did the words in god we trust appear on money,ContextCite32,0.9577160193389845,0.5272727272727272,10
+83,when did the words in god we trust appear on money,WSS32,0.9784085175891043,0.7696969696969697,10
+83,when did the words in god we trust appear on money,ContextCite64,0.9931660525664691,0.9151515151515152,10
+83,when did the words in god we trust appear on money,WSS64,0.9876414733056468,0.8545454545454544,10
+83,when did the words in god we trust appear on money,ContextCite100,0.9897514856781897,0.8666666666666665,10
+83,when did the words in god we trust appear on money,WSS100,0.9909437624123,0.8909090909090909,10
+83,when did the words in god we trust appear on money,TMC5,0.975650483719024,0.9030303030303028,10
+83,when did the words in god we trust appear on money,BetaShap (U)5,0.960793193989689,0.8666666666666665,10
+83,when did the words in god we trust appear on money,TMC10,0.9861573354733844,0.9515151515151514,10
+83,when did the words in god we trust appear on money,BetaShap (U)10,0.8237427788903824,0.9151515151515152,10
+83,when did the words in god we trust appear on money,TMC20,0.9858432990627768,0.9636363636363635,10
+83,when did the words in god we trust appear on money,BetaShap (U)20,0.8108025470351311,0.9151515151515152,10
+83,when did the words in god we trust appear on money,LOO,0.950487780275845,0.4545454545454545,10
+84,who plays smithys sister in gavin and stacey,ContextCite32,0.9713836350452719,0.4424242424242424,10
+84,who plays smithys sister in gavin and stacey,WSS32,0.9591076838864486,0.309090909090909,10
+84,who plays smithys sister in gavin and stacey,ContextCite64,0.9910654452591176,0.5757575757575757,10
+84,who plays smithys sister in gavin and stacey,WSS64,0.9870730932164938,0.3939393939393939,10
+84,who plays smithys sister in gavin and stacey,ContextCite100,0.9965826754898609,0.5757575757575757,10
+84,who plays smithys sister in gavin and stacey,WSS100,0.9959564479388091,0.6242424242424242,10
+84,who plays smithys sister in gavin and stacey,TMC5,0.9690892304407224,0.28484848484848485,10
+84,who plays smithys sister in gavin and stacey,BetaShap (U)5,0.9619123267824438,0.1515151515151515,10
+84,who plays smithys sister in gavin and stacey,TMC10,0.9953008400466024,0.5636363636363636,10
+84,who plays smithys sister in gavin and stacey,BetaShap (U)10,0.9725275470524314,0.5272727272727272,10
+84,who plays smithys sister in gavin and stacey,TMC20,0.993906934111834,0.7333333333333332,10
+84,who plays smithys sister in gavin and stacey,BetaShap (U)20,0.986554447310126,0.6848484848484848,10
+84,who plays smithys sister in gavin and stacey,LOO,0.9911165096471966,0.49090909090909085,10
+85,who is the nets all time leading scorer,ContextCite32,0.9247369736782602,0.6727272727272726,10
+85,who is the nets all time leading scorer,WSS32,0.8454633191825914,0.9393939393939393,10
+85,who is the nets all time leading scorer,ContextCite64,0.9359962836893018,0.7333333333333332,10
+85,who is the nets all time leading scorer,WSS64,0.9450333006148844,0.8666666666666665,10
+85,who is the nets all time leading scorer,ContextCite100,0.9803329960061267,0.8787878787878788,10
+85,who is the nets all time leading scorer,WSS100,0.969857388734928,0.8545454545454544,10
+85,who is the nets all time leading scorer,TMC5,0.5794311697499269,0.5515151515151515,10
+85,who is the nets all time leading scorer,BetaShap (U)5,0.5720827529448678,0.5757575757575757,10
+85,who is the nets all time leading scorer,TMC10,0.8334052698322795,0.6727272727272726,10
+85,who is the nets all time leading scorer,BetaShap (U)10,0.7380058964094054,0.6121212121212121,10
+85,who is the nets all time leading scorer,TMC20,0.8845104667633992,0.6969696969696969,10
+85,who is the nets all time leading scorer,BetaShap (U)20,0.9835197636622384,0.7575757575757575,10
+85,who is the nets all time leading scorer,LOO,0.7938306316699111,0.7454545454545454,10
+86,who sang you won't get me i'm part of the union,ContextCite32,0.9713426169772849,0.9030303030303028,10
+86,who sang you won't get me i'm part of the union,WSS32,0.7117849396617545,0.6484848484848483,10
+86,who sang you won't get me i'm part of the union,ContextCite64,0.9733616967785854,0.9393939393939393,10
+86,who sang you won't get me i'm part of the union,WSS64,0.9127508895438226,0.8424242424242423,10
+86,who sang you won't get me i'm part of the union,ContextCite100,0.973848460324945,0.9393939393939393,10
+86,who sang you won't get me i'm part of the union,WSS100,0.9425583089896206,0.9030303030303028,10
+86,who sang you won't get me i'm part of the union,TMC5,0.7929235337369441,0.38181818181818183,10
+86,who sang you won't get me i'm part of the union,BetaShap (U)5,0.7718383420223841,0.2727272727272727,10
+86,who sang you won't get me i'm part of the union,TMC10,0.916182149494312,0.8181818181818182,10
+86,who sang you won't get me i'm part of the union,BetaShap (U)10,0.6526889997448792,0.6121212121212121,10
+86,who sang you won't get me i'm part of the union,TMC20,0.9369680436387138,0.7575757575757575,10
+86,who sang you won't get me i'm part of the union,BetaShap (U)20,0.6216808370875421,0.6363636363636362,10
+86,who sang you won't get me i'm part of the union,LOO,0.8110868567008374,0.6,10
+87,where was the first pan african conference held,ContextCite32,0.936643941141635,0.772040040473682,10
+87,where was the first pan african conference held,WSS32,0.7301626293698854,0.41818181818181815,10
+87,where was the first pan african conference held,ContextCite64,0.922774731990953,0.709090909090909,10
+87,where was the first pan african conference held,WSS64,0.9515806609436737,0.8181818181818182,10
+87,where was the first pan african conference held,ContextCite100,0.9700060842741212,0.8303030303030302,10
+87,where was the first pan african conference held,WSS100,0.9872072886820549,0.9030303030303028,10
+87,where was the first pan african conference held,TMC5,0.8877014853900316,0.9393939393939393,10
+87,where was the first pan african conference held,BetaShap (U)5,0.6831139871358339,0.9515151515151514,10
+87,where was the first pan african conference held,TMC10,0.9187703986863857,0.9393939393939393,10
+87,where was the first pan african conference held,BetaShap (U)10,0.661891728389344,0.9030303030303028,10
+87,where was the first pan african conference held,TMC20,0.9365869861069961,0.9151515151515152,10
+87,where was the first pan african conference held,BetaShap (U)20,0.7545212298427031,0.8424242424242423,10
+87,where was the first pan african conference held,LOO,0.3836720210063707,0.3696969696969697,10
+88,who played adam schiff on law & order,ContextCite32,0.8603252186280719,0.8545454545454544,10
+88,who played adam schiff on law & order,WSS32,0.6363580474729355,0.7212121212121211,10
+88,who played adam schiff on law & order,ContextCite64,0.9128256758557374,0.8424242424242423,10
+88,who played adam schiff on law & order,WSS64,0.8546271507041162,0.9272727272727272,10
+88,who played adam schiff on law & order,ContextCite100,0.9267382839809629,0.9057792600832962,10
+88,who played adam schiff on law & order,WSS100,0.9356664586650638,0.9393939393939393,10
+88,who played adam schiff on law & order,TMC5,0.6658728553917178,0.6969696969696969,10
+88,who played adam schiff on law & order,BetaShap (U)5,0.6332051890368592,0.6969696969696969,10
+88,who played adam schiff on law & order,TMC10,0.6861774016955621,0.7575757575757575,10
+88,who played adam schiff on law & order,BetaShap (U)10,0.6292069648917947,0.6969696969696969,10
+88,who played adam schiff on law & order,TMC20,0.7410949626288003,0.7696969696969697,10
+88,who played adam schiff on law & order,BetaShap (U)20,0.7457662559008942,0.6848484848484848,10
+88,who played adam schiff on law & order,LOO,0.3195782871796282,0.2727272727272727,10
+89,who was president when the white house was built,ContextCite32,0.893300015645554,0.9030303030303028,10
+89,who was president when the white house was built,WSS32,0.7909733599413171,0.6848484848484848,10
+89,who was president when the white house was built,ContextCite64,0.9259636546631995,0.9757575757575757,10
+89,who was president when the white house was built,WSS64,0.927897227850571,0.8787878787878788,10
+89,who was president when the white house was built,ContextCite100,0.8846290218258808,0.8545454545454544,10
+89,who was president when the white house was built,WSS100,0.9584769188437446,0.9515151515151514,10
+89,who was president when the white house was built,TMC5,0.7338193306594446,0.7575757575757575,10
+89,who was president when the white house was built,BetaShap (U)5,0.6738922605129491,0.6969696969696969,10
+89,who was president when the white house was built,TMC10,0.822644434794122,0.8424242424242423,10
+89,who was president when the white house was built,BetaShap (U)10,0.7646019923299626,0.8060606060606059,10
+89,who was president when the white house was built,TMC20,0.910953817791168,0.9515151515151514,10
+89,who was president when the white house was built,BetaShap (U)20,0.7842916399406911,0.8181818181818182,10
+89,who was president when the white house was built,LOO,0.22793398476481333,0.3696969696969697,10
+90,where is the big statue of jesus located,ContextCite32,0.9352619515386398,0.7212121212121211,10
+90,where is the big statue of jesus located,WSS32,0.8752971162327475,0.4545454545454545,10
+90,where is the big statue of jesus located,ContextCite64,0.9860044078205032,0.5515151515151515,10
+90,where is the big statue of jesus located,WSS64,0.9748285654491979,0.5151515151515151,10
+90,where is the big statue of jesus located,ContextCite100,0.9815636114057742,0.5393939393939393,10
+90,where is the big statue of jesus located,WSS100,0.9978961434577652,0.7333333333333332,10
+90,where is the big statue of jesus located,TMC5,0.9724743070216934,0.7696969696969697,10
+90,where is the big statue of jesus located,BetaShap (U)5,0.9846536138074972,0.7696969696969697,10
+90,where is the big statue of jesus located,TMC10,0.9263527097342165,0.8666666666666665,10
+90,where is the big statue of jesus located,BetaShap (U)10,0.8665667590688287,0.8303030303030302,10
+90,where is the big statue of jesus located,TMC20,0.9557563137883999,0.8424242424242423,10
+90,where is the big statue of jesus located,BetaShap (U)20,0.860955173746629,0.5636363636363636,10
+90,where is the big statue of jesus located,LOO,0.5134980517260743,0.8060606060606059,10
+91,who sang the song you are the reason,ContextCite32,0.9269491507401337,0.5757575757575757,10
+91,who sang the song you are the reason,WSS32,0.8640418392721307,0.6,10
+91,who sang the song you are the reason,ContextCite64,0.9843072675758543,0.8303030303030302,10
+91,who sang the song you are the reason,WSS64,0.9579178357182934,0.7333333333333332,10
+91,who sang the song you are the reason,ContextCite100,0.9851705905005772,0.8424242424242423,10
+91,who sang the song you are the reason,WSS100,0.9950960707004688,0.9636363636363635,10
+91,who sang the song you are the reason,TMC5,0.8200694352249468,0.5636363636363636,10
+91,who sang the song you are the reason,BetaShap (U)5,0.61234255561152,0.5272727272727272,10
+91,who sang the song you are the reason,TMC10,0.8551384403292966,0.5757575757575757,10
+91,who sang the song you are the reason,BetaShap (U)10,0.5298228233523273,0.6363636363636362,10
+91,who sang the song you are the reason,TMC20,0.923943838898143,0.7212121212121211,10
+91,who sang the song you are the reason,BetaShap (U)20,0.6637608867992798,0.709090909090909,10
+91,who sang the song you are the reason,LOO,0.17150438172925386,0.406060606060606,10
+92,what is the predominant religion in the ukraine,ContextCite32,0.7282891856335041,0.7575757575757575,10
+92,what is the predominant religion in the ukraine,WSS32,0.856255499491248,0.8303030303030302,10
+92,what is the predominant religion in the ukraine,ContextCite64,0.8817531170201657,0.9118583155200968,10
+92,what is the predominant religion in the ukraine,WSS64,0.9054493843411642,0.9393939393939393,10
+92,what is the predominant religion in the ukraine,ContextCite100,0.8963060196273109,0.9515151515151514,10
+92,what is the predominant religion in the ukraine,WSS100,0.917480904381021,0.9757575757575757,10
+92,what is the predominant religion in the ukraine,TMC5,0.6301083797316391,0.309090909090909,10
+92,what is the predominant religion in the ukraine,BetaShap (U)5,0.055191407102852946,0.11515151515151514,10
+92,what is the predominant religion in the ukraine,TMC10,0.7138928380435265,0.22424242424242422,10
+92,what is the predominant religion in the ukraine,BetaShap (U)10,0.061012080032788914,0.10303030303030303,10
+92,what is the predominant religion in the ukraine,TMC20,0.7989971741847525,0.5757575757575757,10
+92,what is the predominant religion in the ukraine,BetaShap (U)20,0.4210740209886583,0.406060606060606,10
+92,what is the predominant religion in the ukraine,LOO,0.36274682651046924,0.6363636363636362,10
+93,when did the who perform at the super bowl,ContextCite32,0.9023591763304726,0.7939393939393938,10
+93,when did the who perform at the super bowl,WSS32,0.8441713578326087,0.8787878787878788,10
+93,when did the who perform at the super bowl,ContextCite64,0.9490259532873482,0.8787878787878788,10
+93,when did the who perform at the super bowl,WSS64,0.9263806663695979,0.9030303030303028,10
+93,when did the who perform at the super bowl,ContextCite100,0.9717702571088861,0.9636363636363635,10
+93,when did the who perform at the super bowl,WSS100,0.9219423232832372,0.8666666666666665,10
+93,when did the who perform at the super bowl,TMC5,0.8864083337128914,0.8424242424242423,10
+93,when did the who perform at the super bowl,BetaShap (U)5,0.9242280496116155,0.8545454545454544,10
+93,when did the who perform at the super bowl,TMC10,0.8425900877864381,0.7818181818181817,10
+93,when did the who perform at the super bowl,BetaShap (U)10,0.8410000005889038,0.8303030303030302,10
+93,when did the who perform at the super bowl,TMC20,0.9043531030634849,0.8303030303030302,10
+93,when did the who perform at the super bowl,BetaShap (U)20,0.8894753004059601,0.7696969696969697,10
+93,when did the who perform at the super bowl,LOO,-0.0852962449428949,-0.12727272727272726,10
+94,where was practical magic supposed to be set,ContextCite32,0.9806055290624178,0.5636363636363636,10
+94,where was practical magic supposed to be set,WSS32,0.9879180276404926,0.6363636363636362,10
+94,where was practical magic supposed to be set,ContextCite64,0.9949636112204316,0.6606060606060605,10
+94,where was practical magic supposed to be set,WSS64,0.9948073219309247,0.6969696969696969,10
+94,where was practical magic supposed to be set,ContextCite100,0.9971029292959627,0.7212121212121211,10
+94,where was practical magic supposed to be set,WSS100,0.9969270790185459,0.8545454545454544,10
+94,where was practical magic supposed to be set,TMC5,0.9797471205901483,0.7696969696969697,10
+94,where was practical magic supposed to be set,BetaShap (U)5,0.6966586280940945,0.6969696969696969,10
+94,where was practical magic supposed to be set,TMC10,0.9849239135687724,0.6606060606060605,10
+94,where was practical magic supposed to be set,BetaShap (U)10,0.8703734799070781,0.41818181818181815,10
+94,where was practical magic supposed to be set,TMC20,0.994349601497008,0.7575757575757575,10
+94,where was practical magic supposed to be set,BetaShap (U)20,0.9316818517813098,0.3939393939393939,10
+94,where was practical magic supposed to be set,LOO,0.992198209981066,0.6242424242424242,10
+95,when was abbott and costello who's on first,ContextCite32,0.9460216284990837,0.8206724839680872,10
+95,when was abbott and costello who's on first,WSS32,0.9481963160066308,0.9272727272727272,10
+95,when was abbott and costello who's on first,ContextCite64,0.9697461399680817,0.8181818181818182,10
+95,when was abbott and costello who's on first,WSS64,0.9504850736467114,0.8666666666666665,10
+95,when was abbott and costello who's on first,ContextCite100,0.9814451421312191,0.9151515151515152,10
+95,when was abbott and costello who's on first,WSS100,0.9772331057736985,0.9515151515151514,10
+95,when was abbott and costello who's on first,TMC5,0.9517334453336342,0.8787878787878788,10
+95,when was abbott and costello who's on first,BetaShap (U)5,0.8092693977318928,0.9636363636363635,10
+95,when was abbott and costello who's on first,TMC10,0.9222356613419507,0.9272727272727272,10
+95,when was abbott and costello who's on first,BetaShap (U)10,0.737937202106904,0.9636363636363635,10
+95,when was abbott and costello who's on first,TMC20,0.9667355843447971,0.9030303030303028,10
+95,when was abbott and costello who's on first,BetaShap (U)20,0.8407238716506394,0.9757575757575757,10
+95,when was abbott and costello who's on first,LOO,0.9064693568741339,0.709090909090909,10
+96,india's medal ranking in asian games 2018,ContextCite32,0.9960186850154725,0.8449887057152897,10
+96,india's medal ranking in asian games 2018,WSS32,0.9955837955002038,0.7781190959104828,10
+96,india's medal ranking in asian games 2018,ContextCite64,0.9966112214064026,0.8389096502784892,10
+96,india's medal ranking in asian games 2018,WSS64,0.9914909371273909,0.705170430668875,10
+96,india's medal ranking in asian games 2018,ContextCite100,0.9968234886929037,0.7720400404736821,10
+96,india's medal ranking in asian games 2018,WSS100,0.9955621758214009,0.790277206784084,10
+96,india's medal ranking in asian games 2018,TMC5,0.9871880059486875,0.4498501023232478,10
+96,india's medal ranking in asian games 2018,BetaShap (U)5,0.9899397102410874,0.6565379871744698,10
+96,india's medal ranking in asian games 2018,TMC10,0.9942189751614707,0.7841981513472833,10
+96,india's medal ranking in asian games 2018,BetaShap (U)10,0.9906789703343134,0.8328305948416885,10
+96,india's medal ranking in asian games 2018,TMC20,0.9970150831060197,0.857146816588891,10
+96,india's medal ranking in asian games 2018,BetaShap (U)20,0.9741476722091781,0.8875420937728943,10
+96,india's medal ranking in asian games 2018,LOO,0.9898025936935789,0.6097560975609757,10
+97,how far is murrysville pa from pittsburgh pa,ContextCite32,0.995369383807336,0.9878044218151566,10
+97,how far is murrysville pa from pittsburgh pa,WSS32,0.9862182399028557,0.6121212121212121,10
+97,how far is murrysville pa from pittsburgh pa,ContextCite64,0.9972414086678183,0.9636363636363635,10
+97,how far is murrysville pa from pittsburgh pa,WSS64,0.9932948107995708,0.7939393939393938,10
+97,how far is murrysville pa from pittsburgh pa,ContextCite100,0.9955701817814093,0.8909090909090909,10
+97,how far is murrysville pa from pittsburgh pa,WSS100,0.9943940231770341,0.9393939393939393,10
+97,how far is murrysville pa from pittsburgh pa,TMC5,0.8885878433864816,0.8787878787878788,10
+97,how far is murrysville pa from pittsburgh pa,BetaShap (U)5,0.7910601798303502,0.7333333333333332,10
+97,how far is murrysville pa from pittsburgh pa,TMC10,0.9652860259826296,0.8666666666666665,10
+97,how far is murrysville pa from pittsburgh pa,BetaShap (U)10,0.8100917231702265,0.8181818181818182,10
+97,how far is murrysville pa from pittsburgh pa,TMC20,0.9865331600797294,0.9272727272727272,10
+97,how far is murrysville pa from pittsburgh pa,BetaShap (U)20,0.8428159125166992,0.6969696969696969,10
+97,how far is murrysville pa from pittsburgh pa,LOO,0.984084105588187,0.5757575757575757,10
+98,what is the pattern on a leopard's coat called,ContextCite32,0.9445864786186783,0.9757575757575757,10
+98,what is the pattern on a leopard's coat called,WSS32,0.9591357665704485,0.9757575757575757,10
+98,what is the pattern on a leopard's coat called,ContextCite64,0.9647757447723551,0.9878787878787878,10
+98,what is the pattern on a leopard's coat called,WSS64,0.9560492421254053,0.9636363636363635,10
+98,what is the pattern on a leopard's coat called,ContextCite100,0.9375119303750905,0.9878787878787878,10
+98,what is the pattern on a leopard's coat called,WSS100,0.9565904534364275,0.9151515151515152,10
+98,what is the pattern on a leopard's coat called,TMC5,0.8439555740595925,0.7818181818181817,10
+98,what is the pattern on a leopard's coat called,BetaShap (U)5,0.8054997034835638,0.7696969696969697,10
+98,what is the pattern on a leopard's coat called,TMC10,0.7838062923939408,0.7575757575757575,10
+98,what is the pattern on a leopard's coat called,BetaShap (U)10,0.5845324332081523,0.6,10
+98,what is the pattern on a leopard's coat called,TMC20,0.8503923749902887,0.6484848484848483,10
+98,what is the pattern on a leopard's coat called,BetaShap (U)20,0.4859141825282978,0.33333333333333326,10
+98,what is the pattern on a leopard's coat called,LOO,0.4574643516850962,0.12727272727272726,10
+99,where is eden west resort from couples retreat,ContextCite32,0.9839733303677374,0.5515151515151515,10
+99,where is eden west resort from couples retreat,WSS32,0.9918071200114141,0.8424242424242423,10
+99,where is eden west resort from couples retreat,ContextCite64,0.9987295173441276,0.9878787878787878,10
+99,where is eden west resort from couples retreat,WSS64,0.9921287065281567,0.9757575757575757,10
+99,where is eden west resort from couples retreat,ContextCite100,0.997370159488842,0.9757575757575757,10
+99,where is eden west resort from couples retreat,WSS100,0.9969764706192553,0.9878787878787878,10
+99,where is eden west resort from couples retreat,TMC5,0.9884890943847721,0.8181818181818182,10
+99,where is eden west resort from couples retreat,BetaShap (U)5,0.9533684607784605,0.6363636363636362,10
+99,where is eden west resort from couples retreat,TMC10,0.9927272642672779,0.8424242424242423,10
+99,where is eden west resort from couples retreat,BetaShap (U)10,0.9408401513580447,0.6727272727272726,10
+99,where is eden west resort from couples retreat,TMC20,0.9946626371190324,0.9030303030303028,10
+99,where is eden west resort from couples retreat,BetaShap (U)20,0.937703365540492,0.6848484848484848,10
+99,where is eden west resort from couples retreat,LOO,0.9679545539735777,0.309090909090909,10
