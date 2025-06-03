@@ -14,5 +14,6 @@ dev = [
     "cython>=3.1.1",
     "pandas>=2.2.3",
     "pygam>=0.9.1",
+    "scikit-learn>=1.6.1",
     "xgboost>=3.0.2",
 ]
