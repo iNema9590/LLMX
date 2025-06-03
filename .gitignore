@@ -1,4 +1,5 @@
-/data/
+/data/plots
+/data/results
 __pycache__/
 google-credentials.json
 .git-credentials
