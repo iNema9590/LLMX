@@ -1,24 +1,27 @@
-import numpy as np
-import os
-import random
-import math
-import pickle
 import itertools
-import xgboost
-from sklearn.linear_model import Lasso
-from pygam import LinearGAM, s, te, f, l
-from fastFM import als
-from sklearn.metrics import mean_squared_error, r2_score
+import math
+import os
+import pickle
+import random
+import warnings
 from collections import defaultdict
+
+import numpy as np
 import torch
 import torch.nn.functional as F
+import xgboost
 from accelerate import Accelerator
-from accelerate.utils import gather_object, broadcast_object_list 
-from tqdm.auto import tqdm
-import warnings
-from sklearn.exceptions import ConvergenceWarning
-from scipy.stats import beta as beta_dist
+from accelerate.utils import broadcast_object_list, gather_object
+# from fastFM import als
+from pygam import LinearGAM, f, l, s, te
 from scipy.sparse import csr_matrix
+from scipy.stats import beta as beta_dist
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_squared_error, r2_score
+from tqdm.auto import tqdm
+
+
 class ShapleyExperimentHarness:
     def __init__(self, items, query, 
                  prepared_model_for_harness, tokenizer_for_harness, accelerator_for_harness, 
@@ -192,7 +195,12 @@ class ShapleyExperimentHarness:
         return complete_utilities if complete_utilities is not None else {}
 
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
-        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+        messages = [{"role": "system", "content": """You are a helpful assistant. You must only answer using the provided context.
+                    If the context does not contain the information needed to answer the question, say:
+                    "I don’t have the required information."
+                    Do not use your own knowledge or make assumptions.
+                    Do not fabricate facts.
+                    Be accurate, concise, and directly cite from the context when possible."""}]
         if context_str:
             messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}. If you can not deduce the answer from the context then state 'I do not have the required info'"})
         else:
@@ -244,6 +252,7 @@ class ShapleyExperimentHarness:
         # Explicitly delete tensors
         del input_ids, attention_mask, generated_ids, unwrapped_model, outputs_gen
         torch.cuda.empty_cache()
+        print("POSSIBLE OUTPUT OF THE LLM: ", cleaned_text)
         return cleaned_text
 
     def _llm_compute_logprob(self, context_str: str) -> float:
@@ -484,20 +493,20 @@ class ShapleyExperimentHarness:
             model.fit(X_train, y_train)
             return model
 
-        elif sur_type == "fm":
-            print(X_train.shape)
-            X_train_fm = csr_matrix(X_train)  # Convert to sparse
-            print(X_train_fm.shape)
-            model = als.FMRegression(
-                n_iter=100,
-                init_stdev=0.1,
-                rank=4,
-                l2_reg_w=0.1,
-                l2_reg_V=0.1,
-                random_state=42
-            )
-            model.fit(X_train_fm, y_train)
-            return model
+        # elif sur_type == "fm":
+        #     print(X_train.shape)
+        #     X_train_fm = csr_matrix(X_train)  # Convert to sparse
+        #     print(X_train_fm.shape)
+        #     model = als.FMRegression(
+        #         n_iter=100,
+        #         init_stdev=0.1,
+        #         rank=4,
+        #         l2_reg_w=0.1,
+        #         l2_reg_V=0.1,
+        #         random_state=42
+        #     )
+        #     model.fit(X_train_fm, y_train)
+        #     return model
 
         elif sur_type == "gam":
             gam_lam = 0.6
