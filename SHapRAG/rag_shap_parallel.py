@@ -4,8 +4,10 @@ import random
 import math
 import pickle
 import itertools
-
-from sklearn.linear_model import Lasso, LinearRegression
+import xgboost
+from sklearn.linear_model import Lasso
+from pygam import LinearGAM, s, te, f, l
+from fastFM import als
 from sklearn.metrics import mean_squared_error, r2_score
 from collections import defaultdict
 import torch
@@ -15,9 +17,8 @@ from accelerate.utils import gather_object, broadcast_object_list
 from tqdm.auto import tqdm
 import warnings
 from sklearn.exceptions import ConvergenceWarning
-warnings.filterwarnings("ignore", category=ConvergenceWarning)
-
 from scipy.stats import beta as beta_dist
+from scipy.sparse import csr_matrix
 class ShapleyExperimentHarness:
     def __init__(self, items, query, 
                  prepared_model_for_harness, tokenizer_for_harness, accelerator_for_harness, 
@@ -156,9 +157,7 @@ class ShapleyExperimentHarness:
                 for i, single_process_dict in enumerate(gathered_list_of_dicts):
                     if isinstance(single_process_dict, dict):
                         final_utilities_on_main.update(single_process_dict)
-                    elif self.verbose and single_process_dict is not None:
-                        print(f"Warning (Main Proc): Item from rank {i} in gathered data is not a dict "
-                              f"(type: {type(single_process_dict)}). Skipping.")
+
             elif self.verbose:
                 print(f"Warning (Main Proc): gathered_list_of_dicts is not a list "
                       f"(type: {type(gathered_list_of_dicts)}). Cannot aggregate.")
@@ -195,7 +194,7 @@ class ShapleyExperimentHarness:
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
-            messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}. Be concise and short."})
+            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}. If you can not deduce the answer from the context then state 'I do not have the required info'"})
         else:
             messages.append({"role": "user", "content": self.query})
 
@@ -216,12 +215,10 @@ class ShapleyExperimentHarness:
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 max_new_tokens=max_new_tokens,
-                do_sample=True,
+                do_sample=False,
                 pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
                              else unwrapped_model.config.eos_token_id,
-                temperature=0.1,
                 top_p=1.0,
-    
             )
             # Handle different return types of generate
             if isinstance(outputs_gen, torch.Tensor):
@@ -304,7 +301,7 @@ class ShapleyExperimentHarness:
         included_items = [self.items[i] for i, include in enumerate(v_np) if include == 1]
         return "\n\n".join(included_items)
 
-    def _calculate_shapley_from_cached_dict(self, utility_dict_to_use: dict[tuple, float]) -> np.ndarray:
+    def _calculate_shapley_from_cached_dict(self, utility_dict_to_use: dict[tuple, float], second_util={}) -> np.ndarray:
         shapley_values = np.zeros(self.n_items)
         n = self.n_items
         factorials_local = self._factorials # Already initialized in __init__
@@ -328,12 +325,14 @@ class ShapleyExperimentHarness:
                     s_union_i_list = list(s_tuple)
                     s_union_i_list[i] = 1
                     s_union_i_tuple = tuple(s_union_i_list)
-                    if s_union_i_tuple in utility_dict_to_use:
+                    if s_union_i_tuple in second_util and s_tuple in second_util:
+                        s_union_i_util = second_util[s_union_i_tuple]
+                        s_util = second_util[s_tuple]
+                    elif s_union_i_tuple in utility_dict_to_use:
                         s_union_i_util = utility_dict_to_use[s_union_i_tuple]
-                        if s_union_i_util == -float('inf'): continue # Skip if union utility failed
-                        marginal_contribution = s_union_i_util - s_util
-                        weight = (factorials_local[s_size] * factorials_local[n - s_size - 1]) / factorials_local[n]
-                        shap_i += weight * marginal_contribution
+                    marginal_contribution = s_union_i_util - s_util
+                    weight = (factorials_local[s_size] * factorials_local[n - s_size - 1]) / factorials_local[n]
+                    shap_i += weight * marginal_contribution
             shapley_values[i] = shap_i
         return shapley_values
 
@@ -457,79 +456,121 @@ class ShapleyExperimentHarness:
 
         return list(sampled_tuples_set)
 
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], lasso_alpha: float, eval=False) -> tuple:
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], eval=True, sur_type="linear") -> tuple:
         X_train = np.array(ablations)
         y_train = np.array(utilities)
 
-        X_test=np.array(list(self.all_true_utilities.keys()))
-        y_test=np.array(list(self.all_true_utilities.values()))
+        # X_test=np.array(list(self.all_true_utilities.keys()))
+        # y_test=np.array(list(self.all_true_utilities.values()))
 
         # Train the model
-        if lasso_alpha == 0:
-            model = LinearRegression(fit_intercept=True)
+        if sur_type == "linear":
+
+            model = Lasso(alpha=0.01, fit_intercept=True, random_state=42, max_iter=2000)
+            model.fit(X_train, y_train)
+            coefficients = model.coef_
+            intercept = model.intercept_
+            return model, coefficients, intercept
+
+        elif sur_type=="xgboost":                              
+            model = xgboost.XGBRegressor(
+            n_estimators=100,
+            learning_rate=0.1,
+            max_depth=5,
+            reg_alpha=0.01,
+            reg_lambda=0,
+            objective='reg:squarederror' # Common for regression
+            )
+            model.fit(X_train, y_train)
+            return model
+
+        elif sur_type == "fm":
+            print(X_train.shape)
+            X_train_fm = csr_matrix(X_train)  # Convert to sparse
+            print(X_train_fm.shape)
+            model = als.FMRegression(
+                n_iter=100,
+                init_stdev=0.1,
+                rank=4,
+                l2_reg_w=0.1,
+                l2_reg_V=0.1,
+                random_state=42
+            )
+            model.fit(X_train_fm, y_train)
+            return model
+
+        elif sur_type == "gam":
+            gam_lam = 0.6
+            n_features = X_train.shape[1]
+
+            # Start with univariate smooth terms
+            terms = s(0, lam=gam_lam)
+            for i in range(1, n_features):
+                terms += s(i, lam=gam_lam)
+
+            # Add pairwise interaction terms
+            for i in range(n_features):
+                for j in range(i + 1, n_features):
+                    terms += te(i, j, lam=gam_lam)
+
+            # Fit the model
+            model = LinearGAM(terms).fit(X_train, y_train)
+            return model
         else:
-            model = Lasso(alpha=lasso_alpha, fit_intercept=True, random_state=42, max_iter=2000)
+            raise ValueError("Unknown type")
 
-        model.fit(X_train, y_train)
-        coefficients = model.coef_
-        intercept = model.intercept_
 
-        # --- Evaluation Part (on main process only) ---
-        if eval:
-            if hasattr(self, 'accelerator') and not self.accelerator.is_main_process:
-                # self.accelerator.wait_for_everyone() # Ensure main process completes if others depend on it
-                return model, coefficients, intercept
 
-            # Predict on the same training data for evaluation
-            y_pred = model.predict(X_test)
 
-            # Overall MSE
-            overall_mse = mean_squared_error(y_test, y_pred)
-            if hasattr(self, 'verbose') and self.verbose: # Check if self.verbose exists
-                print(f"Overall Mean Squared Error (MSE): {overall_mse:.6f}")
+        # if eval:
+        #     # Predict on the same training data for evaluation
+        #     y_pred = model.predict(X_test)
 
-            # MSE by subset size
-            mse_by_size = defaultdict(list)
-            predictions_by_size = defaultdict(list)
-            true_values_by_size = defaultdict(list)
+        #     # Overall MSE
+        #     overall_mse = mean_squared_error(y_test, y_pred)
+        #     if hasattr(self, 'verbose') and self.verbose: # Check if self.verbose exists
+        #         print(f"Overall Mean Squared Error (MSE): {overall_mse:.6f}")
 
-            for i, ablation_vector in enumerate(X_test):
-                subset_size = int(np.sum(ablation_vector))
-                true_values_by_size[subset_size].append(y_test[i])
-                predictions_by_size[subset_size].append(y_pred[i])
+        #     # MSE by subset size
+        #     mse_by_size = defaultdict(list)
+        #     predictions_by_size = defaultdict(list)
+        #     true_values_by_size = defaultdict(list)
 
-            if hasattr(self, 'verbose') and self.verbose:
-                print("\nMSE by Subset Size (Number of Active Items):")
-                print("------------------------------------------")
-                print("| Size | Num Subsets | MSE        |")
-                print("|------|-------------|------------|")
+        #     for i, ablation_vector in enumerate(X_test):
+        #         subset_size = int(np.sum(ablation_vector))
+        #         true_values_by_size[subset_size].append(y_test[i])
+        #         predictions_by_size[subset_size].append(y_pred[i])
 
-            sorted_sizes = sorted(true_values_by_size.keys())
-            for size in sorted_sizes:
-                true_vals_s = np.array(true_values_by_size[size])
-                pred_vals_s = np.array(predictions_by_size[size])
-                num_subsets_at_size = len(true_vals_s)
+        #     if hasattr(self, 'verbose') and self.verbose:
+        #         print("\nMSE by Subset Size (Number of Active Items):")
+        #         print("------------------------------------------")
+        #         print("| Size | Num Subsets | MSE        |")
+        #         print("|------|-------------|------------|")
 
-                if num_subsets_at_size > 0:
-                    mse_s = mean_squared_error(true_vals_s, pred_vals_s)
-                    if hasattr(self, 'verbose') and self.verbose:
-                        print(f"| {size:<4} | {num_subsets_at_size:<11} | {mse_s:<10.6f} |")
-                # else: # Should not happen if size is a key from X_train
-                #     if hasattr(self, 'verbose') and self.verbose:
-                #         print(f"| {size:<4} | {num_subsets_at_size:<11} | {'N/A':<10} |")
+        #     sorted_sizes = sorted(true_values_by_size.keys())
+        #     for size in sorted_sizes:
+        #         true_vals_s = np.array(true_values_by_size[size])
+        #         pred_vals_s = np.array(predictions_by_size[size])
+        #         num_subsets_at_size = len(true_vals_s)
+
+        #         if num_subsets_at_size > 0:
+        #             mse_s = mean_squared_error(true_vals_s, pred_vals_s)
+        #             if hasattr(self, 'verbose') and self.verbose:
+        #                 print(f"| {size:<4} | {num_subsets_at_size:<11} | {mse_s:<10.6f} |")
+        #         # else: # Should not happen if size is a key from X_train
+        #         #     if hasattr(self, 'verbose') and self.verbose:
+        #         #         print(f"| {size:<4} | {num_subsets_at_size:<11} | {'N/A':<10} |")
             
-            if hasattr(self, 'verbose') and self.verbose:
-                print("------------------------------------------\n")
-        
-        # self.accelerator.wait_for_everyone() # If other processes need to wait for main's print
-        return model, coefficients, intercept
+        #     if hasattr(self, 'verbose') and self.verbose:
+        #         print("------------------------------------------\n")
+                
 
     def compute_exact_shap(self):
         if self.verbose and self.accelerator.is_main_process:
         # self.all_true_utilities is available and identical on all processes
             return self._calculate_shapley_from_cached_dict(self.all_true_utilities)
 
-    def compute_contextcite_weights(self, num_samples: int, lasso_alpha: float, seed: int = None,  sampling="uniform"):
+    def compute_contextcite_weights(self, num_samples: int, seed: int = None,  sampling="uniform"):
         if self.accelerator.is_main_process:
 
             if seed is not None: random.seed(seed); np.random.seed(seed) # Seed for all processes for consistent sampling
@@ -548,25 +589,18 @@ class ShapleyExperimentHarness:
 
             sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
             utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
-            print("Calling surrogate for CS")
-            _, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
+            _, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train)
         return weights
 
-    def compute_wss(self, num_samples: int, lasso_alpha: float, seed: int = None,  sampling="kernelshap_weighted", return_weights: bool = False, use_hybrid_utilities: bool = False):
+    def compute_wss(self, num_samples: int, seed: int = None, distil: list=None,  sampling="kernelshap",sur_type="xgboost", util="pure-surrogate", pairchecking=False):
         if self.accelerator.is_main_process:
             if seed is not None: random.seed(seed); np.random.seed(seed)
 
             sampled_tuples = self._sample_ablations_from_all(num_samples) if sampling=="uniform" else self._sample_ablations_kernelshap_weighted(num_samples, seed=seed)
-            if not sampled_tuples:
-                if self.verbose and self.accelerator.is_main_process: print("Error: No tuples sampled for WSS.");
-                return (np.zeros(self.n_items), np.zeros(self.n_items)) if return_weights else np.zeros(self.n_items)
 
             utilities_for_samples = [self.all_true_utilities.get(v_tuple, -float('inf')) for v_tuple in sampled_tuples]
             
             valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
-            if not valid_indices:
-                if self.verbose and self.accelerator.is_main_process: print("Error: All sampled precomputed utilities failed for WSS. Cannot train surrogate.");
-                return (np.zeros(self.n_items), np.zeros(self.n_items)) if return_weights else np.zeros(self.n_items)
 
             if len(valid_indices) < len(sampled_tuples) and self.verbose and self.accelerator.is_main_process:
                 print(f"Warning: {len(sampled_tuples) - len(valid_indices)} precomputed utilities were -inf, using {len(valid_indices)} for WSS surrogate.")
@@ -574,30 +608,38 @@ class ShapleyExperimentHarness:
             sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
             utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
             known_utilities_for_hybrid = {v_tuple: self.all_true_utilities[v_tuple] for v_tuple in sampled_tuples_for_train}
-            print("Calling surrogate for WSS")
-            surrogate_model, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, lasso_alpha)
+            if sur_type=="linear":
+                surrogate_model, _, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train)
+            else:
+                surrogate_model= self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
 
             hybrid_utilities = {}
             all_ablations_X = np.array(list(itertools.product([0, 1], repeat=self.n_items)), dtype=int)
             
             # Prediction can be done by all, it's fast.
-            all_predictions = surrogate_model.predict(all_ablations_X)
+            if sur_type=="fm":
+                all_ablations_X_sp=csr_matrix(all_ablations_X)
+                all_predictions = surrogate_model.predict(all_ablations_X_sp)
+            else:
+                all_predictions = surrogate_model.predict(all_ablations_X)
             
-            if use_hybrid_utilities:
+            if util=='hybrid':
                 for i_pred in range(all_ablations_X.shape[0]):
                     v_tuple = tuple(all_ablations_X[i_pred])
-                    # Use the true utility if it was part of the m valid training samples, else predict
                     hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
-            else:
+            elif util=="pure-surrogate":
                 for i_pred in range(all_ablations_X.shape[0]):
                     v_tuple = tuple(all_ablations_X[i_pred])
                     hybrid_utilities[v_tuple] = all_predictions[i_pred]
-            # --- END OF MODIFIED PART ---
-            
-            # Assuming _calculate_shapley_from_cached_dict is your general Shapley calculator
+                if pairchecking:
+                    shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities, known_utilities_for_hybrid)
+                    return shapley_values_wss
+            if distil:
+                {k: v for k, v in hybrid_utilities.items() if sum(k) not in distil}
+
             shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) 
         
-            return (shapley_values_wss, weights) if return_weights else shapley_values_wss
+            return shapley_values_wss
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                           max_unique_lookups: int, # Budget for utility lookups
