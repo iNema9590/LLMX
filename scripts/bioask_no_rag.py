@@ -5,10 +5,12 @@ parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 
 from SHapRAG import*
+from llm_eval import *
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from scipy.stats import spearmanr, pearsonr
+from scipy.stats import spearmanr, pearsonr, kendalltau, rankdata
+from sklearn.metrics import ndcg_score
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import gc
@@ -69,9 +71,11 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     docs=df1.passage[df.relevant_passage_ids[i][:NUM_RETRIEVED_DOCS]].tolist()
 
     # experiment with copies
-    numbers = random.sample(range(1, len(docs)), 3)
+    random.seed(SEED)
+    numbers = random.sample(range(1, len(docs)), 4)
     docs[numbers[0]]=docs[numbers[1]]
     docs[numbers[2]]=docs[numbers[1]]
+    docs[numbers[3]]=docs[numbers[1]]
 
     utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache3bcp"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
@@ -92,14 +96,29 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         verbose=True, # Verbose can be True, but most prints inside harness are main_process guarded
         utility_path=current_utility_path
     )
-            
+    
+    # LLM response evaluation block   
+    print("-" * 40) 
+    target_response = harness.target_response   
+    print('Ground truth response: ', answer)
+    print('Generated response: ', target_response)
+    scores_eval = evaluate_llm_response(tokenizer_eval, embedding_model_eval, causal_lm_model_eval, target_response, answer)
+    for metric, score in scores_eval.items():
+        print(f"{metric}: {score:.4f}")
+        try:
+            all_llm_scores[metric].append(score)
+        except:
+            all_llm_scores[metric] = [score]
+    print("-" * 40)    
+
+
     results_for_query = {}
 
     if accelerator_main.is_main_process:
         results_for_query["Exact"] = harness.compute_exact_shap()
 
         m_samples_map = {"S": 32, "M": 64, "L": 100} 
-        T_iterations_map = {"S": 10, "M": 15, "L":20} 
+        T_iterations_map = {"S": 5, "M": 10, "L":20} 
 
         for size_key, num_s in m_samples_map.items():
             if 2**len(docs) < num_s and size_key != "L":
@@ -108,9 +127,11 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                 actual_samples = num_s
 
             if actual_samples > 0: 
-                results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="uniform", lasso_alpha=0.01, seed=SEED)
+                results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="kernelshap", seed=SEED)
                 
-                results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, lasso_alpha=0.01, seed=SEED, sampling="kernelshap", use_hybrid_utilities=False)
+                # results_for_query[f"WSS_GAM{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, seed=SEED, distil=None, sampling="kernelshap",sur_type="gam", util='pure-surrogate', pairchecking=False)
+                results_for_query[f"WSS_FM{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, seed=SEED, distil=None, sampling="kernelshap",sur_type="fm", util='pure-surrogate', pairchecking=False)
+                results_for_query[f"WSS_XGB{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, seed=SEED, distil=None, sampling="kernelshap",sur_type="xgboost", util='pure-surrogate', pairchecking=False)
                 results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)
                 results_for_query[f"TMC{actual_samples}"] = harness.compute_tmc_shap(num_iterations_max=T_iterations_map[size_key], performance_tolerance=0.001, max_unique_lookups=actual_samples, seed=SEED)
 
@@ -118,6 +139,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
 
         exact_scores = results_for_query.get("Exact")
         if exact_scores is not None:
+            positive_exact_score = np.clip(exact_scores, a_min=0.0, a_max=None) # FOR NDGC SCORE COMPUTATION
             for method, approx_scores in results_for_query.items():
                 if method != "Exact" and approx_scores is not None:
                     if len(approx_scores) == len(exact_scores):
@@ -127,10 +149,18 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                         else:
                             pearson_c, _ = pearsonr(exact_scores, approx_scores)
                             spearman_c, _ = spearmanr(exact_scores, approx_scores)
+                            exact_ranks = rankdata(-np.array(exact_scores), method="average") # rank scores with the smallest =1 and when there is a tie assign the average rank
+                            approx_ranks = rankdata(-np.array(approx_scores), method = "average")
+                            kendall_c, _ = kendalltau(exact_ranks, approx_ranks) # return tau and pval (if pval is < 0.005 we can say that correlation is statistically significant) 
+                        ndgc_scoring  = ndcg_score(
+                            [positive_exact_score], 
+                            [approx_scores],
+                            k = 3 # focus on top k document scoring
+                        )
                         
                         all_metrics_data.append({
                             "Question_Index": i, "Query": query, "Method": method,
-                            "Pearson": pearson_c, "Spearman": spearman_c, "Num_Items": len(docs)
+                            "Pearson": pearson_c, "Spearman": spearman_c, "NDCG" : ndgc_scoring, "KendallTau" : kendall_c,
                         })
                     else:
                         print(f"    Score length mismatch for method {method} (Exact: {len(exact_scores)}, Approx: {len(approx_scores)}). Skipping metrics.")
@@ -157,8 +187,10 @@ if accelerator_main.is_main_process:
         average_metrics = metrics_df_all_questions.groupby("Method").agg(
             Avg_Pearson=("Pearson", "mean"),
             Avg_Spearman=("Spearman", "mean"),
+            Avg_Kendall =("KendallTau", "mean"),
+            Avg_NDCG = ("NDCG", "mean"),
             Num_Valid_Queries=("Query", "nunique")
-        ).sort_values(by="Avg_Spearman", ascending=False)
+        ).sort_values(by="Avg_Pearson", ascending=False)
         
         print(average_metrics.round(4))
 
