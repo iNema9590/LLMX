@@ -106,7 +106,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         random.seed(i) # different seed for each query/line
         random.shuffle(index_list)
         docs = [docs[j] for j in index_list]
-        falgs = [flags[j] for j in index_list]
+        flags = [flags[j] for j in index_list]
 
     utility_cache_base_dir = f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/utilities_cache3bcp"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
@@ -156,9 +156,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         df_save_results.loc[i, "query"] = query
         df_save_results.loc[i, "scoring"] = [results_for_query]
         # print("Flags Value: ", flags)
-        # df_save_results.loc[i, "doc_id"] = [list(string.ascii_uppercase[:10])]
-        # print("what is the bug/: ", type(docs), docs)
-
+        df_save_results.loc[i, "doc_id"] = [[flags]]
         df_save_results.loc[i, "context"] = [[docs]]
         df_save_results.loc[i, "provided_answer"] = harness.target_response
 
