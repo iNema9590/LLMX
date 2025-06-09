@@ -18,6 +18,7 @@ from scipy.stats import kendalltau, pearsonr, rankdata, spearmanr
 from sklearn.metrics import ndcg_score
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from utils import hit_rate_at_k, precision_at_k, reciprocal_rank
 
 from SHapRAG import *
 
@@ -176,6 +177,9 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                             pearson_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0 
                             spearman_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
                             kendall_c = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
+                            precision_k = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
+                            hit_rate_k = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
+                            RR = 1.0 if np.allclose(exact_scores, approx_scores) else 0.0
                         else:
                             pearson_c, _ = pearsonr(exact_scores, approx_scores) #pearson measures linear correlation
                             spearman_c, _ = spearmanr(exact_scores, approx_scores) # spearman measures rank correlation (how well the order matches)
@@ -183,6 +187,9 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                             exact_ranks = rankdata(-np.array(exact_scores), method="average") # rank scores with the smallest =1 and when there is a tie assign the average rank
                             approx_ranks = rankdata(-np.array(approx_scores), method = "average")
                             kendall_c, _ = kendalltau(exact_ranks, approx_ranks) # return tau and pval (if pval is < 0.005 we can say that correlation is statistically significant) 
+                            precision_k = precision_at_k(exact_scores, approx_scores) # k = 3 by default
+                            hit_rate_k = hit_rate_at_k(exact_scores, approx_scores)
+                            RR = reciprocal_rank(exact_scores, approx_scores)
                         
                         ndgc_scoring  = ndcg_score(
                             [positive_exact_score], 
@@ -193,6 +200,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                         all_metrics_data.append({
                             "Question_Index": i, "Query": query, "Method": method,
                             "Pearson": pearson_c, "Spearman": spearman_c, "NDCG" : ndgc_scoring, "KendallTau" : kendall_c,
+                            "Precision_at_k" : precision_k, "Hit_rate_at_k" : hit_rate_k, "Reciprocal_Rank" : RR, 
                             "Num_Items": len(docs), 
                         })
 
@@ -231,6 +239,9 @@ if accelerator_main.is_main_process:
             Avg_Spearman=("Spearman", "mean"),
             Avg_Kendall =("KendallTau", "mean"),
             Avg_NDCG = ("NDCG", "mean"),
+            Avg_Precision_at_k = ("Precision_at_k", "mean"), 
+            Avg_Hit_rate_at_k = ("Hit_rate_at_k", "mean"), 
+            Avg_Reciprocal_rank = ("Reciprocal_Rank", 'mean'), 
             Num_Valid_Queries=("Query", "nunique")
         ).sort_values(by="Avg_Spearman", ascending=False)
         
