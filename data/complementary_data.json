@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "question": "What are the topics of the books Sarah and Michael are reading?",
+    "documents": [
+      "Sarah is reading a book about dragons.",
+      "Michael is reading a book about ancient castles.",
+      "The sun is shining brightly today.",
+      "My favorite color is blue.",
+      "Cars drive on the road.",
+      "Trees have green leaves in summer.",
+      "The cat is sleeping on the mat.",
+      "Birds can fly high in the sky.",
+      "Water is essential for life.",
+      "Computers are useful tools."
+    ]
+  },
+  {
+    "id": 2,
+    "question": "Where did the family go on Saturday?",
+    "documents": [
+      "The family went to the beach on Saturday.",
+      "On Saturday at the beach, my family built a large sandcastle.",
+      "The train arrived at the station on time.",
+      "She enjoys listening to classical music.",
+      "The baker made fresh bread this morning.",
+      "Mountains are very tall.",
+      "The chef is preparing dinner in the kitchen.",
+      "He bought a new bicycle yesterday.",
+      "The moon is visible at night.",
+      "School starts at eight o'clock."
+    ]
+  },
+  {
+    "id": 3,
+    "question": "What colors did Alex use to paint his toy car?",
+    "documents": [
+      "Alex painted his toy car bright red.",
+      "Alex used some yellow paint for the car's stripes.",
+      "The dog barked at the mailman.",
+      "Pencils are used for writing.",
+      "The farmer grows corn in the field.",
+      "She wore a warm scarf in the winter.",
+      "The river flows towards the sea.",
+      "He likes to play video games.",
+      "The library is a quiet place.",
+      "Stars twinkle in the night sky."
+    ]
+  },
+  {
+    "id": 4,
+    "question": "What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?",
+    "documents": [
+      "The Gleepglorp from planet Xylar can manipulate Zylonic energy for teleportation.",
+      "A rare Flumph, also from Xylar, emits Quirkle Crystals that enhance its camouflage.",
+      "Many stories tell of brave Knorbols.",
+      "The Blargon festival happens every Floopy cycle.",
+      "Sky-skiffs are common transport in a Flibbertown.",
+      "Glimmering Floofel-dust is prized by artisans.",
+      "The wind chimes played a strange melody.",
+      "Old maps sometimes show imaginary lands.",
+      "The lunar cycle affects the tides of Blorb.",
+      "Not all portals lead to safe destinations."
+    ]
+  },
+  {
+    "id": 5,
+    "question": "What distinct characteristics do elephants have?",
+    "documents": [
+      "The elephant has large, floppy ears.",
+      "The elephant uses its long trunk to drink water.",
+      "Fish live in water.",
+      "The zookeeper feeds the lions.",
+      "Birds build nests in trees.",
+      "The cheetah is a very fast runner.",
+      "Butterflies have colorful wings.",
+      "The farmer keeps chickens for eggs.",
+      "Snakes can slither on the ground.",
+      "Whales are large marine mammals."
+    ]
+  },
+  {
+    "id": 6,
+    "question": "What are the key ingredients needed for a cake recipe?",
+    "documents": [
+      "To make a cake, you need flour and sugar.",
+      "You will need eggs and butter for a cake recipe.",
+      "Pizza is a popular dish.",
+      "He eats an apple every day.",
+      "The restaurant serves delicious pasta.",
+      "Oranges are a good source of Vitamin C.",
+      "She is making a shopping list.",
+      "The grocery store is open until 9 PM.",
+      "He prefers tea over coffee.",
+      "Vegetables are healthy to eat."
+    ]
+  },
+  {
+    "id": 7,
+    "question": "Which tools does a carpenter use and what are their stated purposes?",
+    "documents": [
+      "The carpenter uses a hammer to drive nails.",
+      "The carpenter uses a saw to cut wood.",
+      "The doctor works at the hospital.",
+      "Teachers help students learn new things.",
+      "The firefighter wears a special uniform.",
+      "Musicians play instruments.",
+      "The pilot flies an airplane.",
+      "A writer creates stories.",
+      "The scientist conducts experiments.",
+      "An artist paints beautiful pictures."
+    ]
+  },
+  {
+    "id": 8,
+    "question": "Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?",
+    "documents": [
+      "The Orb of Zinthar is hidden deep within the treacherous Whispering Peaks.",
+      "Legends say the Scepter of Mydor lies guarded in the Sunken City of Aerilon.",
+      "Grelnockers often search for lost trinkets.",
+      "The ancient texts of Ploorf are hard to decipher.",
+      "Many adventurers seek the Crystal Caves of Nom.",
+      "A good Vorpal blade is sharp and reliable.",
+      "The air was thick with an unknown scent.",
+      "Strange symbols were carved into the stone door.",
+      "The old kingdom of Eldoria had many secrets.",
+      "Not every shining gem holds magical power."
+    ]
+  },
+  {
+    "id": 9,
+    "question": "What are the roles or professions of Elara Vayne and Jax Korden?",
+    "documents": [
+      "Elara Vayne is the chief Star-Navigator of the starship 'Wanderer'.",
+      "Jax Korden serves as the primary Rift-Warden protecting the Chronos Gate.",
+      "The Council of Elders will meet at moonhigh.",
+      "Zorpian ale is a popular drink in the Outer Rim.",
+      "Many young Squibs dream of joining the Sky Guard.",
+      "The markets of Xylos offer exotic goods.",
+      "He wore the insignia of a forgotten legion.",
+      "She hummed a tune from an old space shanty.",
+      "The prophecy spoke of a chosen Zoodle.",
+      "Learning the ancient Floopy tongue is difficult."
+    ]
+  },
+  {
+    "id": 10,
+    "question": "What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?",
+    "documents": [
+      "The 'Chrono-Modulator' device is primarily used to create temporary Reality Stabilizers in unstable zones.",
+      "A 'Bio-Harmonizer' implant allows for direct Neural Augmentation, improving cognitive functions.",
+      "Flux capacitors require careful calibration.",
+      "The energy cells of a Plinkerton device last for eons.",
+      "Not all teleportation devices are safe for organic matter.",
+      "The main reactor of the Narflax is offline.",
+      "Repairing a Zylothian hyperdrive is complex.",
+      "Data-crystals can store vast amounts of information.",
+      "The universal translator sometimes makes comical errors.",
+      "Shield generators protect against space debris and Floopy rays."
+    ]
+  }
+]
