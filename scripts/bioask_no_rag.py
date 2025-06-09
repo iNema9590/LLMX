@@ -5,7 +5,7 @@ parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 
 from SHapRAG import*
-from llm_eval import *
+# from llm_eval import *
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -27,7 +27,7 @@ df1['passage']=df1['passage'].str.replace(r'[\n]', ' ', regex=True)
 df['question']=df['question'].str.replace(r'[\n]', ' ', regex=True)
 df = df[df['relevant_passage_ids'].apply(len) >= 10].reset_index(drop=True)
 
-num_questions_to_run = 100
+num_questions_to_run = 4
 print(f"Running experiments for {num_questions_to_run} questions...")
 
 # Parameters
@@ -98,18 +98,18 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     )
     
     # LLM response evaluation block   
-    print("-" * 40) 
-    target_response = harness.target_response   
-    print('Ground truth response: ', answer)
-    print('Generated response: ', target_response)
-    scores_eval = evaluate_llm_response(tokenizer_eval, embedding_model_eval, causal_lm_model_eval, target_response, answer)
-    for metric, score in scores_eval.items():
-        print(f"{metric}: {score:.4f}")
-        try:
-            all_llm_scores[metric].append(score)
-        except:
-            all_llm_scores[metric] = [score]
-    print("-" * 40)    
+    # print("-" * 40) 
+    # target_response = harness.target_response   
+    # print('Ground truth response: ', answer)
+    # print('Generated response: ', target_response)
+    # scores_eval = evaluate_llm_response(tokenizer_eval, embedding_model_eval, causal_lm_model_eval, target_response, answer)
+    # for metric, score in scores_eval.items():
+    #     print(f"{metric}: {score:.4f}")
+    #     try:
+    #         all_llm_scores[metric].append(score)
+    #     except:
+    #         all_llm_scores[metric] = [score]
+    # print("-" * 40)    
 
 
     results_for_query = {}
@@ -129,7 +129,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
             if actual_samples > 0: 
                 results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="kernelshap", seed=SEED)
                 
-                # results_for_query[f"WSS_GAM{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, seed=SEED, distil=None, sampling="kernelshap",sur_type="gam", util='pure-surrogate', pairchecking=False)
+                results_for_query[f"WSS_GAM{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, seed=SEED, distil=None, sampling="kernelshap",sur_type="gam", util='pure-surrogate', pairchecking=False)
                 results_for_query[f"WSS_FM{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, seed=SEED, distil=None, sampling="kernelshap",sur_type="fm", util='pure-surrogate', pairchecking=False)
                 results_for_query[f"WSS_XGB{actual_samples}"] = harness.compute_wss(num_samples=actual_samples, seed=SEED, distil=None, sampling="kernelshap",sur_type="xgboost", util='pure-surrogate', pairchecking=False)
                 results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)

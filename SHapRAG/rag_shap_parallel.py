@@ -7,8 +7,10 @@ import itertools
 import xgboost
 from sklearn.linear_model import Lasso
 from pygam import LinearGAM, s, te, f, l
+from interpret.glassbox import ExplainableBoostingRegressor
 from fastFM import als
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
 import torch
 import torch.nn.functional as F
@@ -246,21 +248,22 @@ class ShapleyExperimentHarness:
         torch.cuda.empty_cache()
         return cleaned_text
 
-    def _llm_compute_logprob(self, context_str: str) -> float:
+    def _llm_compute_logprob(self, context_str: str, response=None) -> float:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
             messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}. Be concise and short."})
         else:
             messages.append({"role": "user", "content": self.query})
-
+        if not response:
+            response=self.target_response
         prompt_templated = self.tokenizer.apply_chat_template(
             messages, add_generation_prompt=True, tokenize=False
         )
 
-        answer_ids = self.tokenizer(self.target_response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
+        answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
 
         if answer_ids.shape[1] == 0:
-            return 0.0 if not self.target_response else -float('inf')
+            return 0.0 if not response else -float('inf')
 
         prompt_tokens = self.tokenizer(prompt_templated, return_tensors="pt").to(self.device)
 
@@ -295,6 +298,12 @@ class ShapleyExperimentHarness:
         torch.cuda.empty_cache()
         return total_log_prob
     
+    def llm_evaluation(self, gold_answer,embedder, metric="cosine"):
+        if metric=="'cosine":
+            return cosine_similarity(embedder.encode([gold_answer], convert_to_numpy=True), embedder.encode([self.target_response], convert_to_numpy=True))
+        elif metric=="logprob":
+            return self._llm_compute_logprob(context_str="\n\n".join(self.items), response=gold_answer)
+        
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
         if len(v_np) != self.n_items: raise ValueError("Ablation vector length mismatch")
@@ -515,6 +524,20 @@ class ShapleyExperimentHarness:
 
             # Fit the model
             model = LinearGAM(terms).fit(X_train, y_train)
+            return model
+        
+        elif sur_type == "boosted_gam":
+            model = ExplainableBoostingRegressor(
+                max_bins=256,
+                max_interaction_bins=64,
+                interactions=5,
+                learning_rate=0.01,
+                max_leaves=3,
+                max_rounds=100,
+                early_stopping_rounds=5,
+                random_state=42
+            )
+            model.fit(X_train, y_train)
             return model
         else:
             raise ValueError("Unknown type")
