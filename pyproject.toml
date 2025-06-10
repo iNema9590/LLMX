@@ -18,3 +18,6 @@ dev = [
     "scikit-learn>=1.6.1",
     "xgboost>=3.0.2",
 ]
+visualization = [
+    "seaborn>=0.13.2",
+]
