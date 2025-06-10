@@ -195,14 +195,11 @@ class ShapleyExperimentHarness:
         return complete_utilities if complete_utilities is not None else {}
 
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
-        messages = [{"role": "system", "content": """You are a helpful assistant. You must only answer using the provided context.
-                    If the context does not contain the information needed to answer the question, say:
-                    "I don’t have the required information."
-                    Do not use your own knowledge or make assumptions.
-                    Do not fabricate facts.
-                    Be accurate, concise, and directly cite from the context when possible."""}]
+        messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
+                    questions. Avoid using your own knowledge or make assumptions.
+                    """}]
         if context_str:
-            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}. If you can not deduce the answer from the context then state 'I do not have the required info'"})
+            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}."})
         else:
             messages.append({"role": "user", "content": self.query})
 

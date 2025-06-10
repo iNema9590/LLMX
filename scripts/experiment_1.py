@@ -31,7 +31,8 @@ args = parser.parse_args()
 
 available_models = {"qwen_3B" : "Qwen/Qwen2.5-3B-Instruct", 
                     "llama_3B" : "meta-llama/Llama-3.2-3B-Instruct", 
-                    "llama_8B" : "meta-llama/Llama-3.1-8B-Instruct"}
+                    "llama_8B" : "meta-llama/Llama-3.1-8B-Instruct", 
+                    "mistral_7B" : "mistralai/Mistral-7B-Instruct-v0.3"}
 
 start = time.time()
 
@@ -43,7 +44,7 @@ df = pd.read_csv(csv_path)
 df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "scoring", "doc_id"])
 print("Data Loaded!")
 
-num_questions_to_run = 10
+num_questions_to_run = 100
 print(f"Running experiments for {num_questions_to_run} questions...")
 
 # Parameters
@@ -101,14 +102,14 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         docs= eval(df['context'].loc[i])
         flags = eval(df["doc_id"].loc[i])
 
-    if SHUFFLE == True: 
+    if args.shuffle == True: 
         index_list = list(range(10))
         random.seed(i) # different seed for each query/line
         random.shuffle(index_list)
         docs = [docs[j] for j in index_list]
         flags = [flags[j] for j in index_list]
 
-    utility_cache_base_dir = f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/utilities_cache3bcp"
+    utility_cache_base_dir = f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/{SHUFFLE}/utilities_cache3bcp"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
     
@@ -145,7 +146,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
 
             if actual_samples > 0: 
                 results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="uniform",  seed=SEED) #lasso_alpha=0.01,
-                results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
+                # results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
                 results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)
                 results_for_query[f"TMC{actual_samples}"] = harness.compute_tmc_shap(num_iterations_max=T_iterations_map[size_key], performance_tolerance=0.001, max_unique_lookups=actual_samples, seed=SEED)
         
