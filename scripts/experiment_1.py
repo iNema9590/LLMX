@@ -52,10 +52,10 @@ NUM_RETRIEVED_DOCS = 10
 SEED = 42
 DATASET_NAME = f"{args.dataset}"
 PRECISION = f"{args.precision}"
-SHUFFLE = ["SHUFFLE" if args.shuffle else "VANILLA"]
+SHUFFLE = ["SHUFFLE" if args.shuffle else "VANILLA"][0]
 random.seed(42) # SEED SO THAT WE CAN REPLICATE IF NEEDED
 
-if SHUFFLE: 
+if args.shuffle: 
     index_list = list(range(10)) # context size
 
 # Initialize Accelerator ONCE
