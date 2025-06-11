@@ -71,11 +71,11 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     docs=df1.passage[df.relevant_passage_ids[i][:NUM_RETRIEVED_DOCS]].tolist()
 
     # experiment with copies
-    random.seed(SEED)
-    numbers = random.sample(range(1, len(docs)), 4)
-    docs[numbers[0]]=docs[numbers[1]]
-    docs[numbers[2]]=docs[numbers[1]]
-    docs[numbers[3]]=docs[numbers[1]]
+    # random.seed(SEED)
+    # numbers = random.sample(range(1, len(docs)), 4)
+    # docs[numbers[0]]=docs[numbers[1]]
+    # docs[numbers[2]]=docs[numbers[1]]
+    # docs[numbers[3]]=docs[numbers[1]]
 
     utility_cache_base_dir = "../Experiment_data/bioask_utilities_cache3bcp"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming

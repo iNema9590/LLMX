@@ -196,7 +196,7 @@ class ShapleyExperimentHarness:
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
-            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}. If you can not deduce the answer from the context then state 'I do not have the required info'"})
+            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}."})
         else:
             messages.append({"role": "user", "content": self.query})
 
@@ -236,7 +236,7 @@ class ShapleyExperimentHarness:
                     generated_ids = outputs_gen[0] # Guessing the first tensor is it
                 else: # Cannot determine, return empty or raise error
                     del input_ids, attention_mask, unwrapped_model, outputs_gen
-                    torch.cuda.empty_cache() # Attempt to clear if things are really messy
+                    torch.cuda.empty_cache()
                     return ""
 
 
@@ -251,7 +251,7 @@ class ShapleyExperimentHarness:
     def _llm_compute_logprob(self, context_str: str, response=None) -> float:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
-            messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}. Be concise and short."})
+            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}."})
         else:
             messages.append({"role": "user", "content": self.query})
         if not response:
@@ -464,6 +464,29 @@ class ShapleyExperimentHarness:
                   f"less than requested {num_samples}. This might happen if num_samples is close to 2^n.")
 
         return list(sampled_tuples_set)
+    
+    def compute_exhaustive_top_k(self, k: int):
+        n = self.n_items
+        best_k_indices_to_remove = None
+        min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
+
+        possible_indices_to_remove = list(itertools.combinations(range(n), k))
+        
+        pbar_desc = f"Exhaustive Top-{k} Search"
+        pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
+
+        for k_indices_tuple in pbar_iter:
+            ablated_set_np = np.ones(n, dtype=int)
+            ablated_set_np[list(k_indices_tuple)] = 0
+            ablated_set_tuple = tuple(ablated_set_np)
+
+            utility_of_ablated_set = self.all_true_utilities.get(ablated_set_tuple, -float('inf'))
+
+            if utility_of_ablated_set < min_utility_after_removal:
+                min_utility_after_removal = utility_of_ablated_set
+                best_k_indices_to_remove = k_indices_tuple
+
+        return best_k_indices_to_remove  
 
     def _train_surrogate(self, ablations: list[tuple], utilities: list[float], eval=True, sur_type="linear") -> tuple:
         X_train = np.array(ablations)
