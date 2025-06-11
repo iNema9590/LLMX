@@ -21,6 +21,8 @@ import warnings
 from sklearn.exceptions import ConvergenceWarning
 from scipy.stats import beta as beta_dist
 from scipy.sparse import csr_matrix
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 class ShapleyExperimentHarness:
     def __init__(self, items, query, 
                  prepared_model_for_harness, tokenizer_for_harness, accelerator_for_harness, 
@@ -298,11 +300,41 @@ class ShapleyExperimentHarness:
         torch.cuda.empty_cache()
         return total_log_prob
     
-    def llm_evaluation(self, gold_answer,embedder, metric="cosine"):
+    def llm_evaluation(self, gold_answer,embedder=None, metric="cosine", model=None, tokenizer=None):
         if metric=="'cosine":
             return cosine_similarity(embedder.encode([gold_answer], convert_to_numpy=True), embedder.encode([self.target_response], convert_to_numpy=True))
         elif metric=="logprob":
             return self._llm_compute_logprob(context_str="\n\n".join(self.items), response=gold_answer)
+        elif metric=="llm_judge":
+                prompt = f"""You are a strict evaluator checking if the generated answer is correct.
+
+            Question:
+            {self.query}
+
+            Generated Answer:
+            {self.target_response}
+
+            Ground Truth Answer:
+            {gold_answer}
+
+            Is the generated answer semantically equivalent to the ground truth answer?
+            Answer with only "Yes" or "No"."""
+
+                # Tokenize and run generation
+                inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
+                with torch.no_grad():
+                    outputs = model.generate(
+                        **inputs,
+                        max_new_tokens=10,
+                        do_sample=False,
+                        pad_token_id=tokenizer.eos_token_id
+                    )
+
+                # Decode and extract model reply
+                decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+                model_reply = decoded_output[len(prompt):].strip().lower()
+
+                return model_reply.startswith("yes")
         
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
@@ -832,8 +864,6 @@ class ShapleyExperimentHarness:
         shapley_values = np.zeros(self.n_items)
         non_zero_weights_mask = total_weights_for_item > 1e-9
         shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
-        
-        final_lookups_count = len(unique_utility_lookups_tracker)
 
         return shapley_values
 
@@ -854,3 +884,44 @@ class ShapleyExperimentHarness:
                 elif util_all == -float('inf'): loo_scores[i] = -np.inf # Full set failed, but LOO set succeeded
                 else: loo_scores[i] = util_all - util_loo
         return loo_scores
+    
+
+
+def llm_judge(question: str,
+              ground_truth: str,
+              generated_response: str,
+              model,
+              tokenizer,
+              device: str = "cuda" if torch.cuda.is_available() else "cpu",
+              max_new_tokens: int = 10) -> bool:
+
+    # Construct the prompt
+    prompt = f"""You are a strict evaluator checking if the generated answer is correct.
+
+Question:
+{question}
+
+Generated Answer:
+{generated_response}
+
+Ground Truth Answer:
+{ground_truth}
+
+Is the generated answer semantically equivalent to the ground truth answer?
+Answer with only "Yes" or "No"."""
+
+    # Tokenize and run generation
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
+            pad_token_id=tokenizer.eos_token_id
+        )
+
+    # Decode and extract model reply
+    decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    model_reply = decoded_output[len(prompt):].strip().lower()
+
+    return model_reply.startswith("yes")
