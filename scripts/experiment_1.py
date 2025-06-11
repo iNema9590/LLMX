@@ -146,6 +146,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
 
             if actual_samples > 0: 
                 results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="uniform",  seed=SEED) #lasso_alpha=0.01,
+                results_for_query[f"KernelShap{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="kernel_shap",  seed=SEED) #lasso_alpha=0.01,
                 # results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
                 results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)
                 results_for_query[f"TMC{actual_samples}"] = harness.compute_tmc_shap(num_iterations_max=T_iterations_map[size_key], performance_tolerance=0.001, max_unique_lookups=actual_samples, seed=SEED)
@@ -186,7 +187,9 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                             exact_ranks = rankdata(-np.array(exact_scores), method="average") # rank scores with the smallest =1 and when there is a tie assign the average rank
                             approx_ranks = rankdata(-np.array(approx_scores), method = "average")
                             kendall_c, _ = kendalltau(exact_ranks, approx_ranks) # return tau and pval (if pval is < 0.005 we can say that correlation is statistically significant) 
-                            precision_k = precision_at_k(exact_scores, approx_scores) # k = 3 by default
+                            precision_1 = precision_at_k(exact_scores, approx_scores, k=1) # k = 3 by default
+                            precision_3 = precision_at_k(exact_scores, approx_scores, k=3) # k = 3 by default
+                            precision_5 = precision_at_k(exact_scores, approx_scores, k=5) # k = 3 by default
                             hit_rate_k = hit_rate_at_k(exact_scores, approx_scores)
                             RR = reciprocal_rank(exact_scores, approx_scores)
                         
@@ -199,7 +202,8 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                         all_metrics_data.append({
                             "Question_Index": i, "Query": query, "Method": method,
                             "Pearson": pearson_c, "Spearman": spearman_c, "NDCG" : ndgc_scoring, "KendallTau" : kendall_c,
-                            "Precision_at_k" : precision_k, "Hit_rate_at_k" : hit_rate_k, "Reciprocal_Rank" : RR, 
+                            "Precision_at_1" : precision_1, "Precision_at_3" : precision_3, "Precision_at_5" : precision_5,
+                            "Hit_rate_at_k" : hit_rate_k, "Reciprocal_Rank" : RR,
                             "Num_Items": len(docs), 
                         })
 
@@ -222,10 +226,10 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     accelerator_main.wait_for_everyone()
 
 # SAVE EXACT SHAP RESULTS FOR ANALYSIS
-df_save_results.to_csv(f"../Experiment_data/{DATASET_NAME}/{MODEL_NAME}/results_{SHUFFLE}.csv", index=False)
+df_save_results.to_csv(f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/results_{SHUFFLE}.csv", index=False)
 
 # Save
-df_save_results.to_json(f"../Experiment_data/{DATASET_NAME}/{MODEL_NAME}/results_{SHUFFLE}.json", orient="records", lines=True)
+df_save_results.to_json(f"Experiment_data/{DATASET_NAME}/{MODEL_NAME}/results_{SHUFFLE}.json", orient="records", lines=True)
 
 # Aggregate and Report Average Metrics (Only on main process)
 if accelerator_main.is_main_process:
@@ -238,7 +242,9 @@ if accelerator_main.is_main_process:
             Avg_Spearman=("Spearman", "mean"),
             Avg_Kendall =("KendallTau", "mean"),
             Avg_NDCG = ("NDCG", "mean"),
-            Avg_Precision_at_k = ("Precision_at_k", "mean"), 
+            Avg_Precision_at_1 = ("Precision_at_1", "mean"), 
+            Avg_Precision_at_3 = ("Precision_at_3", "mean"), 
+            Avg_Precision_at_5 = ("Precision_at_5", "mean"), 
             Avg_Hit_rate_at_k = ("Hit_rate_at_k", "mean"), 
             Avg_Reciprocal_rank = ("Reciprocal_Rank", 'mean'), 
             Num_Valid_Queries=("Query", "nunique")
