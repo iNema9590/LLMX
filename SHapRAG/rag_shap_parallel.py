@@ -7,8 +7,10 @@ import itertools
 import xgboost
 from sklearn.linear_model import Lasso
 from pygam import LinearGAM, s, te, f, l
+from interpret.glassbox import ExplainableBoostingRegressor
 from fastFM import als
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
 import torch
 import torch.nn.functional as F
@@ -19,6 +21,8 @@ import warnings
 from sklearn.exceptions import ConvergenceWarning
 from scipy.stats import beta as beta_dist
 from scipy.sparse import csr_matrix
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 class ShapleyExperimentHarness:
     def __init__(self, items, query, 
                  prepared_model_for_harness, tokenizer_for_harness, accelerator_for_harness, 
@@ -194,7 +198,7 @@ class ShapleyExperimentHarness:
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
-            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}. If you can not deduce the answer from the context then state 'I do not have the required info'"})
+            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}."})
         else:
             messages.append({"role": "user", "content": self.query})
 
@@ -234,7 +238,7 @@ class ShapleyExperimentHarness:
                     generated_ids = outputs_gen[0] # Guessing the first tensor is it
                 else: # Cannot determine, return empty or raise error
                     del input_ids, attention_mask, unwrapped_model, outputs_gen
-                    torch.cuda.empty_cache() # Attempt to clear if things are really messy
+                    torch.cuda.empty_cache()
                     return ""
 
 
@@ -246,21 +250,22 @@ class ShapleyExperimentHarness:
         torch.cuda.empty_cache()
         return cleaned_text
 
-    def _llm_compute_logprob(self, context_str: str) -> float:
+    def _llm_compute_logprob(self, context_str: str, response=None) -> float:
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         if context_str:
-            messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}. Be concise and short."})
+            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}."})
         else:
             messages.append({"role": "user", "content": self.query})
-
+        if not response:
+            response=self.target_response
         prompt_templated = self.tokenizer.apply_chat_template(
             messages, add_generation_prompt=True, tokenize=False
         )
 
-        answer_ids = self.tokenizer(self.target_response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
+        answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
 
         if answer_ids.shape[1] == 0:
-            return 0.0 if not self.target_response else -float('inf')
+            return 0.0 if not response else -float('inf')
 
         prompt_tokens = self.tokenizer(prompt_templated, return_tensors="pt").to(self.device)
 
@@ -295,6 +300,42 @@ class ShapleyExperimentHarness:
         torch.cuda.empty_cache()
         return total_log_prob
     
+    def llm_evaluation(self, gold_answer,embedder=None, metric="cosine", model=None, tokenizer=None):
+        if metric=="'cosine":
+            return cosine_similarity(embedder.encode([gold_answer], convert_to_numpy=True), embedder.encode([self.target_response], convert_to_numpy=True))
+        elif metric=="logprob":
+            return self._llm_compute_logprob(context_str="\n\n".join(self.items), response=gold_answer)
+        elif metric=="llm_judge":
+                prompt = f"""You are a strict evaluator checking if the generated answer is correct.
+
+            Question:
+            {self.query}
+
+            Generated Answer:
+            {self.target_response}
+
+            Ground Truth Answer:
+            {gold_answer}
+
+            Is the generated answer semantically equivalent to the ground truth answer?
+            Answer with only "Yes" or "No"."""
+
+                # Tokenize and run generation
+                inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
+                with torch.no_grad():
+                    outputs = model.generate(
+                        **inputs,
+                        max_new_tokens=10,
+                        do_sample=False,
+                        pad_token_id=tokenizer.eos_token_id
+                    )
+
+                # Decode and extract model reply
+                decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+                model_reply = decoded_output[len(prompt):].strip().lower()
+
+                return model_reply.startswith("yes")
+        
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
         if len(v_np) != self.n_items: raise ValueError("Ablation vector length mismatch")
@@ -455,6 +496,29 @@ class ShapleyExperimentHarness:
                   f"less than requested {num_samples}. This might happen if num_samples is close to 2^n.")
 
         return list(sampled_tuples_set)
+    
+    def compute_exhaustive_top_k(self, k: int):
+        n = self.n_items
+        best_k_indices_to_remove = None
+        min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
+
+        possible_indices_to_remove = list(itertools.combinations(range(n), k))
+        
+        pbar_desc = f"Exhaustive Top-{k} Search"
+        pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
+
+        for k_indices_tuple in pbar_iter:
+            ablated_set_np = np.ones(n, dtype=int)
+            ablated_set_np[list(k_indices_tuple)] = 0
+            ablated_set_tuple = tuple(ablated_set_np)
+
+            utility_of_ablated_set = self.all_true_utilities.get(ablated_set_tuple, -float('inf'))
+
+            if utility_of_ablated_set < min_utility_after_removal:
+                min_utility_after_removal = utility_of_ablated_set
+                best_k_indices_to_remove = k_indices_tuple
+
+        return best_k_indices_to_remove  
 
     def _train_surrogate(self, ablations: list[tuple], utilities: list[float], eval=True, sur_type="linear") -> tuple:
         X_train = np.array(ablations)
@@ -515,6 +579,20 @@ class ShapleyExperimentHarness:
 
             # Fit the model
             model = LinearGAM(terms).fit(X_train, y_train)
+            return model
+        
+        elif sur_type == "boosted_gam":
+            model = ExplainableBoostingRegressor(
+                max_bins=256,
+                max_interaction_bins=64,
+                interactions=5,
+                learning_rate=0.01,
+                max_leaves=3,
+                max_rounds=100,
+                early_stopping_rounds=5,
+                random_state=42
+            )
+            model.fit(X_train, y_train)
             return model
         else:
             raise ValueError("Unknown type")
@@ -786,8 +864,6 @@ class ShapleyExperimentHarness:
         shapley_values = np.zeros(self.n_items)
         non_zero_weights_mask = total_weights_for_item > 1e-9
         shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
-        
-        final_lookups_count = len(unique_utility_lookups_tracker)
 
         return shapley_values
 
@@ -808,3 +884,44 @@ class ShapleyExperimentHarness:
                 elif util_all == -float('inf'): loo_scores[i] = -np.inf # Full set failed, but LOO set succeeded
                 else: loo_scores[i] = util_all - util_loo
         return loo_scores
+    
+
+
+def llm_judge(question: str,
+              ground_truth: str,
+              generated_response: str,
+              model,
+              tokenizer,
+              device: str = "cuda" if torch.cuda.is_available() else "cpu",
+              max_new_tokens: int = 10) -> bool:
+
+    # Construct the prompt
+    prompt = f"""You are a strict evaluator checking if the generated answer is correct.
+
+Question:
+{question}
+
+Generated Answer:
+{generated_response}
+
+Ground Truth Answer:
+{ground_truth}
+
+Is the generated answer semantically equivalent to the ground truth answer?
+Answer with only "Yes" or "No"."""
+
+    # Tokenize and run generation
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
+            pad_token_id=tokenizer.eos_token_id
+        )
+
+    # Decode and extract model reply
+    decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    model_reply = decoded_output[len(prompt):].strip().lower()
+
+    return model_reply.startswith("yes")
