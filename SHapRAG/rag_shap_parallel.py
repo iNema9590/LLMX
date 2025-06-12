@@ -1,27 +1,30 @@
-import numpy as np
-import os
-import random
-import math
-import pickle
 import itertools
-import xgboost
-from sklearn.linear_model import Lasso
-from pygam import LinearGAM, s, te, f, l
-from interpret.glassbox import ExplainableBoostingRegressor
-from fastFM import als
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.metrics.pairwise import cosine_similarity
+import json
+import math
+import os
+import pickle
+import random
+import warnings
 from collections import defaultdict
+
+import numpy as np
 import torch
 import torch.nn.functional as F
+import xgboost
 from accelerate import Accelerator
-from accelerate.utils import gather_object, broadcast_object_list 
-from tqdm.auto import tqdm
-import warnings
-from sklearn.exceptions import ConvergenceWarning
-from scipy.stats import beta as beta_dist
+from accelerate.utils import broadcast_object_list, gather_object
+from fastFM import als
+from interpret.glassbox import ExplainableBoostingRegressor
+from pygam import LinearGAM, f, l, s, te
 from scipy.sparse import csr_matrix
+from scipy.stats import beta as beta_dist
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics.pairwise import cosine_similarity
+from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
+
 
 class ShapleyExperimentHarness:
     def __init__(self, items, query, 
@@ -306,35 +309,86 @@ class ShapleyExperimentHarness:
         elif metric=="logprob":
             return self._llm_compute_logprob(context_str="\n\n".join(self.items), response=gold_answer)
         elif metric=="llm_judge":
-                prompt = f"""You are a strict evaluator checking if the generated answer is correct.
+            prompt = f"""
+                                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), and the other is a generated answer produced by another language model.
 
-            Question:
-            {self.query}
+                                    Your goal is to determine if the generated answer matches the ground truth in meaning and factual accuracy. 
 
-            Generated Answer:
-            {self.target_response}
+                                    Respond in the following strict JSON format:
+                                    {{
+                                    "evaluation": "Yes" or "No",
+                                    "explanation": "Short, clear explanation of your judgment"
+                                    }}
 
-            Ground Truth Answer:
-            {gold_answer}
+                                    Evaluation Criteria:
+                                    - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
+                                    - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
 
-            Is the generated answer semantically equivalent to the ground truth answer?
-            Answer with only "Yes" or "No"."""
+                                    Be concise in your explanation. Do not add any content outside the JSON structure.
 
-                # Tokenize and run generation
-                inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
-                with torch.no_grad():
-                    outputs = model.generate(
-                        **inputs,
-                        max_new_tokens=10,
-                        do_sample=False,
-                        pad_token_id=tokenizer.eos_token_id
-                    )
+                                    ---
 
-                # Decode and extract model reply
-                decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
-                model_reply = decoded_output[len(prompt):].strip().lower()
+                                    Example 1
+                                    Question: What is the capital of France?  
+                                    Ground Truth Answer: Paris is the capital of France.  
+                                    Generated Answer: The capital of France is Paris.  
+                                    Response:
+                                    {{
+                                    "evaluation": "Yes",
+                                    "explanation": "The generated answer is semantically identical and factually correct."
+                                    }}
 
-                return model_reply.startswith("yes")
+                                    Example 2
+                                    Question: What is the capital of France?  
+                                    Ground Truth Answer: Paris is the capital of France.  
+                                    Generated Answer: The capital of France is Marseille.  
+                                    Response:
+                                    {{
+                                    "evaluation": "No",
+                                    "explanation": "Marseille is not the capital of France; this is a factual error."
+                                    }}
+
+                                    Example 3
+                                    Question: Who wrote *Pride and Prejudice*?  
+                                    Ground Truth Answer: Jane Austen  
+                                    Generated Answer: Charlotte Brontë wrote *Pride and Prejudice*.  
+                                    Response:
+                                    {{
+                                    "evaluation": "No",
+                                    "explanation": "The generated answer misattributes the author, which is factually incorrect."
+                                    }}
+
+                                    *Example 4
+                                    Question: What is the boiling point of water at sea level in Celsius?  
+                                    Ground Truth Answer: 100°C  
+                                    Generated Answer: Around 100 degrees Celsius.  
+                                    Response:
+                                    {{
+                                    "evaluation": "Yes",
+                                    "explanation": "The generated answer approximates the correct value and preserves the meaning."
+                                    }}
+
+                                    Be strict and unbiased. Always follow the exact JSON format.
+                                """
+
+        # Tokenize and run generation
+        inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=10,
+                do_sample=False,
+                pad_token_id=tokenizer.eos_token_id
+            )
+        
+        evaluation = json.loads(outputs)['evaluation']
+
+        # # Decode and extract model reply
+        # decoded_output = tokenizer.decode(outputs, skip_special_tokens=True)
+        # model_reply = decoded_output[len(prompt):].strip().lower()
+
+        # return model_reply.startswith("yes")
+        return evaluation
         
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
@@ -924,4 +978,5 @@ Answer with only "Yes" or "No"."""
     decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
     model_reply = decoded_output[len(prompt):].strip().lower()
 
+    return model_reply.startswith("yes")
     return model_reply.startswith("yes")
