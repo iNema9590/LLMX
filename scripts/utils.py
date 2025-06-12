@@ -1,17 +1,22 @@
 
 import numpy as np
 
+# def precision_at_k(ground_truth, model_scores, k=3):
 
-def precision_at_k(ground_truth, model_scores, k=3):
-
-    relevance_threshold = np.median(ground_truth) # get the relevance threshold. 
-    # Rank model predictions (highest score first)
-    top_k_indices = sorted(range(len(model_scores)), key=lambda i: model_scores[i], reverse=True)[:k] # get the indexes of the highes scores
-    # Count relevant items in top-k based on ground truth, we check if the scores in ground truth are considered relevant. 
-    relevant_count = sum(1 for i in top_k_indices if ground_truth[i] >= relevance_threshold)
+#     relevance_threshold = np.median(ground_truth) # get the relevance threshold. 
+#     # Rank model predictions (highest score first)
+#     top_k_indices = sorted(range(len(model_scores)), key=lambda i: model_scores[i], reverse=True)[:k] # get the indexes of the highes scores
+#     # Count relevant items in top-k based on ground truth, we check if the scores in ground truth are considered relevant. 
+#     relevant_count = sum(1 for i in top_k_indices if ground_truth[i] >= relevance_threshold)
     
-    return relevant_count / k
+#     return relevant_count / k
 
+def precision_at_k(ground_truth, model_scores, k = 3): 
+
+    top_k_indices = sorted(range(len(model_scores)), key = lambda i: model_scores[i], reverse = True )[:k]
+    ground_truth_relevant_indices = sorted(range(len(ground_truth)), key = lambda i: ground_truth[i], reverse = True)[:k]
+    relevant_in_top_k = sum(1 for idx in top_k_indices if idx in ground_truth_relevant_indices)
+    return relevant_in_top_k / k
 
 def hit_rate_at_k(ground_truth, model_scores, k=3):
     """Different from precision at k because it only says if there is at least one relevant itm included in top k. 
