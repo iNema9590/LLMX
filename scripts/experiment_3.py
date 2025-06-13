@@ -132,8 +132,10 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
             
     results_for_query = {}
 
+    exhaustive_top_2 = harness.compute_exhaustive_top_k(2)
+
     if accelerator_main.is_main_process:
-        results_for_query["Exhaustive_top_2"] = harness.compute_exhaustive_top_k(2)
+        # results_for_query["Exhaustive_top_2"] = harness.compute_exhaustive_top_k(2)
         results_for_query["Exact"] = harness.compute_exact_shap()
 
         m_samples_map = {"S": 32, "M": 64, "L": 100} # Example sample sizes
@@ -154,10 +156,20 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         
         results_for_query["LOO"] = harness.compute_loo()
 
-        exact_scores = results_for_query.get("Exhaustive_top_2")
+        exact_scores = results_for_query.get("Exact")
+        methods_top_k = {}
+        precision_top_k = {}
+        for method in results_for_query.keys(): 
+            method_top_k_docs = np.argsort(-np.array(results_for_query[method]))[:2] #exhaustive_top_2
+            methods_top_k[method] = method_top_k_docs
+            gold_top_k_docs = exhaustive_top_2
+            precision_top_k[(2, method)] = len(set.intersection(set(method_top_k_docs), set(gold_top_k_docs)))/2
+
 
         df_save_results.loc[i, "query"] = query
         df_save_results.loc[i, "scoring"] = [results_for_query]
+        df_save_results.loc[i, "top_k"] = [exhaustive_top_2]
+        df_save_results.loc[i, "precision_top_k"] = [precision_top_k]
         # print("Flags Value: ", flags)
         df_save_results.loc[i, "doc_id"] = [[flags]]
         df_save_results.loc[i, "context"] = [[docs]]
@@ -245,7 +257,7 @@ if accelerator_main.is_main_process:
             Avg_Kendall =("KendallTau", "mean"),
             Avg_NDCG = ("NDCG", "mean"),
             Avg_Precision_at_1 = ("Precision_at_1", "mean"), 
-            Avg_Precision_at_2 = ("Precision_at_2", "mean"), 
+            Avg_Precision_at_2 = ("Precision_at_2", "mean"),
             Avg_Precision_at_3 = ("Precision_at_3", "mean"), 
             Avg_Precision_at_5 = ("Precision_at_5", "mean"), 
             Avg_Hit_rate_at_k = ("Hit_rate_at_k", "mean"), 
