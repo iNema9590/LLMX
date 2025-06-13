@@ -189,6 +189,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                             approx_ranks = rankdata(-np.array(approx_scores), method = "average")
                             kendall_c, _ = kendalltau(exact_ranks, approx_ranks) # return tau and pval (if pval is < 0.005 we can say that correlation is statistically significant) 
                             precision_1 = precision_at_k(exact_scores, approx_scores, k=1) # k = 3 by default
+                            precision_2 = precision_at_k(exact_scores, approx_scores, k=2) # k = 3 by default
                             precision_3 = precision_at_k(exact_scores, approx_scores, k=3) # k = 3 by default
                             precision_5 = precision_at_k(exact_scores, approx_scores, k=5) # k = 3 by default
                             hit_rate_k = hit_rate_at_k(exact_scores, approx_scores)
@@ -203,7 +204,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                         all_metrics_data.append({
                             "Question_Index": i, "Query": query, "Method": method,
                             "Pearson": pearson_c, "Spearman": spearman_c, "NDCG" : ndgc_scoring, "KendallTau" : kendall_c,
-                            "Precision_at_1" : precision_1, "Precision_at_3" : precision_3, "Precision_at_5" : precision_5,
+                            "Precision_at_1" : precision_1, "Precision_at_2" : precision_2, "Precision_at_3" : precision_3, "Precision_at_5" : precision_5,
                             "Hit_rate_at_k" : hit_rate_k, "Reciprocal_Rank" : RR,
                             "Num_Items": len(docs), 
                         })
@@ -244,6 +245,7 @@ if accelerator_main.is_main_process:
             Avg_Kendall =("KendallTau", "mean"),
             Avg_NDCG = ("NDCG", "mean"),
             Avg_Precision_at_1 = ("Precision_at_1", "mean"), 
+            Avg_Precision_at_2 = ("Precision_at_2", "mean"), 
             Avg_Precision_at_3 = ("Precision_at_3", "mean"), 
             Avg_Precision_at_5 = ("Precision_at_5", "mean"), 
             Avg_Hit_rate_at_k = ("Hit_rate_at_k", "mean"), 
