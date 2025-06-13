@@ -41,7 +41,7 @@ start = time.time()
 csv_path = os.path.join(current_dir, f'../data/synthetic_data/{args.dataset}.csv')
 
 df = pd.read_csv(csv_path)
-df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "scoring", "doc_id"])
+df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "top_k", "methods_top_k", "precision_top_k", "doc_id"])
 print("Data Loaded!")
 
 num_questions_to_run = df.shape[0]
