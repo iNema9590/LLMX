@@ -304,91 +304,180 @@ class ShapleyExperimentHarness:
         return total_log_prob
     
     def llm_evaluation(self, gold_answer,embedder=None, metric="cosine", model=None, tokenizer=None):
-        if metric=="'cosine":
+        if metric=="cosine":
             return cosine_similarity(embedder.encode([gold_answer], convert_to_numpy=True), embedder.encode([self.target_response], convert_to_numpy=True))
         elif metric=="logprob":
             return self._llm_compute_logprob(context_str="\n\n".join(self.items), response=gold_answer)
         elif metric=="llm_judge":
-            prompt = f"""
-                                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), and the other is a generated answer produced by another language model.
+            prompt = """
+                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), 
+                and the other is a generated answer produced by another language model.Your goal is to determine if 
+                the generated answer matches the ground truth in meaning and factual accuracy. Respond in the following strict JSON format:
+                {{
+                "evaluation": "Yes" or "No",
+                "explanation": "Short, clear explanation of your judgment"
+                }}
+                Evaluation Criteria:
+                - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
+                - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
+                Be concise in your explanation. Do not add any content outside the JSON structure.
+                ---
+                Example 1
+                Question: What is the capital of France?  
+                Ground Truth Answer: Paris is the capital of France.  
+                Generated Answer: The capital of France is Paris.  
+                Response:
+                {{
+                "evaluation": "Yes",
+                "explanation": "The generated answer is semantically identical and factually correct."
+                }}
+                
+                Example 2
+                Question: What is the capital of France?  
+                Ground Truth Answer: Paris is the capital of France.  
+                Generated Answer: The capital of France is Marseille.  
+                Response:
+                {{
+                "evaluation": "No",
+                "explanation": "Marseille is not the capital of France; this is a factual error."
+                }}
+                
+                Example 3
+                Question: Who wrote *Pride and Prejudice*?  
+                Ground Truth Answer: Jane Austen  
+                Generated Answer: Charlotte Bronte wrote *Pride and Prejudice*.  
+                Response:
+                {{
+                "evaluation": "No",
+                "explanation": "The generated answer misattributes the author, which is factually incorrect."
+                }}
+                
+                Example 4
+                Question: What is the boiling point of water at sea level in Celsius?  
+                Ground Truth Answer: 100C  
+                Generated Answer: Around 100 degrees Celsius.  
+                Response:
+                {{
+                "evaluation": "Yes",
+                "explanation": "The generated answer approximates the correct value and preserves the meaning."
+                }}
+                
+                Be strict and unbiased. Always follow the exact JSON format.
+                """
+            messages = [{"role": "system", "content": """
+                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), 
+                and the other is a generated answer produced by another language model.Your goal is to determine if 
+                the generated answer matches the ground truth in meaning and factual accuracy. Respond in the following strict JSON format:
+                {
+                "evaluation": "Yes" or "No",
+                "explanation": "Short, clear explanation of your judgment"
+                }
+                Evaluation Criteria:
+                - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
+                - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
+                Be concise in your explanation. Do not add any content outside the JSON structure.
+                ---
+                Example 1
+                Question: What is the capital of France?  
+                Ground Truth Answer: Paris is the capital of France.  
+                Generated Answer: The capital of France is Paris.  
+                Response:
+                {
+                "evaluation": "Yes",
+                "explanation": "The generated answer is semantically identical and factually correct."
+                }
+                
+                Example 2
+                Question: What is the capital of France?  
+                Ground Truth Answer: Paris is the capital of France.  
+                Generated Answer: The capital of France is Marseille.  
+                Response:
+                {
+                "evaluation": "No",
+                "explanation": "Marseille is not the capital of France; this is a factual error."
+                }
+                
+                Example 3
+                Question: Who wrote *Pride and Prejudice*?  
+                Ground Truth Answer: Jane Austen  
+                Generated Answer: Charlotte Bronte wrote *Pride and Prejudice*.  
+                Response:
+                {
+                "evaluation": "No",
+                "explanation": "The generated answer misattributes the author, which is factually incorrect."
+                }
+                
+                Example 4
+                Question: What is the boiling point of water at sea level in Celsius?  
+                Ground Truth Answer: 100C  
+                Generated Answer: Around 100 degrees Celsius.  
+                Response:
+                {
+                "evaluation": "Yes",
+                "explanation": "The generated answer approximates the correct value and preserves the meaning."
+                }
+                
+                Be strict and unbiased. Always follow the exact JSON format.
+                """
+                }]
+                
+            prompt2 = f"""You are a strict evaluator comparing two responses. 
+            Question: {self.query}
+            Ground Truth Answer: {gold_answer}
+            Generated Answer: {self.target_response}
 
-                                    Your goal is to determine if the generated answer matches the ground truth in meaning and factual accuracy. 
+            Now generate response in the defined format."""
+            
+            messages.append({"role": "user", "content": f"You are a strict evaluator comparing two responses. Question: {self.query} \
+            Ground Truth Answer: {gold_answer} Generated Answer: {self.target_response} Now generate response in the defined format."})
+            
+            chat_text = tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True, tokenize=False)
+            tokenized = tokenizer(chat_text, return_tensors="pt", padding=True)
+            input_ids = tokenized["input_ids"].to(self.device)
+            attention_mask = tokenized["attention_mask"].to(self.device)
+            unwrapped_model = self.accelerator.unwrap_model(model)
+            generated_ids = None # Initialize
+            outputs_dict = None # Initialize for potential outputs if model returns dict
 
-                                    Respond in the following strict JSON format:
-                                    {{
-                                    "evaluation": "Yes" or "No",
-                                    "explanation": "Short, clear explanation of your judgment"
-                                    }}
-
-                                    Evaluation Criteria:
-                                    - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
-                                    - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
-
-                                    Be concise in your explanation. Do not add any content outside the JSON structure.
-
-                                    ---
-
-                                    Example 1
-                                    Question: What is the capital of France?  
-                                    Ground Truth Answer: Paris is the capital of France.  
-                                    Generated Answer: The capital of France is Paris.  
-                                    Response:
-                                    {{
-                                    "evaluation": "Yes",
-                                    "explanation": "The generated answer is semantically identical and factually correct."
-                                    }}
-
-                                    Example 2
-                                    Question: What is the capital of France?  
-                                    Ground Truth Answer: Paris is the capital of France.  
-                                    Generated Answer: The capital of France is Marseille.  
-                                    Response:
-                                    {{
-                                    "evaluation": "No",
-                                    "explanation": "Marseille is not the capital of France; this is a factual error."
-                                    }}
-
-                                    Example 3
-                                    Question: Who wrote *Pride and Prejudice*?  
-                                    Ground Truth Answer: Jane Austen  
-                                    Generated Answer: Charlotte Brontë wrote *Pride and Prejudice*.  
-                                    Response:
-                                    {{
-                                    "evaluation": "No",
-                                    "explanation": "The generated answer misattributes the author, which is factually incorrect."
-                                    }}
-
-                                    *Example 4
-                                    Question: What is the boiling point of water at sea level in Celsius?  
-                                    Ground Truth Answer: 100°C  
-                                    Generated Answer: Around 100 degrees Celsius.  
-                                    Response:
-                                    {{
-                                    "evaluation": "Yes",
-                                    "explanation": "The generated answer approximates the correct value and preserves the meaning."
-                                    }}
-
-                                    Be strict and unbiased. Always follow the exact JSON format.
-                                """
-
-        # Tokenize and run generation
-        inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=10,
+            with torch.no_grad():
+                outputs = unwrapped_model.generate(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                max_new_tokens=60,
                 do_sample=False,
-                pad_token_id=tokenizer.eos_token_id
-            )
-        
-        evaluation = json.loads(outputs)['evaluation']
+                pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
+                             else unwrapped_model.config.eos_token_id,
+                top_p=1.0,
+                )
+                
+                # Tokenize and run generation
+                #inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
+                #with torch.no_grad():
+                #    outputs = model.generate(
+                #        **inputs,
+                #        max_new_tokens=50,
+                #        do_sample=False,
+                #        pad_token_id=tokenizer.eos_token_id
+                #    )
+                len_prompt = len(prompt)+len(prompt2)+5
+                decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)[len_prompt:]
+                cleaned_text = decoded_output.lstrip().removeprefix("assistant").lstrip(": \n").strip().lower()
+                if '"evaluation": "yes"' in cleaned_text:
+                    return True
+                else:
+                    return False
+                #evaluation = json.loads(cleaned_text)["evaluation"]
+                
+                #return evaluation
+                
+                
+                # Decode and extract model reply
+                #decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+                #model_reply = decoded_output[len(prompt):].strip().lower()
+                #model_reply = decoded_output.strip().lower()
 
-        # # Decode and extract model reply
-        # decoded_output = tokenizer.decode(outputs, skip_special_tokens=True)
-        # model_reply = decoded_output[len(prompt):].strip().lower()
-
-        # return model_reply.startswith("yes")
-        return evaluation
+                #return model_reply
         
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
