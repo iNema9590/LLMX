@@ -123,7 +123,30 @@ class ShapleyExperimentHarness:
         
         self.all_true_utilities = ShapleyExperimentHarness.load_utilities_static(file_path, method)
         return self.all_true_utilities
-    
+
+    def compute_exhaustive_top_k(self, k: int):
+        n = self.n_items
+        best_k_indices_to_remove = None
+        min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
+
+        possible_indices_to_remove = list(itertools.combinations(range(n), k))
+        
+        pbar_desc = f"Exhaustive Top-{k} Search"
+        pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
+
+        for k_indices_tuple in pbar_iter:
+            ablated_set_np = np.ones(n, dtype=int)
+            ablated_set_np[list(k_indices_tuple)] = 0
+            ablated_set_tuple = tuple(ablated_set_np)
+
+            utility_of_ablated_set = self.all_true_utilities.get(ablated_set_tuple, -float('inf'))
+
+            if utility_of_ablated_set < min_utility_after_removal:
+                min_utility_after_removal = utility_of_ablated_set
+                best_k_indices_to_remove = k_indices_tuple
+
+        return best_k_indices_to_remove
+
     def _precompute_all_utilities(self) -> dict[tuple, float]:
         all_ablations_tuples = list(itertools.product([0, 1], repeat=self.n_items))
         num_total_subsets = len(all_ablations_tuples)
