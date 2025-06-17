@@ -33,7 +33,8 @@ start = time.time()
 
 # Construct full path to CSV file in same folder
 
-csv_path = os.path.join(current_dir, "test_merged.csv")
+# csv_path = os.path.join(current_dir, "test_merged.csv")
+csv_path = os.path.join(current_dir, f"{args.dataset}.csv")
 
 df = pd.read_csv(csv_path)
 df_save_results = pd.DataFrame(
@@ -60,7 +61,7 @@ accelerator_main = Accelerator(mixed_precision=PRECISION)
 
 if accelerator_main.is_main_process:
     print(f"Main Script: Loading model...")
-model_path = "arnir0/Tiny-LLM"
+model_path = args.model_name
 MODEL_NAME = model_path.split("/")[1]
 
 model_cpu = AutoModelForCausalLM.from_pretrained(
@@ -181,6 +182,14 @@ for i in tqdm(
                     performance_tolerance=0.001,
                     max_unique_lookups=actual_samples,
                     seed=SEED,
+                )
+                results_for_query[f"FM{actual_samples}"] = harness.compute_wss(
+                    num_samples=actual_samples,
+                    seed=SEED,
+                    sampling="kernelshap",
+                    sur_type="fm",
+                    util="pure-surrogate",
+                    pairchecking=False,
                 )
 
         results_for_query["LOO"] = harness.compute_loo()
