@@ -41,7 +41,7 @@ start = time.time()
 csv_path = os.path.join(current_dir, f'../data/synthetic_data/{args.dataset}.csv')
 
 df = pd.read_csv(csv_path)
-df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "top_k", "methods_top_k", "precision_top_k", "doc_id", "FM_matrix"])
+df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "top_k", "doc_id", "FM_matrix"])
 print("Data Loaded!")
 
 num_questions_to_run = df.shape[0]
@@ -159,19 +159,19 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         results_for_query["LOO"] = harness.compute_loo()
 
         exact_scores = results_for_query.get("Exact")
-        methods_top_k = {}
-        precision_top_k = {}
+        # methods_top_k = {}
+        # precision_top_k = {}
         for method in results_for_query.keys(): 
             method_top_k_docs = np.argsort(-np.array(results_for_query[method]))[:2] #exhaustive_top_2
-            methods_top_k[method] = method_top_k_docs
+            # methods_top_k[method] = method_top_k_docs
             gold_top_k_docs = exhaustive_top_2
-            precision_top_k[(2, method)] = len(set.intersection(set(method_top_k_docs), set(gold_top_k_docs)))/2
+            # precision_top_k[(2, method)] = len(set.intersection(set(method_top_k_docs), set(gold_top_k_docs)))/2
 
 
         df_save_results.loc[i, "query"] = query
         df_save_results.loc[i, "scoring"] = [results_for_query]
         df_save_results.loc[i, "top_k"] = [[exhaustive_top_2]]
-        df_save_results.loc[i, "precision_top_k"] = [precision_top_k]
+        # df_save_results.loc[i, "precision_top_k"] = [precision_top_k]
         # print("Flags Value: ", flags)
         df_save_results.loc[i, "doc_id"] = [[flags]]
         df_save_results.loc[i, "context"] = [[docs]]
