@@ -198,6 +198,85 @@ class ShapleyExperimentHarness:
 
         return complete_utilities if complete_utilities is not None else {}
 
+
+    def compute_shapley_interaction_index_pairs_matrix(self):
+        """
+        Computes the Shapley Interaction Index for all unique pairs of items,
+        returning results as an n x n NumPy matrix.
+        I_ij = I_ji. Diagonal I_ii will be 0 or NaN.
+
+        Returns:
+            np.ndarray: An n x n matrix where matrix[i, j] is the interaction
+                        index I_ij. Diagonal elements are set to 0.
+                        Returns None if n_items < 2.
+        """
+        n = self.n_items
+        if n < 2:
+            if self.verbose:
+                print("Cannot compute pairwise interactions for less than 2 items.")
+            return None
+
+        if self.verbose:
+            print(f"Computing Shapley Interaction Index matrix (n={n}, using pre-computed utilities)...")
+
+        # Initialize an n x n matrix with NaNs or 0s
+        interaction_matrix = np.full((n, n), 0.0, dtype=float) # Or np.nan
+
+        item_indices = list(range(n))
+        pbar_pairs = tqdm(list(itertools.combinations(item_indices, 2)), 
+                          desc="Pairwise Interactions (Matrix)", 
+                          disable=not self.verbose)
+
+        for i, j in pbar_pairs: # itertools.combinations ensures i < j
+            interaction_sum_for_pair_ij = 0.0
+            remaining_indices = [idx for idx in item_indices if idx != i and idx != j]
+            num_subsets_to_check_for_pair = 2**len(remaining_indices)
+
+            for k_s in range(num_subsets_to_check_for_pair):
+                s_members_indices = []
+                temp_k_s = k_s
+                for bit_pos in range(len(remaining_indices)):
+                    if (temp_k_s % 2) == 1:
+                        s_members_indices.append(remaining_indices[bit_pos])
+                    temp_k_s //= 2
+                
+                v_S_np = np.zeros(n, dtype=int)
+                if s_members_indices: v_S_np[s_members_indices] = 1
+                v_S_tuple = tuple(v_S_np)
+                size_S = len(s_members_indices)
+
+                v_S_union_i_np = v_S_np.copy(); v_S_union_i_np[i] = 1
+                v_S_union_i_tuple = tuple(v_S_union_i_np)
+                v_S_union_j_np = v_S_np.copy(); v_S_union_j_np[j] = 1
+                v_S_union_j_tuple = tuple(v_S_union_j_np)
+                v_S_union_ij_np = v_S_np.copy(); v_S_union_ij_np[i] = 1; v_S_union_ij_np[j] = 1
+                v_S_union_ij_tuple = tuple(v_S_union_ij_np)
+
+                util_S = self.all_true_utilities.get(v_S_tuple, -float('inf'))
+                util_S_i = self.all_true_utilities.get(v_S_union_i_tuple, -float('inf'))
+                util_S_j = self.all_true_utilities.get(v_S_union_j_tuple, -float('inf'))
+                util_S_ij = self.all_true_utilities.get(v_S_union_ij_tuple, -float('inf'))
+
+                delta_ij_S = 0.0
+                if not any(u == -float('inf') for u in [util_S, util_S_i, util_S_j, util_S_ij]):
+                    delta_ij_S = util_S_ij - util_S_i - util_S_j + util_S
+
+                weight = 0.0
+                if n == 2: weight = 1.0 
+                elif n > 2 and (n - 1 >=0 and n - size_S - 2 >=0): # Check indices for factorials
+                    numerator = self._factorials[size_S] * self._factorials[n - size_S - 2]
+                    denominator = self._factorials[n - 1]
+                    if denominator != 0: weight = numerator / denominator
+                
+                interaction_sum_for_pair_ij += weight * delta_ij_S
+            
+            interaction_matrix[i, j] = interaction_sum_for_pair_ij
+            interaction_matrix[j, i] = interaction_sum_for_pair_ij # Exploit symmetry
+
+        if self.verbose:
+            print("Shapley Interaction Index matrix computation complete.")
+        return interaction_matrix
+
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
         messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
                     questions. Avoid using your own knowledge or make assumptions.
