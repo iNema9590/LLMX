@@ -225,6 +225,7 @@ class ShapleyExperimentHarness:
                 attention_mask=attention_mask,
                 max_new_tokens=max_new_tokens,
                 do_sample=False,
+                temperature=0,
                 pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
                              else unwrapped_model.config.eos_token_id,
                 top_p=1.0,
@@ -683,66 +684,83 @@ class ShapleyExperimentHarness:
             intercept = model.intercept_
             return model, coefficients, intercept
 
-        elif sur_type=="xgboost":                              
-            model = xgboost.XGBRegressor(
-            n_estimators=100,
-            learning_rate=0.1,
-            max_depth=5,
-            reg_alpha=0.01,
-            reg_lambda=0,
-            objective='reg:squarederror' # Common for regression
-            )
-            model.fit(X_train, y_train)
-            return model
+        # elif sur_type=="xgboost":                              
+        #     model = xgboost.XGBRegressor(
+        #     n_estimators=100,
+        #     learning_rate=0.1,
+        #     max_depth=5,
+        #     reg_alpha=0.01,
+        #     reg_lambda=0,
+        #     objective='reg:squarederror' # Common for regression
+        #     )
+        #     model.fit(X_train, y_train)
+        #     return model
 
         elif sur_type == "fm":
-            print(X_train.shape)
-            X_train_fm = csr_matrix(X_train)  # Convert to sparse
-            print(X_train_fm.shape)
+            print("X_train shape:", X_train.shape)
+
+            # Convert to sparse (fastFM requires scipy CSR)
+            X_train_fm = csr_matrix(X_train)
+            print("X_train_fm shape:", X_train_fm.shape)
+
+            # Fit FM
             model = als.FMRegression(
                 n_iter=100,
                 init_stdev=0.1,
-                rank=4,
+                rank=4,  # latent factors dimension
                 l2_reg_w=0.1,
                 l2_reg_V=0.1,
                 random_state=42
             )
             model.fit(X_train_fm, y_train)
-            return model
 
-        elif sur_type == "gam":
-            gam_lam = 0.6
-            n_features = X_train.shape[1]
+            # Check shapes
+            print("model.w_ shape:", model.w_.shape)
+            print("model.V_ shape:", model.V_.shape)
 
-            # Start with univariate smooth terms
-            terms = s(0, lam=gam_lam)
-            for i in range(1, n_features):
-                terms += s(i, lam=gam_lam)
+            # === Attribution ===
+            w = model.w_         # shape: (n_features, )
+            V = model.V_.T         # shape: (n_features, rank)
+            F = V @ V.T          # shape: (n_features, n_features)
 
-            # Add pairwise interaction terms
-            for i in range(n_features):
-                for j in range(i + 1, n_features):
-                    terms += te(i, j, lam=gam_lam)
+            # Attribution score: main + 0.5 * sum of pairwise interactions
+            attr = w + 0.5 * (F.sum(axis=1) - np.diag(F))
 
-            # Fit the model
-            model = LinearGAM(terms).fit(X_train, y_train)
-            return model
+            return model, attr, F
+
+        # elif sur_type == "gam":
+        #     gam_lam = 0.6
+        #     n_features = X_train.shape[1]
+
+        #     # Start with univariate smooth terms
+        #     terms = s(0, lam=gam_lam)
+        #     for i in range(1, n_features):
+        #         terms += s(i, lam=gam_lam)
+
+        #     # Add pairwise interaction terms
+        #     for i in range(n_features):
+        #         for j in range(i + 1, n_features):
+        #             terms += te(i, j, lam=gam_lam)
+
+        #     # Fit the model
+        #     model = LinearGAM(terms).fit(X_train, y_train)
+        #     return model
         
-        elif sur_type == "boosted_gam":
-            model = ExplainableBoostingRegressor(
-                max_bins=256,
-                max_interaction_bins=64,
-                interactions=5,
-                learning_rate=0.01,
-                max_leaves=3,
-                max_rounds=100,
-                early_stopping_rounds=5,
-                random_state=42
-            )
-            model.fit(X_train, y_train)
-            return model
-        else:
-            raise ValueError("Unknown type")
+        # elif sur_type == "boosted_gam":
+        #     model = ExplainableBoostingRegressor(
+        #         max_bins=256,
+        #         max_interaction_bins=64,
+        #         interactions=5,
+        #         learning_rate=0.01,
+        #         max_leaves=3,
+        #         max_rounds=100,
+        #         early_stopping_rounds=5,
+        #         random_state=42
+        #     )
+        #     model.fit(X_train, y_train)
+        #     return model
+        # else:
+        #     raise ValueError("Unknown type")
 
 
 
@@ -817,7 +835,7 @@ class ShapleyExperimentHarness:
             _, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train)
         return weights
 
-    def compute_wss(self, num_samples: int, seed: int = None, distil: list=None,  sampling="kernelshap",sur_type="xgboost", util="pure-surrogate", pairchecking=False):
+    def compute_wss(self, num_samples: int, seed: int = None, distil: list=None,  sampling="kernelshap",sur_type="fm", util="pure-surrogate", pairchecking=False):
         if self.accelerator.is_main_process:
             if seed is not None: random.seed(seed); np.random.seed(seed)
 
@@ -836,35 +854,35 @@ class ShapleyExperimentHarness:
             if sur_type=="linear":
                 surrogate_model, _, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train)
             else:
-                surrogate_model= self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
+                surrogate_model, attr, F= self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
 
-            hybrid_utilities = {}
-            all_ablations_X = np.array(list(itertools.product([0, 1], repeat=self.n_items)), dtype=int)
+            # hybrid_utilities = {}
+            # all_ablations_X = np.array(list(itertools.product([0, 1], repeat=self.n_items)), dtype=int)
             
-            # Prediction can be done by all, it's fast.
-            if sur_type=="fm":
-                all_ablations_X_sp=csr_matrix(all_ablations_X)
-                all_predictions = surrogate_model.predict(all_ablations_X_sp)
-            else:
-                all_predictions = surrogate_model.predict(all_ablations_X)
+            # # Prediction can be done by all, it's fast.
+            # if sur_type=="fm":
+            #     all_ablations_X_sp=csr_matrix(all_ablations_X)
+            #     all_predictions = surrogate_model.predict(all_ablations_X_sp)
+            # else:
+            #     all_predictions = surrogate_model.predict(all_ablations_X)
             
-            if util=='hybrid':
-                for i_pred in range(all_ablations_X.shape[0]):
-                    v_tuple = tuple(all_ablations_X[i_pred])
-                    hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
-            elif util=="pure-surrogate":
-                for i_pred in range(all_ablations_X.shape[0]):
-                    v_tuple = tuple(all_ablations_X[i_pred])
-                    hybrid_utilities[v_tuple] = all_predictions[i_pred]
-                if pairchecking:
-                    shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities, known_utilities_for_hybrid)
-                    return shapley_values_wss
-            if distil:
-                {k: v for k, v in hybrid_utilities.items() if sum(k) not in distil}
+            # if util=='hybrid':
+            #     for i_pred in range(all_ablations_X.shape[0]):
+            #         v_tuple = tuple(all_ablations_X[i_pred])
+            #         hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
+            # elif util=="pure-surrogate":
+            #     for i_pred in range(all_ablations_X.shape[0]):
+            #         v_tuple = tuple(all_ablations_X[i_pred])
+            #         hybrid_utilities[v_tuple] = all_predictions[i_pred]
+            #     if pairchecking:
+            #         shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities, known_utilities_for_hybrid)
+            #         return shapley_values_wss
+            # if distil:
+            #     {k: v for k, v in hybrid_utilities.items() if sum(k) not in distil}
 
-            shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) 
+            # shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) 
         
-            return shapley_values_wss
+            return attr, F
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                           max_unique_lookups: int, # Budget for utility lookups
