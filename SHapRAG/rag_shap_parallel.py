@@ -1,4 +1,5 @@
 import itertools
+import json
 import math
 import os
 import pickle
@@ -12,14 +13,17 @@ import torch.nn.functional as F
 import xgboost
 from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
-# from fastFM import als
+from fastFM import als
+from interpret.glassbox import ExplainableBoostingRegressor
 from pygam import LinearGAM, f, l, s, te
 from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.auto import tqdm
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 class ShapleyExperimentHarness:
@@ -123,30 +127,7 @@ class ShapleyExperimentHarness:
         
         self.all_true_utilities = ShapleyExperimentHarness.load_utilities_static(file_path, method)
         return self.all_true_utilities
-
-    def compute_exhaustive_top_k(self, k: int):
-        n = self.n_items
-        best_k_indices_to_remove = None
-        min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
-
-        possible_indices_to_remove = list(itertools.combinations(range(n), k))
-        
-        pbar_desc = f"Exhaustive Top-{k} Search"
-        pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
-
-        for k_indices_tuple in pbar_iter:
-            ablated_set_np = np.ones(n, dtype=int)
-            ablated_set_np[list(k_indices_tuple)] = 0
-            ablated_set_tuple = tuple(ablated_set_np)
-
-            utility_of_ablated_set = self.all_true_utilities.get(ablated_set_tuple, -float('inf'))
-
-            if utility_of_ablated_set < min_utility_after_removal:
-                min_utility_after_removal = utility_of_ablated_set
-                best_k_indices_to_remove = k_indices_tuple
-
-        return best_k_indices_to_remove
-
+    
     def _precompute_all_utilities(self) -> dict[tuple, float]:
         all_ablations_tuples = list(itertools.product([0, 1], repeat=self.n_items))
         num_total_subsets = len(all_ablations_tuples)
@@ -244,6 +225,7 @@ class ShapleyExperimentHarness:
                 attention_mask=attention_mask,
                 max_new_tokens=max_new_tokens,
                 do_sample=False,
+                temperature=0,
                 pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
                              else unwrapped_model.config.eos_token_id,
                 top_p=1.0,
@@ -262,7 +244,7 @@ class ShapleyExperimentHarness:
                     generated_ids = outputs_gen[0] # Guessing the first tensor is it
                 else: # Cannot determine, return empty or raise error
                     del input_ids, attention_mask, unwrapped_model, outputs_gen
-                    torch.cuda.empty_cache() # Attempt to clear if things are really messy
+                    torch.cuda.empty_cache()
                     return ""
 
 
@@ -272,24 +254,26 @@ class ShapleyExperimentHarness:
         # Explicitly delete tensors
         del input_ids, attention_mask, generated_ids, unwrapped_model, outputs_gen
         torch.cuda.empty_cache()
-        print("POSSIBLE OUTPUT OF THE LLM: ", cleaned_text)
         return cleaned_text
 
-    def _llm_compute_logprob(self, context_str: str) -> float:
-        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+    def _llm_compute_logprob(self, context_str: str, response=None) -> float:
+        messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
+                    questions. Avoid using your own knowledge or make assumptions.
+                    """}]
         if context_str:
-            messages.append({"role": "user", "content": f"Given the context: {context_str}. Briefly answer the query: {self.query}. Be concise and short."})
+            messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}."})
         else:
             messages.append({"role": "user", "content": self.query})
-
+        if not response:
+            response=self.target_response
         prompt_templated = self.tokenizer.apply_chat_template(
             messages, add_generation_prompt=True, tokenize=False
         )
 
-        answer_ids = self.tokenizer(self.target_response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
+        answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
 
         if answer_ids.shape[1] == 0:
-            return 0.0 if not self.target_response else -float('inf')
+            return 0.0 if not response else -float('inf')
 
         prompt_tokens = self.tokenizer(prompt_templated, return_tensors="pt").to(self.device)
 
@@ -324,6 +308,182 @@ class ShapleyExperimentHarness:
         torch.cuda.empty_cache()
         return total_log_prob
     
+    def llm_evaluation(self, gold_answer,embedder=None, metric="cosine", model=None, tokenizer=None):
+        if metric=="cosine":
+            return cosine_similarity(embedder.encode([gold_answer], convert_to_numpy=True), embedder.encode([self.target_response], convert_to_numpy=True))
+        elif metric=="logprob":
+            return self._llm_compute_logprob(context_str="\n\n".join(self.items), response=gold_answer)
+        elif metric=="llm_judge":
+            prompt = """
+                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), 
+                and the other is a generated answer produced by another language model.Your goal is to determine if 
+                the generated answer matches the ground truth in meaning and factual accuracy. Respond in the following strict JSON format:
+                {{
+                "evaluation": "Yes" or "No",
+                "explanation": "Short, clear explanation of your judgment"
+                }}
+                Evaluation Criteria:
+                - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
+                - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
+                Be concise in your explanation. Do not add any content outside the JSON structure.
+                ---
+                Example 1
+                Question: What is the capital of France?  
+                Ground Truth Answer: Paris is the capital of France.  
+                Generated Answer: The capital of France is Paris.  
+                Response:
+                {{
+                "evaluation": "Yes",
+                "explanation": "The generated answer is semantically identical and factually correct."
+                }}
+                
+                Example 2
+                Question: What is the capital of France?  
+                Ground Truth Answer: Paris is the capital of France.  
+                Generated Answer: The capital of France is Marseille.  
+                Response:
+                {{
+                "evaluation": "No",
+                "explanation": "Marseille is not the capital of France; this is a factual error."
+                }}
+                
+                Example 3
+                Question: Who wrote *Pride and Prejudice*?  
+                Ground Truth Answer: Jane Austen  
+                Generated Answer: Charlotte Bronte wrote *Pride and Prejudice*.  
+                Response:
+                {{
+                "evaluation": "No",
+                "explanation": "The generated answer misattributes the author, which is factually incorrect."
+                }}
+                
+                Example 4
+                Question: What is the boiling point of water at sea level in Celsius?  
+                Ground Truth Answer: 100C  
+                Generated Answer: Around 100 degrees Celsius.  
+                Response:
+                {{
+                "evaluation": "Yes",
+                "explanation": "The generated answer approximates the correct value and preserves the meaning."
+                }}
+                
+                Be strict and unbiased. Always follow the exact JSON format.
+                """
+            messages = [{"role": "system", "content": """
+                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), 
+                and the other is a generated answer produced by another language model.Your goal is to determine if 
+                the generated answer matches the ground truth in meaning and factual accuracy. Respond in the following strict JSON format:
+                {
+                "evaluation": "Yes" or "No",
+                "explanation": "Short, clear explanation of your judgment"
+                }
+                Evaluation Criteria:
+                - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
+                - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
+                Be concise in your explanation. Do not add any content outside the JSON structure.
+                ---
+                Example 1
+                Question: What is the capital of France?  
+                Ground Truth Answer: Paris is the capital of France.  
+                Generated Answer: The capital of France is Paris.  
+                Response:
+                {
+                "evaluation": "Yes",
+                "explanation": "The generated answer is semantically identical and factually correct."
+                }
+                
+                Example 2
+                Question: What is the capital of France?  
+                Ground Truth Answer: Paris is the capital of France.  
+                Generated Answer: The capital of France is Marseille.  
+                Response:
+                {
+                "evaluation": "No",
+                "explanation": "Marseille is not the capital of France; this is a factual error."
+                }
+                
+                Example 3
+                Question: Who wrote *Pride and Prejudice*?  
+                Ground Truth Answer: Jane Austen  
+                Generated Answer: Charlotte Bronte wrote *Pride and Prejudice*.  
+                Response:
+                {
+                "evaluation": "No",
+                "explanation": "The generated answer misattributes the author, which is factually incorrect."
+                }
+                
+                Example 4
+                Question: What is the boiling point of water at sea level in Celsius?  
+                Ground Truth Answer: 100C  
+                Generated Answer: Around 100 degrees Celsius.  
+                Response:
+                {
+                "evaluation": "Yes",
+                "explanation": "The generated answer approximates the correct value and preserves the meaning."
+                }
+                
+                Be strict and unbiased. Always follow the exact JSON format.
+                """
+                }]
+                
+            prompt2 = f"""You are a strict evaluator comparing two responses. 
+            Question: {self.query}
+            Ground Truth Answer: {gold_answer}
+            Generated Answer: {self.target_response}
+
+            Now generate response in the defined format."""
+            
+            messages.append({"role": "user", "content": f"You are a strict evaluator comparing two responses. Question: {self.query} \
+            Ground Truth Answer: {gold_answer} Generated Answer: {self.target_response} Now generate response in the defined format."})
+            
+            chat_text = tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True, tokenize=False)
+            tokenized = tokenizer(chat_text, return_tensors="pt", padding=True)
+            input_ids = tokenized["input_ids"].to(self.device)
+            attention_mask = tokenized["attention_mask"].to(self.device)
+            unwrapped_model = self.accelerator.unwrap_model(model)
+            generated_ids = None # Initialize
+            outputs_dict = None # Initialize for potential outputs if model returns dict
+
+            with torch.no_grad():
+                outputs = unwrapped_model.generate(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                max_new_tokens=60,
+                do_sample=False,
+                pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
+                             else unwrapped_model.config.eos_token_id,
+                top_p=1.0,
+                )
+                
+                # Tokenize and run generation
+                #inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
+                #with torch.no_grad():
+                #    outputs = model.generate(
+                #        **inputs,
+                #        max_new_tokens=50,
+                #        do_sample=False,
+                #        pad_token_id=tokenizer.eos_token_id
+                #    )
+                len_prompt = len(prompt)+len(prompt2)+5
+                decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)[len_prompt:]
+                cleaned_text = decoded_output.lstrip().removeprefix("assistant").lstrip(": \n").strip().lower()
+                if '"evaluation": "yes"' in cleaned_text:
+                    return True
+                else:
+                    return False
+                #evaluation = json.loads(cleaned_text)["evaluation"]
+                
+                #return evaluation
+                
+                
+                # Decode and extract model reply
+                #decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+                #model_reply = decoded_output[len(prompt):].strip().lower()
+                #model_reply = decoded_output.strip().lower()
+
+                #return model_reply
+        
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
         if len(v_np) != self.n_items: raise ValueError("Ablation vector length mismatch")
@@ -484,6 +644,29 @@ class ShapleyExperimentHarness:
                   f"less than requested {num_samples}. This might happen if num_samples is close to 2^n.")
 
         return list(sampled_tuples_set)
+    
+    def compute_exhaustive_top_k(self, k: int):
+        n = self.n_items
+        best_k_indices_to_remove = None
+        min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
+
+        possible_indices_to_remove = list(itertools.combinations(range(n), k))
+        
+        pbar_desc = f"Exhaustive Top-{k} Search"
+        pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
+
+        for k_indices_tuple in pbar_iter:
+            ablated_set_np = np.ones(n, dtype=int)
+            ablated_set_np[list(k_indices_tuple)] = 0
+            ablated_set_tuple = tuple(ablated_set_np)
+
+            utility_of_ablated_set = self.all_true_utilities.get(ablated_set_tuple, -float('inf'))
+
+            if utility_of_ablated_set < min_utility_after_removal:
+                min_utility_after_removal = utility_of_ablated_set
+                best_k_indices_to_remove = k_indices_tuple
+
+        return best_k_indices_to_remove  
 
     def _train_surrogate(self, ablations: list[tuple], utilities: list[float], eval=True, sur_type="linear") -> tuple:
         X_train = np.array(ablations)
@@ -501,52 +684,83 @@ class ShapleyExperimentHarness:
             intercept = model.intercept_
             return model, coefficients, intercept
 
-        elif sur_type=="xgboost":                              
-            model = xgboost.XGBRegressor(
-            n_estimators=100,
-            learning_rate=0.1,
-            max_depth=5,
-            reg_alpha=0.01,
-            reg_lambda=0,
-            objective='reg:squarederror' # Common for regression
-            )
-            model.fit(X_train, y_train)
-            return model
-
-        # elif sur_type == "fm":
-        #     print(X_train.shape)
-        #     X_train_fm = csr_matrix(X_train)  # Convert to sparse
-        #     print(X_train_fm.shape)
-        #     model = als.FMRegression(
-        #         n_iter=100,
-        #         init_stdev=0.1,
-        #         rank=4,
-        #         l2_reg_w=0.1,
-        #         l2_reg_V=0.1,
-        #         random_state=42
+        # elif sur_type=="xgboost":                              
+        #     model = xgboost.XGBRegressor(
+        #     n_estimators=100,
+        #     learning_rate=0.1,
+        #     max_depth=5,
+        #     reg_alpha=0.01,
+        #     reg_lambda=0,
+        #     objective='reg:squarederror' # Common for regression
         #     )
-        #     model.fit(X_train_fm, y_train)
+        #     model.fit(X_train, y_train)
         #     return model
 
-        elif sur_type == "gam":
-            gam_lam = 0.6
-            n_features = X_train.shape[1]
+        elif sur_type == "fm":
+            print("X_train shape:", X_train.shape)
 
-            # Start with univariate smooth terms
-            terms = s(0, lam=gam_lam)
-            for i in range(1, n_features):
-                terms += s(i, lam=gam_lam)
+            # Convert to sparse (fastFM requires scipy CSR)
+            X_train_fm = csr_matrix(X_train)
+            print("X_train_fm shape:", X_train_fm.shape)
 
-            # Add pairwise interaction terms
-            for i in range(n_features):
-                for j in range(i + 1, n_features):
-                    terms += te(i, j, lam=gam_lam)
+            # Fit FM
+            model = als.FMRegression(
+                n_iter=100,
+                init_stdev=0.1,
+                rank=4,  # latent factors dimension
+                l2_reg_w=0.1,
+                l2_reg_V=0.1,
+                random_state=42
+            )
+            model.fit(X_train_fm, y_train)
 
-            # Fit the model
-            model = LinearGAM(terms).fit(X_train, y_train)
-            return model
-        else:
-            raise ValueError("Unknown type")
+            # Check shapes
+            print("model.w_ shape:", model.w_.shape)
+            print("model.V_ shape:", model.V_.shape)
+
+            # === Attribution ===
+            w = model.w_         # shape: (n_features, )
+            V = model.V_.T         # shape: (n_features, rank)
+            F = V @ V.T          # shape: (n_features, n_features)
+
+            # Attribution score: main + 0.5 * sum of pairwise interactions
+            attr = w + 0.5 * (F.sum(axis=1) - np.diag(F))
+
+            return model, attr, F
+
+        # elif sur_type == "gam":
+        #     gam_lam = 0.6
+        #     n_features = X_train.shape[1]
+
+        #     # Start with univariate smooth terms
+        #     terms = s(0, lam=gam_lam)
+        #     for i in range(1, n_features):
+        #         terms += s(i, lam=gam_lam)
+
+        #     # Add pairwise interaction terms
+        #     for i in range(n_features):
+        #         for j in range(i + 1, n_features):
+        #             terms += te(i, j, lam=gam_lam)
+
+        #     # Fit the model
+        #     model = LinearGAM(terms).fit(X_train, y_train)
+        #     return model
+        
+        # elif sur_type == "boosted_gam":
+        #     model = ExplainableBoostingRegressor(
+        #         max_bins=256,
+        #         max_interaction_bins=64,
+        #         interactions=5,
+        #         learning_rate=0.01,
+        #         max_leaves=3,
+        #         max_rounds=100,
+        #         early_stopping_rounds=5,
+        #         random_state=42
+        #     )
+        #     model.fit(X_train, y_train)
+        #     return model
+        # else:
+        #     raise ValueError("Unknown type")
 
 
 
@@ -621,7 +835,7 @@ class ShapleyExperimentHarness:
             _, weights, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train)
         return weights
 
-    def compute_wss(self, num_samples: int, seed: int = None, distil: list=None,  sampling="kernelshap",sur_type="xgboost", util="pure-surrogate", pairchecking=False):
+    def compute_wss(self, num_samples: int, seed: int = None, distil: list=None,  sampling="kernelshap",sur_type="fm", util="pure-surrogate", pairchecking=False):
         if self.accelerator.is_main_process:
             if seed is not None: random.seed(seed); np.random.seed(seed)
 
@@ -640,35 +854,35 @@ class ShapleyExperimentHarness:
             if sur_type=="linear":
                 surrogate_model, _, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train)
             else:
-                surrogate_model= self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
+                surrogate_model, attr, F= self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
 
-            hybrid_utilities = {}
-            all_ablations_X = np.array(list(itertools.product([0, 1], repeat=self.n_items)), dtype=int)
+            # hybrid_utilities = {}
+            # all_ablations_X = np.array(list(itertools.product([0, 1], repeat=self.n_items)), dtype=int)
             
-            # Prediction can be done by all, it's fast.
-            if sur_type=="fm":
-                all_ablations_X_sp=csr_matrix(all_ablations_X)
-                all_predictions = surrogate_model.predict(all_ablations_X_sp)
-            else:
-                all_predictions = surrogate_model.predict(all_ablations_X)
+            # # Prediction can be done by all, it's fast.
+            # if sur_type=="fm":
+            #     all_ablations_X_sp=csr_matrix(all_ablations_X)
+            #     all_predictions = surrogate_model.predict(all_ablations_X_sp)
+            # else:
+            #     all_predictions = surrogate_model.predict(all_ablations_X)
             
-            if util=='hybrid':
-                for i_pred in range(all_ablations_X.shape[0]):
-                    v_tuple = tuple(all_ablations_X[i_pred])
-                    hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
-            elif util=="pure-surrogate":
-                for i_pred in range(all_ablations_X.shape[0]):
-                    v_tuple = tuple(all_ablations_X[i_pred])
-                    hybrid_utilities[v_tuple] = all_predictions[i_pred]
-                if pairchecking:
-                    shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities, known_utilities_for_hybrid)
-                    return shapley_values_wss
-            if distil:
-                {k: v for k, v in hybrid_utilities.items() if sum(k) not in distil}
+            # if util=='hybrid':
+            #     for i_pred in range(all_ablations_X.shape[0]):
+            #         v_tuple = tuple(all_ablations_X[i_pred])
+            #         hybrid_utilities[v_tuple] = known_utilities_for_hybrid.get(v_tuple, all_predictions[i_pred])
+            # elif util=="pure-surrogate":
+            #     for i_pred in range(all_ablations_X.shape[0]):
+            #         v_tuple = tuple(all_ablations_X[i_pred])
+            #         hybrid_utilities[v_tuple] = all_predictions[i_pred]
+            #     if pairchecking:
+            #         shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities, known_utilities_for_hybrid)
+            #         return shapley_values_wss
+            # if distil:
+            #     {k: v for k, v in hybrid_utilities.items() if sum(k) not in distil}
 
-            shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) 
+            # shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) 
         
-            return shapley_values_wss
+            return attr, F
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                           max_unique_lookups: int, # Budget for utility lookups
@@ -815,8 +1029,6 @@ class ShapleyExperimentHarness:
         shapley_values = np.zeros(self.n_items)
         non_zero_weights_mask = total_weights_for_item > 1e-9
         shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
-        
-        final_lookups_count = len(unique_utility_lookups_tracker)
 
         return shapley_values
 
@@ -837,3 +1049,45 @@ class ShapleyExperimentHarness:
                 elif util_all == -float('inf'): loo_scores[i] = -np.inf # Full set failed, but LOO set succeeded
                 else: loo_scores[i] = util_all - util_loo
         return loo_scores
+    
+
+
+def llm_judge(question: str,
+              ground_truth: str,
+              generated_response: str,
+              model,
+              tokenizer,
+              device: str = "cuda" if torch.cuda.is_available() else "cpu",
+              max_new_tokens: int = 10) -> bool:
+
+    # Construct the prompt
+    prompt = f"""You are a strict evaluator checking if the generated answer is correct.
+
+Question:
+{question}
+
+Generated Answer:
+{generated_response}
+
+Ground Truth Answer:
+{ground_truth}
+
+Is the generated answer semantically equivalent to the ground truth answer?
+Answer with only "Yes" or "No"."""
+
+    # Tokenize and run generation
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
+            pad_token_id=tokenizer.eos_token_id
+        )
+
+    # Decode and extract model reply
+    decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    model_reply = decoded_output[len(prompt):].strip().lower()
+
+    return model_reply.startswith("yes")
+    return model_reply.startswith("yes")

@@ -519,6 +519,7 @@ dependencies = [
 dev = [
     { name = "accelerate" },
     { name = "cython" },
+    { name = "ipykernel" },
     { name = "pandas" },
     { name = "pyarrow" },
     { name = "pygam" },
@@ -536,6 +537,7 @@ requires-dist = [{ name = "ipykernel", specifier = ">=6.29.5" }]
 dev = [
     { name = "accelerate", specifier = ">=1.7.0" },
     { name = "cython", specifier = ">=3.1.1" },
+    { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pyarrow", specifier = ">=20.0.0" },
     { name = "pygam", specifier = ">=0.9.1" },
