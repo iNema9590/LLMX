@@ -1,32 +1,136 @@
-query,context,provided_answer,top_k,methods_top_k,precision_top_k,doc_id,scoring
-What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,"[[[""The lightweight frame of a Xylotian Sky-Skiff is primarily made from hardened 'Aero-Coral'."", ""For durability and energy shielding, the Aero-Coral frame of a Sky-Skiff is then clad in thin sheets of 'Noctilucent Metal'."", 'Xylotian ground vehicles are often made from volcanic rock.', 'Sky-Skiffs are typically piloted by a single Xylotian navigator.', 'The propulsion system of a Sky-Skiff utilizes focused solar winds.', ""Aero-Coral is a bio-engineered substance grown in Xylos's upper atmosphere."", ""The annual 'Great Xylotian Sky Race' features heavily modified Sky-Skiffs."", 'Noctilucent Metal glows faintly in the dark, a common aesthetic in Xylotian design.', ""Navigational tools on a Sky-Skiff include a 'Star-Compass' and a 'Wind-Gauge'."", 'Training to pilot a Sky-Skiff begins at a young age for many Xylotians.']]]",The two primary materials used to construct a Xylotian Sky-Skiff hull are Aero-Coral and Noctilucent Metal.,"[[(1, 7)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 0.5, (2, 'TMC32'): 0.5, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 0.5}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([  6.42630508,  31.64520243, -11.57339202,  -0.17704686,
+query,context,provided_answer,top_k,doc_id,FM_matrix,scoring,FM_matrix_groundtruth
+What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,"[[[""The lightweight frame of a Xylotian Sky-Skiff is primarily made from hardened 'Aero-Coral'."", ""For durability and energy shielding, the Aero-Coral frame of a Sky-Skiff is then clad in thin sheets of 'Noctilucent Metal'."", 'Xylotian ground vehicles are often made from volcanic rock.', 'Sky-Skiffs are typically piloted by a single Xylotian navigator.', 'The propulsion system of a Sky-Skiff utilizes focused solar winds.', ""Aero-Coral is a bio-engineered substance grown in Xylos's upper atmosphere."", ""The annual 'Great Xylotian Sky Race' features heavily modified Sky-Skiffs."", 'Noctilucent Metal glows faintly in the dark, a common aesthetic in Xylotian design.', ""Navigational tools on a Sky-Skiff include a 'Star-Compass' and a 'Wind-Gauge'."", 'Training to pilot a Sky-Skiff begins at a young age for many Xylotians.']]]",The two primary materials used to construct a Xylotian Sky-Skiff hull are Aero-Coral and Noctilucent Metal.,,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 4.89235021e+02, -1.02059823e+01,  2.44046995e+01,
+         7.85112767e-01,  4.18150210e+00, -1.14186791e+01,
+        -1.11154167e-01,  1.55068649e+01,  2.55053722e+00,
+        -6.76767545e-01],
+       [-1.02059823e+01,  1.57640974e+02,  1.97355047e+01,
+        -1.50362800e+00,  1.60114369e+00, -3.84443228e+00,
+         9.15738928e-01, -3.62054920e+01, -3.42052574e-01,
+        -1.87629099e+00],
+       [ 2.44046995e+01,  1.97355047e+01,  4.39101382e+01,
+        -3.51964908e+00, -5.54045993e+00, -1.48718072e+00,
+        -1.24059736e+00,  5.93419605e+00, -3.07582570e+00,
+        -9.55241715e-01],
+       [ 7.85112767e-01, -1.50362800e+00, -3.51964908e+00,
+         9.26310805e-01,  7.18641089e-01,  1.42904917e+00,
+        -1.34871232e-02,  1.35659017e+00,  2.51376647e+00,
+         6.01926991e-01],
+       [ 4.18150210e+00,  1.60114369e+00, -5.54045993e+00,
+         7.18641089e-01,  1.02357238e+00,  4.13636066e-01,
+         1.67432836e-01, -1.05232251e+00,  1.29873069e+00,
+         2.65538101e-01],
+       [-1.14186791e+01, -3.84443228e+00, -1.48718072e+00,
+         1.42904917e+00,  4.13636066e-01,  3.38982543e+00,
+        -2.66955680e-01,  4.44587978e+00,  4.88762683e+00,
+         1.22835712e+00],
+       [-1.11154167e-01,  9.15738928e-01, -1.24059736e+00,
+        -1.34871232e-02,  1.67432836e-01, -2.66955680e-01,
+         7.32332210e-02, -8.83091507e-01, -3.17488123e-01,
+        -8.73964319e-02],
+       [ 1.55068649e+01, -3.62054920e+01,  5.93419605e+00,
+         1.35659017e+00, -1.05232251e+00,  4.44587978e+00,
+        -8.83091507e-01,  1.62911779e+01,  5.84609767e+00,
+         1.76921023e+00],
+       [ 2.55053722e+00, -3.42052574e-01, -3.07582570e+00,
+         2.51376647e+00,  1.29873069e+00,  4.88762683e+00,
+        -3.17488123e-01,  5.84609767e+00,  8.25927187e+00,
+         1.93790837e+00],
+       [-6.76767545e-01, -1.87629099e+00, -9.55241715e-01,
+         6.01926991e-01,  2.65538101e-01,  1.22835712e+00,
+        -8.73964319e-02,  1.76921023e+00,  1.93790837e+00,
+         4.79237771e-01]])]","[{'Exact': array([  6.42630508,  31.64520243, -11.57339202,  -0.17704686,
         -3.17996855,   5.22979254,  -1.43074125,  16.46609414,
         -2.60449441,   1.92372637]), 'ContextCite32': array([ 20.23550671,  40.49649048, -27.40977159,  -4.69177864,
        -13.51257308,  12.50953974, -11.0693993 ,  30.13704702,
         -2.11804279,   9.06670556]), 'KernelShap32': array([ 15.89444012,  42.43263927, -16.35891291,  -1.28961516,
         -2.19001649,  19.24737719,  -7.57083374,  20.5137436 ,
-        10.60620426,  -1.14180418]), 'BetaShap (U)32': array([-0.08488351, 38.73905571,  0.11794348, -1.50200102, -1.18387938,
+        10.60620426,  -1.14180418]), 'WSS32': array([  4.67328257,  19.71446265, -10.13665887, -15.63130679,
+         2.66095888,   9.77219214,  -9.84834698,  46.06174977,
+         0.18827462,  -1.27109526]), 'BetaShap (U)32': array([-0.08488351, 38.73905571,  0.11794348, -1.50200102, -1.18387938,
        -0.13184917, -0.93539034, -0.41422406,  0.34149005, -0.76034273]), 'TMC32': array([ 7.3128151 , 29.35482934,  0.12363724, -0.66537026, -1.10270031,
         3.70764667, -0.90896702,  6.44788035,  0.33533669, -0.48688427]), 'ContextCite64': array([ 17.52019667,  27.57688501, -21.43402496,  -2.46743271,
         -8.261436  ,  12.1713108 ,  -6.49985846,  24.58798876,
         -0.23689391,   2.69551995]), 'KernelShap64': array([ 14.26494885,  37.29093874, -15.05782401,  -0.85156832,
         -2.38613164,   6.19834204,  -2.76182356,  22.36700932,
-         4.6543635 ,   3.77319298]), 'BetaShap (U)64': array([ -0.08488017,  38.73906749,  -9.02807088,  -1.50199528,
+         4.6543635 ,   3.77319298]), 'WSS64': array([13.45782039, 33.51367694, -4.71766248, -2.46719953, -0.69463148,
+       -2.17474869, -0.15389749, 16.75991868, -2.04170941,  2.6006149 ]), 'BetaShap (U)64': array([ -0.08488017,  38.73906749,  -9.02807088,  -1.50199528,
         -0.32404706,  -0.13184613,  -2.57631804,   9.28920827,
        -11.58911128,   3.2331929 ]), 'TMC64': array([ 4.5905976 , 33.93110508, -8.95139962,  0.53228778, -0.56015692,
         5.93011938, -2.65025541,  9.04645669, -1.66288133,  3.76189324]), 'ContextCite100': array([ 17.63079751,  32.88150288, -15.92269203,  -5.68328225,
         -7.65172253,   7.80145264,  -3.36998428,  20.9656379 ,
         -3.72338396,   5.48024138]), 'KernelShap100': array([ 1.29776117e+01,  3.50318397e+01, -1.54391412e+01,  3.14819320e+00,
        -9.25422141e-01,  5.18616677e+00, -1.90938116e+00,  2.22295984e+01,
-       -3.84474251e-03,  0.00000000e+00]), 'BetaShap (U)100': array([ -0.36250961,  38.73905674, -12.19448571,  -1.50199611,
+       -3.84474251e-03,  0.00000000e+00]), 'WSS100': array([ 14.94767811,  36.19587405, -11.70272782,  -3.74159501,
+        -4.86493887,   5.1779618 ,  -1.32411482,  19.43651854,
+        -3.03537686,   0.22184741]), 'BetaShap (U)100': array([ -0.36250961,  38.73905674, -12.19448571,  -1.50199611,
         -0.32404903,  -0.13184683,  -2.27926923,   8.318869  ,
        -11.58912698,   5.97534535]), 'TMC100': array([ 5.17657681, 34.51687396, -7.79772655,  0.37828999, -1.1993452 ,
         3.84208312, -2.48163504, 11.76069692, -2.08660095,  0.8632097 ]), 'LOO': array([-0.5013361 ,  3.10584569, -0.37098706, -0.39030027, -0.32404637,
-       -0.1318568 , -0.60081053, -0.41424489,  0.06539893,  0.18423104])}]"
-What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,"[[['A trained Xylotian Chrono-Weaver can subtly perceive echoes of recent past events in their immediate vicinity.', 'Furthermore, advanced Chrono-Weavers can project faint, localized temporal distortions, making objects appear to shimmer or briefly lag.', ""Xylotian cuisine often features 'Sun-Berries' which ripen instantly upon picking."", ""Chrono-Weavers often wear time-keeping amulets made of 'Hourglass Sandstone'."", ""The 'Temporal College' on Xylos is where Chrono-Weavers hone their skills."", 'The Xylotian concept of time is multi-linear, unlike simpler sequential models.', 'Uncontrolled temporal abilities can be dangerous, so Chrono-Weavers undergo rigorous training.', 'Many Xylotian myths involve legendary Chrono-Weavers who could allegedly halt time, though this is unproven.', 'Chrono-Weaving is considered more of an art than a science by many Xylotians.', ""The energy source for a Chrono-Weaver's abilities is drawn from ambient 'Temporal Flux'.""]]]","A Xylotian 'Chrono-Weaver' possesses the abilities to subtly perceive echoes of recent past events in their immediate vicinity and project faint, localized temporal distortions, making objects appear to shimmer or briefly lag.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([68.17086717, 83.74396559, -1.83778247,  1.53343564, -0.93166024,
+       -0.1318568 , -0.60081053, -0.41424489,  0.06539893,  0.18423104])}]","[[  0.         -16.55372907  16.24999984  -0.05031976   1.81928994
+  -10.00458958   0.31967721  11.04394776  -0.46394053  -2.77676819]
+ [-16.55372907   0.          15.62877329   1.14393058   4.00448599
+   -5.3935907    2.1040131  -39.45431985   3.04427625  -0.15707386]
+ [ 16.24999984  15.62877329   0.          -5.20808827  -4.26206967
+   -2.44133794  -4.86295765   1.66690159  -1.70102934  -3.24665225]
+ [ -0.05031976   1.14393058  -5.20808827   0.           2.14570127
+   -0.36047645   0.33450833   1.02583758   1.58037975   0.50022942]
+ [  1.81928994   4.00448599  -4.26206967   2.14570127   0.
+   -2.88992153   0.06194998   2.22852948   2.59308481   0.8083117 ]
+ [-10.00458958  -5.3935907   -2.44133794  -0.36047645  -2.88992153
+    0.           0.97935232   5.96802506   0.11424433  -1.85239311]
+ [  0.31967721   2.1040131   -4.86295765   0.33450833   0.06194998
+    0.97935232   0.           0.96622304   1.80330366   0.49868436]
+ [ 11.04394776 -39.45431985   1.66690159   1.02583758   2.22852948
+    5.96802506   0.96622304   0.           3.12471838  -1.12504384]
+ [ -0.46394053   3.04427625  -1.70102934   1.58037975   2.59308481
+    0.11424433   1.80330366   3.12471838   0.           1.55953397]
+ [ -2.77676819  -0.15707386  -3.24665225   0.50022942   0.8083117
+   -1.85239311   0.49868436  -1.12504384   1.55953397   0.        ]]"
+What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,"[[['A trained Xylotian Chrono-Weaver can subtly perceive echoes of recent past events in their immediate vicinity.', 'Furthermore, advanced Chrono-Weavers can project faint, localized temporal distortions, making objects appear to shimmer or briefly lag.', ""Xylotian cuisine often features 'Sun-Berries' which ripen instantly upon picking."", ""Chrono-Weavers often wear time-keeping amulets made of 'Hourglass Sandstone'."", ""The 'Temporal College' on Xylos is where Chrono-Weavers hone their skills."", 'The Xylotian concept of time is multi-linear, unlike simpler sequential models.', 'Uncontrolled temporal abilities can be dangerous, so Chrono-Weavers undergo rigorous training.', 'Many Xylotian myths involve legendary Chrono-Weavers who could allegedly halt time, though this is unproven.', 'Chrono-Weaving is considered more of an art than a science by many Xylotians.', ""The energy source for a Chrono-Weaver's abilities is drawn from ambient 'Temporal Flux'.""]]]","A Xylotian 'Chrono-Weaver' possesses the abilities to subtly perceive echoes of recent past events in their immediate vicinity and project faint, localized temporal distortions, making objects appear to shimmer or briefly lag.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 1.34822524e+03, -3.08333548e-01, -1.56918513e+00,
+        -6.41473814e+00, -9.42095926e-01,  7.91204388e+00,
+         1.32433876e+00, -4.28345850e-02, -1.41684973e+00,
+        -3.91270708e-01],
+       [-3.08333548e-01,  2.69868175e+00,  1.45024410e+00,
+         3.24872439e+00,  3.14373447e-01,  8.86998812e-01,
+         1.48559990e+00,  1.10709657e+00, -1.88855826e-01,
+         9.38613829e-01],
+       [-1.56918513e+00,  1.45024410e+00,  1.81350112e+00,
+         3.21429300e+00,  1.59343257e+00,  2.07530759e+00,
+        -1.97813161e-01,  1.44535575e+00,  1.83645160e-01,
+        -6.39018802e-01],
+       [-6.41473814e+00,  3.24872439e+00,  3.21429300e+00,
+         1.13033516e+01,  1.97858298e+00,  4.17929834e+00,
+         6.72113411e+00,  3.62457029e+00, -5.40474592e-01,
+         1.73482429e+00],
+       [-9.42095926e-01,  3.14373447e-01,  1.59343257e+00,
+         1.97858298e+00,  2.03279889e+00,  2.24404594e+00,
+        -1.70187520e+00,  1.21511410e+00,  4.27088708e-01,
+        -1.64317332e+00],
+       [ 7.91204388e+00,  8.86998812e-01,  2.07530759e+00,
+         4.17929834e+00,  2.24404594e+00,  2.98346017e+00,
+        -5.05210436e-03,  1.86704743e+00,  2.51967241e-01,
+        -1.10679554e+00],
+       [ 1.32433876e+00,  1.48559990e+00, -1.97813161e-01,
+         6.72113411e+00, -1.70187520e+00, -5.05210436e-03,
+         9.38683749e+00,  1.09467238e+00, -1.24325543e+00,
+         4.28279053e+00],
+       [-4.28345850e-02,  1.10709657e+00,  1.44535575e+00,
+         3.62457029e+00,  1.21511410e+00,  1.86704743e+00,
+         1.09467238e+00,  1.37817822e+00,  7.85191175e-03,
+        -1.00139115e-01],
+       [-1.41684973e+00, -1.88855826e-01,  1.83645160e-01,
+        -5.40474592e-01,  4.27088708e-01,  2.51967241e-01,
+        -1.24325543e+00,  7.85191175e-03,  1.90873801e-01,
+        -6.82272827e-01],
+       [-3.91270708e-01,  9.38613829e-01, -6.39018802e-01,
+         1.73482429e+00, -1.64317332e+00, -1.10679554e+00,
+         4.28279053e+00, -1.00139115e-01, -6.82272827e-01,
+         2.52644319e+00]])]","[{'Exact': array([68.17086717, 83.74396559, -1.83778247,  1.53343564, -0.93166024,
        -4.30910291, -0.97340037, -2.05528785,  2.35661364, -0.10060421]), 'ContextCite32': array([71.75624886, 86.91890416, -2.43720888,  0.09323028,  3.06466891,
        -7.64652574, -1.73146493, -2.18180755,  2.82999691, -3.22288916]), 'KernelShap32': array([69.76569147, 82.89773499, -4.56196283, -0.35707991, -1.39018411,
-        0.41461457, -1.0961722 , -1.12955561,  0.41851888, -0.44917497]), 'BetaShap (U)32': array([ 5.96024916e+01,  7.51970836e+01, -4.01973734e-02,  1.08399388e+01,
+        0.41461457, -1.0961722 , -1.12955561,  0.41851888, -0.44917497]), 'WSS32': array([ 79.84363337,  48.17227897,   1.88079483, -13.77212528,
+         9.54122948,  10.06674631,  18.64441518, -20.23360885,
+         8.46337327,   3.52760623]), 'BetaShap (U)32': array([ 5.96024916e+01,  7.51970836e+01, -4.01973734e-02,  1.08399388e+01,
         4.16911517e+00,  2.13067346e-01, -2.35975946e+00,  1.37339378e+00,
         8.51615775e-01, -5.64847548e-01]), 'TMC32': array([ 6.92024312e+01,  8.07065842e+01, -4.56282298e-02,  5.05539918e+00,
         3.93543593e+00, -6.14920306e+00, -2.28722286e+00, -6.28401375e+00,
@@ -34,371 +138,1541 @@ What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,"[[['A trai
         2.57800787e-02, -4.06412430e+00, -2.97279166e+00, -9.69176556e-01,
         1.02256972e-01, -1.23653053e+00]), 'KernelShap64': array([ 7.01502386e+01,  8.41590640e+01, -2.99118967e+00, -1.03401312e-01,
         3.25508241e-01, -1.23126855e+00, -1.48022268e+00, -1.96649163e-02,
-        1.35079668e+00, -1.68117295e+00]), 'BetaShap (U)64': array([ 5.96025161e+01,  7.51970860e+01, -1.71097581e+00,  1.08399241e+01,
+        1.35079668e+00, -1.68117295e+00]), 'WSS64': array([68.69686674, 82.69886712, -4.08528011,  0.22115596, -0.6745318 ,
+       -2.94119337, -1.65837974, -0.7154292 , -0.28754889, -2.5343957 ]), 'BetaShap (U)64': array([ 5.96025161e+01,  7.51970860e+01, -1.71097581e+00,  1.08399241e+01,
         6.06438555e-03,  2.13070697e-01,  1.99758002e-01, -9.36741278e+00,
         4.42474967e+00, -1.17518478e+00]), 'TMC64': array([68.78450884, 81.79385245, -1.75873733,  3.18781853,  1.76794938,
        -5.21599429,  0.22452164, -5.23950839,  2.66835368, -1.31227636]), 'ContextCite100': array([69.07643806, 84.88326762, -2.68718068,  0.        ,  1.47495729,
        -3.64264902, -1.90152047, -0.44486415,  1.07309929, -2.21730237]), 'KernelShap100': array([70.10479896, 83.14619703, -2.56073618,  0.48391348,  0.        ,
-       -2.17742818, -0.88490228, -1.8782461 ,  3.23576915, -1.52669838]), 'BetaShap (U)100': array([ 6.67335442e+01,  7.51971076e+01,  3.39484766e+00,  1.08399254e+01,
+       -2.17742818, -0.88490228, -1.8782461 ,  3.23576915, -1.52669838]), 'WSS100': array([68.91373347, 85.20040585, -3.68728025,  0.38609036,  0.99779306,
+       -3.48262696, -1.25710705, -1.3495918 ,  1.6368108 , -1.96880902]), 'BetaShap (U)100': array([ 6.67335442e+01,  7.51971076e+01,  3.39484766e+00,  1.08399254e+01,
         6.06385161e-03,  2.13069374e-01, -1.22927921e+00, -8.29333120e+00,
         4.42475375e+00,  6.44440409e+00]), 'TMC100': array([67.02736018, 83.64443559, -2.2491258 ,  3.27689743,  1.32224292,
        -4.36626075, -0.89443064, -5.03682073,  3.20196159, -0.68438307]), 'LOO': array([ 7.02990856e+01,  9.22780743e+01, -6.77490234e-02, -1.02020264e-01,
         6.05964661e-03,  2.13080406e-01,  5.68199158e-03,  1.37341690e+00,
-        1.55649471e+00,  6.98074341e-01])}]"
+        1.55649471e+00,  6.98074341e-01])}]","[[ 0.          4.86253602 -0.84303181 -2.64810822  0.10237154  3.53063919
+   1.20213739  3.59093415  0.49293376  0.40621082]
+ [ 4.86253602  0.          0.49092496 -0.17372653  0.7521096   3.08456391
+   2.03241832  5.10549476 -1.28568255  2.21236852]
+ [-0.84303181  0.49092496  0.         -3.57607844  0.96753956  3.79678114
+  -1.57321728  0.56429735 -0.61378848 -2.67607351]
+ [-2.64810822 -0.17372653 -3.57607844  0.         -1.03306326 -1.51480084
+   0.27717861  0.4924087  -0.73326935 -2.0325115 ]
+ [ 0.10237154  0.7521096   0.96753956 -1.03306326  0.          1.65652094
+   0.35753264  2.88181496  0.15003254  0.25063838]
+ [ 3.53063919  3.08456391  3.79678114 -1.51480084  1.65652094  0.
+   1.6499647   1.28637285  1.34211658 -1.7354416 ]
+ [ 1.20213739  2.03241832 -1.57321728  0.27717861  0.35753264  1.6499647
+   0.         -0.27696545 -2.19695143 -0.27468884]
+ [ 3.59093415  5.10549476  0.56429735  0.4924087   2.88181496  1.28637285
+  -0.27696545  0.          2.17007212  0.29682621]
+ [ 0.49293376 -1.28568255 -0.61378848 -0.73326935  0.15003254  1.34211658
+  -2.19695143  2.17007212  0.         -2.19372739]
+ [ 0.40621082  2.21236852 -2.67607351 -2.0325115   0.25063838 -1.7354416
+  -0.27468884  0.29682621 -2.19372739  0.        ]]"
 What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,"[[[""Within Xylotian terraforming pods, 'Symbiotic Spores' are first tasked with breaking down hostile native soil into a nutrient-rich substrate."", 'Once the soil is viable, these same Symbiotic Spores then release dormant Xylotian flora seeds to begin atmospheric oxygenation.', ""The 'Seed Vaults' on Xylos contain genetic material for countless plant species."", 'Terraforming pods are launched from Xylos towards potentially habitable exoplanets.', ""The outer shell of a terraforming pod is made from 'Impact-Resistant Ceramite'."", 'Symbiotic Spores are genetically engineered for extreme environmental resilience.', ""Xylotian astronomers use 'Deep-Space Telescopes' to identify terraforming candidates."", 'The process initiated by Symbiotic Spores can take several Xylotian years to show significant results.', 'Each pod contains enough spores to initiate a small, localized ecosystem.', 'The success rate of Xylotian terraforming efforts has been steadily increasing.']]]","The two key functions of 'Symbiotic Spores' in Xylotian terraforming pods are:
 
 1. Breaking down hostile native soil into a nutrient-rich substrate.
-2. Releasing dormant Xylotian flora seeds to begin atmospheric oxygenation.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([ 49.41393543,  68.35119946,  -2.10848576,   1.10838938,
+2. Releasing dormant Xylotian flora seeds to begin atmospheric oxygenation.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 9.44289781e+02,  1.29762829e+01,  1.90539383e-01,
+         1.09900529e+00, -5.23013432e+00,  2.23602156e-01,
+        -2.16172955e+00,  2.24312073e+00,  1.00488709e+00,
+        -1.64439710e-01],
+       [ 1.29762829e+01,  1.80371107e+01,  3.16270212e+00,
+        -2.45065692e+00,  1.63972705e+00,  1.08800484e+00,
+        -1.22092284e+00, -1.07569002e+00,  1.80262282e+01,
+        -1.91094053e+00],
+       [ 1.90539383e-01,  3.16270212e+00,  4.16999256e+00,
+         1.35375453e+00,  7.74761046e-01,  1.45928665e+00,
+         1.45736945e+00,  1.64011175e+00,  2.68382546e+00,
+        -1.78683083e+00],
+       [ 1.09900529e+00, -2.45065692e+00,  1.35375453e+00,
+         1.26674875e+00, -3.30895046e-02,  4.76365132e-01,
+         9.58195649e-01,  1.07743702e+00, -2.93267087e+00,
+        -4.78776055e-01],
+       [-5.23013432e+00,  1.63972705e+00,  7.74761046e-01,
+        -3.30895046e-02,  2.71650814e-01,  2.70244084e-01,
+         1.36875918e-01,  1.13817165e-01,  1.78583443e+00,
+        -3.55989658e-01],
+       [ 2.23602156e-01,  1.08800484e+00,  1.45928665e+00,
+         4.76365132e-01,  2.70244084e-01,  5.10867811e-01,
+         5.14597820e-01,  5.76757852e-01,  9.29606553e-01,
+        -6.23130686e-01],
+       [-2.16172955e+00, -1.22092284e+00,  1.45736945e+00,
+         9.58195649e-01,  1.36875918e-01,  5.14597820e-01,
+         8.80688020e-01,  9.06877015e-01, -1.27547474e+00,
+        -5.22486577e-01],
+       [ 2.24312073e+00, -1.07569002e+00,  1.64011175e+00,
+         1.07743702e+00,  1.13817165e-01,  5.76757852e-01,
+         9.06877015e-01,  1.01085004e+00, -1.43343439e+00,
+        -6.26429498e-01],
+       [ 1.00488709e+00,  1.80262282e+01,  2.68382546e+00,
+        -2.93267087e+00,  1.78583443e+00,  9.29606553e-01,
+        -1.27547474e+00, -1.43343439e+00,  1.92674471e+01,
+        -1.59887396e+00],
+       [-1.64439710e-01, -1.91094053e+00, -1.78683083e+00,
+        -4.78776055e-01, -3.55989658e-01, -6.23130686e-01,
+        -5.22486577e-01, -6.26429498e-01, -1.59887396e+00,
+         8.00564034e-01]])]","[{'Exact': array([ 49.41393543,  68.35119946,  -2.10848576,   1.10838938,
          1.39549659,  -1.08920436,   2.51379944,   0.91656707,
        -11.43781421,   1.17024402]), 'ContextCite32': array([ 44.38342132,  76.07571049,  -4.21617448,   6.01593033,
         -2.49692474,  -4.48356625,   1.50576749,  -0.17840252,
        -16.65293365,   1.50850806]), 'KernelShap32': array([ 4.96951614e+01,  7.14174866e+01,  2.62584200e+00, -3.32617416e+00,
         2.50557684e+00, -3.71876163e+00,  4.47234519e-02, -9.02289540e-01,
-       -1.28811194e+01,  2.83611322e-02]), 'BetaShap (U)32': array([52.28547329, 65.09879914,  0.35722884,  7.95281967,  0.82634813,
+       -1.28811194e+01,  2.83611322e-02]), 'WSS32': array([ 49.28635377,  46.22603522,  15.88514182,  -0.12993399,
+       -14.60807288,  18.61367904,  18.66446009,  -5.57378018,
+       -23.73946886,   5.88763782]), 'BetaShap (U)32': array([52.28547329, 65.09879914,  0.35722884,  7.95281967,  0.82634813,
        -0.52106232,  2.95580481,  0.27159838,  0.37681414, -0.9840793 ]), 'TMC32': array([47.6689992 , 56.77147597,  0.37273892,  4.10941106,  0.76870966,
        -0.84436983,  2.89664276, -0.5644091 ,  0.37877989, -0.75850421]), 'ContextCite64': array([ 45.53602276,  67.56978161,  -2.1584542 ,   0.0775026 ,
          1.39156215,  -2.80533464,   4.27613036,  -0.63385835,
        -14.19938728,  -0.84500492]), 'KernelShap64': array([ 48.74600101,  69.3644482 ,   0.71201777,  -1.3575368 ,
         -1.40532605,  -2.22950548,   0.86105307,  -0.47382675,
-       -11.05910326,   0.        ]), 'BetaShap (U)64': array([ 52.28547547,  65.09881169,  -0.98347499,   7.95280881,
+       -11.05910326,   0.        ]), 'WSS64': array([ 45.15602597,  66.71180729,  -2.39277607,   1.09072961,
+        -0.55302125,  -1.41953771,   3.56709755,   0.37294292,
+       -11.50418175,   1.32164523]), 'BetaShap (U)64': array([ 52.28547547,  65.09881169,  -0.98347499,   7.95280881,
          0.25116141,  -0.52106456,   3.02559807,   5.87581784,
        -22.90228651,   0.34769889]), 'TMC64': array([50.14949431, 60.86276111, -0.97111323,  2.34867561,  0.54498747,
        -2.15918422,  3.07505244,  1.57537803, -6.65218732,  0.56917724]), 'ContextCite100': array([ 46.5875355 ,  68.03465245,  -2.69367299,   2.21884749,
         -1.39966898,  -3.90232087,   1.94503555,  -1.44528315,
        -12.36279156,   0.6074016 ]), 'KernelShap100': array([ 47.83381751,  68.6371731 ,  -0.49781059,   0.12861388,
         -0.10517608,  -1.7440858 ,   2.85904005,  -0.30166793,
-       -11.58817152,  -0.64113647]), 'BetaShap (U)100': array([ 58.38197183,  65.09882723,  -0.93700839,   7.95280616,
+       -11.58817152,  -0.64113647]), 'WSS100': array([ 47.39155085,  68.03270192,  -1.75955197,   0.71612817,
+        -0.41956263,  -1.37051257,   1.85885581,   0.12271723,
+       -10.81574797,   2.03227916]), 'BetaShap (U)100': array([ 58.38197183,  65.09882723,  -0.93700839,   7.95280616,
          0.25116059,  -0.52106638,   2.75847483,   5.31539819,
        -22.90231884,   6.82837302]), 'TMC100': array([50.6286872 , 65.17897556, -1.53136311,  1.46062875,  0.22766368,
        -2.48065488,  2.88390291,  1.9994158 , -9.28920979,  1.53450813]), 'LOO': array([ 6.14302559e+01,  8.34939613e+01,  1.82626009e-01,  3.23004723e-01,
         2.51160622e-01, -5.21061659e-01,  3.41852903e-01,  2.71600723e-01,
-        1.65536880e-01, -5.46126366e-02])}]"
-What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,"[[[""The 'Dual-Resonance Crystals' found deep within Xylos's crust are known to efficiently absorb ambient geothermal energy from the planet's core."", ""In addition to heat, these unique crystals also passively collect and store psychic energy emanated by Xylos's sentient life forms."", ""Xylotian vehicles primarily run on 'Bio-Luminescent Fuel Cells'."", 'These crystals are often a deep, pulsating blue color.', 'The energy stored in Dual-Resonance Crystals is used to power Xylotian cities.', 'Mining Dual-Resonance Crystals is a dangerous but vital Xylotian industry.', 'Xylotian art often depicts the geometric beauty of these crystals.', ""The 'Crystal Caves' where they are found are considered sacred by some Xylotians."", 'The size of a crystal correlates with its energy storage capacity.', ""Over-harvesting can destabilize the crystals' resonant frequencies.""]]]",The 'Dual-Resonance Crystals' of Xylos harvest and store both geothermal energy from the planet's core and psychic energy emanated by Xylos's sentient life forms.,"[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([24.66829546, 37.86921361, -0.62219645,  0.91829387, -0.05118503,
+        1.65536880e-01, -5.46126366e-02])}]","[[ 0.         12.77174114  0.65687943  0.64455549 -3.91912142 -0.24406281
+  -2.48452274  1.69535087  2.0817622  -2.05781441]
+ [12.77174114  0.          0.85390325 -3.55590329 -0.91126701 -0.87364446
+  -3.28761196 -2.33684534 16.87812386 -1.1433584 ]
+ [ 0.65687943  0.85390325  0.         -1.02373078 -1.39077602 -0.77616133
+  -0.34058739 -1.17916335  3.75607452  0.56319179]
+ [ 0.64455549 -3.55590329 -1.02373078  0.         -1.30487081 -0.37927325
+  -1.17353465 -0.75494908  0.32682297 -0.40893933]
+ [-3.91912142 -0.91126701 -1.39077602 -1.30487081  0.         -1.56750731
+  -1.11799175 -1.81052692 -0.80398385 -1.04275889]
+ [-0.24406281 -0.87364446 -0.77616133 -0.37927325 -1.56750731  0.
+  -2.05119236 -1.51526045  0.64716625 -1.40219345]
+ [-2.48452274 -3.28761196 -0.34058739 -1.17353465 -1.11799175 -2.05119236
+   0.         -0.64961839  0.26939242 -0.44199473]
+ [ 1.69535087 -2.33684534 -1.17916335 -0.75494908 -1.81052692 -1.51526045
+  -0.64961839  0.         -0.49679941 -1.35852758]
+ [ 2.0817622  16.87812386  3.75607452  0.32682297 -0.80398385  0.64716625
+   0.26939242 -0.49679941  0.          0.40935982]
+ [-2.05781441 -1.1433584   0.56319179 -0.40893933 -1.04275889 -1.40219345
+  -0.44199473 -1.35852758  0.40935982  0.        ]]"
+What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,"[[[""The 'Dual-Resonance Crystals' found deep within Xylos's crust are known to efficiently absorb ambient geothermal energy from the planet's core."", ""In addition to heat, these unique crystals also passively collect and store psychic energy emanated by Xylos's sentient life forms."", ""Xylotian vehicles primarily run on 'Bio-Luminescent Fuel Cells'."", 'These crystals are often a deep, pulsating blue color.', 'The energy stored in Dual-Resonance Crystals is used to power Xylotian cities.', 'Mining Dual-Resonance Crystals is a dangerous but vital Xylotian industry.', 'Xylotian art often depicts the geometric beauty of these crystals.', ""The 'Crystal Caves' where they are found are considered sacred by some Xylotians."", 'The size of a crystal correlates with its energy storage capacity.', ""Over-harvesting can destabilize the crystals' resonant frequencies.""]]]",The 'Dual-Resonance Crystals' of Xylos harvest and store both geothermal energy from the planet's core and psychic energy emanated by Xylos's sentient life forms.,,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 2.15916360e+02,  1.05991731e+00, -1.78958707e+00,
+         6.41349115e-01,  2.69076626e+00, -2.33486103e+00,
+         2.38796285e+00, -3.45905433e+00,  1.09334666e+00,
+         2.83825384e+00],
+       [ 1.05991731e+00,  7.74378004e+00, -1.65314320e+00,
+        -1.41631524e-01, -1.39625581e+00, -1.85337063e+00,
+        -1.38482259e+00, -7.82965872e-01, -3.34258298e-01,
+         4.12547616e+00],
+       [-1.78958707e+00, -1.65314320e+00,  1.48180173e+00,
+         6.22387358e-01,  2.58124981e+00,  1.89841449e+00,
+         7.86585470e-01,  2.79342557e+00,  1.06086109e+00,
+        -1.29790359e-01],
+       [ 6.41349115e-01, -1.41631524e-01,  6.22387358e-01,
+         1.17972234e+00,  7.44690168e-01,  1.74599187e-01,
+         2.16765857e+00,  2.47972576e+00,  6.89736390e-01,
+         5.96763816e-01],
+       [ 2.69076626e+00, -1.39625581e+00,  2.58124981e+00,
+         7.44690168e-01,  5.35671942e+00,  3.76703614e+00,
+         2.03087321e-01,  4.80099821e+00,  2.04308888e+00,
+         7.13439783e-01],
+       [-2.33486103e+00, -1.85337063e+00,  1.89841449e+00,
+         1.74599187e-01,  3.76703614e+00,  2.93375168e+00,
+        -4.23353776e-01,  2.86226875e+00,  1.28589441e+00,
+        -1.80892013e-01],
+       [ 2.38796285e+00, -1.38482259e+00,  7.86585470e-01,
+         2.16765857e+00,  2.03087321e-01, -4.23353776e-01,
+         4.56087544e+00,  3.64804156e+00,  8.48489994e-01,
+         1.94707144e-01],
+       [-3.45905433e+00, -7.82965872e-01,  2.79342557e+00,
+         2.47972576e+00,  4.80099821e+00,  2.86226875e+00,
+         3.64804156e+00,  7.56634804e+00,  2.52580646e+00,
+         1.65807693e+00],
+       [ 1.09334666e+00, -3.34258298e-01,  1.06086109e+00,
+         6.89736390e-01,  2.04308888e+00,  1.28589441e+00,
+         8.48489994e-01,  2.52580646e+00,  9.36537964e-01,
+         5.62946839e-01],
+       [ 2.83825384e+00,  4.12547616e+00, -1.29790359e-01,
+         5.96763816e-01,  7.13439783e-01, -1.80892013e-01,
+         1.94707144e-01,  1.65807693e+00,  5.62946839e-01,
+         2.82488581e+00]])]","[{'Exact': array([24.66829546, 37.86921361, -0.62219645,  0.91829387, -0.05118503,
         0.25604867,  0.05333609, -1.99731969, -1.19287237, -0.97481916]), 'ContextCite32': array([27.26356295, 38.81143435,  1.0006351 ,  0.30796584,  1.4682363 ,
         0.67694799, -0.30382063,  0.8631306 , -1.39168425, -2.65477007]), 'KernelShap32': array([27.92704777, 37.92985817,  0.53467606,  1.04964906,  0.31742137,
-        1.04463402,  0.04460503,  0.34587734, -2.51522003, -2.2707283 ]), 'BetaShap (U)32': array([10.91036875, 25.17995743,  0.1247576 ,  1.96309179,  1.86465484,
+        1.04463402,  0.04460503,  0.34587734, -2.51522003, -2.2707283 ]), 'WSS32': array([24.90896042, 24.92627139,  6.21678248,  0.39633832, -1.56659399,
+        7.97505484, -1.04368807,  0.31958448,  1.11159178, -0.41870481]), 'BetaShap (U)32': array([10.91036875, 25.17995743,  0.1247576 ,  1.96309179,  1.86465484,
         0.5950848 , -0.61366381,  0.53235881,  0.9964958 , -1.02693633]), 'TMC32': array([26.54485607, 33.97399545,  0.09424432,  1.46141982,  1.78725354,
        -0.96984768, -0.61768277, -4.90071646,  0.98669147, -0.95708549]), 'ContextCite64': array([ 2.84758993e+01,  3.93105129e+01,  8.42175380e-01,  5.23293099e-01,
         1.01361139e+00,  6.86853837e-01,  9.27131609e-02, -1.44901123e-02,
        -1.16672210e+00, -2.45691161e+00]), 'KernelShap64': array([28.02807691, 38.59094994,  1.22443086,  0.74448195,  1.67732388,
-        0.17511206,  0.78727106, -0.37498032, -0.68643791, -0.8410748 ]), 'BetaShap (U)64': array([ 1.09104208e+01,  2.51799613e+01, -7.67414139e-01,  1.96309225e+00,
+        0.17511206,  0.78727106, -0.37498032, -0.68643791, -0.8410748 ]), 'WSS64': array([29.67042624, 38.1950751 , -0.89301144,  0.8039699 , -0.36835595,
+        1.14098305, -1.93292879, -0.1780134 , -1.89609748, -1.75250468]), 'BetaShap (U)64': array([ 1.09104208e+01,  2.51799613e+01, -7.67414139e-01,  1.96309225e+00,
         3.40382924e-03,  5.95088114e-01, -1.49208670e-01, -1.04683445e+01,
        -3.27245756e+00, -1.52856306e+00]), 'TMC64': array([28.28537886, 35.56018221, -0.76896328,  1.72082019,  0.76970891,
         0.66572162, -0.17440063, -5.40585029, -0.13881367, -1.62636226]), 'ContextCite100': array([27.68790961, 39.76685215,  0.19237862,  0.83339403,  0.946072  ,
         0.5830453 ,  0.32105692,  0.18187692, -0.79221687, -2.04956966]), 'KernelShap100': array([27.98033444, 39.18293282,  0.14380427,  0.86054011,  1.64250852,
-        0.91043692,  0.63782286, -0.15646816, -0.64992642, -0.8996225 ]), 'BetaShap (U)100': array([ 2.10831757e+01,  2.51799918e+01, -4.02067486e+00,  1.96309192e+00,
+        0.91043692,  0.63782286, -0.15646816, -0.64992642, -0.8996225 ]), 'WSS100': array([27.4677467 , 39.57921494, -1.26336564,  0.555215  ,  0.79993905,
+       -0.24442224, -0.46117956, -0.12561618, -0.97083233, -1.9764033 ]), 'BetaShap (U)100': array([ 2.10831757e+01,  2.51799918e+01, -4.02067486e+00,  1.96309192e+00,
         3.40470619e-03,  5.95088683e-01,  7.37111276e-02, -9.36827313e+00,
        -3.27246408e+00, -1.95699378e+00]), 'TMC100': array([ 2.49898160e+01,  3.78199834e+01, -5.58072527e-01,  1.65885592e+00,
         9.37776125e-01,  9.04478257e-01, -3.29473813e-02, -4.51995432e+00,
        -7.24548156e-01, -2.12676839e+00]), 'LOO': array([2.61695852e+01, 3.92410345e+01, 1.35350704e-01, 1.46331072e+00,
        3.40175629e-03, 5.95088005e-01, 1.64178371e-01, 5.32375336e-01,
-       8.96322250e-01, 4.86812115e-01])}]"
+       8.96322250e-01, 4.86812115e-01])}]","[[ 0.          3.35005884 -0.31242114 -0.20693727  4.15979777  2.31727241
+  -0.31010944  3.26682844  1.85077645  1.1439989 ]
+ [ 3.35005884  0.          1.59433955 -0.33077417  1.29330605  1.08111415
+   0.83126293  3.22900474  1.96653097  1.04625981]
+ [-0.31242114  1.59433955  0.         -0.29978803 -0.10134425  1.51533029
+   0.623614    2.80943072 -2.34617735  0.67307309]
+ [-0.20693727 -0.33077417 -0.29978803  0.          0.26018226 -0.79219165
+  -0.36617333  0.11586381  1.34266358 -0.22262727]
+ [ 4.15979777  1.29330605 -0.10134425  0.26018226  0.         -0.10364353
+  -1.1932746   3.18716645  0.00955732 -0.24983131]
+ [ 2.31727241  1.08111415  1.51533029 -0.79219165 -0.10364353  0.
+   0.24291623  1.60506145 -0.08410168 -0.84757359]
+ [-0.31010944  0.83126293  0.623614   -0.36617333 -1.1932746   0.24291623
+   0.          2.03711355 -0.1024384  -0.32487545]
+ [ 3.26682844  3.22900474  2.80943072  0.11586381  3.18716645  1.60506145
+   2.03711355  0.          0.27861609 -0.02799042]
+ [ 1.85077645  1.96653097 -2.34617735  1.34266358  0.00955732 -0.08410168
+  -0.1024384   0.27861609  0.          1.25337147]
+ [ 1.1439989   1.04625981  0.67307309 -0.22262727 -0.24983131 -0.84757359
+  -0.32487545 -0.02799042  1.25337147  0.        ]]"
 What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,"[[[""A Xylotian 'Guardian Orb' drone can emit a powerful, localized kinetic pulse to physically repel threats."", 'For less direct confrontations, the Guardian Orb can also generate a disorienting multi-spectral light pattern to confuse attackers.', ""The 'Festival of Aerial Drones' showcases the latest Xylotian drone technology."", 'Guardian Orbs are often deployed to protect sensitive Xylotian installations.', 'These drones are autonomously controlled by a central AI network.', 'The outer casing of a Guardian Orb is made of self-repairing polymers.', ""Xylotian 'Peacekeeper' units often work in tandem with Guardian Orbs."", ""Guardian Orbs recharge at designated 'Energy Pylons'."", 'Their primary sensor suite includes advanced optical and thermal imaging.', 'The design of the Guardian Orb has remained largely unchanged for decades due to its effectiveness.']]]","The two main defensive mechanisms of a Xylotian 'Guardian Orb' drone are:
 
 1. A powerful, localized kinetic pulse to physically repel threats.
-2. A disorienting multi-spectral light pattern to confuse attackers.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([54.0866017 , 56.98176928,  0.87834297,  0.42488947, -0.28824718,
+2. A disorienting multi-spectral light pattern to confuse attackers.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 1.45632400e+03,  2.75042331e+01,  1.94370059e+00,
+         3.37584024e+00,  3.45591876e+00,  7.86622588e+00,
+         5.08782661e+00, -9.67300126e-01, -1.97786368e+00,
+        -1.72915549e+00],
+       [ 2.75042331e+01,  5.70548906e+00, -9.97455181e-01,
+         5.12584940e+00, -1.44839623e+00,  2.06522596e+00,
+        -1.55213851e-01,  2.21016499e+00,  1.43465423e+00,
+        -1.07226402e+00],
+       [ 1.94370059e+00, -9.97455181e-01,  3.63911878e+00,
+        -6.62617975e+00,  2.92448302e+00, -6.82072425e-01,
+        -4.70577556e-01, -7.80503628e-01,  2.49620047e-01,
+        -9.97629521e-01],
+       [ 3.37584024e+00,  5.12584940e+00, -6.62617975e+00,
+         1.45893577e+01, -5.83992918e+00,  2.52944792e+00,
+         7.53175748e-01,  3.01744471e+00,  5.92394959e-01,
+         8.58844255e-01],
+       [ 3.45591876e+00, -1.44839623e+00,  2.92448302e+00,
+        -5.83992918e+00,  2.46312275e+00, -8.02292982e-01,
+        -3.40048070e-01, -9.63639307e-01, -2.79889073e-02,
+        -6.01090864e-01],
+       [ 7.86622588e+00,  2.06522596e+00, -6.82072425e-01,
+         2.52944792e+00, -8.02292982e-01,  8.19414224e-01,
+         1.99013543e-02,  9.39540609e-01,  5.00721074e-01,
+        -3.13364715e-01],
+       [ 5.08782661e+00, -1.55213851e-01, -4.70577556e-01,
+         7.53175748e-01, -3.40048070e-01,  1.99013543e-02,
+         1.45934773e-01,  2.44745722e-02, -1.46612546e-01,
+         2.02706785e-01],
+       [-9.67300126e-01,  2.21016499e+00, -7.80503628e-01,
+         3.01744471e+00, -9.63639307e-01,  9.39540609e-01,
+         2.44745722e-02,  1.19491818e+00,  6.18184336e-01,
+        -3.92424126e-01],
+       [-1.97786368e+00,  1.43465423e+00,  2.49620047e-01,
+         5.92394959e-01, -2.79889073e-02,  5.00721074e-01,
+        -1.46612546e-01,  6.18184336e-01,  5.14282620e-01,
+        -4.95933376e-01],
+       [-1.72915549e+00, -1.07226402e+00, -9.97629521e-01,
+         8.58844255e-01, -6.01090864e-01, -3.13364715e-01,
+         2.02706785e-01, -3.92424126e-01, -4.95933376e-01,
+         6.52316665e-01]])]","[{'Exact': array([54.0866017 , 56.98176928,  0.87834297,  0.42488947, -0.28824718,
        -4.60562223,  0.98050498, -0.66343881, -2.02596453,  0.74072304]), 'ContextCite32': array([44.83856793, 58.95304905, -4.38645918,  1.21183715, -2.10422223,
        -4.55743646,  1.21003446, -1.4784923 , -7.46036318,  1.46484143]), 'KernelShap32': array([48.73834534, 52.55488291,  4.70256178, -1.50896944,  0.46780379,
-       -9.72689643, -1.66340202, -3.57398267, -4.57538455,  3.89053313]), 'BetaShap (U)32': array([60.31783408, 63.69650908, -0.63043186, 10.37120576, -2.45599557,
+       -9.72689643, -1.66340202, -3.57398267, -4.57538455,  3.89053313]), 'WSS32': array([ 72.41500914,  45.09128474, -15.90965805,  -7.37716828,
+        21.01536712,  -1.49160519,  15.12255048, -15.5744071 ,
+        -1.68408362, -11.97252581]), 'BetaShap (U)32': array([60.31783408, 63.69650908, -0.63043186, 10.37120576, -2.45599557,
         0.14837936, -2.84171339,  0.07361857,  0.36008045, -2.66038901]), 'TMC32': array([54.51626194, 53.25686455, -0.59231869,  5.40656614, -2.30679512,
        -1.25142324, -2.73187669,  0.42566665,  0.34209808, -2.04385853]), 'ContextCite64': array([48.63434757, 52.69491235, -2.63566222, -4.32973053,  0.85256414,
        -4.52054925, -0.18506538, -3.13450904, -7.39219962, -1.11621484]), 'KernelShap64': array([49.47225333, 53.07025082,  2.1641501 , -1.61089502, -0.86021246,
-       -7.608475  , -2.62427925, -1.73753131, -2.95647811,  1.60968488]), 'BetaShap (U)64': array([60.3178249 , 63.69649476, -3.09854282, 10.37119173, -0.20981752,
+       -7.608475  , -2.62427925, -1.73753131, -2.95647811,  1.60968488]), 'WSS64': array([54.25159778, 54.42845969, -2.22740271, -0.87965076, -1.76969911,
+       -5.16828047,  1.19116856, -3.88812273, -4.62717326,  0.70653416]), 'BetaShap (U)64': array([60.3178249 , 63.69649476, -3.09854282, 10.37119173, -0.20981752,
         0.14837832, -0.24049431,  6.1558478 , 13.03832518, -1.01670643]), 'TMC64': array([55.93506275, 47.78518009, -3.07102942,  3.54360253, -0.94086579,
        -2.03360278, -0.19395578,  2.16436803,  2.26913971, -0.70636284]), 'ContextCite100': array([50.56315526, 53.94488723, -3.42191153, -1.04314376, -0.47390238,
        -5.35510028, -1.21986808, -3.70976322, -5.68826593,  0.1695493 ]), 'KernelShap100': array([50.26641434, 54.11393963, -0.        , -1.26424913, -1.68243471,
-       -7.05675325, -1.43899668, -2.61206226, -2.15421756,  0.28861406]), 'BetaShap (U)100': array([65.19970197, 63.69649379, 22.49295026, 10.37119148, -0.2098162 ,
+       -7.05675325, -1.43899668, -2.61206226, -2.15421756,  0.28861406]), 'WSS100': array([52.18889672, 53.41355295, -3.2312253 , -1.43958501, -1.0172603 ,
+       -4.69652197,  0.26126555, -1.72900866, -4.56839001, -0.48975496]), 'BetaShap (U)100': array([65.19970197, 63.69649379, 22.49295026, 10.37119148, -0.2098162 ,
         0.14837661, -1.4093078 ,  5.54762627, 13.03832827, 15.14836581]), 'TMC100': array([ 5.23367098e+01,  5.31573695e+01, -4.69853481e-02,  3.07443655e+00,
        -3.70219487e-01, -2.26763263e+00, -1.10724835e+00,  2.18212533e+00,
        -3.96346202e-01,  2.37325589e-01]), 'LOO': array([ 6.76407003e+01,  7.61125326e+01, -6.92409039e-01,  4.55851078e-01,
        -2.09815502e-01,  1.48382187e-01,  7.16803551e-01,  7.36179352e-02,
-        1.19793892e-01,  1.71428680e-01])}]"
-What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,"[[[""Xylotian 'Lumin-Ink', prized for its enduring glow, is primarily formulated from finely crushed 'Glow-Geodes'."", ""This geode powder is then suspended in a viscous sap extracted from the 'Aether-Blossom' plant to create the final ink."", 'Xylotian cuisine often features edible flowers, but not the Aether-Blossom.', 'Lumin-Ink is traditionally used for inscribing sacred Xylotian texts.', 'The color of the glow can vary depending on the specific type of Glow-Geode used.', ""Aether-Blossoms only bloom under the light of Xylos's twin moons."", 'Xylotian printing presses use a different, more mundane type of ink for mass production.', ""The 'Great Library of Xylos' contains scrolls written entirely in Lumin-Ink."", 'The art of Lumin-Ink making is passed down through generations of scribes.', 'Texts written in Lumin-Ink can be read even in complete darkness.']]]",The two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes are finely crushed 'Glow-Geodes' and a viscous sap extracted from the 'Aether-Blossom' plant.,"[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([25.63132673, 39.62233289, -1.41889843,  0.06903081,  7.34750226,
+        1.19793892e-01,  1.71428680e-01])}]","[[ 0.         18.81239398 -2.63235956 -0.03871578 -1.57237913  4.73643244
+   1.42539012 -2.00488541 -8.07474959 -3.32828256]
+ [18.81239398  0.         -4.73957448  0.26714578 -2.26605086  2.12407485
+   0.28816069 -1.71347187  1.26772136 -1.62440765]
+ [-2.63235956 -4.73957448  0.         -4.44919737 -1.59195612 -2.91899447
+  -2.38961313 -1.72027604 -1.70392122 -1.03967308]
+ [-0.03871578  0.26714578 -4.44919737  0.         -3.69802789  0.70691286
+  -0.74094837 -0.39937367 -1.03679699 -0.52636331]
+ [-1.57237913 -2.26605086 -1.59195612 -3.69802789  0.         -6.76612014
+  -2.71162233 -0.10618599  0.32557337 -1.63160964]
+ [ 4.73643244  2.12407485 -2.91899447  0.70691286 -6.76612014  0.
+  -1.1490324   1.08571555 -0.31528247 -2.31507136]
+ [ 1.42539012  0.28816069 -2.38961313 -0.74094837 -2.71162233 -1.1490324
+   0.         -3.8095211  -1.11077818 -0.33135602]
+ [-2.00488541 -1.71347187 -1.72027604 -0.39937367 -0.10618599  1.08571555
+  -3.8095211   0.          0.72729555 -1.18265479]
+ [-8.07474959  1.26772136 -1.70392122 -1.03679699  0.32557337 -0.31528247
+  -1.11077818  0.72729555  0.         -2.99765906]
+ [-3.32828256 -1.62440765 -1.03967308 -0.52636331 -1.63160964 -2.31507136
+  -0.33135602 -1.18265479 -2.99765906  0.        ]]"
+What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,"[[[""Xylotian 'Lumin-Ink', prized for its enduring glow, is primarily formulated from finely crushed 'Glow-Geodes'."", ""This geode powder is then suspended in a viscous sap extracted from the 'Aether-Blossom' plant to create the final ink."", 'Xylotian cuisine often features edible flowers, but not the Aether-Blossom.', 'Lumin-Ink is traditionally used for inscribing sacred Xylotian texts.', 'The color of the glow can vary depending on the specific type of Glow-Geode used.', ""Aether-Blossoms only bloom under the light of Xylos's twin moons."", 'Xylotian printing presses use a different, more mundane type of ink for mass production.', ""The 'Great Library of Xylos' contains scrolls written entirely in Lumin-Ink."", 'The art of Lumin-Ink making is passed down through generations of scribes.', 'Texts written in Lumin-Ink can be read even in complete darkness.']]]",The two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes are finely crushed 'Glow-Geodes' and a viscous sap extracted from the 'Aether-Blossom' plant.,,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 4.34328385e+01,  1.74322893e+01, -6.75762381e+00,
+         4.82065099e-01, -1.71351964e+01,  2.70499695e+00,
+         3.14404938e+00,  2.48848315e+00,  1.60586890e+00,
+         5.32415428e+00],
+       [ 1.74322893e+01,  1.49946380e+02,  1.70340014e+00,
+        -1.68920377e+00,  7.71812553e+00, -9.95776016e+00,
+         9.01122482e-01, -7.25937892e+00, -1.91123235e+00,
+         2.23426411e+00],
+       [-6.75762381e+00,  1.70340014e+00,  1.69236046e+00,
+         7.44731152e-02,  1.73594675e+00, -1.56617556e+00,
+         6.04441789e-01,  1.01346455e-01, -6.72693596e-01,
+        -4.90590950e-01],
+       [ 4.82065099e-01, -1.68920377e+00,  7.44731152e-02,
+         1.43486520e+00,  4.58033770e+00,  1.84823583e+00,
+         1.30882637e+00,  3.47501039e+00,  4.98566590e-01,
+        -4.50668351e-01],
+       [-1.71351964e+01,  7.71812553e+00,  1.73594675e+00,
+         4.58033770e+00,  3.52185547e+01,  8.40667626e+00,
+        -8.85872157e-01,  8.85401277e+00,  2.51438678e+00,
+        -5.71616195e+00],
+       [ 2.70499695e+00, -9.95776016e+00, -1.56617556e+00,
+         1.84823583e+00,  8.40667626e+00,  5.34654691e+00,
+        -2.99991043e-01,  4.21366315e+00,  1.73952307e+00,
+        -1.19101708e+00],
+       [ 3.14404938e+00,  9.01122482e-01,  6.04441789e-01,
+         1.30882637e+00, -8.85872157e-01, -2.99991043e-01,
+         3.15037778e+00,  3.70159210e+00, -2.66862230e-01,
+         7.19167956e-01],
+       [ 2.48848315e+00, -7.25937892e+00,  1.01346455e-01,
+         3.47501039e+00,  8.85401277e+00,  4.21366315e+00,
+         3.70159210e+00,  8.68667519e+00,  1.08583945e+00,
+        -6.92707443e-01],
+       [ 1.60586890e+00, -1.91123235e+00, -6.72693596e-01,
+         4.98566590e-01,  2.51438678e+00,  1.73952307e+00,
+        -2.66862230e-01,  1.08583945e+00,  6.02062391e-01,
+        -3.21385095e-01],
+       [ 5.32415428e+00,  2.23426411e+00, -4.90590950e-01,
+        -4.50668351e-01, -5.71616195e+00, -1.19101708e+00,
+         7.19167956e-01, -6.92707443e-01, -3.21385095e-01,
+         1.19140583e+00]])]","[{'Exact': array([25.63132673, 39.62233289, -1.41889843,  0.06903081,  7.34750226,
        -1.24056255, -2.83368424, -0.62646746, -0.15431914, -2.36344684]), 'ContextCite32': array([19.22411675, 40.97926046, -0.64819886,  6.02308192,  0.72445699,
         2.68818539, -7.35909535,  2.36842651,  1.67899033,  1.53706641]), 'KernelShap32': array([26.28763558, 45.90293859,  1.0588883 , -3.91743878,  5.86783748,
-        3.53747401, -1.19461028,  0.8819514 ,  2.25273048, -6.03584425]), 'BetaShap (U)32': array([ 10.70858023,  13.8273434 ,   0.71190589, -12.3619256 ,
+        3.53747401, -1.19461028,  0.8819514 ,  2.25273048, -6.03584425]), 'WSS32': array([ 32.15943458,  24.99899084,   5.24286647,  -1.60109865,
+       -10.96977667,  12.69593961,   4.5974716 ,  -8.95616443,
+        -5.01810044,  16.06847915]), 'BetaShap (U)32': array([ 10.70858023,  13.8273434 ,   0.71190589, -12.3619256 ,
          7.36263501,  -0.74187769,  -4.02778489,   0.9723384 ,
          0.35585918,  -1.517753  ]), 'TMC32': array([30.0344646 , 39.48778057,  0.8070151 , -6.00717485,  6.92554061,
        -2.60999703, -3.86724981,  0.89077854,  0.37194331, -1.21737099]), 'ContextCite64': array([25.84991899, 37.53613336, -0.74362527,  1.68460395,  7.79582249,
         1.94384063, -4.80682644, -1.66853662,  1.13670516, -4.71889603]), 'KernelShap64': array([ 2.76414304e+01,  4.18973892e+01,  5.17248023e-01, -4.22355202e-02,
         9.78830907e+00,  5.07495011e+00, -2.34419070e-01,  2.60623490e-02,
-       -2.41765046e-01, -2.31945216e+00]), 'BetaShap (U)64': array([ 10.7086871 ,  13.8273176 ,  -0.15359664, -12.36190461,
+       -2.41765046e-01, -2.31945216e+00]), 'WSS64': array([ 2.78832434e+01,  3.98709105e+01,  1.45891107e-01,  1.17719923e+00,
+        7.01534392e+00,  1.18634145e+00, -2.83205010e+00, -7.14471776e-01,
+        2.78851928e-02, -7.97816780e-01]), 'BetaShap (U)64': array([ 10.7086871 ,  13.8273176 ,  -0.15359664, -12.36190461,
          0.51936864,  -0.74187535,  -0.90887679,  -9.02217717,
         -8.66517512,  -1.74305085]), 'TMC64': array([39.13407081, 30.52296162, -0.22449732, -2.59708297,  3.14186968,
        -1.46825954, -0.89166862, -2.99873203,  0.06115788, -1.65695244]), 'ContextCite100': array([26.87664474, 40.96036717, -1.25747603,  2.30435215,  8.76343357,
         0.63798347, -2.04548506, -2.89690145,  1.43738728, -3.57069257]), 'KernelShap100': array([27.04366335, 41.74124249, -1.02283128, -0.23095548,  9.63774827,
-        6.29975219,  0.09842224, -1.56112318,  2.01585634, -3.22150269]), 'BetaShap (U)100': array([ 20.51187924,  13.82737965,  -3.49062548, -12.36190479,
+        6.29975219,  0.09842224, -1.56112318,  2.01585634, -3.22150269]), 'WSS100': array([26.48066878, 40.84859434, -2.65521468,  2.0577101 ,  8.0755312 ,
+        1.45583856, -2.05837321, -1.60020658,  0.45746514, -1.5282352 ]), 'BetaShap (U)100': array([ 20.51187924,  13.82737965,  -3.49062548, -12.36190479,
          0.51938367,  -0.74187167,  -2.0019516 ,  -8.02272727,
         -8.66519229, -14.63261378]), 'TMC100': array([30.43143845, 36.14940669, -1.46542128, -2.33461308,  7.73580045,
         0.62719818, -1.69906557, -2.59375648, -0.91991355, -2.75024863]), 'LOO': array([25.41350555, 50.6740036 ,  0.44707298,  0.41958237,  0.5193615 ,
-       -0.74187422, -0.10240173,  0.97233868,  0.55077648, -0.55114746])}]"
-What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,"[[[""The Xylotian 'Pathfinder Helm' incorporates 'Echo-Location Sonar' to map out the immediate physical surroundings, even in zero visibility."", ""Additionally, the helm is equipped with 'Bio-Sign Scanners' to detect and highlight living organisms within a certain radius."", ""The most popular recreational sport on Xylos is 'Zero-G Acrobatics'."", 'Pathfinder Helms are standard issue for Xylotian reconnaissance teams.', ""The visor of the helm is made from 'Crystal-Quartz', offering impact protection."", 'Data from the helm can be transmitted to a central command unit.', ""Xylotian explorers often carry 'Survival Packs' with rations and tools."", ""The helm's power cell provides up to 72 Xylotian hours of continuous operation."", 'Early prototypes of the Pathfinder Helm were much bulkier.', 'The helm also provides basic atmospheric analysis.']]]",The 'Pathfinder Helm' integrates Echo-Location Sonar and Bio-Sign Scanners for Xylotian explorers.,"[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([ 2.94811186e+01,  3.07310625e+01, -2.60576606e+00,  1.58100288e-02,
+       -0.74187422, -0.10240173,  0.97233868,  0.55077648, -0.55114746])}]","[[  0.          19.66386845  -3.95230647  -0.73840673 -17.38693452
+    8.84000333   2.83280516   2.70379576  -0.52212012   3.26428553]
+ [ 19.66386845   0.           4.45577954   0.76171077   8.08948553
+   -2.21914251   3.64728729  -0.37025628   1.15039145   1.66760885]
+ [ -3.95230647   4.45577954   0.          -1.1628522    1.24825119
+   -2.19838197   3.58405551   0.75942173  -0.08082167   1.28457368]
+ [ -0.73840673   0.76171077  -1.1628522    0.           4.67779827
+    2.40348204   1.38526272   2.30928314   1.41458546   1.73065736]
+ [-17.38693452   8.08948553   1.24825119   4.67779827   0.
+    4.37238973  -1.25312702   1.28220099   1.06169581  -0.63544782]
+ [  8.84000333  -2.21914251  -2.19838197   2.40348204   4.37238973
+    0.           4.38484743   3.71019793   2.40865603   4.13738785]
+ [  2.83280516   3.64728729   3.58405551   1.38526272  -1.25312702
+    4.38484743   0.           1.76632535   2.5628456    0.61019053]
+ [  2.70379576  -0.37025628   0.75942173   2.30928314   1.28220099
+    3.71019793   1.76632535   0.           1.01464062   1.8161844 ]
+ [ -0.52212012   1.15039145  -0.08082167   1.41458546   1.06169581
+    2.40865603   2.5628456    1.01464062   0.           0.2061331 ]
+ [  3.26428553   1.66760885   1.28457368   1.73065736  -0.63544782
+    4.13738785   0.61019053   1.8161844    0.2061331    0.        ]]"
+What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,"[[[""The Xylotian 'Pathfinder Helm' incorporates 'Echo-Location Sonar' to map out the immediate physical surroundings, even in zero visibility."", ""Additionally, the helm is equipped with 'Bio-Sign Scanners' to detect and highlight living organisms within a certain radius."", ""The most popular recreational sport on Xylos is 'Zero-G Acrobatics'."", 'Pathfinder Helms are standard issue for Xylotian reconnaissance teams.', ""The visor of the helm is made from 'Crystal-Quartz', offering impact protection."", 'Data from the helm can be transmitted to a central command unit.', ""Xylotian explorers often carry 'Survival Packs' with rations and tools."", ""The helm's power cell provides up to 72 Xylotian hours of continuous operation."", 'Early prototypes of the Pathfinder Helm were much bulkier.', 'The helm also provides basic atmospheric analysis.']]]",The 'Pathfinder Helm' integrates Echo-Location Sonar and Bio-Sign Scanners for Xylotian explorers.,,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 7.28286687e+02,  1.71427541e+01, -4.21829215e+00,
+         8.47714605e-02,  2.89161836e+00, -4.10530615e+00,
+         6.73129237e-02, -3.55974277e+00, -3.45491567e-01,
+         1.26100258e+01],
+       [ 1.71427541e+01,  3.95832782e+01, -1.85584304e+00,
+        -3.00678302e+00,  3.77129540e+00, -2.90853500e+00,
+        -1.84924835e+00, -2.63898590e+00, -2.85019794e+00,
+         1.52441246e+01],
+       [-4.21829215e+00, -1.85584304e+00,  4.66609273e+00,
+         5.17711691e-01,  5.88728322e+00,  2.25822494e+00,
+         1.34814660e-01,  2.13883578e+00,  3.01887238e+00,
+         9.31952251e-01],
+       [ 8.47714605e-02, -3.00678302e+00,  5.17711691e-01,
+         2.67723985e-01,  1.87711435e-01,  3.94113688e-01,
+         1.44561375e-01,  3.54094554e-01,  4.46817017e-01,
+        -1.05163139e+00],
+       [ 2.89161836e+00,  3.77129540e+00,  5.88728322e+00,
+         1.87711435e-01,  8.76319111e+00,  2.50954376e+00,
+        -8.83566223e-02,  2.49572811e+00,  3.69479011e+00,
+         4.08468859e+00],
+       [-4.10530615e+00, -2.90853500e+00,  2.25822494e+00,
+         3.94113688e-01,  2.50954376e+00,  1.19969825e+00,
+         1.55906731e-01,  1.12581816e+00,  1.53617330e+00,
+        -3.85671639e-01],
+       [ 6.73129237e-02, -1.84924835e+00,  1.34814660e-01,
+         1.44561375e-01, -8.83566223e-02,  1.55906731e-01,
+         8.89044133e-02,  1.47738413e-01,  1.73531971e-01,
+        -6.65486116e-01],
+       [-3.55974277e+00, -2.63898590e+00,  2.13883578e+00,
+         3.54094554e-01,  2.49572811e+00,  1.12581816e+00,
+         1.47738413e-01,  1.08647516e+00,  1.48765604e+00,
+        -1.97431684e-01],
+       [-3.45491567e-01, -2.85019794e+00,  3.01887238e+00,
+         4.46817017e-01,  3.69479011e+00,  1.53617330e+00,
+         1.73531971e-01,  1.48765604e+00,  2.08084007e+00,
+         1.16168800e-01],
+       [ 1.26100258e+01,  1.52441246e+01,  9.31952251e-01,
+        -1.05163139e+00,  4.08468859e+00, -3.85671639e-01,
+        -6.65486116e-01, -1.97431684e-01,  1.16168800e-01,
+         7.00954821e+00]])]","[{'Exact': array([ 2.94811186e+01,  3.07310625e+01, -2.60576606e+00,  1.58100288e-02,
        -5.34604600e+00, -3.29944961e-01, -1.72743055e+00,  8.28687716e-01,
        -6.21376000e-03, -1.06017322e+01]), 'ContextCite32': array([ 25.1648606 ,  32.46657497,  -0.74798513,   1.38675673,
         -3.93862016,   3.91616115,  -0.66211401,   6.6334861 ,
         -0.61209797, -15.51328843]), 'KernelShap32': array([ 30.61295251,  32.01332605,   1.58623344,   2.41218139,
         -8.74399891,  -2.26013603,   4.50492052,   4.19167639,
-        -3.47781273, -14.24831447]), 'BetaShap (U)32': array([ 3.53561517,  9.04719709,  0.01659635, -5.60844976, -3.2903864 ,
+        -3.47781273, -14.24831447]), 'WSS32': array([ 25.38276934,  25.71378346,  10.80788386,   1.26692357,
+        -5.61737172,   2.95037573,  -2.58768593,   2.31222255,
+         2.69782387, -13.44352766]), 'BetaShap (U)32': array([ 3.53561517,  9.04719709,  0.01659635, -5.60844976, -3.2903864 ,
         0.299085  , -2.08728346,  0.10846223, -0.49301641, -4.56814786]), 'TMC32': array([ 2.34352219e+01,  2.69121765e+01,  3.19910049e-03, -2.69643107e+00,
        -3.11323484e+00, -4.78747278e-01, -2.01475843e+00,  9.67170477e-01,
        -4.93747036e-01, -3.29409260e+00]), 'ContextCite64': array([ 30.00537477,  30.55304147,  -1.6748192 ,   0.43568513,
         -2.23716487,   4.53253582,  -0.0308364 ,   1.50806955,
          0.0420476 , -12.65741947]), 'KernelShap64': array([ 31.28479329,  30.30365468,   2.5774023 ,  -0.72086371,
         -2.30962805,   0.13355484,  -0.05552811,   2.70681923,
-        -0.99293994, -10.80203697]), 'BetaShap (U)64': array([ 3.53570689,  9.04718025, -2.10003045, -5.60844164, -0.25825175,
+        -0.99293994, -10.80203697]), 'WSS64': array([33.14792381, 32.61787251, -1.69907519, -0.79626998, -3.55374615,
+        0.63445607, -1.9048677 ,  1.28812248, -1.02565244, -6.75433315]), 'BetaShap (U)64': array([ 3.53570689,  9.04718025, -2.10003045, -5.60844164, -0.25825175,
         0.29908642,  0.28914849, -2.98687731, -6.92836228, -7.12230398]), 'TMC64': array([29.62514767, 21.50924557, -2.07328632, -1.7598124 , -1.45796813,
         0.2156675 ,  0.34572446, -0.71896353, -0.22413777, -7.13880815]), 'ContextCite100': array([31.0108413 , 32.6823888 , -0.        ,  1.09615675, -2.43833958,
         2.08484378,  0.87193411, -1.33875633, -0.59412401, -9.59410155]), 'KernelShap100': array([ 30.93438309,  31.71912913,   1.02368061,   0.76714143,
         -1.26745195,   0.20395482,   0.03996029,   1.72061223,
-         0.09592063, -10.52760097]), 'BetaShap (U)100': array([ 30.25699297,   9.04724507, -18.16961993,  -5.60844235,
+         0.09592063, -10.52760097]), 'WSS100': array([ 3.16972754e+01,  3.28146411e+01, -1.76373996e+00,  7.30013062e-01,
+       -3.17144705e+00, -3.70148436e-02,  1.83695018e-02,  1.39578973e+00,
+        3.42530751e-01, -8.38832172e+00]), 'BetaShap (U)100': array([ 30.25699297,   9.04724507, -18.16961993,  -5.60844235,
         -0.25825163,   0.29908574,  -1.45324943,  -2.67734453,
         -6.92837563, -26.59396755]), 'TMC100': array([ 30.3849167 ,  29.93312713,  -3.0656727 ,  -1.68572969,
         -1.23729202,  -0.11990172,  -0.9782963 ,  -0.8013183 ,
         -0.89870599, -12.63162797]), 'LOO': array([ 4.36177146e+01,  4.24394195e+01,  1.45465732e-01,  1.60155535e-01,
        -2.58248508e-01,  2.99086571e-01,  3.95519733e-02,  1.08459830e-01,
-       -2.15895176e-01,  9.05589223e-01])}]"
-What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,"[[[""The initial phase of a Xylotian 'Matter Re-sequencer' involves 'Atomic Deconstruction', where the target object is broken down into its base elemental components."", ""Following deconstruction, the 'Pattern Imprinting' phase reassembles these components according to a new digital blueprint."", ""Xylotians primarily communicate using 'Telepathic Resonance Bands'."", 'Matter Re-sequencers are used for rapid prototyping and custom manufacturing on Xylos.', 'The energy requirements for a Matter Re-sequencer are substantial.', 'Only non-sentient matter can be processed by current Re-sequencer technology due to ethical protocols.', 'Xylotian culinary artists sometimes use small-scale Re-sequencers for creating novel food textures.', ""The 'Xylotian Council of Innovators' oversees the development of Re-sequencer technology."", 'Complex items can take several minutes to re-sequence.', 'Error correction protocols are vital to ensure accurate re-sequencing.']]]","The two distinct phases that define the operation of a Xylotian 'Matter Re-sequencer' are 'Atomic Deconstruction' and 'Pattern Imprinting'. In the Atomic Deconstruction phase, the target object is broken down into its base elemental components. Following this, during the Pattern Imprinting phase, these components are reassembled according to a new digital blueprint.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([42.44280638, 54.51112902,  1.89213402,  4.39335378, -1.18406081,
+       -2.15895176e-01,  9.05589223e-01])}]","[[ 0.         18.07582539  0.75532292  2.99429678  4.18928527  1.3455341
+   2.43401841  0.12935334  0.1366168  10.02190865]
+ [18.07582539  0.          2.09304041 -2.77917243  4.88136035  0.39277812
+   1.82828365 -1.98571271 -1.47048156 12.35635243]
+ [ 0.75532292  2.09304041  0.          0.26196363  3.13090332  0.87533776
+   3.36284539  1.72288055  0.92163097  5.19129862]
+ [ 2.99429678 -2.77917243  0.26196363  0.          1.26320852  0.16950773
+   1.87803253  0.43159063  0.9530123   0.59617149]
+ [ 4.18928527  4.88136035  3.13090332  1.26320852  0.          1.28208452
+   2.1171265   2.66167546  4.04508201  2.56887178]
+ [ 1.3455341   0.39277812  0.87533776  0.16950773  1.28208452  0.
+   1.83937237  0.79291854  0.80347137 -0.9663642 ]
+ [ 2.43401841  1.82828365  3.36284539  1.87803253  2.1171265   1.83937237
+   0.          1.92053407  1.09115843  0.79439599]
+ [ 0.12935334 -1.98571271  1.72288055  0.43159063  2.66167546  0.79291854
+   1.92053407  0.          1.13237107 -2.16259761]
+ [ 0.1366168  -1.47048156  0.92163097  0.9530123   4.04508201  0.80347137
+   1.09115843  1.13237107  0.         -0.90035081]
+ [10.02190865 12.35635243  5.19129862  0.59617149  2.56887178 -0.9663642
+   0.79439599 -2.16259761 -0.90035081  0.        ]]"
+What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,"[[[""The initial phase of a Xylotian 'Matter Re-sequencer' involves 'Atomic Deconstruction', where the target object is broken down into its base elemental components."", ""Following deconstruction, the 'Pattern Imprinting' phase reassembles these components according to a new digital blueprint."", ""Xylotians primarily communicate using 'Telepathic Resonance Bands'."", 'Matter Re-sequencers are used for rapid prototyping and custom manufacturing on Xylos.', 'The energy requirements for a Matter Re-sequencer are substantial.', 'Only non-sentient matter can be processed by current Re-sequencer technology due to ethical protocols.', 'Xylotian culinary artists sometimes use small-scale Re-sequencers for creating novel food textures.', ""The 'Xylotian Council of Innovators' oversees the development of Re-sequencer technology."", 'Complex items can take several minutes to re-sequence.', 'Error correction protocols are vital to ensure accurate re-sequencing.']]]","The two distinct phases that define the operation of a Xylotian 'Matter Re-sequencer' are 'Atomic Deconstruction' and 'Pattern Imprinting'. In the Atomic Deconstruction phase, the target object is broken down into its base elemental components. Following this, during the Pattern Imprinting phase, these components are reassembled according to a new digital blueprint.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 5.87346070e+02,  2.77278129e+01, -2.34941897e+00,
+        -3.37730402e+00,  2.83340911e+00, -1.58560603e+00,
+        -1.24111895e-01,  8.28612116e-01, -2.58923613e+00,
+        -7.89720645e-01],
+       [ 2.77278129e+01,  1.36287471e+01, -2.50728234e+00,
+        -6.85894776e+00,  2.81366370e+00, -2.46936115e+00,
+        -6.07816287e-01,  1.95624364e-01,  1.43476143e+00,
+         2.04663051e+00],
+       [-2.34941897e+00, -2.50728234e+00,  9.53105408e-01,
+         1.98829948e+00, -2.56337457e-01,  5.27879298e-01,
+         6.82425888e-01, -2.84958207e-01, -6.32954377e-01,
+        -2.53422501e-01],
+       [-3.37730402e+00, -6.85894776e+00,  1.98829948e+00,
+         6.87942041e+00, -4.77657154e-01,  1.99219908e+00,
+         1.97597910e+00, -1.36711096e+00, -1.39757748e+00,
+        -7.67996695e-01],
+       [ 2.83340911e+00,  2.81366370e+00, -2.56337457e-01,
+        -4.77657154e-01,  9.18832575e-01, -3.35192232e-01,
+         4.23395287e-01, -3.54277488e-01,  1.06000367e-01,
+         5.76057681e-01],
+       [-1.58560603e+00, -2.46936115e+00,  5.27879298e-01,
+         1.99219908e+00, -3.35192232e-01,  6.35960146e-01,
+         4.09626346e-01, -3.06990633e-01, -3.58452583e-01,
+        -3.45364743e-01],
+       [-1.24111895e-01, -6.07816287e-01,  6.82425888e-01,
+         1.97597910e+00,  4.23395287e-01,  4.09626346e-01,
+         1.01812241e+00, -6.52006435e-01, -5.10860646e-01,
+         1.31198793e-01],
+       [ 8.28612116e-01,  1.95624364e-01, -2.84958207e-01,
+        -1.36711096e+00, -3.54277488e-01, -3.06990633e-01,
+        -6.52006435e-01,  5.10998423e-01,  2.30567826e-01,
+        -1.14487258e-01],
+       [-2.58923613e+00,  1.43476143e+00, -6.32954377e-01,
+        -1.39757748e+00,  1.06000367e-01, -3.58452583e-01,
+        -5.10860646e-01,  2.30567826e-01,  4.54219814e-01,
+         1.54998581e-01],
+       [-7.89720645e-01,  2.04663051e+00, -2.53422501e-01,
+        -7.67996695e-01,  5.76057681e-01, -3.45364743e-01,
+         1.31198793e-01, -1.14487258e-01,  1.54998581e-01,
+         4.10000894e-01]])]","[{'Exact': array([42.44280638, 54.51112902,  1.89213402,  4.39335378, -1.18406081,
         1.37895259, -2.06031539,  4.01982203, -0.73915898, -5.35677483]), 'ContextCite32': array([31.15405449, 54.98878628,  0.65221441, 10.1793546 , -0.76605077,
         0.81571797, -1.38924908,  3.63607983,  2.73570877, -5.87194204]), 'KernelShap32': array([41.53679941, 56.48865059,  4.80272326,  3.84530863, -5.03798283,
-       -4.15334332, -0.78794995,  0.65812821, -2.50530385, -4.24257903]), 'BetaShap (U)32': array([38.06287865, 46.13760519, -0.38620039, 15.18934769, -4.21352285,
+       -4.15334332, -0.78794995,  0.65812821, -2.50530385, -4.24257903]), 'WSS32': array([ 50.45411234,  36.23585914,   6.91422211, -11.0453552 ,
+        -6.08299794,  12.22379752,  15.01409194,  -1.89516941,
+        -5.67927373,   4.26597794]), 'BetaShap (U)32': array([38.06287865, 46.13760519, -0.38620039, 15.18934769, -4.21352285,
        -0.98469737,  1.89287593, -0.92424682, -1.35688112, -7.26408457]), 'TMC32': array([45.92741418, 54.82939148, -0.4415706 ,  8.33851743, -3.98386065,
        -0.37756443,  1.8517952 , -0.3204085 , -1.35521412, -5.87306023]), 'ContextCite64': array([ 3.81269265e+01,  5.32279095e+01, -6.23487889e-01,  4.45025960e+00,
        -4.72071095e-01,  1.41850923e+00, -3.19197977e-02,  9.65560384e-01,
         1.00295507e+00, -4.52036778e+00]), 'KernelShap64': array([40.58120348, 54.76749655,  3.88795887,  3.32174161, -2.14453603,
-       -1.77190393, -1.16023328,  1.61554724, -1.12698691, -2.79446865]), 'BetaShap (U)64': array([38.06292307, 46.13758153,  0.25390638, 15.18932667, -0.46577119,
+       -1.77190393, -1.16023328,  1.61554724, -1.12698691, -2.79446865]), 'WSS64': array([42.35854003, 53.60660214,  0.51714092,  4.24657677, -2.8993232 ,
+        0.19554949, -3.42967504,  2.30708784, -1.81792586, -2.1250329 ]), 'BetaShap (U)64': array([38.06292307, 46.13758153,  0.25390638, 15.18932667, -0.46577119,
        -0.98469967, -0.07100164, 11.96388476,  3.84260141, -4.3232599 ]), 'TMC64': array([49.59010506, 46.39010715,  0.20464885,  4.97672248, -1.69898238,
        -1.67227854, -0.07935345,  5.07651675, -0.54384446, -3.74228764]), 'ContextCite100': array([40.45318169, 54.48733332,  0.09859021,  4.862027  , -1.54873662,
        -0.1432292 , -0.08970638, -0.58752776, -0.71910054, -2.58041229]), 'KernelShap100': array([40.43281997, 54.8353107 ,  1.59793135,  3.60639961, -1.46532296,
-       -0.        ,  0.11671375,  1.62695283, -0.85198567, -3.72451326]), 'BetaShap (U)100': array([ 48.79184866,  46.13761298,  12.72371178,  15.1893287 ,
+       -0.        ,  0.11671375,  1.62695283, -0.85198567, -3.72451326]), 'WSS100': array([42.50971987, 55.04754603,  0.4977342 ,  3.55929004, -1.71493169,
+        0.54584118, -1.34356106,  1.74799178, -0.70455518, -1.82938852]), 'BetaShap (U)100': array([ 48.79184866,  46.13761298,  12.72371178,  15.1893287 ,
         -0.46577123,  -0.98469871,  -1.35053593,  10.67507426,
          3.84260778, -20.97411259]), 'TMC100': array([46.13141764, 52.37248795,  1.26637944,  5.38968579, -1.52043563,
        -1.00145758, -1.16733758,  4.911443  , -0.48114557, -6.354304  ]), 'LOO': array([54.15636253, 67.49274254, -1.60108757, -0.30277061, -0.46576786,
-       -0.9846983 , -1.22570038, -0.92424774, -1.8521471 , -1.54143715])}]"
+       -0.9846983 , -1.22570038, -0.92424774, -1.8521471 , -1.54143715])}]","[[ 0.00000000e+00  2.82814924e+01 -2.49134520e+00 -2.40259349e+00
+   2.18563191e+00 -2.38112224e+00  1.69680929e+00 -3.41513151e+00
+  -4.18076628e+00 -1.19946331e+00]
+ [ 2.82814924e+01  0.00000000e+00 -5.17069157e+00 -6.33362786e+00
+   1.23471794e+00 -2.96891195e+00  1.59576812e+00 -2.81369453e+00
+   3.31384621e-02  7.49697063e+00]
+ [-2.49134520e+00 -5.17069157e+00  0.00000000e+00 -1.90217930e+00
+  -3.97401456e+00 -3.88817825e-03  4.97740903e-01 -2.48710838e+00
+  -7.85491880e-01  1.99207467e+00]
+ [-2.40259349e+00 -6.33362786e+00 -1.90217930e+00  0.00000000e+00
+  -1.49027333e+00 -9.13695139e-01  7.01996962e-01 -3.53535810e+00
+  -1.98535886e+00  2.36895692e+00]
+ [ 2.18563191e+00  1.23471794e+00 -3.97401456e+00 -1.49027333e+00
+   0.00000000e+00 -5.77180444e-01 -9.77608279e-01 -2.70104106e+00
+   1.20335341e-01  5.31161878e-01]
+ [-2.38112224e+00 -2.96891195e+00 -3.88817825e-03 -9.13695139e-01
+  -5.77180444e-01  0.00000000e+00 -3.56590192e-01 -2.93324751e+00
+   2.42531816e-01  1.57363479e+00]
+ [ 1.69680929e+00  1.59576812e+00  4.97740903e-01  7.01996962e-01
+  -9.77608279e-01 -3.56590192e-01  0.00000000e+00 -2.10262469e+00
+  -7.86645115e-01  3.03189611e+00]
+ [-3.41513151e+00 -2.81369453e+00 -2.48710838e+00 -3.53535810e+00
+  -2.70104106e+00 -2.93324751e+00 -2.10262469e+00  0.00000000e+00
+  -6.67054797e-01  1.32303860e+00]
+ [-4.18076628e+00  3.31384621e-02 -7.85491880e-01 -1.98535886e+00
+   1.20335341e-01  2.42531816e-01 -7.86645115e-01 -6.67054797e-01
+   0.00000000e+00  2.31453573e+00]
+ [-1.19946331e+00  7.49697063e+00  1.99207467e+00  2.36895692e+00
+   5.31161878e-01  1.57363479e+00  3.03189611e+00  1.32303860e+00
+   2.31453573e+00  0.00000000e+00]]"
 What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,"[[[""The Xylotian 'Aura-Cloak' is designed to subtly dampen the wearer's strong emotional projections, preventing unintended psychic interference during sensitive negotiations."", ""Simultaneously, the cloak projects a field of 'Calm-Resonance', which can help soothe agitated individuals in the wearer's vicinity."", ""Xylotian starships are equipped with advanced 'Translation Matrixes' for communication."", ""Aura-Cloaks are woven from 'Psyche-Neutral Fibers'."", ""The design of an Aura-Cloak often signifies the diplomat's home region on Xylos."", 'Xylotian diplomatic missions are crucial for maintaining inter-species relations.', ""The 'Xylotian Diplomatic Corps' is highly respected."", ""The effectiveness of an Aura-Cloak can be influenced by the wearer's own mental discipline."", 'These cloaks are not designed for physical protection.', 'Each Aura-Cloak is individually attuned to its wearer.']]]","The two main functions of the 'Aura-Cloak' worn by Xylotian diplomats are:
 
 1. To subtly dampen the wearer's strong emotional projections, preventing unintended psychic interference during sensitive negotiations.
-2. To project a field of 'Calm-Resonance', which can help soothe agitated individuals in the wearer's vicinity.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([ 89.0229692 ,  75.67746233,   2.86830791,   2.95801525,
+2. To project a field of 'Calm-Resonance', which can help soothe agitated individuals in the wearer's vicinity.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 4.98684628e+03,  5.21799431e+01,  4.92081172e+00,
+         6.15431231e+00,  1.51158265e+01, -9.54019354e-01,
+         3.93743322e+00, -8.44204470e-01,  2.28945751e+00,
+         3.58982059e+00],
+       [ 5.21799431e+01,  4.83806110e+01, -7.41844659e+00,
+         1.32178655e-01,  1.42342619e+01,  1.60606591e+00,
+         6.27700844e-01, -3.16315701e+00,  3.08510939e+00,
+        -3.68738676e-01],
+       [ 4.92081172e+00, -7.41844659e+00,  1.24524638e+00,
+         1.58432334e-01, -2.05483226e+00, -2.78579224e-01,
+        -1.02743007e-01,  6.89445274e-01, -4.74454217e-01,
+         4.32935974e-02],
+       [ 6.15431231e+00,  1.32178655e-01,  1.58432334e-01,
+         1.21830310e+00,  1.78895997e+00, -1.71304577e-01,
+         1.04619339e-01,  1.63469795e+00,  3.63836765e-02,
+        -2.94236041e-01],
+       [ 1.51158265e+01,  1.42342619e+01, -2.05483226e+00,
+         1.78895997e+00,  6.93990560e+00,  2.27631382e-01,
+         3.86075765e-01,  1.48834036e+00,  9.55370420e-01,
+        -5.73569044e-01],
+       [-9.54019354e-01,  1.60606591e+00, -2.78579224e-01,
+        -1.71304577e-01,  2.27631382e-01,  7.94173106e-02,
+         6.09946411e-03, -3.39087681e-01,  9.89224906e-02,
+         2.73878846e-02],
+       [ 3.93743322e+00,  6.27700844e-01, -1.02743007e-01,
+         1.04619339e-01,  3.86075765e-01,  6.09946411e-03,
+         3.38631962e-02,  1.07288940e-01,  4.31539893e-02,
+        -3.54729959e-02],
+       [-8.44204470e-01, -3.16315701e+00,  6.89445274e-01,
+         1.63469795e+00,  1.48834036e+00, -3.39087681e-01,
+         1.07288940e-01,  2.44064986e+00, -1.61497243e-01,
+        -3.84982407e-01],
+       [ 2.28945751e+00,  3.08510939e+00, -4.74454217e-01,
+         3.63836765e-02,  9.55370420e-01,  9.89224906e-02,
+         4.31539893e-02, -1.61497243e-01,  1.97784717e-01,
+        -3.23737287e-02],
+       [ 3.58982059e+00, -3.68738676e-01,  4.32935974e-02,
+        -2.94236041e-01, -5.73569044e-01,  2.73878846e-02,
+        -3.54729959e-02, -3.84982407e-01, -3.23737287e-02,
+         8.46282456e-02]])]","[{'Exact': array([ 89.0229692 ,  75.67746233,   2.86830791,   2.95801525,
        -12.34894508,  -3.59645384,  -3.30699455,  -0.21672806,
         -2.88419978,  -0.52943715]), 'ContextCite32': array([ 73.97640631,  77.9591079 ,   6.09824171,   0.873204  ,
        -11.75744071,   0.80265817,  -2.54454306,   6.92483425,
         -4.24891874,  -5.25792347]), 'KernelShap32': array([ 88.78549801,  80.55158554,   9.86190392,   3.01307658,
        -18.29297496, -13.1126258 ,  -0.34533754,  -1.80309922,
-        -5.51586871,  -1.20750759]), 'BetaShap (U)32': array([ 44.14906255,  49.70505296,   0.2389723 ,  15.36245703,
+        -5.51586871,  -1.20750759]), 'WSS32': array([88.61497225, 54.92930234, 17.87366474, -7.93656408, -7.77698859,
+        4.81351202,  5.4642407 , -3.11484729, -3.26558382,  2.71998619]), 'BetaShap (U)32': array([ 44.14906255,  49.70505296,   0.2389723 ,  15.36245703,
        -15.08369773,   0.11995137,  -2.49299657,  -0.54504212,
          0.72662359,   0.8404079 ]), 'TMC32': array([ 83.56044817,  73.67714763,   0.37730853,   7.7104733 ,
        -14.30792936,  -4.89739251,  -2.37020048,  -2.31520557,
          0.7200648 ,   0.86092114]), 'ContextCite64': array([87.72496447, 72.99953494,  1.70452494, -4.4668693 , -8.43726525,
         1.13091037, -0.68463512, -2.45511291, -4.09325574, -2.08795823]), 'KernelShap64': array([ 91.37769678,  76.84512232,   9.39252849,  -0.31105199,
        -12.10749599,  -4.71612539,  -1.97982609,  -1.68512746,
-        -5.90494335,   1.49915555]), 'BetaShap (U)64': array([44.14923141, 49.7050128 ,  0.58622122, 15.36244186,  0.51829145,
+        -5.90494335,   1.49915555]), 'WSS64': array([ 9.26422359e+01,  7.53872723e+01,  5.27648679e+00,  9.58375431e-01,
+       -8.09532800e+00, -1.64053032e+00, -8.72940010e-01,  8.78935126e-03,
+       -4.38009083e+00, -1.22243671e-01]), 'BetaShap (U)64': array([44.14923141, 49.7050128 ,  0.58622122, 15.36244186,  0.51829145,
         0.11995341, -2.38028921,  0.6691578 , -3.01138444, -2.56225176]), 'TMC64': array([94.19632026, 59.41824949,  0.59893119,  6.45297277, -5.9689797 ,
        -4.52072893, -2.42689347, -0.87312007, -0.76150382, -3.03855312]), 'ContextCite100': array([91.63062066, 77.57839755,  2.34216334,  0.62584819, -9.95881351,
        -1.79196015, -0.79703203, -3.77486214, -4.25783804,  0.46342823]), 'KernelShap100': array([ 9.06964072e+01,  7.78768352e+01,  6.61019315e+00,  6.07028951e-02,
        -1.31377255e+01, -4.93436810e+00, -2.74106979e+00, -1.23483650e+00,
-       -3.84351775e+00,  2.64836682e+00]), 'BetaShap (U)100': array([95.04954973, 49.70506782, 10.24552963, 15.36244153,  0.51828764,
+       -3.84351775e+00,  2.64836682e+00]), 'WSS100': array([92.88116267, 75.6925275 ,  2.75513259, -0.441299  , -9.74815378,
+       -0.35630188, -2.0995361 ,  0.23847246, -2.35217383, -0.09298101]), 'BetaShap (U)100': array([95.04954973, 49.70506782, 10.24552963, 15.36244153,  0.51828764,
         0.11995357, -5.56435855,  0.54774009, -3.01139226, -1.21747004]), 'TMC100': array([92.60346963, 65.80302385,  2.08733527,  6.11866784, -6.22071838,
        -3.18627871, -4.98938394, -0.12065673, -1.74966057, -3.10737093]), 'LOO': array([ 1.20499877e+02,  1.04190612e+02, -3.15618515e-01,  5.23186684e-01,
         5.18308640e-01,  1.19961739e-01,  1.01949978e+00, -5.45036316e-01,
-       -4.51121330e-01,  2.32515907e+00])}]"
-What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,"[[[""A Xylotian 'Legacy Crystal' is traditionally imbued with a detailed 'Lineage Record', chronicling the direct ancestors of the crystal's creator."", ""Beyond genealogy, these crystals also store a 'Core Essence Imprint', a psychic snapshot of the creator's personality and defining memories."", ""Xylotian children play a popular board game called 'Star-Hopper Quest'."", 'Legacy Crystals are often passed down as family heirlooms on Xylos.', 'The process of imbuing a Legacy Crystal is a deeply personal and ceremonial act.', 'These crystals glow with a soft, internal light that reflects the stored essence.', ""Xylotian 'Crystal Readers' are sometimes consulted to interpret older Legacy Crystals."", ""The 'Hall of Ancestors' on Xylos displays many prominent Legacy Crystals."", 'The physical structure of the crystal must be flawless to hold the complex information.', 'A Legacy Crystal cannot be altered once the imbuing process is complete.']]]","A Xylotian 'Legacy Crystal' encodes two types of information: a 'Lineage Record', which chronicles the direct ancestors of the crystal's creator, and a 'Core Essence Imprint', a psychic snapshot of the creator's personality and defining memories.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([42.63423981, 60.5523456 ,  0.92914569, -2.5494748 ,  1.5993627 ,
+       -4.51121330e-01,  2.32515907e+00])}]","[[ 0.00000000e+00  4.96576687e+01  9.76290421e-01  5.95143362e-01
+   1.31149431e+01  1.19867147e+00  3.73656473e+00  2.48450577e-01
+   3.27974104e+00  3.54346251e+00]
+ [ 4.96576687e+01  0.00000000e+00 -7.13478574e+00 -4.82422921e+00
+   1.38532726e+01  3.17435806e+00  2.15473623e+00 -4.39940601e+00
+   1.52419648e+00  4.79814170e-01]
+ [ 9.76290421e-01 -7.13478574e+00  0.00000000e+00 -2.89132894e+00
+  -3.10175056e-01  1.73836526e+00  6.79995383e-01 -9.16097611e-02
+  -2.20650882e+00 -1.32146673e+00]
+ [ 5.95143362e-01 -4.82422921e+00 -2.89132894e+00  0.00000000e+00
+  -1.81957176e+00 -1.79891477e+00 -1.90196954e+00 -1.25440718e+00
+   1.31707357e-01 -1.07571516e+00]
+ [ 1.31149431e+01  1.38532726e+01 -3.10175056e-01 -1.81957176e+00
+   0.00000000e+00  1.87143365e+00  1.81984009e+00  2.30226348e+00
+  -2.31995934e+00  1.02971464e+00]
+ [ 1.19867147e+00  3.17435806e+00  1.73836526e+00 -1.79891477e+00
+   1.87143365e+00  0.00000000e+00  4.24773844e+00  4.20502315e-01
+   3.26630878e-01 -3.55515463e-01]
+ [ 3.73656473e+00  2.15473623e+00  6.79995383e-01 -1.90196954e+00
+   1.81984009e+00  4.24773844e+00  0.00000000e+00  2.92549788e-02
+   1.14258516e+00  3.47952183e-01]
+ [ 2.48450577e-01 -4.39940601e+00 -9.16097611e-02 -1.25440718e+00
+   2.30226348e+00  4.20502315e-01  2.92549788e-02  0.00000000e+00
+   3.55586615e-01  5.68068298e-01]
+ [ 3.27974104e+00  1.52419648e+00 -2.20650882e+00  1.31707357e-01
+  -2.31995934e+00  3.26630878e-01  1.14258516e+00  3.55586615e-01
+   0.00000000e+00  3.26297625e-01]
+ [ 3.54346251e+00  4.79814170e-01 -1.32146673e+00 -1.07571516e+00
+   1.02971464e+00 -3.55515463e-01  3.47952183e-01  5.68068298e-01
+   3.26297625e-01  0.00000000e+00]]"
+What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,"[[[""A Xylotian 'Legacy Crystal' is traditionally imbued with a detailed 'Lineage Record', chronicling the direct ancestors of the crystal's creator."", ""Beyond genealogy, these crystals also store a 'Core Essence Imprint', a psychic snapshot of the creator's personality and defining memories."", ""Xylotian children play a popular board game called 'Star-Hopper Quest'."", 'Legacy Crystals are often passed down as family heirlooms on Xylos.', 'The process of imbuing a Legacy Crystal is a deeply personal and ceremonial act.', 'These crystals glow with a soft, internal light that reflects the stored essence.', ""Xylotian 'Crystal Readers' are sometimes consulted to interpret older Legacy Crystals."", ""The 'Hall of Ancestors' on Xylos displays many prominent Legacy Crystals."", 'The physical structure of the crystal must be flawless to hold the complex information.', 'A Legacy Crystal cannot be altered once the imbuing process is complete.']]]","A Xylotian 'Legacy Crystal' encodes two types of information: a 'Lineage Record', which chronicles the direct ancestors of the crystal's creator, and a 'Core Essence Imprint', a psychic snapshot of the creator's personality and defining memories.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 7.00474501e+02,  3.23373088e+01,  2.92802763e+00,
+         2.50578784e+00,  9.08314614e-01, -1.82597582e-02,
+        -4.96899156e-01, -2.85052220e+00,  5.05141395e+00,
+         2.17153000e+00],
+       [ 3.23373088e+01,  3.62823482e+00,  1.32305958e+00,
+         5.68271118e-01, -9.31627262e-02,  2.14401411e+00,
+         2.59691429e+00,  1.28394370e+00, -1.01667199e+00,
+        -3.53822393e+00],
+       [ 2.92802763e+00,  1.32305958e+00,  1.87695692e+00,
+        -4.98981793e-01,  2.05722099e+00,  4.54415965e-01,
+         1.58295491e+00,  8.43719748e-01, -2.05845553e+00,
+        -3.79725097e+00],
+       [ 2.50578784e+00,  5.68271118e-01, -4.98981793e-01,
+         9.14746188e-01, -2.09699097e+00,  1.34815123e+00,
+         8.37334643e-01,  5.41418280e-01,  9.19530252e-01,
+         5.71332474e-01],
+       [ 9.08314614e-01, -9.31627262e-02,  2.05722099e+00,
+        -2.09699097e+00,  5.37623012e+00, -2.38397062e+00,
+        -7.45974486e-01, -6.23687229e-01, -3.00486817e+00,
+        -3.37719509e+00],
+       [-1.82597582e-02,  2.14401411e+00,  4.54415965e-01,
+         1.34815123e+00, -2.38397062e+00,  3.16142091e+00,
+         3.02648850e+00,  1.76269753e+00, -2.82650751e-02,
+        -2.29133337e+00],
+       [-4.96899156e-01,  2.59691429e+00,  1.58295491e+00,
+         8.37334643e-01, -7.45974486e-01,  3.02648850e+00,
+         3.63262136e+00,  2.07295288e+00, -1.36078618e+00,
+        -4.42388265e+00],
+       [-2.85052220e+00,  1.28394370e+00,  8.43719748e-01,
+         5.41418280e-01, -6.23687229e-01,  1.76269753e+00,
+         2.07295288e+00,  1.21818321e+00, -6.66374101e-01,
+        -2.33530972e+00],
+       [ 5.05141395e+00, -1.01667199e+00, -2.05845553e+00,
+         9.19530252e-01, -3.00486817e+00, -2.82650751e-02,
+        -1.36078618e+00, -6.66374101e-01,  2.61758974e+00,
+         4.37874074e+00],
+       [ 2.17153000e+00, -3.53822393e+00, -3.79725097e+00,
+         5.71332474e-01, -3.37719509e+00, -2.29133337e+00,
+        -4.42388265e+00, -2.33530972e+00,  4.37874074e+00,
+         8.97627455e+00]])]","[{'Exact': array([42.63423981, 60.5523456 ,  0.92914569, -2.5494748 ,  1.5993627 ,
        -1.35047443, -1.12192105,  3.08251919, -1.65856299,  1.10950866]), 'ContextCite32': array([35.09813718, 60.59955333, -0.64018313,  0.18611846,  0.47121393,
        -4.04596298, -4.09896196,  2.03322796,  0.67633591, -4.91372118]), 'KernelShap32': array([43.56272117, 59.36337811,  8.35302506, -7.80477513,  1.68988026,
-       -6.68467587, -0.68191598, -2.12303973,  0.12656139,  3.28722185]), 'BetaShap (U)32': array([27.11927209, 54.311206  ,  0.70574543, -0.27845047, -1.37678835,
+       -6.68467587, -0.68191598, -2.12303973,  0.12656139,  3.28722185]), 'WSS32': array([ 54.62811196,  46.0595964 , -10.54280848, -10.47592693,
+        -1.0275028 ,   5.44593621,  -3.01758782,  -0.52918531,
+         7.32329598,  10.54908908]), 'BetaShap (U)32': array([27.11927209, 54.311206  ,  0.70574543, -0.27845047, -1.37678835,
        -0.93326371, -4.1789633 ,  0.2490982 , -1.27917968, -0.33932001]), 'TMC32': array([44.7695086 , 63.60344553,  0.79220422, -0.50309396, -1.24642372,
        -2.21279764, -4.10143789,  3.75098483, -1.33449777, -0.43016505]), 'ContextCite64': array([39.88269305, 57.67213134,  0.20212575, -3.81622982,  1.34851441,
        -3.00182647, -2.13591706, -0.29021608, -1.13754771, -3.22631367]), 'KernelShap64': array([41.88464446, 59.62473399,  6.35592904, -4.54531291,  0.32065322,
-       -3.81392266, -0.73320608, -0.72423415,  0.        , -0.15599406]), 'BetaShap (U)64': array([27.11934638, 54.31118155, -0.86318516, -0.27845765,  0.25216385,
+       -3.81392266, -0.73320608, -0.72423415,  0.        , -0.15599406]), 'WSS64': array([46.48357469, 61.40048614,  1.9446215 , -2.53046675, -0.06193451,
+       -2.70002887, -1.6713025 ,  0.96991386, -0.48340923, -1.75414742]), 'BetaShap (U)64': array([27.11934638, 54.31118155, -0.86318516, -0.27845765,  0.25216385,
        -0.93326363, -1.7820504 , 12.50918982,  1.44316091,  0.49461017]), 'TMC64': array([49.30478409, 54.75033498, -0.90657854, -2.1397301 , -0.06091458,
        -2.40813773, -1.73709619,  6.75044024, -1.8081336 ,  0.56216371]), 'ContextCite100': array([43.01726976, 60.43928909,  0.96250022, -1.74029449,  0.46790016,
        -4.43019732, -1.65447085, -1.85189109, -1.69442651, -0.62094291]), 'KernelShap100': array([41.96890391, 60.82230238,  1.9538042 , -3.67005423, -0.40486602,
-       -2.67486326,  0.09933576, -0.64337004, -0.09086717, -0.28483146]), 'BetaShap (U)100': array([47.1405162 , 54.31119499,  7.4290768 , -0.27845465,  0.25216591,
+       -2.67486326,  0.09933576, -0.64337004, -0.09086717, -0.28483146]), 'WSS100': array([45.66514345, 60.13186183,  1.53101338, -3.18260404,  0.47338853,
+       -2.1824714 , -1.9822811 ,  0.81222215, -1.31861981, -1.30094081]), 'BetaShap (U)100': array([47.1405162 , 54.31119499,  7.4290768 , -0.27845465,  0.25216591,
        -0.9332656 , -3.41125935, 11.28318153,  1.44317021, 17.11237909]), 'TMC100': array([46.11769309, 56.72525127,  0.79887366, -1.39236935,  0.6697252 ,
        -2.910619  , -3.03567108,  6.29973427, -1.06575687,  1.33489124]), 'LOO': array([ 5.71511726e+01,  7.18225365e+01, -7.01541901e-02, -7.84142494e-01,
         2.52164841e-01, -9.33260918e-01, -1.83130836e+00,  2.49088287e-01,
-       -3.76216888e-01,  8.71725082e-02])}]"
-What are the topics of the books Sarah and Michael are reading?,"[[['Sarah is reading a book about dragons.', 'Michael is reading a book about ancient castles.', 'The sun is shining brightly today.', 'My favorite color is blue.', 'Cars drive on the road.', 'Trees have green leaves in summer.', 'The cat is sleeping on the mat.', 'Birds can fly high in the sky.', 'Water is essential for life.', 'Computers are useful tools.']]]","Sarah is reading a book about dragons, and Michael is reading a book about ancient castles.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([18.60323381, 51.96611349,  0.91647179,  2.49417977, -4.07602914,
+       -3.76216888e-01,  8.71725082e-02])}]","[[ 0.         27.64641974  1.33451166  3.77683143 -1.96379798 -1.07583997
+  -0.07039079 -1.63151038  3.10075072 -1.08501873]
+ [27.64641974  0.         -2.62943991  1.56419117 -1.78885909 -2.0293039
+   2.45247485 -3.50555337  0.38228921 -4.58086234]
+ [ 1.33451166 -2.62943991  0.         -1.03880927  0.30397671 -0.21419942
+   0.42590927 -1.35657732 -2.29583272 -2.02883138]
+ [ 3.77683143  1.56419117 -1.03880927  0.         -1.49698453 -1.4789221
+   1.03331275 -0.94164694 -1.68842866 -0.23523632]
+ [-1.96379798 -1.78885909  0.30397671 -1.49698453  0.         -3.04781878
+  -1.61690518 -3.67535716  0.60017353 -2.27563396]
+ [-1.07583997 -2.0293039  -0.21419942 -1.4789221  -3.04781878  0.
+   0.41737485 -2.28389465  1.32071249 -2.28098584]
+ [-0.07039079  2.45247485  0.42590927  1.03331275 -1.61690518  0.41737485
+   0.         -0.86752955 -1.52900869 -1.35742203]
+ [-1.63151038 -3.50555337 -1.35657732 -0.94164694 -3.67535716 -2.28389465
+  -0.86752955  0.         -1.32839775 -2.79970392]
+ [ 3.10075072  0.38228921 -2.29583272 -1.68842866  0.60017353  1.32071249
+  -1.52900869 -1.32839775  0.         -0.38165892]
+ [-1.08501873 -4.58086234 -2.02883138 -0.23523632 -2.27563396 -2.28098584
+  -1.35742203 -2.79970392 -0.38165892  0.        ]]"
+What are the topics of the books Sarah and Michael are reading?,"[[['Sarah is reading a book about dragons.', 'Michael is reading a book about ancient castles.', 'The sun is shining brightly today.', 'My favorite color is blue.', 'Cars drive on the road.', 'Trees have green leaves in summer.', 'The cat is sleeping on the mat.', 'Birds can fly high in the sky.', 'Water is essential for life.', 'Computers are useful tools.']]]","Sarah is reading a book about dragons, and Michael is reading a book about ancient castles.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 2.33114328e+02,  1.72612266e+00, -3.72186507e+00,
+        -1.17403960e+00,  4.45255602e-01, -2.93486620e-01,
+        -4.62069461e-01, -7.52464672e-01,  2.06811095e+00,
+         3.53035206e+00],
+       [ 1.72612266e+00,  2.84407673e+01,  1.18408924e-01,
+        -2.71058114e+00,  3.31446174e+00,  1.32579038e+00,
+         2.04363001e+00, -2.27751629e-01,  2.41996895e+00,
+         5.91751484e+00],
+       [-3.72186507e+00,  1.18408924e-01,  7.85518131e+00,
+        -3.02376699e+00,  1.51161274e+00,  3.60332396e+00,
+         1.25660207e+00,  2.12311724e+00,  1.15283835e+00,
+         3.02209153e+00],
+       [-1.17403960e+00, -2.71058114e+00, -3.02376699e+00,
+         2.13802034e+00,  1.58063387e-01, -1.58035251e-01,
+         2.82621308e-02,  2.12461797e-01,  1.50696931e-02,
+        -1.11540416e+00],
+       [ 4.45255602e-01,  3.31446174e+00,  1.51161274e+00,
+         1.58063387e-01,  2.27963398e+00,  2.91015848e+00,
+         1.53951892e+00,  1.90728740e+00,  1.58587340e+00,
+         2.25998260e+00],
+       [-2.93486620e-01,  1.32579038e+00,  3.60332396e+00,
+        -1.58035251e-01,  2.91015848e+00,  4.37389221e+00,
+         2.03547688e+00,  2.92995551e+00,  2.03495030e+00,
+         2.93631185e+00],
+       [-4.62069461e-01,  2.04363001e+00,  1.25660207e+00,
+         2.82621308e-02,  1.53951892e+00,  2.03547688e+00,
+         1.05015860e+00,  1.33400797e+00,  1.06877422e+00,
+         1.55123407e+00],
+       [-7.52464672e-01, -2.27751629e-01,  2.12311724e+00,
+         2.12461797e-01,  1.90728740e+00,  2.92995551e+00,
+         1.33400797e+00,  2.03168925e+00,  1.31721867e+00,
+         1.70183307e+00],
+       [ 2.06811095e+00,  2.41996895e+00,  1.15283835e+00,
+         1.50696931e-02,  1.58587340e+00,  2.03495030e+00,
+         1.06877422e+00,  1.31721867e+00,  1.11999213e+00,
+         1.64575810e+00],
+       [ 3.53035206e+00,  5.91751484e+00,  3.02209153e+00,
+        -1.11540416e+00,  2.25998260e+00,  2.93631185e+00,
+         1.55123407e+00,  1.70183307e+00,  1.64575810e+00,
+         3.06495092e+00]])]","[{'Exact': array([18.60323381, 51.96611349,  0.91647179,  2.49417977, -4.07602914,
        -1.27601749, -0.68801157, -1.89291751, -2.72018216, -3.22223747]), 'ContextCite32': array([18.22546368, 54.40649536,  0.        ,  4.42669507, -1.78352081,
        -2.79558052, -3.31003701,  2.75434208, -1.74637773, -6.78418039]), 'KernelShap32': array([19.7595503 , 51.6886156 ,  2.22415811,  2.14381835, -2.06484793,
-        0.3155306 ,  1.00100287,  0.53538685, -5.85601396, -6.4030863 ]), 'BetaShap (U)32': array([ 1.73545757e+01,  4.76972677e+01, -1.54354348e-02,  3.99140173e+00,
+        0.3155306 ,  1.00100287,  0.53538685, -5.85601396, -6.4030863 ]), 'WSS32': array([ 11.36643449,  27.73565238,   8.71247771,   4.71518194,
+         8.3814687 ,  10.26321005,   3.30835178,  -8.83603277,
+         6.80777582, -10.74605137]), 'BetaShap (U)32': array([ 1.73545757e+01,  4.76972677e+01, -1.54354348e-02,  3.99140173e+00,
        -1.77983877e+00,  7.47228175e-02, -8.12256264e-01, -4.74889124e-02,
         1.27769861e-01, -3.90184571e-01]), 'TMC32': array([ 1.49385382e+01,  4.54593213e+01,  1.88662211e-02,  2.13626879e+00,
        -1.69585371e+00,  2.91796863e-01, -7.78613091e-01, -8.33346367e-01,
         1.30122383e-01, -2.17245400e-01]), 'ContextCite64': array([18.96947064, 51.83431286,  1.31209998,  1.72785128, -1.44372403,
        -0.62039833, -1.95917902, -0.52965855, -2.22705834, -4.81395157]), 'KernelShap64': array([18.8607539 , 51.04093887,  2.46738572,  1.41836954, -1.6488141 ,
-        0.96804305, -0.43934863, -1.17591329, -4.57811138, -4.80868297]), 'BetaShap (U)64': array([ 1.73545752e+01,  4.76972741e+01,  1.04381879e+00,  3.99139999e+00,
+        0.96804305, -0.43934863, -1.17591329, -4.57811138, -4.80868297]), 'WSS64': array([18.62925998, 50.14330459, -0.30624257,  2.1640405 , -4.05765005,
+        1.23889049, -2.13606412, -0.76218329, -1.26234181, -2.72981261]), 'BetaShap (U)64': array([ 1.73545752e+01,  4.76972741e+01,  1.04381879e+00,  3.99139999e+00,
        -2.04397186e-03,  7.47229629e-02, -5.64195543e-01, -8.78978433e+00,
        -1.30750293e+01, -1.43043829e+00]), 'TMC64': array([16.15652951, 47.56617939,  1.02657697,  2.34412527, -0.82089988,
         0.42957153, -0.57232708, -3.72819082, -1.21370813, -1.49469565]), 'ContextCite100': array([18.78734318, 51.63389044,  0.66655973,  2.4379275 , -1.91915683,
        -1.03409045, -1.44019099, -1.48697277, -2.57713046, -4.44838821]), 'KernelShap100': array([18.36015666, 51.50985315,  1.82076487,  1.83132967, -2.2189535 ,
-       -0.18390421, -0.32369987, -0.98984876, -3.33579543, -3.4232723 ]), 'BetaShap (U)100': array([ 1.83715817e+01,  4.76972825e+01, -1.23244337e+00,  3.99139885e+00,
+       -0.18390421, -0.32369987, -0.98984876, -3.33579543, -3.4232723 ]), 'WSS100': array([18.63943314, 51.79559432,  0.5474945 ,  2.16401329, -2.5496366 ,
+       -1.50921582, -0.87309014, -0.79478721, -1.61487455, -3.52281547]), 'BetaShap (U)100': array([ 1.83715817e+01,  4.76972825e+01, -1.23244337e+00,  3.99139885e+00,
        -2.04436223e-03,  7.47219187e-02,  5.98521035e-01, -7.91555604e+00,
        -1.30750494e+01, -1.15607862e+01]), 'TMC100': array([17.4134178 , 49.25884637,  0.59201393,  1.9790225 , -0.82024909,
        -0.1919239 ,  0.31064441, -3.43443702, -1.86627841, -3.57814502]), 'LOO': array([ 1.88800857e+01,  5.45901191e+01, -7.47088194e-02,  4.02780771e-01,
        -2.04181671e-03,  7.47222900e-02,  7.47578144e-02, -4.74865437e-02,
-       -8.24182034e-02,  1.93482280e-01])}]"
-Where did the family go on Saturday and what did they do?,"[[['The family went to the beach on Saturday.', 'On Saturday at the beach, my family built a large sandcastle.', 'The train arrived at the station on time.', 'She enjoys listening to classical music.', 'The baker made fresh bread this morning.', 'Mountains are very tall.', 'The chef is preparing dinner in the kitchen.', 'He bought a new bicycle yesterday.', 'The moon is visible at night.', ""School starts at eight o'clock.""]]]","The family went to the beach on Saturday, and they built a large sandcastle there.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 0.5, (2, 'TMC32'): 0.5, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 0.5, (2, 'TMC64'): 0.5, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 0.5, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([ 4.29768145, 51.12858451, -4.02146493, -2.91588842, -2.15748343,
+       -8.24182034e-02,  1.93482280e-01])}]","[[ 0.          0.24788197 -3.14375969 -1.8241295   1.66617809  0.69736828
+  -3.91934041  1.16594246  3.15070548  3.48465529]
+ [ 0.24788197  0.         -0.87587981 -3.37630351  4.38692449 -0.08243068
+   0.52726997 -0.03580477  2.08054893  4.02063738]
+ [-3.14375969 -0.87587981  0.         -2.3886847   2.73705004  0.96326258
+   2.04922879  1.70204938 -0.0644463   0.17893092]
+ [-1.8241295  -3.37630351 -2.3886847   0.          2.49852582  1.33713216
+   0.20173175  1.13684686 -0.47214194 -0.70160166]
+ [ 1.66617809  4.38692449  2.73705004  2.49852582  0.          3.11823072
+   1.33788844  2.71745089  2.31847022  0.69928751]
+ [ 0.69736828 -0.08243068  0.96326258  1.33713216  3.11823072  0.
+   0.46099181  2.07620229  1.55443035  0.90865649]
+ [-3.91934041  0.52726997  2.04922879  0.20173175  1.33788844  0.46099181
+   0.          1.53698169  0.29620742  0.00510878]
+ [ 1.16594246 -0.03580477  1.70204938  1.13684686  2.71745089  2.07620229
+   1.53698169  0.          1.89201927  0.9217751 ]
+ [ 3.15070548  2.08054893 -0.0644463  -0.47214194  2.31847022  1.55443035
+   0.29620742  1.89201927  0.          2.23689213]
+ [ 3.48465529  4.02063738  0.17893092 -0.70160166  0.69928751  0.90865649
+   0.00510878  0.9217751   2.23689213  0.        ]]"
+Where did the family go on Saturday and what did they do?,"[[['The family went to the beach on Saturday.', 'On Saturday at the beach, my family built a large sandcastle.', 'The train arrived at the station on time.', 'She enjoys listening to classical music.', 'The baker made fresh bread this morning.', 'Mountains are very tall.', 'The chef is preparing dinner in the kitchen.', 'He bought a new bicycle yesterday.', 'The moon is visible at night.', ""School starts at eight o'clock.""]]]","The family went to the beach on Saturday, and they built a large sandcastle there.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 1.39581422e+02, -5.98299721e+00, -1.08385434e+00,
+        -2.07548314e-01, -1.30578987e+00, -7.58707663e-01,
+         5.30850856e-01, -3.53174721e+00, -1.57525763e+00,
+         8.76295360e-01],
+       [-5.98299721e+00,  3.93701522e+00,  1.62381772e+00,
+        -9.34790154e-02,  9.78976377e-01,  1.91450964e+00,
+         2.03846359e-01, -1.34093350e+00,  1.36751029e-01,
+         2.68539185e+00],
+       [-1.08385434e+00,  1.62381772e+00,  1.99810533e+00,
+         2.12492472e+00,  2.44100838e+00,  1.81634679e+00,
+         1.89824575e+00,  1.80565176e+00,  1.15930822e+00,
+         1.47092287e+00],
+       [-2.07548314e-01, -9.34790154e-02,  2.12492472e+00,
+         3.71185041e+00,  2.99477096e+00,  1.40185354e+00,
+         2.79757798e+00,  4.55339058e+00,  1.45304180e+00,
+         7.91701104e-01],
+       [-1.30578987e+00,  9.78976377e-01,  2.44100838e+00,
+         2.99477096e+00,  4.25852368e+00,  2.55027087e+00,
+         3.28939830e+00,  2.08866841e+00,  2.75600408e+00,
+         2.51534896e-01],
+       [-7.58707663e-01,  1.91450964e+00,  1.81634679e+00,
+         1.40185354e+00,  2.55027087e+00,  2.04249511e+00,
+         1.75638019e+00,  3.15774686e-01,  1.49226890e+00,
+         1.08340799e+00],
+       [ 5.30850856e-01,  2.03846359e-01,  1.89824575e+00,
+         2.79757798e+00,  3.28939830e+00,  1.75638019e+00,
+         2.72210919e+00,  2.54408154e+00,  2.04153634e+00,
+         1.35353818e-01],
+       [-3.53174721e+00, -1.34093350e+00,  1.80565176e+00,
+         4.55339058e+00,  2.08866841e+00,  3.15774686e-01,
+         2.54408154e+00,  7.15446872e+00,  5.51960951e-01,
+         8.27504567e-01],
+       [-1.57525763e+00,  1.36751029e-01,  1.15930822e+00,
+         1.45304180e+00,  2.75600408e+00,  1.49226890e+00,
+         2.04153634e+00,  5.51960951e-01,  2.11337005e+00,
+        -7.36652901e-01],
+       [ 8.76295360e-01,  2.68539185e+00,  1.47092287e+00,
+         7.91701104e-01,  2.51534896e-01,  1.08340799e+00,
+         1.35353818e-01,  8.27504567e-01, -7.36652901e-01,
+         3.04331202e+00]])]","[{'Exact': array([ 4.29768145, 51.12858451, -4.02146493, -2.91588842, -2.15748343,
        -1.61239638, -1.03591945, -2.18336492, -2.25291346, -1.91103908]), 'ContextCite32': array([ 7.52198674, 53.32178153, -1.57876602, -0.        , -2.52612407,
        -2.25580902, -2.53471477,  0.26828009, -0.13045725, -0.08219221]), 'KernelShap32': array([ 6.90361869, 52.98816492, -5.48544618,  0.08824746, -2.25522571,
-        1.98621567,  1.47474588,  1.08396177, -1.67285014, -3.45305582]), 'BetaShap (U)32': array([-1.11567328e+01,  3.64006998e+01,  1.42620459e-01, -2.96500249e+01,
+        1.98621567,  1.47474588,  1.08396177, -1.67285014, -3.45305582]), 'WSS32': array([ -0.13727155,  30.33010547,   9.40365986,   3.97521587,
+        -3.44733762,   9.63128407,   4.09725125, -13.23526559,
+         3.74600065,  -0.16666234]), 'BetaShap (U)32': array([-1.11567328e+01,  3.64006998e+01,  1.42620459e-01, -2.96500249e+01,
         1.62063231e+00, -2.48351061e-01, -1.82637284e-01, -1.43738039e-01,
         1.40351707e-02, -1.00101498e-01]), 'TMC32': array([-6.82843596e-01,  4.66581650e+01,  1.46414359e-01, -1.48469421e+01,
         1.52129845e+00,  3.12841153e+00, -1.89020157e-01,  2.69761475e+00,
         1.25706196e-02,  7.72420764e-02]), 'ContextCite64': array([ 6.79812564e+00,  5.23865569e+01, -1.51071706e+00,  7.66963811e-01,
        -1.76132171e+00, -5.12690285e-01, -1.54383442e+00,  4.96928212e-01,
         5.02460927e-02, -1.08936154e-01]), 'KernelShap64': array([ 6.77451509, 52.99405881, -3.59592042,  0.36085696, -1.09438163,
-        0.15425982,  0.16461562,  1.24569827, -0.3872025 , -1.3851443 ]), 'BetaShap (U)64': array([-1.11566944e+01,  3.64007049e+01, -9.34504643e-01, -2.96499837e+01,
+        0.15425982,  0.16461562,  1.24569827, -0.3872025 , -1.3851443 ]), 'WSS64': array([ 6.0519788 , 50.99887794, -3.67638754,  0.38760321, -2.45566736,
+        0.60440302, -2.62751064,  0.10834269, -1.02086428,  0.09547677]), 'BetaShap (U)64': array([-1.11566944e+01,  3.64007049e+01, -9.34504643e-01, -2.96499837e+01,
        -2.29595870e-02, -2.48355510e-01,  2.95869523e-01, -1.35712604e+01,
        -1.58034267e+01,  9.88619978e-01]), 'TMC64': array([ 1.02044954, 48.79050836, -0.93806374, -9.08760355,  0.7437119 ,
         1.06421348,  0.30377552, -4.01231387, -1.9960342 ,  1.20170847]), 'ContextCite100': array([ 6.56711068, 52.71274954, -0.91681296,  0.30614939, -0.86593402,
        -0.53025622, -0.82010057,  0.77409   , -0.23160298, -0.        ]), 'KernelShap100': array([ 7.03919861, 53.57807004, -2.64542101,  0.39610302, -0.10123244,
-        0.44482855,  1.07413712,  2.01966708, -0.96608889, -0.94218713]), 'BetaShap (U)100': array([-4.14786121e-01,  3.64007365e+01, -2.25250513e+01, -2.96499847e+01,
+        0.44482855,  1.07413712,  2.01966708, -0.96608889, -0.94218713]), 'WSS100': array([ 6.30556522, 52.11227976, -2.73017127,  0.15380811, -1.16898478,
+       -1.74763196, -1.16910645, -0.13148733, -0.42598324,  0.50027213]), 'BetaShap (U)100': array([-4.14786121e-01,  3.64007365e+01, -2.25250513e+01, -2.96499847e+01,
        -2.29588907e-02, -2.48356147e-01, -3.89147816e-01, -1.22285129e+01,
        -1.58034477e+01, -1.00571162e+01]), 'TMC100': array([ 4.11103909, 50.54225001, -2.95477547, -8.59059818,  0.85704823,
         0.37376538, -0.1134728 , -4.25759661, -2.29587133, -1.70221223]), 'LOO': array([ 4.95617771e+00,  5.11525035e+01, -9.63652134e-02, -2.79425621e-01,
        -2.29616165e-02, -2.48357773e-01, -2.86792755e-01, -1.43746853e-01,
-        8.56733322e-03,  9.96367931e-02])}]"
-What colors did Alex use to paint his toy car?,"[[['Alex painted his toy car bright red.', ""Alex used some yellow paint for the car's stripes."", 'The dog barked at the mailman.', 'Pencils are used for writing.', 'The farmer grows corn in the field.', 'She wore a warm scarf in the winter.', 'The river flows towards the sea.', 'He likes to play video games.', 'The library is a quiet place.', 'Stars twinkle in the night sky.']]]",Alex used two colors to paint his toy car: bright red and yellow.,"[[(0, 9)]]",,"[{(2, 'Exact'): 0.5, (2, 'ContextCite32'): 0.0, (2, 'KernelShap32'): 0.5, (2, 'BetaShap (U)32'): 0.0, (2, 'TMC32'): 0.5, (2, 'ContextCite64'): 0.5, (2, 'KernelShap64'): 0.5, (2, 'BetaShap (U)64'): 0.0, (2, 'TMC64'): 0.5, (2, 'ContextCite100'): 0.5, (2, 'KernelShap100'): 0.5, (2, 'BetaShap (U)100'): 0.5, (2, 'TMC100'): 0.5, (2, 'LOO'): 0.5}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([25.38533794, 22.00797937, -1.56549334,  0.90214648, -1.02305081,
+        8.56733322e-03,  9.96367931e-02])}]","[[ 0.         -1.79581398  3.15583094  4.37829571  2.0621363   0.60541806
+   0.81583949  3.30552489  2.05236229  1.53334899]
+ [-1.79581398  0.          5.03643694  1.73205274  2.25668754  1.85247319
+  -0.42731959  1.03776942  2.53631327  2.52323415]
+ [ 3.15583094  5.03643694  0.          4.37589055  3.11986509  1.70206014
+   0.9268012   1.40518977  1.63020501  1.07658554]
+ [ 4.37829571  1.73205274  4.37589055  0.          3.63310626  3.8426249
+   1.87642175  5.29814226  2.50029933  1.7337958 ]
+ [ 2.0621363   2.25668754  3.11986509  3.63310626  0.          0.72493947
+  -0.0597445   2.42376729  2.07584511  1.4315636 ]
+ [ 0.60541806  1.85247319  1.70206014  3.8426249   0.72493947  0.
+   0.82973275  0.99192107  1.03481217  1.80971219]
+ [ 0.81583949 -0.42731959  0.9268012   1.87642175 -0.0597445   0.82973275
+   0.          1.26736375  2.07334455  0.10462313]
+ [ 3.30552489  1.03776942  1.40518977  5.29814226  2.42376729  0.99192107
+   1.26736375  0.          3.18827949  1.22334466]
+ [ 2.05236229  2.53631327  1.63020501  2.50029933  2.07584511  1.03481217
+   2.07334455  3.18827949  0.         -1.27938132]
+ [ 1.53334899  2.52323415  1.07658554  1.7337958   1.4315636   1.80971219
+   0.10462313  1.22334466 -1.27938132  0.        ]]"
+What colors did Alex use to paint his toy car?,"[[['Alex painted his toy car bright red.', ""Alex used some yellow paint for the car's stripes."", 'The dog barked at the mailman.', 'Pencils are used for writing.', 'The farmer grows corn in the field.', 'She wore a warm scarf in the winter.', 'The river flows towards the sea.', 'He likes to play video games.', 'The library is a quiet place.', 'Stars twinkle in the night sky.']]]",Alex used two colors to paint his toy car: bright red and yellow.,,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 1.15066960e+03,  6.37843764e+01, -1.24333365e+00,
+        -1.68905709e+00,  7.52473127e-02,  1.34702428e+00,
+         6.06033044e-01, -3.79443167e-01, -5.99682608e-01,
+        -3.33101017e+00],
+       [ 6.37843764e+01,  3.66005709e+00,  3.52753949e-02,
+        -9.42958295e-02, -3.03256921e-01,  6.47092717e-02,
+         7.14012000e-01, -1.07705305e-01, -1.82567949e-02,
+        -5.87265611e-02],
+       [-1.24333365e+00,  3.52753949e-02,  2.16090187e+00,
+        -1.42710759e+00,  9.16529313e-01,  9.76901558e-01,
+         5.70067058e-01,  5.77549694e-01,  1.41789807e+00,
+         3.17751575e-01],
+       [-1.68905709e+00, -9.42958295e-02, -1.42710759e+00,
+         1.11577035e+00, -7.06239529e-01, -8.71753997e-01,
+        -4.04906967e-01, -4.14708533e-01, -1.13469755e+00,
+        -3.02331507e-01],
+       [ 7.52473127e-02, -3.03256921e-01,  9.16529313e-01,
+        -7.06239529e-01,  1.50573984e+00,  4.34080557e-01,
+        -1.99780394e+00,  6.07851893e-01,  6.26851796e-01,
+        -3.21804998e-01],
+       [ 1.34702428e+00,  6.47092717e-02,  9.76901558e-01,
+        -8.71753997e-01,  4.34080557e-01,  7.51772735e-01,
+         5.35961132e-01,  2.68507711e-01,  9.13439670e-01,
+         3.25188473e-01],
+       [ 6.06033044e-01,  7.14012000e-01,  5.70067058e-01,
+        -4.04906967e-01, -1.99780394e+00,  5.35961132e-01,
+         4.96687072e+00, -5.74250274e-01,  6.01789273e-01,
+         1.19309026e+00],
+       [-3.79443167e-01, -1.07705305e-01,  5.77549694e-01,
+        -4.14708533e-01,  6.07851893e-01,  2.68507711e-01,
+        -5.74250274e-01,  2.72315338e-01,  3.88433009e-01,
+        -6.19058093e-02],
+       [-5.99682608e-01, -1.82567949e-02,  1.41789807e+00,
+        -1.13469755e+00,  6.26851796e-01,  9.13439670e-01,
+         6.01789273e-01,  3.88433009e-01,  1.17163128e+00,
+         3.69788294e-01],
+       [-3.33101017e+00, -5.87265611e-02,  3.17751575e-01,
+        -3.02331507e-01, -3.21804998e-01,  3.25188473e-01,
+         1.19309026e+00, -6.19058093e-02,  3.69788294e-01,
+         3.63912457e-01]])]","[{'Exact': array([25.38533794, 22.00797937, -1.56549334,  0.90214648, -1.02305081,
        -2.10040379, -1.08609953, -1.72700705, -0.76642898,  0.32153378]), 'ContextCite32': array([ 0.76264584, 22.82199794, -0.03735925,  5.93527096,  1.0633472 ,
        -4.19440722, -4.07338823,  1.0385098 ,  6.02850347, -2.11625658]), 'KernelShap32': array([ 24.5164158 ,  22.83481445,  12.25672911,  -3.90619133,
         -1.86248761, -14.77135707,   0.41447662,  -3.13062462,
-        -1.05893757,   1.64333481]), 'BetaShap (U)32': array([-4.92133004, -6.76456664,  0.75795181,  0.63300242,  0.65464161,
+        -1.05893757,   1.64333481]), 'WSS32': array([25.95777899, 26.37482913, -2.70345159,  2.26745952, -0.63135356,
+       -1.10648689, -4.42032137,  2.6421806 , -0.61032193, -2.1787017 ]), 'BetaShap (U)32': array([-4.92133004, -6.76456664,  0.75795181,  0.63300242,  0.65464161,
         0.42443306, -1.67842172,  0.37470771,  0.1314074 , -1.54554054]), 'TMC32': array([21.15068924, 22.4282248 ,  0.78216815,  0.22996068,  0.59583656,
        -1.85781056, -1.61491736, -0.62097541,  0.13495874, -1.16323268]), 'ContextCite64': array([15.47367832, 17.95711584, -3.62867848, -0.04078124,  3.6240468 ,
        -0.14958909, -1.96382408, -3.34767917,  1.70917491, -1.75997999]), 'KernelShap64': array([24.30117491, 19.97534559,  7.60596111, -2.38836567, -0.62223673,
-       -4.13322859,  0.0851898 , -2.2402659 , -0.25745105, -0.15501006]), 'BetaShap (U)64': array([-4.92118205, -6.76461139, -0.14643061,  0.63300652,  0.8570251 ,
+       -4.13322859,  0.0851898 , -2.2402659 , -0.25745105, -0.15501006]), 'WSS64': array([25.26237784, 21.08101701, -0.16935037,  1.66528121, -0.18868969,
+        0.36077846, -0.72952211, -1.20654523, -0.10532144,  1.29546207]), 'BetaShap (U)64': array([-4.92118205, -6.76461139, -0.14643061,  0.63300652,  0.8570251 ,
         0.42443399, -0.28682329, -4.45059771, -8.34529401, -0.04599345]), 'TMC64': array([33.67842027,  6.37754357, -0.10879222,  1.45861673,  0.64577852,
        -1.61381153, -0.26478377, -2.50559846, -0.77763665,  0.22731459]), 'ContextCite100': array([21.60553441, 22.00445715, -1.26504018,  3.3079001 ,  1.10754125,
        -3.81558178, -0.71668086, -7.18338946,  0.61958788,  1.12932352]), 'KernelShap100': array([23.33617903, 20.75304842,  2.10369136, -1.76715572, -1.08093006,
-       -2.41606154,  2.82997323, -4.16339014,  1.11479777,  0.38622131]), 'BetaShap (U)100': array([36.64620913, -6.76454084, -7.37133479,  0.63300616,  0.85702419,
+       -2.41606154,  2.82997323, -4.16339014,  1.11479777,  0.38622131]), 'WSS100': array([25.86535956, 21.9069095 , -0.05791008,  1.96779908,  0.20653573,
+       -0.0692178 , -0.36362413, -1.09780729,  0.76898439,  1.12047258]), 'BetaShap (U)100': array([36.64620913, -6.76454084, -7.37133479,  0.63300616,  0.85702419,
         0.42443443, -0.23106334, -3.96806756, -8.3453051 , -0.52026567]), 'TMC100': array([29.87093461, 14.46741225, -1.23032361,  1.44378948,  0.39000995,
        -0.8539021 , -0.17521312, -2.31175276, -0.88173184, -0.59429924]), 'LOO': array([57.43005705, 53.88888884,  0.84514856,  1.21930337,  0.85702562,
-        0.42443752,  0.953789  ,  0.3747108 ,  0.84935713,  0.315485  ])}]"
-What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,"[[['The Gleepglorp from planet Xylar can manipulate Zylonic energy for teleportation.', 'A rare Flumph, also from Xylar, emits Quirkle Crystals that enhance its camouflage.', 'Many stories tell of brave Knorbols.', 'The Blargon festival happens every Floopy cycle.', 'Sky-skiffs are common transport in a Flibbertown.', 'Glimmering Floofel-dust is prized by artisans.', 'The wind chimes played a strange melody.', 'Old maps sometimes show imaginary lands.', 'The lunar cycle affects the tides of Blorb.', 'Not all portals lead to safe destinations.']]]","The Gleepglorp from planet Xylar can manipulate Zylonic energy for teleportation, while the Flumph, also from Xylar, emits Quirkle Crystals that enhance its camouflage.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([52.34691996, 75.85878473,  0.95568486,  3.62772546,  4.28672982,
+        0.42443752,  0.953789  ,  0.3747108 ,  0.84935713,  0.315485  ])}]","[[ 0.         62.66693987  1.07561988 -0.44300347  0.06872804  0.84550174
+  -0.70374545  0.22157543  0.61655265 -1.9966944 ]
+ [62.66693987  0.         -0.70174395 -0.19924445 -1.10236001 -0.31532362
+   0.9879095   0.88383203  0.22114898 -1.78762107]
+ [ 1.07561988 -0.70174395  0.         -1.6748954   1.16702135  3.55144745
+   0.83601244  1.05864645  1.80598799  1.09844365]
+ [-0.44300347 -0.19924445 -1.6748954   0.          0.16829723  0.64362697
+   0.11336516  0.51885137  0.95094186  0.50836086]
+ [ 0.06872804 -1.10236001  1.16702135  0.16829723  0.          1.67572419
+   0.87190962  1.4014156   1.42189586  0.15709196]
+ [ 0.84550174 -0.31532362  3.55144745  0.64362697  1.67572419  0.
+   1.4888685   0.51009287  1.53263008  1.07856597]
+ [-0.70374545  0.9879095   0.83601244  0.11336516  0.87190962  1.4888685
+   0.          1.19469607  0.87565002  0.27395972]
+ [ 0.22157543  0.88383203  1.05864645  0.51885137  1.4014156   0.51009287
+   1.19469607  0.          0.85755387  0.59130546]
+ [ 0.61655265  0.22114898  1.80598799  0.95094186  1.42189586  1.53263008
+   0.87565002  0.85755387  0.          0.91233654]
+ [-1.9966944  -1.78762107  1.09844365  0.50836086  0.15709196  1.07856597
+   0.27395972  0.59130546  0.91233654  0.        ]]"
+What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,"[[['The Gleepglorp from planet Xylar can manipulate Zylonic energy for teleportation.', 'A rare Flumph, also from Xylar, emits Quirkle Crystals that enhance its camouflage.', 'Many stories tell of brave Knorbols.', 'The Blargon festival happens every Floopy cycle.', 'Sky-skiffs are common transport in a Flibbertown.', 'Glimmering Floofel-dust is prized by artisans.', 'The wind chimes played a strange melody.', 'Old maps sometimes show imaginary lands.', 'The lunar cycle affects the tides of Blorb.', 'Not all portals lead to safe destinations.']]]","The Gleepglorp from planet Xylar can manipulate Zylonic energy for teleportation, while the Flumph, also from Xylar, emits Quirkle Crystals that enhance its camouflage.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 2.81243283e+02,  8.25665769e+00,  2.10365990e+00,
+        -5.03258561e+00, -1.90979089e+00, -6.63495758e-01,
+        -5.55233081e+00,  7.44716523e-01, -7.59385234e-01,
+        -3.26493688e+00],
+       [ 8.25665769e+00,  5.26625004e+00,  9.54175899e-01,
+        -2.69377103e+00, -3.43418865e-01,  6.74062107e-01,
+         3.08349363e-02,  8.09788926e-01, -2.49334431e-01,
+         1.31803335e+00],
+       [ 2.10365990e+00,  9.54175899e-01,  1.39120020e+00,
+         2.52226570e-01,  1.05449068e-01, -1.73775582e+00,
+        -1.15592832e+00,  9.23110861e-01, -5.12963232e-01,
+         3.39268262e-02],
+       [-5.03258561e+00, -2.69377103e+00,  2.52226570e-01,
+         3.82997424e+00,  4.21121056e-01,  5.31758630e-01,
+         2.02553875e-01, -5.11481302e-01,  3.28371296e-01,
+        -8.85734205e-01],
+       [-1.90979089e+00, -3.43418865e-01,  1.05449068e-01,
+         4.21121056e-01,  6.27925394e-02, -1.58024061e-01,
+        -7.26444021e-02,  1.96348237e-02, -1.41078991e-02,
+        -9.33158339e-02],
+       [-6.63495758e-01,  6.74062107e-01, -1.73775582e+00,
+         5.31758630e-01, -1.58024061e-01,  4.93734223e+00,
+         2.69679606e+00, -1.65369974e+00,  1.16859574e+00,
+         3.86570435e-01],
+       [-5.55233081e+00,  3.08349363e-02, -1.15592832e+00,
+         2.02553875e-01, -7.26444021e-02,  2.69679606e+00,
+         1.60906221e+00, -9.77191943e-01,  6.65885389e-01,
+         2.51325383e-01],
+       [ 7.44716523e-01,  8.09788926e-01,  9.23110861e-01,
+        -5.11481302e-01,  1.96348237e-02, -1.65369974e+00,
+        -9.77191943e-01,  7.86818796e-01, -4.75003906e-01,
+         1.21481024e-01],
+       [-7.59385234e-01, -2.49334431e-01, -5.12963232e-01,
+         3.28371296e-01, -1.41078991e-02,  1.16859574e+00,
+         6.65885389e-01, -4.75003906e-01,  3.09022884e-01,
+        -7.79364661e-03],
+       [-3.26493688e+00,  1.31803335e+00,  3.39268262e-02,
+        -8.85734205e-01, -9.33158339e-02,  3.86570435e-01,
+         2.51325383e-01,  1.21481024e-01, -7.79364661e-03,
+         4.72429005e-01]])]","[{'Exact': array([52.34691996, 75.85878473,  0.95568486,  3.62772546,  4.28672982,
         2.47937823,  3.87106509,  3.48306666,  2.84039794,  5.17113711]), 'ContextCite32': array([43.7784603 , 73.52970268, -1.87521543,  3.34065886,  6.08661315,
        -0.64807775,  1.48586108,  1.42084108,  4.82239931, -0.6293111 ]), 'KernelShap32': array([49.90925936, 72.51268616,  1.44478733, -0.18036103,  3.21036854,
-       -3.74610699,  1.15668596,  2.02574644,  0.2871478 ,  2.55156323]), 'BetaShap (U)32': array([ 8.28896251e+01,  1.12363915e+02, -1.20330185e+00,  3.31615718e+01,
+       -3.74610699,  1.15668596,  2.02574644,  0.2871478 ,  2.55156323]), 'WSS32': array([ 64.55838367,  51.31564686, -14.63299921,   3.93608973,
+        16.52625356,  24.67162619,   4.64939395,  -3.2866459 ,
+        -2.41348229,  -2.69418306]), 'BetaShap (U)32': array([ 8.28896251e+01,  1.12363915e+02, -1.20330185e+00,  3.31615718e+01,
         1.24654523e+00,  9.23991288e-01, -3.51514997e-01, -5.68700579e-02,
        -5.17690099e-01,  1.57528640e+00]), 'TMC32': array([56.05328691, 78.52067971, -1.22175996, 16.3433671 ,  1.2783761 ,
         1.83379781, -0.34508149,  2.23458068, -0.50583029,  1.42025864]), 'ContextCite64': array([ 4.52166418e+01,  7.14843557e+01, -2.70472371e+00,  2.06460380e+00,
         3.65659888e+00, -1.74085074e-02,  4.30145582e-01,  1.14598371e+00,
         2.09465734e+00,  1.70399684e+00]), 'KernelShap64': array([48.5218135 , 72.22886827, -1.39731136, -0.49628754,  1.39042147,
-       -1.60995088,  0.66402299,  1.55342537, -0.34198857,  2.31878584]), 'BetaShap (U)64': array([ 8.28895346e+01,  1.12363916e+02, -1.99464259e+00,  3.31615179e+01,
+       -1.60995088,  0.66402299,  1.55342537, -0.34198857,  2.31878584]), 'WSS64': array([49.12971408, 71.68160387, -0.50483703,  1.69903962,  2.01431692,
+       -1.41690484,  0.20821925,  1.39432728,  0.19635469,  3.55467058]), 'BetaShap (U)64': array([ 8.28895346e+01,  1.12363916e+02, -1.99464259e+00,  3.31615179e+01,
         6.16822188e-01,  9.23990097e-01,  6.08528481e-02,  2.33833136e+01,
         3.49381361e+01,  1.72926930e+00]), 'TMC64': array([ 5.32190945e+01,  7.82346188e+01, -1.96945381e+00,  7.81486034e+00,
         1.00802353e+00,  1.33412654e+00,  7.69496560e-02,  9.26259851e+00,
         4.73093873e+00,  1.72582430e+00]), 'ContextCite100': array([46.7415044 , 70.89497729, -1.94525351,  1.63809889,  1.50386772,
        -1.40358561,  0.35067979, -0.80909641,  0.27197636,  2.28942531]), 'KernelShap100': array([48.45933315, 71.31460315, -2.14511177,  0.201406  ,  1.39786169,
-       -1.96832197,  1.21864409,  0.28309969, -1.13624268,  2.39326994]), 'BetaShap (U)100': array([ 62.81061957, 112.36384084,  29.7118909 ,  33.16152104,
+       -1.96832197,  1.21864409,  0.28309969, -1.13624268,  2.39326994]), 'WSS100': array([ 4.90089254e+01,  7.15085523e+01, -1.49282765e+00,  1.47620654e+00,
+        1.27849305e+00, -2.34274993e+00,  1.29261809e-02, -2.90149562e-01,
+       -1.55138010e-01,  3.11732433e+00]), 'BetaShap (U)100': array([ 62.81061957, 112.36384084,  29.7118909 ,  33.16152104,
          0.61682022,   0.92398914,  -0.29192393,  21.03929949,
         34.93818395,  37.60496904]), 'TMC100': array([51.63228248, 76.06574598,  0.25496856,  7.8976965 ,  0.28368737,
         0.72789482, -0.14632014,  9.078661  ,  5.80609853,  5.08037945]), 'LOO': array([ 5.27711363e+01,  7.64421072e+01, -2.08852768e-01, -4.00130272e-01,
         6.16821289e-01,  9.23989296e-01,  1.47870064e-01, -5.68771362e-02,
-       -1.43837452e-01,  1.73137665e+00])}]"
-What distinct characteristics do elephants have?,"[[['The elephant has large, floppy ears.', 'The elephant uses its long trunk to drink water.', 'Fish live in water.', 'The zookeeper feeds the lions.', 'Birds build nests in trees.', 'The cheetah is a very fast runner.', 'Butterflies have colorful wings.', 'The farmer keeps chickens for eggs.', 'Snakes can slither on the ground.', 'Whales are large marine mammals.']]]","Elephants have distinct characteristics such as large, floppy ears and a long trunk.","[[(0, 6)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 0.5, (2, 'BetaShap (U)32'): 0.5, (2, 'TMC32'): 0.5, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 0.5, (2, 'BetaShap (U)64'): 0.5, (2, 'TMC64'): 0.5, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 0.5, (2, 'TMC100'): 0.5, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([23.57345451, -4.4540682 ,  1.67226985,  1.50653694,  1.69419712,
+       -1.43837452e-01,  1.73137665e+00])}]","[[ 0.          2.56941535 -0.1255641  -5.35946967 -3.77439384 -3.93814823
+  -6.13865023 -3.91502944 -3.25747834 -6.17925468]
+ [ 2.56941535  0.         -4.1370099  -6.35794811 -5.90871254 -5.14353337
+  -3.11917964 -4.37726725 -6.3357218  -3.11194921]
+ [-0.1255641  -4.1370099   0.         -3.58618422 -3.77063425 -3.86592961
+  -3.0592593  -3.72314005 -3.84763987 -3.80564967]
+ [-5.35946967 -6.35794811 -3.58618422  0.         -2.97109018 -2.65105135
+  -2.81592893 -3.48214755 -3.60022164 -2.73769446]
+ [-3.77439384 -5.90871254 -3.77063425 -2.97109018  0.         -3.69529223
+  -3.35041026 -3.59552978 -4.20117006 -3.98514723]
+ [-3.93814823 -5.14353337 -3.86592961 -2.65105135 -3.69529223  0.
+  -4.27299922 -3.96214169 -3.12815478 -3.86800949]
+ [-6.13865023 -3.11917964 -3.0592593  -2.81592893 -3.35041026 -4.27299922
+   0.         -4.87364587 -3.43772873 -4.88856816]
+ [-3.91502944 -4.37726725 -3.72314005 -3.48214755 -3.59552978 -3.96214169
+  -4.87364587  0.         -3.60392774 -3.62750235]
+ [-3.25747834 -6.3357218  -3.84763987 -3.60022164 -4.20117006 -3.12815478
+  -3.43772873 -3.60392774  0.         -3.67011847]
+ [-6.17925468 -3.11194921 -3.80564967 -2.73769446 -3.98514723 -3.86800949
+  -4.88856816 -3.62750235 -3.67011847  0.        ]]"
+What distinct characteristics do elephants have?,"[[['The elephant has large, floppy ears.', 'The elephant uses its long trunk to drink water.', 'Fish live in water.', 'The zookeeper feeds the lions.', 'Birds build nests in trees.', 'The cheetah is a very fast runner.', 'Butterflies have colorful wings.', 'The farmer keeps chickens for eggs.', 'Snakes can slither on the ground.', 'Whales are large marine mammals.']]]","Elephants have distinct characteristics such as large, floppy ears and a long trunk.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 2.04421074e+01,  6.43898999e+00,  5.86602582e-01,
+         1.25186099e+00, -9.82225270e-02, -2.13332012e-01,
+        -9.82986763e-01,  9.76095490e-01, -5.26103446e-02,
+         7.21815676e-01],
+       [ 6.43898999e+00,  1.24364464e+01, -9.99404558e-01,
+        -4.12066496e-02, -4.53657930e-01,  7.76963689e-03,
+         1.80424037e+00, -1.48065779e+00, -1.97440671e+00,
+        -1.86024473e-01],
+       [ 5.86602582e-01, -9.99404558e-01,  6.21652109e+00,
+        -3.75821972e+00,  1.00770006e+00,  7.13410251e-01,
+         4.70420162e-02, -1.37761174e+00, -1.16836868e+00,
+        -7.52774195e-01],
+       [ 1.25186099e+00, -4.12066496e-02, -3.75821972e+00,
+         4.49273536e+00, -1.01934058e+00, -1.09333478e+00,
+        -2.99928796e+00,  4.58777176e-03,  1.06800608e+00,
+         8.77440688e-01],
+       [-9.82225270e-02, -4.53657930e-01,  1.00770006e+00,
+        -1.01934058e+00,  2.60736945e-01,  2.45663566e-01,
+         5.37849091e-01,  5.93651265e-02, -1.64059049e-01,
+        -1.80398731e-01],
+       [-2.13332012e-01,  7.76963689e-03,  7.13410251e-01,
+        -1.09333478e+00,  2.45663566e-01,  2.83404250e-01,
+         8.95232198e-01,  1.44618145e-01, -2.14460104e-01,
+        -2.01884053e-01],
+       [-9.82986763e-01,  1.80424037e+00,  4.70420162e-02,
+        -2.99928796e+00,  5.37849091e-01,  8.95232198e-01,
+         4.07390739e+00,  1.05946767e+00, -6.14207979e-01,
+        -5.61189721e-01],
+       [ 9.76095490e-01, -1.48065779e+00, -1.37761174e+00,
+         4.58777176e-03,  5.93651265e-02,  1.44618145e-01,
+         1.05946767e+00,  1.45450459e+00,  6.38843982e-01,
+         1.49742838e-01],
+       [-5.26103446e-02, -1.97440671e+00, -1.16836868e+00,
+         1.06800608e+00, -1.64059049e-01, -2.14460104e-01,
+        -6.14207979e-01,  6.38843982e-01,  6.92815334e-01,
+         2.80286373e-01],
+       [ 7.21815676e-01, -1.86024473e-01, -7.52774195e-01,
+         8.77440688e-01, -1.80398731e-01, -2.01884053e-01,
+        -5.61189721e-01,  1.49742838e-01,  2.80286373e-01,
+         1.97551249e-01]])]","[{'Exact': array([23.57345451, -4.4540682 ,  1.67226985,  1.50653694,  1.69419712,
         1.3064608 ,  3.07913234,  1.46542032,  1.35426738,  1.99134861]), 'ContextCite32': array([21.05814333, -4.74128764,  0.12769444,  1.19821597,  1.05728288,
         0.75869853,  2.16624468,  1.68246951,  0.54236947,  0.4107259 ]), 'KernelShap32': array([22.99322771, -5.04596058,  3.42557083, -0.30410671, -0.23274895,
-       -2.24484468,  1.25285316,  0.25942882,  1.29841947,  2.01728929]), 'BetaShap (U)32': array([25.12468205,  4.35122908,  0.64747228, 16.98653419, -0.10283742,
+       -2.24484468,  1.25285316,  0.25942882,  1.29841947,  2.01728929]), 'WSS32': array([ 2.45592373e+01, -2.12096763e-02,  5.62464539e+00, -1.60943345e+00,
+        4.49845232e+00, -8.32467000e+00,  1.74900250e+00,  2.13640400e+00,
+        1.75686140e+00, -1.43774711e+00]), 'BetaShap (U)32': array([25.12468205,  4.35122908,  0.64747228, 16.98653419, -0.10283742,
         0.35399115, -0.11604816,  0.78204092, -1.12964473,  1.37674065]), 'TMC32': array([ 2.50209473e+01,  4.84251976e-03,  6.94291751e-01,  8.54752302e+00,
        -4.31636175e-02, -5.36752462e-01, -1.30154769e-01, -6.42154376e-01,
        -1.14993286e+00,  9.51170802e-01]), 'ContextCite64': array([22.32318918, -5.7437305 ,  0.2529936 ,  0.18974389,  0.88275627,
        -0.02791872,  1.96725262, -0.        , -0.31665203,  0.61935626]), 'KernelShap64': array([23.07708739, -5.89965628,  1.95186201, -0.28970077,  0.28249026,
-       -0.50388532,  1.64790782, -0.30406845, -0.20947373,  1.90892548]), 'BetaShap (U)64': array([ 2.51246908e+01,  4.35122054e+00, -3.77518906e-03,  1.69865053e+01,
+       -0.50388532,  1.64790782, -0.30406845, -0.20947373,  1.90892548]), 'WSS64': array([23.65484354, -4.61836366,  1.33708325,  1.07199095,  0.09755773,
+       -1.17225509,  3.14158178, -0.46167925, -0.7065735 ,  0.68471306]), 'BetaShap (U)64': array([ 2.51246908e+01,  4.35122054e+00, -3.77518906e-03,  1.69865053e+01,
         1.30070826e+00,  3.53990879e-01,  1.89740478e-01,  1.19684877e+01,
         1.78483032e+01,  1.02889810e+00]), 'TMC64': array([26.48871463, -3.14895666, -0.03126347,  3.89401418,  0.54603481,
        -0.81401552,  0.17568088,  4.10403079,  1.13899076,  0.82094282]), 'ContextCite100': array([22.92553408, -5.39660139,  0.1113689 ,  0.36441131,  0.48886863,
        -0.38066307,  1.92066507, -0.58931432, -0.63396095,  1.24079042]), 'KernelShap100': array([23.14636961, -5.84884606,  0.70161613, -0.11454124,  0.04675099,
-       -0.4161862 ,  1.61984714, -0.88373115, -0.46012451,  1.05414795]), 'BetaShap (U)100': array([26.69801672,  4.35120446, 16.93969896, 16.98650778,  1.30070755,
+       -0.4161862 ,  1.61984714, -0.88373115, -0.46012451,  1.05414795]), 'WSS100': array([23.40409616, -5.56532333,  0.68937865,  0.70834279,  0.12794073,
+       -0.79961997,  2.73437445, -0.25283226, -0.75626649,  0.73934145]), 'BetaShap (U)100': array([26.69801672,  4.35120446, 16.93969896, 16.98650778,  1.30070755,
         0.35399067,  0.41858216, 10.84984648, 17.84833046, 13.06611386]), 'TMC100': array([23.86521134, -3.6147115 ,  1.40531909,  4.14717066,  0.42052053,
        -0.5456171 ,  0.40254871,  4.28815647,  1.83000055,  1.65187669]), 'LOO': array([27.48470068, -1.84092474,  1.32846022,  0.53775358,  1.3007102 ,
-        0.35399294,  1.57186556,  0.78204489,  0.3138442 ,  1.425529  ])}]"
-What are the key ingredients needed for a cake recipe?,"[[['To make a cake, you need flour and sugar.', 'You will need eggs and butter for a cake recipe.', 'Pizza is a popular dish.', 'He eats an apple every day.', 'The restaurant serves delicious pasta.', 'Oranges are a good source of Vitamin C.', 'She is making a shopping list.', 'The grocery store is open until 9 PM.', 'He prefers tea over coffee.', 'Vegetables are healthy to eat.']]]","The key ingredients needed for a cake recipe, according to the provided context, are flour and sugar. However, it was also mentioned that eggs and butter are needed for a cake recipe, but that information was not part of the initial question.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([37.55800552, 42.148783  , -2.98617352, -2.43309654, -1.71636782,
+        0.35399294,  1.57186556,  0.78204489,  0.3138442 ,  1.425529  ])}]","[[ 0.          6.98629037  0.28466906 -0.99307793 -1.07470814  0.47252179
+  -1.49763331 -0.58344399 -0.83890294 -0.39569476]
+ [ 6.98629037  0.         -2.4225136  -1.49309451 -1.43502305 -1.82071447
+  -0.62283002 -1.89487724 -2.71562553 -0.77377876]
+ [ 0.28466906 -2.4225136   0.         -2.26637973 -1.43963501 -2.27212262
+  -2.01550611 -2.29383934 -1.77975252 -1.40630023]
+ [-0.99307793 -1.49309451 -2.26637973  0.         -1.92835702 -2.39495034
+  -2.22176992 -1.96218541 -1.82451615 -1.36446669]
+ [-1.07470814 -1.43502305 -1.43963501 -1.92835702  0.         -2.51705724
+  -1.91643259 -2.08860053 -2.09741636 -1.75547706]
+ [ 0.47252179 -1.82071447 -2.27212262 -2.39495034 -2.51705724  0.
+  -2.64116553 -2.43904116 -2.56911151 -1.20989325]
+ [-1.49763331 -0.62283002 -2.01550611 -2.22176992 -1.91643259 -2.64116553
+   0.         -1.82430388 -2.24104915 -1.53184602]
+ [-0.58344399 -1.89487724 -2.29383934 -1.96218541 -2.08860053 -2.43904116
+  -1.82430388  0.         -1.97917726 -1.71422145]
+ [-0.83890294 -2.71562553 -1.77975252 -1.82451615 -2.09741636 -2.56911151
+  -2.24104915 -1.97917726  0.         -1.48901211]
+ [-0.39569476 -0.77377876 -1.40630023 -1.36446669 -1.75547706 -1.20989325
+  -1.53184602 -1.71422145 -1.48901211  0.        ]]"
+What are the key ingredients needed for a cake recipe?,"[[['To make a cake, you need flour and sugar.', 'You will need eggs and butter for a cake recipe.', 'Pizza is a popular dish.', 'He eats an apple every day.', 'The restaurant serves delicious pasta.', 'Oranges are a good source of Vitamin C.', 'She is making a shopping list.', 'The grocery store is open until 9 PM.', 'He prefers tea over coffee.', 'Vegetables are healthy to eat.']]]","The key ingredients needed for a cake recipe, according to the provided context, are flour and sugar. However, it was also mentioned that eggs and butter are needed for a cake recipe, but that information was not part of the initial question.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 1.54403978e+02, -2.55100653e+01, -7.21066461e-01,
+        -1.16896722e+00, -1.97788192e+00, -2.02069468e+00,
+        -3.10810891e+00, -3.63366530e+00, -6.82643648e+00,
+         2.20669033e+00],
+       [-2.55100653e+01,  5.60553821e+00,  3.00552054e-01,
+         1.14536237e+00,  1.91605422e-01, -2.42856519e-01,
+         3.83307840e-01,  2.77338121e+00, -9.10427422e-01,
+        -1.44807101e-01],
+       [-7.21066461e-01,  3.00552054e-01,  3.65110638e+00,
+         4.31489070e+00,  2.10344348e+00,  2.36230021e+00,
+         7.07993225e+00,  3.10165273e+00,  2.30591093e+00,
+        -6.36824833e-01],
+       [-1.16896722e+00,  1.14536237e+00,  4.31489070e+00,
+         5.90820257e+00,  1.92488787e+00,  1.97885848e+00,
+         8.26760748e+00,  4.96135056e+00,  3.97634489e-02,
+         4.52299614e-01],
+       [-1.97788192e+00,  1.91605422e-01,  2.10344348e+00,
+         1.92488787e+00,  1.72887981e+00,  1.96640448e+00,
+         4.01710634e+00,  1.24525909e+00,  3.39835277e+00,
+        -1.56427326e+00],
+       [-2.02069468e+00, -2.42856519e-01,  2.36230021e+00,
+         1.97885848e+00,  1.96640448e+00,  2.37191380e+00,
+         4.67388205e+00,  7.96138296e-01,  4.30366885e+00,
+        -1.71592014e+00],
+       [-3.10810891e+00,  3.83307840e-01,  7.07993225e+00,
+         8.26760748e+00,  4.01710634e+00,  4.67388205e+00,
+         1.39730355e+01,  5.42267349e+00,  4.71496739e+00,
+        -9.45139275e-01],
+       [-3.63366530e+00,  2.77338121e+00,  3.10165273e+00,
+         4.96135056e+00,  1.24525909e+00,  7.96138296e-01,
+         5.42267349e+00,  5.75345920e+00, -1.85060035e+00,
+         3.33091673e-01],
+       [-6.82643648e+00, -9.10427422e-01,  2.30591093e+00,
+         3.97634489e-02,  3.39835277e+00,  4.30366885e+00,
+         4.71496739e+00, -1.85060035e+00,  1.08669955e+01,
+        -4.90171081e+00],
+       [ 2.20669033e+00, -1.44807101e-01, -6.36824833e-01,
+         4.52299614e-01, -1.56427326e+00, -1.71592014e+00,
+        -9.45139275e-01,  3.33091673e-01, -4.90171081e+00,
+         2.97591969e+00]])]","[{'Exact': array([37.55800552, 42.148783  , -2.98617352, -2.43309654, -1.71636782,
        -0.39126749, -0.21831976, -1.74642147, -1.80580936, -0.21797971]), 'ContextCite32': array([46.45001264, 41.88472442, -1.73072624, -0.53735432, -4.18643356,
         1.33658582, -1.56141014, -5.94058031,  2.02152227,  8.53673133]), 'KernelShap32': array([39.8113709 , 43.18522407, -7.8709997 ,  0.8000186 ,  1.418236  ,
-        7.72178543, -0.63877041, -3.33782583,  3.37136013,  2.98240124]), 'BetaShap (U)32': array([ 25.68382911,  18.11065431,   1.95715529, -53.59974267,
+        7.72178543, -0.63877041, -3.33782583,  3.37136013,  2.98240124]), 'WSS32': array([ 54.79074515,  18.65167655,   4.86475232, -28.45194138,
+        -1.60417933,   2.4754627 ,  24.5540503 , -21.90296972,
+         2.34374079,  18.64362296]), 'BetaShap (U)32': array([ 25.68382911,  18.11065431,   1.95715529, -53.59974267,
         11.26298484,  -1.05235404,  -5.02437141,   1.45960894,
          2.17226   ,   2.91390913]), 'TMC32': array([ 38.29083729,  35.35790062,   2.11476898, -25.24499226,
         11.06091054,   6.28725243,  -5.07369741,   3.61012777,
          2.16501617,   2.49675179]), 'ContextCite64': array([40.73332593, 44.7931257 , -0.68663486,  4.19068252, -2.35384295,
         2.51873682,  0.        ,  1.09435163,  2.39680334,  5.24121491]), 'KernelShap64': array([39.93032844, 46.6414285 , -3.31651612,  1.79194072,  1.58102211,
-        3.15102783,  0.22635459, -0.09268658,  4.12347027,  3.44180059]), 'BetaShap (U)64': array([ 25.68384355,  18.11067098,   1.66257601, -53.59964242,
+        3.15102783,  0.22635459, -0.09268658,  4.12347027,  3.44180059]), 'WSS64': array([38.98076963, 42.3129069 , -2.97074072,  1.30573365, -2.31505371,
+        4.20193661, -1.57413637, -1.35783462, -0.11341289,  4.23307408]), 'BetaShap (U)64': array([ 25.68384355,  18.11067098,   1.66257601, -53.59964242,
          0.35770958,  -1.05235939,  -1.76953344, -21.2440398 ,
        -48.03966402,   3.4444743 ]), 'TMC64': array([35.10142408, 41.76404381,  1.68372345, -8.90302849,  5.45387595,
         4.10736193, -1.79062462, -6.83632517, -3.76287222,  3.52880192]), 'ContextCite100': array([39.34965835, 44.65630991, -0.37661081,  2.56972229,  0.46057944,
         3.88529728, -0.        ,  4.03804887,  3.39140899,  3.34080876]), 'KernelShap100': array([41.03385228, 46.82022533, -1.02620295,  0.95119887,  2.45184472,
-        3.13373126,  0.10121973,  0.72384163,  3.77101975,  3.19166545]), 'BetaShap (U)100': array([ 25.76266856,  18.11071883, -40.54306427, -53.5996523 ,
+        3.13373126,  0.10121973,  0.72384163,  3.77101975,  3.19166545]), 'WSS100': array([39.21527391, 44.99334677, -3.2176185 ,  1.33615572,  0.18608814,
+        1.06658221, -2.16801369,  0.27233041,  2.43988013,  5.11807437]), 'BetaShap (U)100': array([ 25.76266856,  18.11071883, -40.54306427, -53.5996523 ,
          0.35770422,  -1.05235744,   0.07164199, -18.97368167,
        -48.039735  , -35.42500764]), 'TMC100': array([ 41.28817338,  42.66466786,  -1.51928202, -10.14685567,
          2.71628218,   3.60208365,  -0.36055978,  -7.16479651,
         -5.42641244,   0.6512661 ]), 'LOO': array([25.80201721, 34.83172607, -0.41448212,  1.84690094,  0.35769653,
-       -1.05236816, -1.77816772,  1.45960236,  0.15019608,  0.88578796])}]"
-Which tools does a carpenter use and what are their stated purposes?,"[[['The carpenter uses a hammer to drive nails.', 'The carpenter uses a saw to cut wood.', 'The doctor works at the hospital.', 'Teachers help students learn new things.', 'The firefighter wears a special uniform.', 'Musicians play instruments.', 'The pilot flies an airplane.', 'A writer creates stories.', 'The scientist conducts experiments.', 'An artist paints beautiful pictures.']]]","A carpenter uses a hammer to drive nails and a saw to cut wood. The hammer is used for driving nails into wood, while the saw is used for cutting wood.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 0.5, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 0.5, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 0.5, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([27.1797967 ,  7.9937833 ,  2.51375915, -0.19948031,  2.92399804,
+       -1.05236816, -1.77816772,  1.45960236,  0.15019608,  0.88578796])}]","[[  0.         -18.35926323   3.17522079   5.07998119   1.90104694
+    0.33620408  -1.52812137   3.04274159   3.54624463   2.92417047]
+ [-18.35926323   0.           6.29427206   8.73478139   5.07279084
+    1.66997105   0.02595701   6.3910947    7.26576825  -0.37424933]
+ [  3.17522079   6.29427206   0.           5.55367188   4.30454878
+    4.99631802   1.82927912   3.16204013   4.33401651   6.47956947]
+ [  5.07998119   8.73478139   5.55367188   0.           7.03127185
+    5.47016154   4.24532027   3.73942338   8.23042689   7.36166266]
+ [  1.90104694   5.07279084   4.30454878   7.03127185   0.
+    5.81675651   1.58556489   4.19133808   5.19668637   6.88155548]
+ [  0.33620408   1.66997105   4.99631802   5.47016154   5.81675651
+    0.           2.65143873   4.23674653   5.27042457   3.19705191]
+ [ -1.52812137   0.02595701   1.82927912   4.24532027   1.58556489
+    2.65143873   0.           0.22526559   3.58975982   0.76703833]
+ [  3.04274159   6.3910947    3.16204013   3.73942338   4.19133808
+    4.23674653   0.22526559   0.           5.37466753   3.69219395]
+ [  3.54624463   7.26576825   4.33401651   8.23042689   5.19668637
+    5.27042457   3.58975982   5.37466753   0.           5.38214138]
+ [  2.92417047  -0.37424933   6.47956947   7.36166266   6.88155548
+    3.19705191   0.76703833   3.69219395   5.38214138   0.        ]]"
+Which tools does a carpenter use and what are their stated purposes?,"[[['The carpenter uses a hammer to drive nails.', 'The carpenter uses a saw to cut wood.', 'The doctor works at the hospital.', 'Teachers help students learn new things.', 'The firefighter wears a special uniform.', 'Musicians play instruments.', 'The pilot flies an airplane.', 'A writer creates stories.', 'The scientist conducts experiments.', 'An artist paints beautiful pictures.']]]","A carpenter uses a hammer to drive nails and a saw to cut wood. The hammer is used for driving nails into wood, while the saw is used for cutting wood.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 4.65299394e+01,  6.78820929e+00,  6.03516136e-01,
+        -1.04715000e+00, -2.07041031e+00, -2.38310574e+00,
+        -2.54709410e+00,  2.75793371e-01, -4.99882145e-02,
+        -1.43472897e+00],
+       [ 6.78820929e+00,  6.41490010e+00,  1.16208390e+00,
+         8.49159130e-01, -1.47845454e+00, -1.02893138e+00,
+        -1.77212738e+00, -3.14642437e-01,  9.81820565e-01,
+        -1.46011883e+00],
+       [ 6.03516136e-01,  1.16208390e+00,  1.03917340e+00,
+         3.61880205e-01, -4.91279922e-01, -3.57323474e-01,
+        -5.04273457e-01,  1.45843397e+00,  7.86205001e-02,
+         5.43678001e-01],
+       [-1.04715000e+00,  8.49159130e-01,  3.61880205e-01,
+         7.23192451e-01,  8.82012644e-02,  6.58049611e-01,
+         3.61635687e-01,  2.26605376e-01,  3.03978106e-01,
+         6.30787240e-02],
+       [-2.07041031e+00, -1.47845454e+00, -4.91279922e-01,
+         8.82012644e-02,  6.13144606e-01,  8.08547435e-01,
+         8.64347713e-01, -3.87028428e-01, -8.50075749e-02,
+         1.62263085e-01],
+       [-2.38310574e+00, -1.02893138e+00, -3.57323474e-01,
+         6.58049611e-01,  8.08547435e-01,  1.50274128e+00,
+         1.33188518e+00, -3.77435822e-01,  1.41159808e-01,
+         1.81441669e-01],
+       [-2.54709410e+00, -1.77212738e+00, -5.04273457e-01,
+         3.61635687e-01,  8.64347713e-01,  1.33188518e+00,
+         1.31535630e+00, -3.24805626e-01, -4.03663886e-02,
+         3.19638608e-01],
+       [ 2.75793371e-01, -3.14642437e-01,  1.45843397e+00,
+         2.26605376e-01, -3.87028428e-01, -3.77435822e-01,
+        -3.24805626e-01,  2.86804849e+00, -2.91785144e-01,
+         1.57640793e+00],
+       [-4.99882145e-02,  9.81820565e-01,  7.86205001e-02,
+         3.03978106e-01, -8.50075749e-02,  1.41159808e-01,
+        -4.03663886e-02, -2.91785144e-01,  2.41381477e-01,
+        -3.15413160e-01],
+       [-1.43472897e+00, -1.46011883e+00,  5.43678001e-01,
+         6.30787240e-02,  1.62263085e-01,  1.81441669e-01,
+         3.19638608e-01,  1.57640793e+00, -3.15413160e-01,
+         1.14969050e+00]])]","[{'Exact': array([27.1797967 ,  7.9937833 ,  2.51375915, -0.19948031,  2.92399804,
         1.29243033,  2.52210744,  0.03259575,  1.72130265,  1.25861286]), 'ContextCite32': array([23.11526944,  7.72168944,  1.54642506, -0.37783229,  3.08561229,
         0.03336895,  1.41407069, -0.        ,  2.80272356,  0.52038718]), 'KernelShap32': array([26.9083608 ,  8.42463546,  4.57281888, -1.8963605 ,  4.54225349,
-       -1.80855715, -0.47656385, -0.90906611,  1.42390151,  1.46510115]), 'BetaShap (U)32': array([22.80466215,  3.60881186,  2.20941925,  0.28771886,  3.11698486,
+       -1.80855715, -0.47656385, -0.90906611,  1.42390151,  1.46510115]), 'WSS32': array([27.44543508,  6.20794344,  2.6089684 , -1.16652942,  6.17408034,
+       -1.41550488,  2.29169588,  2.03235881,  2.82187685, -2.82607192]), 'BetaShap (U)32': array([22.80466215,  3.60881186,  2.20941925,  0.28771886,  3.11698486,
         0.04417698,  2.56471413, -0.40237534,  1.01811844,  3.92912484]), 'TMC32': array([28.33403254,  6.86272287,  2.26532714, -0.13919425,  3.06602287,
         0.90965152,  2.54288928,  0.64745585,  1.01076953,  2.77281952]), 'ContextCite64': array([24.80170009,  7.26300957,  1.3351939 , -0.44050364,  3.21573714,
         0.66419024,  1.8557889 ,  0.2294688 ,  1.91979693,  0.25940418]), 'KernelShap64': array([26.83439059,  7.34809037,  3.44517332, -0.5738121 ,  2.84052613,
-       -0.13710318,  1.4599143 , -0.69526759,  1.85955689,  0.67330907]), 'BetaShap (U)64': array([22.80469316,  3.60880781,  2.19888247,  0.28771845,  0.1747029 ,
+       -0.13710318,  1.4599143 , -0.69526759,  1.85955689,  0.67330907]), 'WSS64': array([26.56080367,  7.72817585,  1.93770819, -0.15225573,  2.95279388,
+        0.23663321,  1.32242533, -0.24281551,  1.23740251,  0.21966962]), 'BetaShap (U)64': array([22.80469316,  3.60880781,  2.19888247,  0.28771845,  0.1747029 ,
         0.04417702,  2.02880206,  2.04776905,  5.56219299,  2.22299093]), 'TMC64': array([30.79848126,  5.3010056 ,  2.2683537 , -0.03637707,  1.76084518,
         1.07921396,  2.05435312,  0.92912281,  1.54280186,  1.80678904]), 'ContextCite100': array([ 2.57788960e+01,  7.62564620e+00,  1.77480095e+00,  8.39728862e-03,
         2.46820709e+00,  0.00000000e+00,  1.66535937e+00, -2.14474347e-01,
         1.67013840e+00,  2.87515393e-01]), 'KernelShap100': array([26.67281975,  7.52852647,  2.47690366, -0.56686189,  2.87321441,
-       -0.07142359,  1.70343027, -0.47039061,  1.44725407,  0.51591038]), 'BetaShap (U)100': array([27.45368012,  3.60881242,  3.11883586,  0.28771846,  0.17470396,
+       -0.07142359,  1.70343027, -0.47039061,  1.44725407,  0.51591038]), 'WSS100': array([26.76404528,  7.89879105,  2.08599415, -0.34188429,  2.61115136,
+       -0.16263564,  1.21653074, -0.21266527,  0.90954423,  0.17093054]), 'BetaShap (U)100': array([27.45368012,  3.60881242,  3.11883586,  0.28771846,  0.17470396,
         0.04417607,  2.56298671,  1.80275483,  5.56219943,  7.76777415]), 'TMC100': array([29.84798365,  5.44168164,  2.43569422, -0.08692479,  1.84382285,
         0.33080042,  2.48315342,  0.91456294,  1.73192376,  2.90780234]), 'LOO': array([29.77818203,  9.88124371,  1.08854771, -0.86498737,  0.17469883,
-        0.04417515,  0.45255184, -0.40237808,  0.27232075, -1.88401031])}]"
-Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,"[[['The Orb of Zinthar is hidden deep within the treacherous Whispering Peaks.', 'Legends say the Scepter of Mydor lies guarded in the Sunken City of Aerilon.', 'Grelnockers often search for lost trinkets.', 'The ancient texts of Ploorf are hard to decipher.', 'Many adventurers seek the Crystal Caves of Nom.', 'A good Vorpal blade is sharp and reliable.', 'The air was thick with an unknown scent.', 'Strange symbols were carved into the stone door.', 'The old kingdom of Eldoria had many secrets.', 'Not every shining gem holds magical power.']]]","The Orb of Zinthar is believed to be hidden deep within the treacherous Whispering Peaks, while the Scepter of Mydor is said to be guarded in the Sunken City of Aerilon.","[[(1, 5)]]",,"[{(2, 'Exact'): 0.5, (2, 'ContextCite32'): 0.5, (2, 'KernelShap32'): 0.5, (2, 'BetaShap (U)32'): 0.5, (2, 'TMC32'): 0.5, (2, 'ContextCite64'): 0.5, (2, 'KernelShap64'): 0.5, (2, 'BetaShap (U)64'): 0.5, (2, 'TMC64'): 0.5, (2, 'ContextCite100'): 0.5, (2, 'KernelShap100'): 0.5, (2, 'BetaShap (U)100'): 0.5, (2, 'TMC100'): 0.5, (2, 'LOO'): 0.5}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([40.56311835, 42.78179181, -0.65513128, -1.63018194, -3.07683438,
+        0.04417515,  0.45255184, -0.40237808,  0.27232075, -1.88401031])}]","[[ 0.          6.96290186  0.95945154  0.82064904 -0.34838503 -0.62016671
+  -0.65628917  1.2990049   0.71846991 -2.16209603]
+ [ 6.96290186  0.          1.26885658  1.42423467 -0.64150013 -0.36021271
+  -1.06136334 -0.38368875  1.06834458 -2.00513185]
+ [ 0.95945154  1.26885658  0.         -0.33306806 -0.7058702  -0.8498209
+  -0.79783755 -0.24007734 -1.13300975 -0.19891969]
+ [ 0.82064904  1.42423467 -0.33306806  0.         -0.03820702 -0.72347284
+  -0.39318027 -0.6207666  -0.54638657 -0.74250946]
+ [-0.34838503 -0.64150013 -0.7058702  -0.03820702  0.         -1.39221233
+  -0.37198713 -0.27332971 -0.97392171 -0.71254401]
+ [-0.62016671 -0.36021271 -0.8498209  -0.72347284 -1.39221233  0.
+   0.15536736 -0.42244124 -0.88227203 -0.87693562]
+ [-0.65628917 -1.06136334 -0.79783755 -0.39318027 -0.37198713  0.15536736
+   0.         -1.28717595 -0.98900308 -0.99923145]
+ [ 1.2990049  -0.38368875 -0.24007734 -0.6207666  -0.27332971 -0.42244124
+  -1.28717595  0.         -1.17220555 -0.57454408]
+ [ 0.71846991  1.06834458 -1.13300975 -0.54638657 -0.97392171 -0.88227203
+  -0.98900308 -1.17220555  0.         -1.37991276]
+ [-2.16209603 -2.00513185 -0.19891969 -0.74250946 -0.71254401 -0.87693562
+  -0.99923145 -0.57454408 -1.37991276  0.        ]]"
+Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,"[[['The Orb of Zinthar is hidden deep within the treacherous Whispering Peaks.', 'Legends say the Scepter of Mydor lies guarded in the Sunken City of Aerilon.', 'Grelnockers often search for lost trinkets.', 'The ancient texts of Ploorf are hard to decipher.', 'Many adventurers seek the Crystal Caves of Nom.', 'A good Vorpal blade is sharp and reliable.', 'The air was thick with an unknown scent.', 'Strange symbols were carved into the stone door.', 'The old kingdom of Eldoria had many secrets.', 'Not every shining gem holds magical power.']]]","The Orb of Zinthar is believed to be hidden deep within the treacherous Whispering Peaks, while the Scepter of Mydor is said to be guarded in the Sunken City of Aerilon.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 3.12514144e+03,  8.09319021e+01,  1.00913667e+00,
+         4.50472608e+00, -1.05185342e+00,  2.29049941e+00,
+         1.11343010e+00,  4.85630864e+00,  9.34339910e+00,
+        -4.08930770e+00],
+       [ 8.09319021e+01,  8.59964782e+00,  2.92535204e+00,
+         3.58656789e+00, -3.83639675e-01, -2.42895334e+00,
+         5.38314702e-01,  1.87653734e+00,  3.74959130e-01,
+        -1.72287400e+00],
+       [ 1.00913667e+00,  2.92535204e+00,  2.79984536e+00,
+         1.93294986e+00, -1.47976967e+00, -8.24071502e-01,
+         1.04763634e+00,  1.18376971e+00,  3.77032797e-01,
+        -1.92451249e+00],
+       [ 4.50472608e+00,  3.58656789e+00,  1.93294986e+00,
+         2.24637924e+00, -4.55753099e-01, -1.65982988e+00,
+         4.75636006e-01,  1.20437749e+00,  3.12784348e-01,
+        -9.79391150e-01],
+       [-1.05185342e+00, -3.83639675e-01, -1.47976967e+00,
+        -4.55753099e-01,  1.19531383e+00, -2.16189051e-01,
+        -7.48724382e-01, -4.09194345e-01, -2.49003548e-01,
+         1.19281279e+00],
+       [ 2.29049941e+00, -2.42895334e+00, -8.24071502e-01,
+        -1.65982988e+00, -2.16189051e-01,  1.58101672e+00,
+        -2.93076912e-02, -8.16391137e-01, -1.92691957e-01,
+         1.13118538e-01],
+       [ 1.11343010e+00,  5.38314702e-01,  1.04763634e+00,
+         4.75636006e-01, -7.48724382e-01, -2.93076912e-02,
+         4.86809765e-01,  3.53558268e-01,  1.81384196e-01,
+        -7.87272304e-01],
+       [ 4.85630864e+00,  1.87653734e+00,  1.18376971e+00,
+         1.20437749e+00, -4.09194345e-01, -8.16391137e-01,
+         3.53558268e-01,  6.74917704e-01,  2.16153474e-01,
+        -6.53600965e-01],
+       [ 9.34339910e+00,  3.74959130e-01,  3.77032797e-01,
+         3.12784348e-01, -2.49003548e-01, -1.92691957e-01,
+         1.81384196e-01,  2.16153474e-01,  1.71829618e-01,
+        -1.96426834e-01],
+       [-4.08930770e+00, -1.72287400e+00, -1.92451249e+00,
+        -9.79391150e-01,  1.19281279e+00,  1.13118538e-01,
+        -7.87272304e-01, -6.53600965e-01, -1.96426834e-01,
+         1.49905644e+00]])]","[{'Exact': array([40.56311835, 42.78179181, -0.65513128, -1.63018194, -3.07683438,
         0.05213186, -0.6091984 , -1.93109422, -2.35130509,  2.25748302]), 'ContextCite32': array([11.96904192, 43.45642019, -3.49932528,  0.68684519, -2.30744211,
        -6.96103169, -7.783994  ,  3.23875853,  1.97594634, -2.73270891]), 'KernelShap32': array([ 39.17165878,  38.24379376,  17.37052872, -13.75930009,
         -5.23929308, -17.36917822,  -5.95407849,  -9.46903779,
-        -4.41880671,  10.18373874]), 'BetaShap (U)32': array([25.82189145, 24.57662988,  0.64603009, 13.6018    , -3.16149562,
+        -4.41880671,  10.18373874]), 'WSS32': array([44.53320496, 50.2972067 , -5.55904418,  1.27593534, -3.51301051,
+       -8.26161663, -7.94676282,  7.60179373, -2.33574005,  0.11557028]), 'BetaShap (U)32': array([25.82189145, 24.57662988,  0.64603009, 13.6018    , -3.16149562,
         0.81733658,  1.35670753,  0.36831824,  0.94900763, -3.93506243]), 'TMC32': array([34.18851471, 39.51539922,  0.78657881,  6.55584633, -2.905948  ,
         0.44055343,  1.39178212, -3.96581602,  0.91614691, -2.96398449]), 'ContextCite64': array([29.43214912, 34.82104265, -5.70878812, -8.73367953, -0.        ,
        -2.47323443, -4.86901126, -5.28036679, -3.77458077, -0.43116999]), 'KernelShap64': array([37.05439795, 35.41101374,  9.69092399, -8.22303505, -5.61468159,
-       -5.27236673, -4.79736129, -4.40467368, -3.52047392,  2.62332301]), 'BetaShap (U)64': array([25.82200043, 24.57659004, -2.98292237, 13.60177269,  0.98696405,
+       -5.27236673, -4.79736129, -4.40467368, -3.52047392,  2.62332301]), 'WSS64': array([39.41350458, 42.11550324, -1.52963898, -4.55781265, -2.90431468,
+       -0.21135497, -1.91631165, -0.85213113, -1.35761864,  3.89617159]), 'BetaShap (U)64': array([25.82200043, 24.57659004, -2.98292237, 13.60177269,  0.98696405,
         0.81733606, -1.99641927,  7.37933469, 16.28098425, -1.19783266]), 'TMC64': array([48.48037039, 24.67063582, -2.81220788,  1.92291611, -0.84767335,
         0.1822334 , -2.01249683,  1.48566878,  0.67996514, -0.59051937]), 'ContextCite100': array([35.85647433, 40.33684029, -3.77201786, -1.24109925, -3.59981309,
        -6.7813961 , -4.14238526, -9.31443254, -4.12705786,  2.4406087 ]), 'KernelShap100': array([33.67810468, 36.95442871,  1.20698883, -6.64454266, -6.72339205,
-       -2.05510084, -0.72835562, -5.86858006, -0.88718605,  0.78843528]), 'BetaShap (U)100': array([62.54786791, 24.57663207, 20.09514439, 13.60177675,  0.98696285,
+       -2.05510084, -0.72835562, -5.86858006, -0.88718605,  0.78843528]), 'WSS100': array([40.2823034 , 39.76056716, -2.16115361, -3.0275717 , -4.67550724,
+       -0.6895416 , -3.8922716 , -1.27839475, -3.92912163,  2.26635626]), 'BetaShap (U)100': array([62.54786791, 24.57663207, 20.09514439, 13.60177675,  0.98696285,
         0.81733299, -3.67552217,  6.67823711, 16.28100585, 23.56980805]), 'TMC100': array([44.03228202, 31.44799464, -0.5225664 ,  2.66552142, -0.97898887,
        -1.14925399, -3.66414249,  1.88436266,  0.34691099,  1.43677398]), 'LOO': array([80.9109726 , 85.96434021,  1.11898804,  1.11681747,  0.98696899,
-        0.81733704,  1.10748386,  0.36833143,  1.16824341,  0.27300501])}]"
-What are the roles or professions of Elara Vayne and Jax Korden?,"[[[""Elara Vayne is the chief Star-Navigator of the starship 'Wanderer'."", 'Jax Korden serves as the primary Rift-Warden protecting the Chronos Gate.', 'The Council of Elders will meet at moonhigh.', 'Zorpian ale is a popular drink in the Outer Rim.', 'Many young Squibs dream of joining the Sky Guard.', 'The markets of Xylos offer exotic goods.', 'He wore the insignia of a forgotten legion.', 'She hummed a tune from an old space shanty.', 'The prophecy spoke of a chosen Zoodle.', 'Learning the ancient Floopy tongue is difficult.']]]","Elara Vayne is the chief Star-Navigator of the starship 'Wanderer', while Jax Korden serves as the primary Rift-Warden protecting the Chronos Gate.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([51.73008907, 71.97464998,  1.36820885,  0.20430005, -0.07375168,
+        0.81733704,  1.10748386,  0.36833143,  1.16824341,  0.27300501])}]","[[ 0.00000000e+00  6.99734866e+01 -3.07077195e+00 -1.65616706e+00
+  -3.04941165e+00 -1.38419625e+00 -2.27858094e+00 -2.44722341e-01
+   4.58766529e+00 -7.78819032e+00]
+ [ 6.99734866e+01  0.00000000e+00  2.20256775e-01  1.15473366e+00
+  -1.36067924e-03 -4.51986399e+00  7.71056958e-01 -5.49292689e-01
+  -1.43652003e+00 -4.22474783e+00]
+ [-3.07077195e+00  2.20256775e-01  0.00000000e+00 -2.17935352e+00
+  -2.02610622e+00 -3.59014139e-01 -4.03798938e+00 -2.57889472e+00
+  -4.41660850e+00 -5.27863404e-01]
+ [-1.65616706e+00  1.15473366e+00 -2.17935352e+00  0.00000000e+00
+  -1.51099667e+00  2.33220246e-01 -2.46358093e+00 -1.64105859e+00
+  -3.02064679e+00 -1.40114715e+00]
+ [-3.04941165e+00 -1.36067924e-03 -2.02610622e+00 -1.51099667e+00
+   0.00000000e+00  1.93241338e+00 -1.36276252e+00 -6.59850652e-01
+   1.34276763e+00  2.42245032e+00]
+ [-1.38419625e+00 -4.51986399e+00 -3.59014139e-01  2.33220246e-01
+   1.93241338e+00  0.00000000e+00 -2.58466767e+00 -2.56793383e+00
+  -4.23112306e+00 -3.32008896e+00]
+ [-2.27858094e+00  7.71056958e-01 -4.03798938e+00 -2.46358093e+00
+  -1.36276252e+00 -2.58466767e+00  0.00000000e+00 -4.00457096e-01
+  -2.61545300e+00 -2.98678154e+00]
+ [-2.44722341e-01 -5.49292689e-01 -2.57889472e+00 -1.64105859e+00
+  -6.59850652e-01 -2.56793383e+00 -4.00457096e-01  0.00000000e+00
+  -8.63297519e-01 -1.01101830e+00]
+ [ 4.58766529e+00 -1.43652003e+00 -4.41660850e+00 -3.02064679e+00
+   1.34276763e+00 -4.23112306e+00 -2.61545300e+00 -8.63297519e-01
+   0.00000000e+00 -4.45962276e+00]
+ [-7.78819032e+00 -4.22474783e+00 -5.27863404e-01 -1.40114715e+00
+   2.42245032e+00 -3.32008896e+00 -2.98678154e+00 -1.01101830e+00
+  -4.45962276e+00  0.00000000e+00]]"
+What are the roles or professions of Elara Vayne and Jax Korden?,"[[[""Elara Vayne is the chief Star-Navigator of the starship 'Wanderer'."", 'Jax Korden serves as the primary Rift-Warden protecting the Chronos Gate.', 'The Council of Elders will meet at moonhigh.', 'Zorpian ale is a popular drink in the Outer Rim.', 'Many young Squibs dream of joining the Sky Guard.', 'The markets of Xylos offer exotic goods.', 'He wore the insignia of a forgotten legion.', 'She hummed a tune from an old space shanty.', 'The prophecy spoke of a chosen Zoodle.', 'Learning the ancient Floopy tongue is difficult.']]]","Elara Vayne is the chief Star-Navigator of the starship 'Wanderer', while Jax Korden serves as the primary Rift-Warden protecting the Chronos Gate.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 1.31164477e+03,  2.27105232e+01, -1.84242583e+00,
+        -1.66915858e-01,  5.30715867e-01,  5.66669701e+00,
+         5.99127734e+00,  5.64485767e+00,  3.61179360e+00,
+        -7.35615596e-02],
+       [ 2.27105232e+01,  9.15833487e+00, -1.18142110e+00,
+         1.95463861e+00,  3.76500572e+00,  1.56753110e+00,
+         6.20487331e+00, -6.95917921e-01, -2.78829004e+00,
+        -2.11447886e+00],
+       [-1.84242583e+00, -1.18142110e+00,  1.19371544e+00,
+         1.98190582e-01, -3.03977691e-01,  6.29781742e-01,
+        -4.17875830e-01,  1.47447092e-01, -5.18243883e-01,
+        -5.15818266e-01],
+       [-1.66915858e-01,  1.95463861e+00,  1.98190582e-01,
+         6.80971596e-01,  8.96012824e-01,  6.59047832e-01,
+         1.37560111e+00, -1.66985805e-01, -9.67912273e-01,
+        -7.88867352e-01],
+       [ 5.30715867e-01,  3.76500572e+00, -3.03977691e-01,
+         8.96012824e-01,  1.65840733e+00,  8.00766480e-01,
+         2.77651847e+00, -3.21999859e-01, -1.41368556e+00,
+        -1.06661779e+00],
+       [ 5.66669701e+00,  1.56753110e+00,  6.29781742e-01,
+         6.59047832e-01,  8.00766480e-01,  9.55499867e-01,
+         1.46971240e+00, -5.97704511e-02, -1.20995479e+00,
+        -1.00825781e+00],
+       [ 5.99127734e+00,  6.20487331e+00, -4.17875830e-01,
+         1.37560111e+00,  2.77651847e+00,  1.46971240e+00,
+         4.96764968e+00, -4.67564312e-01, -2.49919538e+00,
+        -1.87243326e+00],
+       [ 5.64485767e+00, -6.95917921e-01,  1.47447092e-01,
+        -1.66985805e-01, -3.21999859e-01, -5.97704511e-02,
+        -4.67564312e-01,  1.01587128e-01,  2.15507016e-01,
+         1.44401550e-01],
+       [ 3.61179360e+00, -2.78829004e+00, -5.18243883e-01,
+        -9.67912273e-01, -1.41368556e+00, -1.20995479e+00,
+        -2.49919538e+00,  2.15507016e-01,  1.76534344e+00,
+         1.40076082e+00],
+       [-7.35615596e-02, -2.11447886e+00, -5.15818266e-01,
+        -7.88867352e-01, -1.06661779e+00, -1.00825781e+00,
+        -1.87243326e+00,  1.44401550e-01,  1.40076082e+00,
+         1.13355745e+00]])]","[{'Exact': array([51.73008907, 71.97464998,  1.36820885,  0.20430005, -0.07375168,
        -2.69451284, -6.9073965 , -1.95952626,  3.12261994, -0.24562811]), 'ContextCite32': array([ 43.60340898,  73.49869665,   0.70304237,   3.16480628,
          0.98766184,  -5.94905655, -12.00602352,  -4.4219069 ,
          6.72939234,  -3.71026162]), 'KernelShap32': array([47.16314795, 70.20629242,  3.54973035, -0.99402093, -2.75012216,
-       -4.70560127, -7.72128428, -6.55279724,  0.26974457,  2.93197003]), 'BetaShap (U)32': array([46.18840181, 72.32806761,  0.10596278,  7.34557456, -5.63253034,
+       -4.70560127, -7.72128428, -6.55279724,  0.26974457,  2.93197003]), 'WSS32': array([ 56.52338478,  53.59149108,  21.89694894,   9.22499863,
+       -12.68939324,   6.76244249,  12.04484021, -32.48112434,
+        -6.70716879,   7.21183091]), 'BetaShap (U)32': array([46.18840181, 72.32806761,  0.10596278,  7.34557456, -5.63253034,
         1.44087739, -7.47733883,  0.18212767,  0.26031689,  0.13614281]), 'TMC32': array([49.86114311, 71.7671119 ,  0.11042627,  4.14076853, -5.38997396,
        -1.2812016 , -7.2170701 ,  1.60645056,  0.24665165,  0.17558777]), 'ContextCite64': array([ 47.70898105,  70.80247656,   0.21451387,  -1.67529628,
          0.39503841,  -3.55568518, -13.37373368,  -7.58422553,
          2.23825112,  -1.83732127]), 'KernelShap64': array([ 47.95197376,  70.4666749 ,   2.82965356,  -0.70259212,
         -2.56082854,  -0.96573684, -10.50090351,  -5.8302232 ,
-         2.20195948,  -2.18245731]), 'BetaShap (U)64': array([46.18843653, 72.32804865,  2.28368234,  7.34555533,  0.78693036,
+         2.20195948,  -2.18245731]), 'WSS64': array([ 48.03848089,  71.4665002 ,  -1.604162  ,   0.1878072 ,
+        -3.3932932 ,  -0.9508868 , -11.31508256,  -5.99276289,
+         3.09118793,  -0.43943254]), 'BetaShap (U)64': array([46.18843653, 72.32804865,  2.28368234,  7.34555533,  0.78693036,
         1.44087629, -6.9993136 ,  8.76053776, 21.07478499, -1.03842705]), 'TMC64': array([53.72756202, 64.58259827,  2.27529293, -0.12027276, -2.20627553,
        -2.22751495, -7.0839324 ,  1.65214407,  4.03916675, -1.12759995]), 'ContextCite100': array([ 4.84356118e+01,  7.24725853e+01,  2.16417760e-01,  0.00000000e+00,
        -7.96133484e-03, -5.21039012e+00, -1.11181221e+01, -7.86058547e+00,
         1.22580044e+00, -1.38768295e+00]), 'KernelShap100': array([46.67303658, 71.66899043,  0.15905344, -0.65436766, -2.60047902,
-       -1.29866713, -9.10748668, -5.31202836,  2.99549252, -1.60003365]), 'BetaShap (U)100': array([64.58114512, 72.32805098, 20.38712992,  7.3455596 ,  0.78693246,
+       -1.29866713, -9.10748668, -5.31202836,  2.99549252, -1.60003365]), 'WSS100': array([ 48.36241233,  72.01295485,   1.29108105,   0.1726832 ,
+        -1.62458372,  -2.54970056, -10.00874771,  -5.66189486,
+         2.21943658,  -0.8262101 ]), 'BetaShap (U)100': array([64.58114512, 72.32805098, 20.38712992,  7.3455596 ,  0.78693246,
         1.44087222, -8.89039882,  7.9026983 , 21.07481395, 11.1211889 ]), 'TMC100': array([52.21408664, 67.58546738,  2.61343555,  1.00378187, -0.9931396 ,
        -3.18244817, -8.55792614,  1.77334062,  5.13968677, -1.3516167 ]), 'LOO': array([73.7775898 , 85.71595955,  0.87219906,  1.76562214,  0.78693819,
-        1.44088268,  0.53469658,  0.18212318,  1.34926176,  0.36721992])}]"
-What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,"[[[""The 'Chrono-Modulator' device is primarily used to create temporary Reality Stabilizers in unstable zones."", ""A 'Bio-Harmonizer' implant allows for direct Neural Augmentation, improving cognitive functions."", 'Flux capacitors require careful calibration.', 'The energy cells of a Plinkerton device last for eons.', 'Not all teleportation devices are safe for organic matter.', 'The main reactor of the Narflax is offline.', 'Repairing a Zylothian hyperdrive is complex.', 'Data-crystals can store vast amounts of information.', 'The universal translator sometimes makes comical errors.', 'Shield generators protect against space debris and Floopy rays.']]]","The primary use described for the 'Chrono-Modulator' is to create temporary Reality Stabilizers in unstable zones. On the other hand, the 'Bio-Harmonizer' is used for direct Neural Augmentation, improving cognitive functions.","[[(0, 1)]]",,"[{(2, 'Exact'): 1.0, (2, 'ContextCite32'): 1.0, (2, 'KernelShap32'): 1.0, (2, 'BetaShap (U)32'): 1.0, (2, 'TMC32'): 1.0, (2, 'ContextCite64'): 1.0, (2, 'KernelShap64'): 1.0, (2, 'BetaShap (U)64'): 1.0, (2, 'TMC64'): 1.0, (2, 'ContextCite100'): 1.0, (2, 'KernelShap100'): 1.0, (2, 'BetaShap (U)100'): 1.0, (2, 'TMC100'): 1.0, (2, 'LOO'): 1.0}]","[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[{'Exact': array([53.55239133, 58.38167078,  1.1115654 ,  4.37147284, -6.54224016,
+        1.44088268,  0.53469658,  0.18212318,  1.34926176,  0.36721992])}]","[[ 0.         20.67843659 -3.6591899  -0.13430898 -1.01920625  3.46548201
+   7.62702586  2.19991343 -0.6344639  -0.93449169]
+ [20.67843659  0.         -4.8432251  -0.9429792   0.44548907 -0.90963997
+   6.52880415  1.38450164 -6.94638939 -2.00710984]
+ [-3.6591899  -4.8432251   0.          0.79907258 -2.42263061 -0.14333638
+  -2.00769153 -1.59026745 -2.43732084 -3.21050266]
+ [-0.13430898 -0.9429792   0.79907258  0.         -2.89900162  0.83515178
+  -1.18038252 -1.36020973 -0.8752396   0.17793838]
+ [-1.01920625  0.44548907 -2.42263061 -2.89900162  0.          1.93216483
+  -0.49972231 -2.05618937 -3.00290842 -0.26259033]
+ [ 3.46548201 -0.90963997 -0.14333638  0.83515178  1.93216483  0.
+  -1.3791022  -1.88421274 -1.13238862 -1.22274499]
+ [ 7.62702586  6.52880415 -2.00769153 -1.18038252 -0.49972231 -1.3791022
+   0.         -6.77039922 -1.57994598 -1.55075247]
+ [ 2.19991343  1.38450164 -1.59026745 -1.36020973 -2.05618937 -1.88421274
+  -6.77039922  0.         -2.08195885 -0.70882107]
+ [-0.6344639  -6.94638939 -2.43732084 -0.8752396  -3.00290842 -1.13238862
+  -1.57994598 -2.08195885  0.         -1.03501278]
+ [-0.93449169 -2.00710984 -3.21050266  0.17793838 -0.26259033 -1.22274499
+  -1.55075247 -0.70882107 -1.03501278  0.        ]]"
+What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,"[[[""The 'Chrono-Modulator' device is primarily used to create temporary Reality Stabilizers in unstable zones."", ""A 'Bio-Harmonizer' implant allows for direct Neural Augmentation, improving cognitive functions."", 'Flux capacitors require careful calibration.', 'The energy cells of a Plinkerton device last for eons.', 'Not all teleportation devices are safe for organic matter.', 'The main reactor of the Narflax is offline.', 'Repairing a Zylothian hyperdrive is complex.', 'Data-crystals can store vast amounts of information.', 'The universal translator sometimes makes comical errors.', 'Shield generators protect against space debris and Floopy rays.']]]","The primary use described for the 'Chrono-Modulator' is to create temporary Reality Stabilizers in unstable zones. On the other hand, the 'Bio-Harmonizer' is used for direct Neural Augmentation, improving cognitive functions.",,"[[['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]]","[array([[ 4.81067116e+02,  1.70169013e+01,  5.44886156e+00,
+         2.64373995e+00,  8.39887418e+00, -1.14895879e+01,
+        -1.06827360e+00,  7.84018070e-01,  1.36623029e+00,
+        -4.71102624e-01],
+       [ 1.70169013e+01,  1.90538021e+01, -4.11098655e+00,
+         2.06136305e+00,  1.17974555e+01,  3.44540996e-01,
+         2.06476419e+00, -3.88290352e-01, -7.68761364e-02,
+        -8.52234522e-01],
+       [ 5.44886156e+00, -4.11098655e+00,  1.31941085e+00,
+        -1.72482991e+00, -1.62408826e+00, -1.01063611e+00,
+        -1.06807068e+00, -1.85783580e-01,  1.71774798e-01,
+         8.34490563e-01],
+       [ 2.64373995e+00,  2.06136305e+00, -1.72482991e+00,
+         7.21581355e+00, -4.20663870e+00,  3.83356373e+00,
+         3.11287160e+00,  1.41184808e+00, -7.22554072e-01,
+        -3.54716945e+00],
+       [ 8.39887418e+00,  1.17974555e+01, -1.62408826e+00,
+        -4.20663870e+00,  1.18086034e+01, -2.73144075e+00,
+        -8.65587802e-01, -1.29720535e+00,  5.29419096e-01,
+         2.16192146e+00],
+       [-1.14895879e+01,  3.44540996e-01, -1.01063611e+00,
+         3.83356373e+00, -2.73144075e+00,  2.38876798e+00,
+         1.68689244e+00,  7.53595139e-01, -4.29827136e-01,
+        -1.90843033e+00],
+       [-1.06827360e+00,  2.06476419e+00, -1.06807068e+00,
+         3.11287160e+00, -8.65587802e-01,  1.68689244e+00,
+         1.50200581e+00,  5.99875547e-01, -3.01858999e-01,
+        -1.53430050e+00],
+       [ 7.84018070e-01, -3.88290352e-01, -1.85783580e-01,
+         1.41184808e+00, -1.29720535e+00,  7.53595139e-01,
+         5.99875547e-01,  3.49391849e-01, -1.34340733e-01,
+        -7.06934828e-01],
+       [ 1.36623029e+00, -7.68761364e-02,  1.71774798e-01,
+        -7.22554072e-01,  5.29419096e-01, -4.29827136e-01,
+        -3.01858999e-01, -1.34340733e-01,  8.06004271e-02,
+         3.56680331e-01],
+       [-4.71102624e-01, -8.52234522e-01,  8.34490563e-01,
+        -3.54716945e+00,  2.16192146e+00, -1.90843033e+00,
+        -1.53430050e+00, -7.06934828e-01,  3.56680331e-01,
+         1.74762006e+00]])]","[{'Exact': array([53.55239133, 58.38167078,  1.1115654 ,  4.37147284, -6.54224016,
         4.29283925,  1.54285801,  4.5555288 ,  3.46010557,  6.78722544]), 'ContextCite32': array([ 44.08131769,  61.03609012,  -5.37479045,  -0.50342248,
        -10.52883462,   2.65295215,   4.35456096,   3.40326118,
          2.74361997,   3.66148112]), 'KernelShap32': array([46.70304254, 57.39103326,  5.18406003,  1.76755382, -9.96731765,
-       -3.07191283, -3.30959348, -5.60011384,  6.5725732 ,  5.86633225]), 'BetaShap (U)32': array([ 81.60415036,  69.47736857,   0.52864237,  49.83610104,
+       -3.07191283, -3.30959348, -5.60011384,  6.5725732 ,  5.86633225]), 'WSS32': array([ 62.13248291,  56.2497994 ,  -4.87794936,  15.6783695 ,
+        -8.63064216,  19.72364346,  14.26889189, -15.82693211,
+       -17.99307231,   4.44455279]), 'BetaShap (U)32': array([ 81.60415036,  69.47736857,   0.52864237,  49.83610104,
        -13.52325824,   0.21034306,  -1.16631202,   1.14578221,
         -1.08124021,  -0.71801398]), 'TMC32': array([ 60.2916584 ,  58.89113998,   0.53827063,  25.11411285,
        -12.79429245,  -0.90565181,  -1.0973285 ,  -1.24139531,
         -1.08513037,  -0.39391494]), 'ContextCite64': array([48.22619436, 55.93365033, -4.90662481, -2.21450339, -9.792591  ,
         3.61093098,  1.89377176,  0.34171613, -0.48127102,  2.6456356 ]), 'KernelShap64': array([48.95383028, 57.43119045,  0.55287872,  1.37863059, -9.09688193,
-       -1.95625314, -1.55780816, -0.65845338,  1.4370816 ,  6.38440213]), 'BetaShap (U)64': array([81.6040871 , 69.47734979, -2.41250712, 49.83602483,  0.66032517,
+       -1.95625314, -1.55780816, -0.65845338,  1.4370816 ,  6.38440213]), 'WSS64': array([50.1464061 , 58.26368052, -2.20580355, -2.11425869, -5.58341859,
+        0.37400922,  1.50504738,  0.61980827,  0.3336866 ,  3.02936706]), 'BetaShap (U)64': array([81.6040871 , 69.47734979, -2.41250712, 49.83602483,  0.66032517,
         0.2103454 , -1.77798992, 28.67070712, 42.04067916, -0.24150865]), 'TMC64': array([ 5.90614166e+01,  5.16927233e+01, -2.37962413e+00,  1.38251039e+01,
        -4.99853407e+00,  2.71846635e-01, -1.80809665e+00,  1.00820069e+01,
         5.04488206e+00, -1.02962255e-02]), 'ContextCite100': array([49.7069799 , 57.74039513, -3.67555264, -0.07547257, -9.66842566,
         2.66245923,  0.27460875,  1.07809912, -0.75997874,  3.52147942]), 'KernelShap100': array([ 48.04251081,  58.07807563,  -0.76315971,  -0.62566648,
        -11.53753649,  -1.97175862,  -3.35685627,   0.81865882,
-         0.74622641,   6.22423436]), 'BetaShap (U)100': array([67.29042852, 69.47732157, 37.73237781, 49.83602737,  0.66032365,
+         0.74622641,   6.22423436]), 'WSS100': array([50.45819933, 57.26076522, -2.01162935, -0.89679541, -7.71696336,
+        1.41582825, -1.59566414,  0.74580854,  0.35220173,  2.8691243 ]), 'BetaShap (U)100': array([67.29042852, 69.47732157, 37.73237781, 49.83602737,  0.66032365,
         0.21034485, -4.85704989, 25.91822295, 42.04073552, 54.0265421 ]), 'TMC100': array([53.75101016, 52.46299568,  1.03945732, 13.14780498, -4.60152061,
        -0.10285055, -4.32990313, 10.6799225 ,  5.85714502,  5.35911981]), 'LOO': array([60.13361073, 68.7718401 ,  0.29589367,  1.10425854,  0.66034031,
-        0.21034527,  0.34854412,  1.14578915,  0.28711033,  0.30189228])}]"
+        0.21034527,  0.34854412,  1.14578915,  0.28711033,  0.30189228])}]","[[  0.           9.14153768   0.47871044  -4.36758229   2.95308753
+  -10.40655933  -2.03410746  -3.29059351  -4.81822247  -9.12687358]
+ [  9.14153768   0.          -4.97704554  -2.49114874  10.42068724
+    3.52614504   1.5691644   -3.9114937   -6.62614172  -7.3572663 ]
+ [  0.47871044  -4.97704554   0.          -6.19345466  -3.76985078
+   -5.62850725  -4.46991483  -3.99250491  -4.14267848  -4.74157212]
+ [ -4.36758229  -2.49114874  -6.19345466   0.          -7.70951839
+   -5.58771221  -5.10796984  -5.02731048  -5.22071171  -7.02648426]
+ [  2.95308753  10.42068724  -3.76985078  -7.70951839   0.
+   -9.69431415  -7.12685339  -6.03398336  -3.28868039  -3.55868647]
+ [-10.40655933   3.52614504  -5.62850725  -5.58771221  -9.69431415
+    0.          -3.38244643  -3.97814061  -4.11174668  -6.80531904]
+ [ -2.03410746   1.5691644   -4.46991483  -5.10796984  -7.12685339
+   -3.38244643   0.          -4.70836709  -4.15404508  -4.73699244]
+ [ -3.29059351  -3.9114937   -3.99250491  -5.02731048  -6.03398336
+   -3.97814061  -4.70836709   0.          -4.68235519  -5.66268954]
+ [ -4.81822247  -6.62614172  -4.14267848  -5.22071171  -3.28868039
+   -4.11174668  -4.15404508  -4.68235519   0.          -4.70921677]
+ [ -9.12687358  -7.3572663   -4.74157212  -7.02648426  -3.55868647
+   -6.80531904  -4.73699244  -5.66268954  -4.70921677   0.        ]]"
