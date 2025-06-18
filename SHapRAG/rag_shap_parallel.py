@@ -199,7 +199,9 @@ class ShapleyExperimentHarness:
         return complete_utilities if complete_utilities is not None else {}
 
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 200) -> str:
-        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+        messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
+                    questions. Avoid using your own knowledge or make assumptions.
+                    """}]
         if context_str:
             messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}."})
         else:
@@ -254,7 +256,9 @@ class ShapleyExperimentHarness:
         return cleaned_text
 
     def _llm_compute_logprob(self, context_str: str, response=None) -> float:
-        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+        messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
+                    questions. Avoid using your own knowledge or make assumptions.
+                    """}]
         if context_str:
             messages.append({"role": "user", "content": f"Use only the context: {context_str}. Briefly answer the query: {self.query}."})
         else:
