@@ -153,6 +153,8 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
                 results_for_query[f"WSS{actual_samples}"], F = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
                 results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)
                 results_for_query[f"TMC{actual_samples}"] = harness.compute_tmc_shap(num_iterations_max=T_iterations_map[size_key], performance_tolerance=0.001, max_unique_lookups=actual_samples, seed=SEED)
+                results_for_query[f"Shapic"] = harness.compute_shapley_interaction_index_pairs_matrix()
+
         
         results_for_query["LOO"] = harness.compute_loo()
 
