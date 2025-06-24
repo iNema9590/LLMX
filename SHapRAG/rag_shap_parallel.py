@@ -202,50 +202,33 @@ class ShapleyExperimentHarness:
 
 
     def compute_shapley_interaction_index_pairs_matrix(self):
-        """
-        Computes the Shapley Interaction Index for all unique pairs of items,
-        returning results as an n x n NumPy matrix.
-        I_ij = I_ji. Diagonal I_ii will be 0 or NaN.
 
-        Returns:
-            np.ndarray: An n x n matrix where matrix[i, j] is the interaction
-                        index I_ij. Diagonal elements are set to 0.
-                        Returns None if n_items < 2.
-        """
         n = self.n_items
-        if n < 2:
-            if self.verbose:
-                print("Cannot compute pairwise interactions for less than 2 items.")
-            return None
 
-        if self.verbose:
-            print(f"Computing Shapley Interaction Index matrix (n={n}, using pre-computed utilities)...")
-
-        # Initialize an n x n matrix with NaNs or 0s
-        interaction_matrix = np.full((n, n), 0.0, dtype=float) # Or np.nan
+        interaction_matrix = np.zeros((n, n), dtype=float)
 
         item_indices = list(range(n))
-        pbar_pairs = tqdm(list(itertools.combinations(item_indices, 2)), 
-                          desc="Pairwise Interactions (Matrix)", 
-                          disable=not self.verbose)
+        pbar_pairs = tqdm(list(itertools.combinations(item_indices, 2)),
+                        desc="Pairwise Interactions (Matrix)",
+                        disable=not self.verbose)
 
-        for i, j in pbar_pairs: # itertools.combinations ensures i < j
+        for i, j in pbar_pairs:  # i < j guaranteed
             interaction_sum_for_pair_ij = 0.0
             remaining_indices = [idx for idx in item_indices if idx != i and idx != j]
-            num_subsets_to_check_for_pair = 2**len(remaining_indices)
+            num_subsets = 2 ** len(remaining_indices)
 
-            for k_s in range(num_subsets_to_check_for_pair):
+            for k_s in range(num_subsets):
                 s_members_indices = []
                 temp_k_s = k_s
                 for bit_pos in range(len(remaining_indices)):
                     if (temp_k_s % 2) == 1:
                         s_members_indices.append(remaining_indices[bit_pos])
                     temp_k_s //= 2
-                
+
                 v_S_np = np.zeros(n, dtype=int)
-                if s_members_indices: v_S_np[s_members_indices] = 1
+                if s_members_indices:
+                    v_S_np[s_members_indices] = 1
                 v_S_tuple = tuple(v_S_np)
-                size_S = len(s_members_indices)
 
                 v_S_union_i_np = v_S_np.copy(); v_S_union_i_np[i] = 1
                 v_S_union_i_tuple = tuple(v_S_union_i_np)
@@ -254,34 +237,32 @@ class ShapleyExperimentHarness:
                 v_S_union_ij_np = v_S_np.copy(); v_S_union_ij_np[i] = 1; v_S_union_ij_np[j] = 1
                 v_S_union_ij_tuple = tuple(v_S_union_ij_np)
 
-                util_S = self.all_true_utilities.get(v_S_tuple, -float('inf'))
-                util_S_i = self.all_true_utilities.get(v_S_union_i_tuple, -float('inf'))
-                util_S_j = self.all_true_utilities.get(v_S_union_j_tuple, -float('inf'))
-                util_S_ij = self.all_true_utilities.get(v_S_union_ij_tuple, -float('inf'))
+                util_S = self.all_true_utilities[v_S_tuple]
+                util_S_i = self.all_true_utilities[v_S_union_i_tuple]
+                util_S_j = self.all_true_utilities[v_S_union_j_tuple]
+                util_S_ij = self.all_true_utilities[v_S_union_ij_tuple]
 
-                delta_ij_S = 0.0
-                if not any(u == -float('inf') for u in [util_S, util_S_i, util_S_j, util_S_ij]):
-                    delta_ij_S = util_S_ij - util_S_i - util_S_j + util_S
+                delta_ij_S = util_S_ij - util_S_i - util_S_j + util_S
 
-                weight = 0.0
-                if n == 2: weight = 1.0 
-                elif n > 2 and (n - 1 >=0 and n - size_S - 2 >=0): # Check indices for factorials
+                if n == 2:
+                    weight = 1.0
+                else:
+                    size_S = len(s_members_indices)
                     numerator = self._factorials[size_S] * self._factorials[n - size_S - 2]
                     denominator = self._factorials[n - 1]
-                    if denominator != 0: weight = numerator / denominator
-                
-                interaction_sum_for_pair_ij += weight * delta_ij_S
-            
-            interaction_matrix[i, j] = interaction_sum_for_pair_ij
-            interaction_matrix[j, i] = interaction_sum_for_pair_ij # Exploit symmetry
+                    weight = numerator / denominator
 
-        if self.verbose:
-            print("Shapley Interaction Index matrix computation complete.")
+                interaction_sum_for_pair_ij += weight * delta_ij_S
+
+            interaction_matrix[i, j] = interaction_sum_for_pair_ij
+            interaction_matrix[j, i] = interaction_sum_for_pair_ij  # Symmetry
+
         return interaction_matrix
+
 
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 100) -> str:
         messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
-                    questions in a word or two. Avoid using your own knowledge or make assumptions.
+                    questions in few words. Avoid using your own knowledge or make assumptions.
                     """}]
         if context_str:
             messages.append({"role": "user", "content": f"###context: {context_str}. ###question: {self.query}."})
@@ -338,56 +319,78 @@ class ShapleyExperimentHarness:
         return cleaned_text
 
     def _llm_compute_logprob(self, context_str: str, response=None) -> float:
-        messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
-                    questions in a word or two. Avoid using your own knowledge or make assumptions.
-                    """}]
+        """
+        Compute the average log-prob *gain* per answer token compared to an empty context.
+        This reduces length bias and centers the utility on the *value of the context*.
+        """
+        # Use target response if none provided
+        if response is None:
+            response = self.target_response
+
+        answer_ids = self.tokenizer(
+            response, return_tensors="pt", add_special_tokens=False
+        ).input_ids.to(self.device)
+
+        L = answer_ids.shape[1]
+        if L == 0:
+            return 0.0
+
+        sys_msg = {
+            "role": "system",
+            "content": """You are a helpful assistant. You use the provided context to answer
+                    questions in few words. Avoid using your own knowledge or make assumptions."""
+        }
         if context_str:
-            messages.append({"role": "user", "content": f"###context: {context_str}. ###question: {self.query}."})
+            user_msg = {"role": "user", "content": f"###context: {context_str} ###question: {self.query}"}
         else:
-            messages.append({"role": "user", "content": self.query})
-        if not response:
-            response=self.target_response
-        prompt_templated = self.tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True, tokenize=False
+            user_msg = {"role": "user", "content": self.query}
+
+        prompt_with_context = self.tokenizer.apply_chat_template(
+            [sys_msg, user_msg], add_generation_prompt=True, tokenize=False
+        )
+        prompt_empty = self.tokenizer.apply_chat_template(
+            [sys_msg, {"role": "user", "content": self.query}],
+            add_generation_prompt=True,
+            tokenize=False
         )
 
-        answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
-
-        if answer_ids.shape[1] == 0:
-            return 0.0 if not response else -float('inf')
-
-        prompt_tokens = self.tokenizer(prompt_templated, return_tensors="pt").to(self.device)
-
-        input_ids = torch.cat([prompt_tokens.input_ids, answer_ids], dim=1)
-
-        unwrapped_model = self.accelerator.unwrap_model(self.model)
-        max_model_len = getattr(unwrapped_model.config, 'max_position_embeddings', 512)
-        
-        if input_ids.shape[1] > max_model_len:
-            if self.verbose and self.accelerator.is_main_process:
-                print(f"Warning (logprob): Combined input length {input_ids.shape[1]} exceeds model max length {max_model_len}. Result may be inaccurate or OOM.")
-        
-            del prompt_tokens, answer_ids, input_ids, unwrapped_model
-            torch.cuda.empty_cache()
-            return -float('inf')
+        input_ids_with_context = torch.cat(
+            [self.tokenizer(prompt_with_context, return_tensors="pt").input_ids.to(self.device),
+            answer_ids],
+            dim=1
+        )
+        input_ids_empty = torch.cat(
+            [self.tokenizer(prompt_empty, return_tensors="pt").input_ids.to(self.device),
+            answer_ids],
+            dim=1
+        )
 
         with torch.no_grad():
-            outputs = self.model(input_ids=input_ids) # Pass the full sequence
-            logits = outputs.logits
+            logits_with = self.model(input_ids=input_ids_with_context).logits
+            logits_empty = self.model(input_ids=input_ids_empty).logits
 
+        prompt_len_with = input_ids_with_context.shape[1] - L
+        prompt_len_empty = input_ids_empty.shape[1] - L
 
-        shift_logits = logits[..., prompt_tokens.input_ids.shape[1]-1:-1, :].contiguous()
-        shift_labels = answer_ids.contiguous()
+        shift_logits_with = logits_with[..., prompt_len_with-1:-1, :].contiguous()
+        shift_logits_empty = logits_empty[..., prompt_len_empty-1:-1, :].contiguous()
 
-        log_probs = F.log_softmax(shift_logits, dim=-1)
- 
-        answer_log_probs = torch.gather(log_probs, 2, shift_labels.unsqueeze(-1)).squeeze(-1)
-        
-        total_log_prob = answer_log_probs.sum().item()
+        log_probs_with = F.log_softmax(shift_logits_with, dim=-1)
+        log_probs_empty = F.log_softmax(shift_logits_empty, dim=-1)
 
-        del prompt_tokens, answer_ids, input_ids, outputs, logits, shift_logits, shift_labels, answer_log_probs, unwrapped_model
+        answer_log_probs_with = torch.gather(log_probs_with, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        answer_log_probs_empty = torch.gather(log_probs_empty, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+
+        total_with = answer_log_probs_with.sum().item()
+        total_empty = answer_log_probs_empty.sum().item()
+
+        logprob_gain = (total_with - total_empty) / L  # Per-token gain
+
+        del logits_with, logits_empty, shift_logits_with, shift_logits_empty
+        del log_probs_with, log_probs_empty, answer_log_probs_with, answer_log_probs_empty
         torch.cuda.empty_cache()
-        return total_log_prob
+
+        return logprob_gain
     
         
 
