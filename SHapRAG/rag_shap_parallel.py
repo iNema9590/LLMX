@@ -8,6 +8,7 @@ import warnings
 from collections import defaultdict
 
 import numpy as np
+import math
 import torch
 import torch.nn.functional as F
 import xgboost
@@ -345,52 +346,73 @@ class ShapleyExperimentHarness:
         else:
             user_msg = {"role": "user", "content": self.query}
 
-        prompt_with_context = self.tokenizer.apply_chat_template(
-            [sys_msg, user_msg], add_generation_prompt=True, tokenize=False
-        )
-        prompt_empty = self.tokenizer.apply_chat_template(
-            [sys_msg, {"role": "user", "content": self.query}],
+
+        # --- Calculate for prompt with context ---
+        prompt_with_context_str = self.tokenizer.apply_chat_template(
+            [sys_msg, {"role": "user", "content": f"###context: {context_str} ###question: {self.query}" if context_str else self.query}], # Handle both cases
             add_generation_prompt=True,
             tokenize=False
         )
-
         input_ids_with_context = torch.cat(
-            [self.tokenizer(prompt_with_context, return_tensors="pt").input_ids.to(self.device),
+            [self.tokenizer(prompt_with_context_str, return_tensors="pt").input_ids.to(self.device),
             answer_ids],
             dim=1
         )
-        input_ids_empty = torch.cat(
-            [self.tokenizer(prompt_empty, return_tensors="pt").input_ids.to(self.device),
-            answer_ids],
-            dim=1
-        )
-
         with torch.no_grad():
-            logits_with = self.model(input_ids=input_ids_with_context).logits
-            logits_empty = self.model(input_ids=input_ids_empty).logits
+            logits_model_output_with = self.model(input_ids=input_ids_with_context).logits
 
         prompt_len_with = input_ids_with_context.shape[1] - L
-        prompt_len_empty = input_ids_empty.shape[1] - L
+        # Extract logits corresponding to the answer tokens
+        shift_logits_with = logits_model_output_with[..., prompt_len_with-1:-1, :].contiguous()
+        log_probs_tokens_with = F.log_softmax(shift_logits_with, dim=-1)
+        # Gather log_probs of actual answer tokens
+        answer_log_probs_with = torch.gather(log_probs_tokens_with, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        total_log_prob_with = answer_log_probs_with.sum() # This is log(P_with)
 
-        shift_logits_with = logits_with[..., prompt_len_with-1:-1, :].contiguous()
-        shift_logits_empty = logits_empty[..., prompt_len_empty-1:-1, :].contiguous()
+        # --- Calculate for prompt with empty context ---
+        prompt_empty_context_str = self.tokenizer.apply_chat_template(
+            [sys_msg, {"role": "user", "content": self.query}], # Query only
+            add_generation_prompt=True,
+            tokenize=False
+        )
+        input_ids_empty_context = torch.cat(
+            [self.tokenizer(prompt_empty_context_str, return_tensors="pt").input_ids.to(self.device),
+            answer_ids],
+            dim=1
+        )
+        with torch.no_grad():
+            logits_model_output_empty = self.model(input_ids=input_ids_empty_context).logits
 
-        log_probs_with = F.log_softmax(shift_logits_with, dim=-1)
-        log_probs_empty = F.log_softmax(shift_logits_empty, dim=-1)
+        prompt_len_empty = input_ids_empty_context.shape[1] - L
+        shift_logits_empty = logits_model_output_empty[..., prompt_len_empty-1:-1, :].contiguous()
+        log_probs_tokens_empty = F.log_softmax(shift_logits_empty, dim=-1)
+        answer_log_probs_empty = torch.gather(log_probs_tokens_empty, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        total_log_prob_empty = answer_log_probs_empty.sum() # This is log(P_empty)
 
-        answer_log_probs_with = torch.gather(log_probs_with, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
-        answer_log_probs_empty = torch.gather(log_probs_empty, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        # --- Calculate probabilities and logits ---
+        # Probability of the answer given the context
+        prob_with = torch.exp(total_log_prob_with)
+        # Probability of the answer given empty context
+        prob_empty = torch.exp(total_log_prob_empty)
 
-        total_with = answer_log_probs_with.sum().item()
-        total_empty = answer_log_probs_empty.sum().item()
+        # Logit of the probability of the answer given the context
+        logit_with = logit(prob_with)
+        # Logit of the probability of the answer given empty context
+        logit_empty = logit(prob_empty)
 
-        logprob_gain = (total_with - total_empty) / L  # Per-token gain
+        # --- Calculate logit gain ---
+        # The gain on the logit scale
+        logit_gain_total = (logit_with - logit_empty)
 
-        del logits_with, logits_empty, shift_logits_with, shift_logits_empty
-        del log_probs_with, log_probs_empty, answer_log_probs_with, answer_log_probs_empty
+        # Optional: Per-token logit gain (interpretation is a bit nuanced)
+        logit_gain_per_token = logit_gain_total / L
+
+        # Clean up (important for long loops in CONTEXTCITE)
+        del logits_model_output_with, logits_model_output_empty, shift_logits_with, shift_logits_empty
+        del log_probs_tokens_with, log_probs_tokens_empty, answer_log_probs_with, answer_log_probs_empty
+        del total_log_prob_with, total_log_prob_empty, prob_with, prob_empty, logit_with, logit_empty
         torch.cuda.empty_cache()
-
-        return logprob_gain
+        return logit_gain_per_token.item()
     
         
 
@@ -577,7 +599,7 @@ class ShapleyExperimentHarness:
 
         return best_k_indices_to_remove  
 
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], eval=True, sur_type="linear") -> tuple:
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], eval=True, sur_type="linear", alpha=0.01) -> tuple:
         X_train = np.array(ablations)
         y_train = np.array(utilities)
 
@@ -587,11 +609,12 @@ class ShapleyExperimentHarness:
         # Train the model
         if sur_type == "linear":
 
-            model = Lasso(alpha=0.01, fit_intercept=True, random_state=42, max_iter=2000)
+            model = Lasso(alpha=alpha, fit_intercept=True, random_state=42, max_iter=2000)
             model.fit(X_train, y_train)
+            y_pred=model.predict(X_train)
+            overall_mse = mean_squared_error(y_train, y_pred)
             coefficients = model.coef_
-            intercept = model.intercept_
-            return model, coefficients, intercept
+            return model, coefficients, overall_mse
 
         # elif sur_type=="xgboost":                              
         #     model = xgboost.XGBRegressor(
@@ -619,24 +642,25 @@ class ShapleyExperimentHarness:
                 random_state=42
             )
             model.fit(X_train_fm, y_train)
-
+            y_pred=model.predict(X_train_fm)
+            overall_mse = mean_squared_error(y_train, y_pred)
             w = model.w_ 
-            V = model.V_.T    
+            V = model.V_.T 
             F = V @ V.T     
             np.fill_diagonal(F, 0.0)
             # Attribution score: main + 0.5 * sum of pairwise interactions
             attr = w + 0.5 * F.sum(axis=1) 
 
-            return model, attr, F
+            return model, attr, F, overall_mse
         
         elif sur_type == "full_poly2":
             poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
             X_poly = poly.fit_transform(X_train)
-            model = Ridge(alpha=0.01, fit_intercept=True)
+            model = Ridge(alpha=0, fit_intercept=True)
             model.fit(X_poly, y_train)
-
+            y_pred=model.predict(X_poly)
+            overall_mse = mean_squared_error(y_train, y_pred)
             coefs = model.coef_
-            intercept = model.intercept_
 
             # === Attribution ===
             n = X_train.shape[1]
@@ -650,7 +674,7 @@ class ShapleyExperimentHarness:
 
             importance = linear + 0.5 * pairs.sum(axis=1)
 
-            return model, importance, pairs
+            return model, importance, pairs, overall_mse
 
         # elif sur_type == "gam":
         #     gam_lam = 0.6
@@ -734,13 +758,13 @@ class ShapleyExperimentHarness:
 
     def compute_exact_linear_shap(self):
         if self.verbose and self.accelerator.is_main_process:
-            _, weights, _ = self._train_surrogate(list(self.all_true_utilities.keys()), list(self.all_true_utilities.values()))
-            return weights
+            _, weights, mse = self._train_surrogate(list(self.all_true_utilities.keys()), list(self.all_true_utilities.values()), alpha=0)
+            return weights, mse
 
     def compute_exact_inter_shap(self):
         if self.verbose and self.accelerator.is_main_process:
-            surrogate_model, attr, F= self._train_surrogate(list(self.all_true_utilities.keys()), list(self.all_true_utilities.values()), sur_type="full_poly2")
-            return attr, F
+            surrogate_model, attr, F, mse= self._train_surrogate(list(self.all_true_utilities.keys()), list(self.all_true_utilities.values()), sur_type="full_poly2")
+            return attr, F, mse
 
     def compute_contextcite_weights(self, num_samples: int, seed: int = None):
         if self.accelerator.is_main_process:
@@ -776,7 +800,7 @@ class ShapleyExperimentHarness:
             if sur_type=="linear":
                 surrogate_model, _, _ = self._train_surrogate(sampled_tuples_for_train, utilities_for_train)
             else:
-                surrogate_model, attr, F= self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
+                surrogate_model, attr, F, mse= self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
 
             # hybrid_utilities = {}
             # all_ablations_X = np.array(list(itertools.product([0, 1], repeat=self.n_items)), dtype=int)
@@ -804,7 +828,7 @@ class ShapleyExperimentHarness:
 
             # shapley_values_wss = self._calculate_shapley_from_cached_dict(hybrid_utilities) 
         
-            return attr, F
+            return attr, F, mse
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                           max_unique_lookups: int, # Budget for utility lookups
@@ -1147,3 +1171,6 @@ class ShapleyExperimentHarness:
                 #model_reply = decoded_output.strip().lower()
 
                 #return model_reply
+def logit(p, eps=1e-7): # Add epsilon for numerical stability
+    p = torch.clamp(p, eps, 1 - eps) # Clamp to avoid log(0) or division by zero
+    return torch.log(p / (1 - p))
