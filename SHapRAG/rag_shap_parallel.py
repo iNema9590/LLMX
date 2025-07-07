@@ -616,23 +616,10 @@ class ShapleyExperimentHarness:
             coefficients = model.coef_
             return model, coefficients, overall_mse
 
-        # elif sur_type=="xgboost":                              
-        #     model = xgboost.XGBRegressor(
-        #     n_estimators=100,
-        #     learning_rate=0.1,
-        #     max_depth=5,
-        #     reg_alpha=0.01,
-        #     reg_lambda=0,
-        #     objective='reg:squarederror' # Common for regression
-        #     )
-        #     model.fit(X_train, y_train)
-        #     return model
-
         elif sur_type == "fm":
             # Convert to sparse (fastFM requires scipy CSR)
             X_train_fm = csr_matrix(X_train)
 
-            # Fit FM
             model = als.FMRegression(
                 n_iter=100,
                 init_stdev=0.1,
@@ -644,11 +631,10 @@ class ShapleyExperimentHarness:
             model.fit(X_train_fm, y_train)
             y_pred=model.predict(X_train_fm)
             overall_mse = mean_squared_error(y_train, y_pred)
-            w = model.w_ 
+            w = model.w_
             V = model.V_.T 
             F = V @ V.T     
             np.fill_diagonal(F, 0.0)
-            # Attribution score: main + 0.5 * sum of pairwise interactions
             attr = w + 0.5 * F.sum(axis=1) 
 
             return model, attr, F, overall_mse
@@ -676,85 +662,158 @@ class ShapleyExperimentHarness:
 
             return model, importance, pairs, overall_mse
 
-        # elif sur_type == "gam":
-        #     gam_lam = 0.6
-        #     n_features = X_train.shape[1]
+    def _get_response_token_distributions(self, context_str: str, response: str) -> torch.Tensor:
+        """
+        Computes the probability distribution for each token in the given response.
 
-        #     # Start with univariate smooth terms
-        #     terms = s(0, lam=gam_lam)
-        #     for i in range(1, n_features):
-        #         terms += s(i, lam=gam_lam)
+        Args:
+            context_str (str): The context to condition the generation on.
+            response (str): The response for which to calculate token distributions.
 
-        #     # Add pairwise interaction terms
-        #     for i in range(n_features):
-        #         for j in range(i + 1, n_features):
-        #             terms += te(i, j, lam=gam_lam)
-
-        #     # Fit the model
-        #     model = LinearGAM(terms).fit(X_train, y_train)
-        #     return model
+        Returns:
+            torch.Tensor: A tensor of shape (num_response_tokens, vocab_size) containing
+                          the probability distribution for each token in the response.
+        """
+        answer_ids = self.tokenizer(
+            response, return_tensors="pt", add_special_tokens=False
+        ).input_ids.to(self.device)
         
-        # elif sur_type == "boosted_gam":
-        #     model = ExplainableBoostingRegressor(
-        #         max_bins=256,
-        #         max_interaction_bins=64,
-        #         interactions=5,
-        #         learning_rate=0.01,
-        #         max_leaves=3,
-        #         max_rounds=100,
-        #         early_stopping_rounds=5,
-        #         random_state=42
-        #     )
-        #     model.fit(X_train, y_train)
-        #     return model
-        # else:
-        #     raise ValueError("Unknown type")
+        L = answer_ids.shape[1]
+        if L == 0:
+            return torch.tensor([], device=self.device)
 
+        # Prepare the prompt
+        messages = [
+            {"role": "system", "content": """You are a helpful assistant. You use the provided context to answer questions in few words. Avoid using your own knowledge or make assumptions."""},
+            {"role": "user", "content": f"###context: {context_str}. ###question: {self.query}." if context_str else self.query}
+        ]
+        prompt_str = self.tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True, tokenize=False
+        )
+        prompt_ids = self.tokenizer(prompt_str, return_tensors="pt").input_ids.to(self.device)
 
+        # Concatenate prompt and answer to get full input
+        input_ids = torch.cat([prompt_ids, answer_ids], dim=1)
+        prompt_len = prompt_ids.shape[1]
 
+        with torch.no_grad():
+            outputs = self.model(input_ids=input_ids)
+            logits = outputs.logits
 
-        # if eval:
-        #     # Predict on the same training data for evaluation
-        #     y_pred = model.predict(X_test)
+        # Get logits corresponding to the positions of the answer tokens
+        # The logit for the k-th answer token is at index (prompt_len + k - 1)
+        shifted_logits = logits[..., prompt_len - 1:-1, :].contiguous()
+        
+        # Calculate the probability distributions
+        distributions = F.softmax(shifted_logits, dim=-1).squeeze(0) # Shape: (L, vocab_size)
 
-        #     # Overall MSE
-        #     overall_mse = mean_squared_error(y_test, y_pred)
-        #     if hasattr(self, 'verbose') and self.verbose: # Check if self.verbose exists
-        #         print(f"Overall Mean Squared Error (MSE): {overall_mse:.6f}")
+        # Cleanup
+        del outputs, logits, shifted_logits, prompt_ids, answer_ids, input_ids
+        torch.cuda.empty_cache()
 
-        #     # MSE by subset size
-        #     mse_by_size = defaultdict(list)
-        #     predictions_by_size = defaultdict(list)
-        #     true_values_by_size = defaultdict(list)
+        return distributions
 
-        #     for i, ablation_vector in enumerate(X_test):
-        #         subset_size = int(np.sum(ablation_vector))
-        #         true_values_by_size[subset_size].append(y_test[i])
-        #         predictions_by_size[subset_size].append(y_pred[i])
+    @staticmethod
+    def _jensen_shannon_divergence(p: torch.Tensor, q: torch.Tensor, epsilon: float = 1e-10) -> float:
+        """
+        Calculates the Jensen-Shannon Divergence between two probability distributions.
 
-        #     if hasattr(self, 'verbose') and self.verbose:
-        #         print("\nMSE by Subset Size (Number of Active Items):")
-        #         print("------------------------------------------")
-        #         print("| Size | Num Subsets | MSE        |")
-        #         print("|------|-------------|------------|")
+        Args:
+            p (torch.Tensor): The first probability distribution (1D tensor).
+            q (torch.Tensor): The second probability distribution (1D tensor).
+            epsilon (float): A small value to avoid log(0).
 
-        #     sorted_sizes = sorted(true_values_by_size.keys())
-        #     for size in sorted_sizes:
-        #         true_vals_s = np.array(true_values_by_size[size])
-        #         pred_vals_s = np.array(predictions_by_size[size])
-        #         num_subsets_at_size = len(true_vals_s)
+        Returns:
+            float: The JSD score.
+        """
+        # Add epsilon to avoid log(0) issues
+        p = p + epsilon
+        q = q + epsilon
 
-        #         if num_subsets_at_size > 0:
-        #             mse_s = mean_squared_error(true_vals_s, pred_vals_s)
-        #             if hasattr(self, 'verbose') and self.verbose:
-        #                 print(f"| {size:<4} | {num_subsets_at_size:<11} | {mse_s:<10.6f} |")
-        #         # else: # Should not happen if size is a key from X_train
-        #         #     if hasattr(self, 'verbose') and self.verbose:
-        #         #         print(f"| {size:<4} | {num_subsets_at_size:<11} | {'N/A':<10} |")
+        # Normalize to ensure they sum to 1 after adding epsilon
+        p /= p.sum()
+        q /= q.sum()
+
+        m = 0.5 * (p + q)
+        
+        # PyTorch's F.kl_div expects (input, target) where input is log-probabilities
+        # It calculates sum(target * (log(target) - input))
+        # So D_KL(p || m) is equivalent to F.kl_div(m.log(), p, reduction='sum')
+        kl_p_m = F.kl_div(m.log(), p, reduction='sum')
+        kl_q_m = F.kl_div(m.log(), q, reduction='sum')
+        
+        jsd = 0.5 * (kl_p_m + kl_q_m)
+        return jsd.item()
+
+    def compute_arc_jsd(self) -> list[float]:
+        """
+        Runs the Attribute Response to Context (ARC-JSD) method at the document level.
+
+        This method identifies the most influential context documents for the generated
+        response by measuring the change in token-level probability distributions when
+        a document is removed (ablated).
+
+        Returns:
+            list[float]: A list of JSD scores, where the i-th score corresponds
+                         to the i-th document in the input `self.items`.
+        """
+        if self.accelerator.is_main_process:
+            print("--- Running ARC-JSD Attribution (Document Level) ---")
+
+        # Step 1: Get the baseline distributions for the target response with full context
+        if self.verbose and self.accelerator.is_main_process:
+            print("Calculating baseline token distributions with full context...")
+        full_context_str = "\n\n".join(self.items)
+        baseline_distributions = self._get_response_token_distributions(
+            context_str=full_context_str,
+            response=self.target_response
+        )
+
+        if baseline_distributions.nelement() == 0:
+            if self.accelerator.is_main_process:
+                print("Warning: Target response is empty. Cannot run ARC-JSD.")
+            return [0.0] * self.n_items
+
+        jsd_scores = [0.0] * self.n_items
+        
+        pbar = None
+        if self.accelerator.is_main_process:
+            pbar = tqdm(total=self.n_items, desc="Attributing Documents")
+        
+        # Step 2 & 3: Iterate, ablate each document, and compute JSD
+        for i in range(self.n_items):
+            # Create ablated context by removing the i-th document
+            ablated_items = [item for j, item in enumerate(self.items) if i != j]
+            ablated_context_str = "\n\n".join(ablated_items)
             
-        #     if hasattr(self, 'verbose') and self.verbose:
-        #         print("------------------------------------------\n")
-                
+            # Get distributions for the ablated context
+            ablated_distributions = self._get_response_token_distributions(
+                context_str=ablated_context_str,
+                response=self.target_response
+            )
+
+            total_jsd_for_item = 0.0
+            # Sum the JSD scores over all tokens in the response
+            if ablated_distributions.nelement() > 0:
+                for token_idx in range(len(baseline_distributions)):
+                    p = baseline_distributions[token_idx]
+                    q = ablated_distributions[token_idx]
+                    token_jsd = self._jensen_shannon_divergence(p, q)
+                    total_jsd_for_item += token_jsd
+            
+            jsd_scores[i] = total_jsd_for_item
+            
+            if pbar:
+                pbar.update(1)
+
+        if pbar:
+            pbar.close()
+        
+        if self.accelerator.is_main_process:
+            print("--- ARC-JSD Attribution Complete ---")
+        
+        return jsd_scores
+    
 
     def compute_exact_linear_shap(self):
         if self.verbose and self.accelerator.is_main_process:
