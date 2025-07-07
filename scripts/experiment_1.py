@@ -44,7 +44,7 @@ df = pd.read_csv(csv_path)
 df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "scoring", "doc_id"])
 print("Data Loaded!")
 
-num_questions_to_run = 100
+num_questions_to_run = df.shape[0]
 print(f"Running experiments for {num_questions_to_run} questions...")
 
 # Parameters

@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "ipykernel>=6.29.5",
+    "vertexai>=1.71.1",
 ]
 
 [dependency-groups]
@@ -17,8 +18,9 @@ dev = [
     "pyarrow>=20.0.0",
     "pygam>=0.9.1",
     "scikit-learn>=1.6.1",
+    "sentence-transformers>=4.1.0",
     "xgboost>=3.0.2",
 ]
-visualization = [
+visual = [
     "seaborn>=0.13.2",
 ]
