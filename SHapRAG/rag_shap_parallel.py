@@ -715,17 +715,7 @@ class ShapleyExperimentHarness:
 
     @staticmethod
     def _jensen_shannon_divergence(p: torch.Tensor, q: torch.Tensor, epsilon: float = 1e-10) -> float:
-        """
-        Calculates the Jensen-Shannon Divergence between two probability distributions.
 
-        Args:
-            p (torch.Tensor): The first probability distribution (1D tensor).
-            q (torch.Tensor): The second probability distribution (1D tensor).
-            epsilon (float): A small value to avoid log(0).
-
-        Returns:
-            float: The JSD score.
-        """
         # Add epsilon to avoid log(0) issues
         p = p + epsilon
         q = q + epsilon
@@ -746,17 +736,7 @@ class ShapleyExperimentHarness:
         return jsd.item()
 
     def compute_arc_jsd(self) -> list[float]:
-        """
-        Runs the Attribute Response to Context (ARC-JSD) method at the document level.
 
-        This method identifies the most influential context documents for the generated
-        response by measuring the change in token-level probability distributions when
-        a document is removed (ablated).
-
-        Returns:
-            list[float]: A list of JSD scores, where the i-th score corresponds
-                         to the i-th document in the input `self.items`.
-        """
         if self.accelerator.is_main_process:
             print("--- Running ARC-JSD Attribution (Document Level) ---")
 
