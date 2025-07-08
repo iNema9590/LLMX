@@ -1,32 +1,32 @@
 import itertools
-import json
+# import json
 import math
 import os
 import pickle
 import random
-import warnings
-from collections import defaultdict
 
 import numpy as np
-import math
 import torch
 import torch.nn.functional as F
-import xgboost
-from accelerate import Accelerator
+# import xgboost
+# from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
-from fastFM import als
-from interpret.glassbox import ExplainableBoostingRegressor
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import Ridge
-from pygam import LinearGAM, f, l, s, te
-from scipy.sparse import csr_matrix
+# from fastFM import als
+# from interpret.glassbox import ExplainableBoostingRegressor
+# from pygam import LinearGAM, f, l, s, te
+# from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
-from sklearn.exceptions import ConvergenceWarning
-from sklearn.linear_model import Lasso
+# from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import Lasso, Ridge
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import PolynomialFeatures
 from tqdm.auto import tqdm
-from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# import warnings
+# from collections import defaultdict
+
+# from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 class ShapleyExperimentHarness:
@@ -616,28 +616,28 @@ class ShapleyExperimentHarness:
             coefficients = model.coef_
             return model, coefficients, overall_mse
 
-        elif sur_type == "fm":
-            # Convert to sparse (fastFM requires scipy CSR)
-            X_train_fm = csr_matrix(X_train)
+        # elif sur_type == "fm":
+        #     # Convert to sparse (fastFM requires scipy CSR)
+        #     X_train_fm = csr_matrix(X_train)
 
-            model = als.FMRegression(
-                n_iter=100,
-                init_stdev=0.1,
-                rank=4,
-                l2_reg_w=0.1,
-                l2_reg_V=0.1,
-                random_state=42
-            )
-            model.fit(X_train_fm, y_train)
-            y_pred=model.predict(X_train_fm)
-            overall_mse = mean_squared_error(y_train, y_pred)
-            w = model.w_
-            V = model.V_.T 
-            F = V @ V.T     
-            np.fill_diagonal(F, 0.0)
-            attr = w + 0.5 * F.sum(axis=1) 
+        #     model = als.FMRegression(
+        #         n_iter=100,
+        #         init_stdev=0.1,
+        #         rank=4,
+        #         l2_reg_w=0.1,
+        #         l2_reg_V=0.1,
+        #         random_state=42
+        #     )
+        #     model.fit(X_train_fm, y_train)
+        #     y_pred=model.predict(X_train_fm)
+        #     overall_mse = mean_squared_error(y_train, y_pred)
+        #     w = model.w_
+        #     V = model.V_.T 
+        #     F = V @ V.T     
+        #     np.fill_diagonal(F, 0.0)
+        #     attr = w + 0.5 * F.sum(axis=1) 
 
-            return model, attr, F, overall_mse
+        #     return model, attr, F, overall_mse
         
         elif sur_type == "full_poly2":
             poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
@@ -715,17 +715,7 @@ class ShapleyExperimentHarness:
 
     @staticmethod
     def _jensen_shannon_divergence(p: torch.Tensor, q: torch.Tensor, epsilon: float = 1e-10) -> float:
-        """
-        Calculates the Jensen-Shannon Divergence between two probability distributions.
 
-        Args:
-            p (torch.Tensor): The first probability distribution (1D tensor).
-            q (torch.Tensor): The second probability distribution (1D tensor).
-            epsilon (float): A small value to avoid log(0).
-
-        Returns:
-            float: The JSD score.
-        """
         # Add epsilon to avoid log(0) issues
         p = p + epsilon
         q = q + epsilon
@@ -746,17 +736,7 @@ class ShapleyExperimentHarness:
         return jsd.item()
 
     def compute_arc_jsd(self) -> list[float]:
-        """
-        Runs the Attribute Response to Context (ARC-JSD) method at the document level.
 
-        This method identifies the most influential context documents for the generated
-        response by measuring the change in token-level probability distributions when
-        a document is removed (ablated).
-
-        Returns:
-            list[float]: A list of JSD scores, where the i-th score corresponds
-                         to the i-th document in the input `self.items`.
-        """
         if self.accelerator.is_main_process:
             print("--- Running ARC-JSD Attribution (Document Level) ---")
 
