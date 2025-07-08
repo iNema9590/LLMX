@@ -395,98 +395,131 @@ class ContextAttribution:
         return attr, F, mse
     
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
-                        max_unique_lookups: int, seed: int = None):
-
+                        max_unique_lookups: int, seed: int = None, 
+                        shared_cache: dict = None):
+        """
+        Computes Shapley values using Truncated Monte Carlo sampling.
+        
+        This version uses a provided shared_cache to store and retrieve utilities,
+        and manages its own lookup budget independently of the cache's total size.
+        It runs on the main process.
+        """
+        if not self.accelerator.is_main_process:
+            return np.zeros(self.n_items)
             
         if seed is not None:
             random.seed(seed)
             np.random.seed(seed)
+            
+        # Use the provided shared cache or the instance's own cache if none is given.
+        cache = shared_cache if shared_cache is not None else self.utility_cache
+        
+        # This method's own counter for its budget.
+        lookups_made_by_this_call = 0
 
         shapley_values = np.zeros(self.n_items)
         marginal_counts = np.zeros(self.n_items, dtype=int)
         
-        # On-demand call for empty and full sets, which are crucial for truncation.
-        # This also populates the cache for the first lookups.
-        v_empty_util = self.get_utility(tuple([0] * self.n_items))
-        v_full_util = self.get_utility(tuple([1] * self.n_items))
+        # Nested function to handle on-demand utility calls while tracking budget.
+        def get_utility_with_budget(subset_tuple):
+            nonlocal lookups_made_by_this_call
+            # Always return from cache if available, without penalty to budget.
+            if subset_tuple in cache:
+                return cache[subset_tuple]
+                
+            # If not in cache, check if we have budget to compute it.
+            if lookups_made_by_this_call >= max_unique_lookups:
+                return -float('inf') # Budget exceeded, return failure.
+            
+            # Compute, cache, increment budget counter, and return.
+            utility = self._llm_compute_logprob(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)))
+            cache[subset_tuple] = utility
+            lookups_made_by_this_call += 1
+            return utility
+
+        v_empty_util = get_utility_with_budget(tuple([0] * self.n_items))
+        v_full_util = get_utility_with_budget(tuple([1] * self.n_items))
         
-        # Check for fatal errors in endpoint utilities needed for truncation.
-        truncation_possible = v_empty_util != -float('inf') and v_full_util != -float('inf')
-        if not truncation_possible and self.verbose:
-            print("  Warning: Truncation disabled because utility for empty or full set failed.")
+        truncation_possible = v_empty_util > -float('inf') and v_full_util > -float('inf')
 
         indices = list(range(self.n_items))
         pbar = tqdm(range(num_iterations_max), desc="TMC Iterations (Corrected)", disable=not self.verbose)
         
         for t in pbar:
-            if len(self.utility_cache) >= max_unique_lookups:
-                if self.verbose:
-                    print(f"Stopping TMC at iteration {t+1} due to lookup budget ({max_unique_lookups}).")
+            if lookups_made_by_this_call >= max_unique_lookups:
+                if self.verbose: print(f"TMC: Budget of {max_unique_lookups} lookups reached.")
+                pbar.close()
                 break 
-
+                
             permutation = random.sample(indices, self.n_items)
             v_prev_util = v_empty_util
             current_subset_np = np.zeros(self.n_items, dtype=int) 
 
             for item_idx_to_add in permutation:
-                # Check if we can truncate the rest of this permutation
-                can_truncate = t > 0 and truncation_possible and (abs(v_full_util - v_prev_util) < performance_tolerance)
-                
-                if can_truncate:
-                    # If we truncate, the utility is assumed not to change from the previous step.
-                    # The marginal contribution is therefore 0.
-                    v_curr_util = v_prev_util
+                # If the chain has already failed (e.g., v_prev_util is -inf), no point continuing.
+                if v_prev_util == -float('inf'):
+                    marginal_contribution = 0.0 # Cannot compute a valid marginal.
+                    v_curr_util = -float('inf') # The chain remains broken.
                 else:
-                    # If not truncating, compute the utility for the new subset on-demand.
-                    v_curr_np = current_subset_np.copy() 
-                    v_curr_np[item_idx_to_add] = 1
-                    v_curr_util = self.get_utility(tuple(v_curr_np))
+                    can_truncate = t > 0 and truncation_possible and (abs(v_full_util - v_prev_util) < performance_tolerance)
+                    if can_truncate:
+                        v_curr_util = v_prev_util
+                    else:
+                        v_curr_np = current_subset_np.copy(); v_curr_np[item_idx_to_add] = 1
+                        v_curr_util = get_utility_with_budget(tuple(v_curr_np))
+                    
+                    marginal_contribution = v_curr_util - v_prev_util if v_curr_util > -float('inf') else 0.0
                 
-                # Calculate marginal contribution if utilities are valid
-                marginal_contribution = 0.0
-                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
-                    marginal_contribution = v_curr_util - v_prev_util
-                
-                # Update the running average for the current item's Shapley value
                 k_count = marginal_counts[item_idx_to_add] + 1
-                shapley_values[item_idx_to_add] = ((k_count - 1) / k_count) * shapley_values[item_idx_to_add] + \
-                                                (1 / k_count) * marginal_contribution
+                shapley_values[item_idx_to_add] = ((k_count - 1) / k_count) * shapley_values[item_idx_to_add] + (1 / k_count) * marginal_contribution
                 marginal_counts[item_idx_to_add] = k_count
                 
-                # CRITICAL: Update state for the next step in the permutation
-                v_prev_util = v_curr_util 
+                # CRITICAL: Update state for the next step in the permutation.
+                v_prev_util = v_curr_util
                 current_subset_np[item_idx_to_add] = 1
         
-        pbar.close()
         return shapley_values
 
     def compute_beta_shap(self, num_iterations_max: int, beta_a: float, beta_b: float, 
-                        max_unique_lookups: int, seed: int = None):
+                        max_unique_lookups: int, seed: int = None,
+                        shared_cache: dict = None):
+        """
+        Computes Shapley values using BetaShap sampling. This version uses a
+        provided shared cache and manages its own lookup budget. It runs on the main process.
+        """
         if not self.accelerator.is_main_process:
             return np.zeros(self.n_items)
             
-        if beta_dist is None:
-            raise ImportError("BetaShap requires scipy. `pip install scipy`")
+        if beta_dist is None: raise ImportError("BetaShap requires scipy.")
+        if seed is not None: random.seed(seed); np.random.seed(seed)
             
-        if seed is not None:
-            random.seed(seed)
-            np.random.seed(seed)
+        cache = shared_cache if shared_cache is not None else self.utility_cache
+        lookups_made_by_this_call = 0
 
         weighted_marginal_sums = np.zeros(self.n_items)
         total_weights_for_item = np.zeros(self.n_items)
         
-        # On-demand call for the empty set utility. This is the crucial first step.
-        v_empty_util = self.get_utility(tuple([0] * self.n_items))
-        if v_empty_util == -float('inf') and self.verbose:
-            print("  FATAL WARNING for BetaShap: Utility of the empty set failed. All marginals will be invalid.")
+        def get_utility_with_budget(subset_tuple):
+            nonlocal lookups_made_by_this_call
+            if subset_tuple in cache: return cache[subset_tuple]
+            if lookups_made_by_this_call >= max_unique_lookups: return -float('inf')
             
+            utility = self._llm_compute_logprob(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)))
+            cache[subset_tuple] = utility
+            lookups_made_by_this_call += 1
+            return utility
+
+        v_empty_util = get_utility_with_budget(tuple([0] * self.n_items))
+        if v_empty_util == -float('inf') and self.verbose:
+            print("BetaShap Warning: Utility of empty set is -inf. This may lead to zero scores.")
+
         indices = list(range(self.n_items))
-        pbar = tqdm(range(num_iterations_max), desc="BetaShap Iterations (Fortified)", disable=not self.verbose)
+        pbar = tqdm(range(num_iterations_max), desc="BetaShap Iterations (Corrected)", disable=not self.verbose)
         
         for t in pbar:
-            if len(self.utility_cache) >= max_unique_lookups:
-                if self.verbose:
-                    print(f"Stopping BetaShap at iteration {t+1} due to lookup budget ({max_unique_lookups}).")
+            if lookups_made_by_this_call >= max_unique_lookups:
+                if self.verbose: print(f"BetaShap: Budget of {max_unique_lookups} lookups reached.")
+                pbar.close()
                 break
 
             permutation = random.sample(indices, self.n_items)
@@ -494,47 +527,37 @@ class ContextAttribution:
             current_subset_np = np.zeros(self.n_items, dtype=int)
 
             for k, item_idx_to_add in enumerate(permutation):
-                # Form the new subset by adding the item
-                v_curr_np = current_subset_np.copy()
-                v_curr_np[item_idx_to_add] = 1
+                # If the chain has already failed, break from this permutation.
+                if v_prev_util == -float('inf'):
+                    break
+
+                v_curr_np = current_subset_np.copy(); v_curr_np[item_idx_to_add] = 1
+                v_curr_util = get_utility_with_budget(tuple(v_curr_np))
                 
-                # On-demand call to get the utility for the new subset
-                v_curr_util = self.get_utility(tuple(v_curr_np))
-                
-                # Calculate the Beta distribution weight
-                if self.n_items > 1:
-                    x_pos = k / (self.n_items - 1)
-                else: # Avoid division by zero for n=1
-                    x_pos = 0.5
-                
-                try:
-                    weight = beta_dist.pdf(x_pos, beta_a, beta_b)
-                    if not np.isfinite(weight):
-                        weight = 1e6 # Use a large, stable weight if PDF is infinite (e.g., at boundaries)
-                except Exception:
-                    weight = 1.0 # Fallback weight
-                
-                # Only update sums if the marginal contribution is valid
-                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
+                # Only proceed if the new utility is valid
+                if v_curr_util > -float('inf'):
                     marginal_contribution = v_curr_util - v_prev_util
+                    
+                    # Calculate Beta weight
+                    if self.n_items > 1: x_pos = k / (self.n_items - 1)
+                    else: x_pos = 0.5
+                    
+                    try:
+                        weight = beta_dist.pdf(x_pos, beta_a, beta_b)
+                        if not np.isfinite(weight): weight = 1e6 # Use large stable weight if PDF is infinite
+                    except Exception: weight = 1.0 # Fallback
+                    
                     weighted_marginal_sums[item_idx_to_add] += weight * marginal_contribution
                     total_weights_for_item[item_idx_to_add] += weight
-                    if self.verbose and t < 2 and k < 5: # Log first few steps of first two iterations
-                        print(f"  [Iter {t+1}, Step {k+1}] item {item_idx_to_add}: "
-                            f"V(S U i)={v_curr_util:.3f}, V(S)={v_prev_util:.3f}, "
-                            f"Marginal={marginal_contribution:.3f}, Weight={weight:.3f}")
                 
-                # Update state for the next step in the permutation
                 v_prev_util = v_curr_util
-                current_subset_np = v_curr_np
+                current_subset_np[item_idx_to_add] = 1
                 
         pbar.close()
         
-        # Calculate the final Shapley values
         shapley_values = np.zeros(self.n_items)
-        # Avoid division by zero
-        non_zero_weights_mask = total_weights_for_item > 1e-9
-        shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
+        non_zero_mask = total_weights_for_item > 1e-9
+        shapley_values[non_zero_mask] = weighted_marginal_sums[non_zero_mask] / total_weights_for_item[non_zero_mask]
 
         return shapley_values
 
