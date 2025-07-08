@@ -41,7 +41,7 @@ start = time.time()
 csv_path = os.path.join(current_dir, f'../data/synthetic_data/{args.dataset}.csv')
 
 df = pd.read_csv(csv_path)
-df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "top_k", "methods_top_k", "precision_top_k", "doc_id"])
+df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "top_k", "doc_id", "FM_matrix"])
 print("Data Loaded!")
 
 num_questions_to_run = df.shape[0]
@@ -132,11 +132,12 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
             
     results_for_query = {}
 
-    exhaustive_top_2 = harness.compute_exhaustive_top_k(2)
+    # exhaustive_top_2 = harness.compute_exhaustive_top_k(2)
 
     if accelerator_main.is_main_process:
         # results_for_query["Exhaustive_top_2"] = harness.compute_exhaustive_top_k(2)
         results_for_query["Exact"] = harness.compute_exact_shap()
+        shapic = harness.compute_shapley_interaction_index_pairs_matrix()
 
         m_samples_map = {"S": 32, "M": 64, "L": 100} # Example sample sizes
         T_iterations_map = {"S": 32, "M": 64, "L":100}  # Example iterations
@@ -150,30 +151,34 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
             if actual_samples > 0: 
                 results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="uniform",  seed=SEED) #lasso_alpha=0.01,
                 results_for_query[f"KernelShap{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="kernel_shap",  seed=SEED) #lasso_alpha=0.01,
-                # results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
+                results_for_query[f"WSS{actual_samples}"], F = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
                 results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)
                 results_for_query[f"TMC{actual_samples}"] = harness.compute_tmc_shap(num_iterations_max=T_iterations_map[size_key], performance_tolerance=0.001, max_unique_lookups=actual_samples, seed=SEED)
+                # results_for_query[f"Shapic"] = harness.compute_shapley_interaction_index_pairs_matrix()
+
         
         results_for_query["LOO"] = harness.compute_loo()
 
         exact_scores = results_for_query.get("Exact")
-        methods_top_k = {}
-        precision_top_k = {}
-        for method in results_for_query.keys(): 
-            method_top_k_docs = np.argsort(-np.array(results_for_query[method]))[:2] #exhaustive_top_2
-            methods_top_k[method] = method_top_k_docs
-            gold_top_k_docs = exhaustive_top_2
-            precision_top_k[(2, method)] = len(set.intersection(set(method_top_k_docs), set(gold_top_k_docs)))/2
+        # methods_top_k = {}
+        # precision_top_k = {}
+        # for method in results_for_query.keys(): 
+        #     method_top_k_docs = np.argsort(-np.array(results_for_query[method]))[:2] #exhaustive_top_2
+        #     # methods_top_k[method] = method_top_k_docs
+        #     gold_top_k_docs = exhaustive_top_2
+            # precision_top_k[(2, method)] = len(set.intersection(set(method_top_k_docs), set(gold_top_k_docs)))/2
 
 
         df_save_results.loc[i, "query"] = query
         df_save_results.loc[i, "scoring"] = [results_for_query]
-        df_save_results.loc[i, "top_k"] = [exhaustive_top_2]
-        df_save_results.loc[i, "precision_top_k"] = [precision_top_k]
+        # df_save_results.loc[i, "top_k"] = [[exhaustive_top_2]]
+        # df_save_results.loc[i, "precision_top_k"] = [precision_top_k]
         # print("Flags Value: ", flags)
         df_save_results.loc[i, "doc_id"] = [[flags]]
         df_save_results.loc[i, "context"] = [[docs]]
         df_save_results.loc[i, "provided_answer"] = harness.target_response
+        df_save_results.loc[i, "FM_matrix"] = [F]
+        df_save_results.loc[i, "FM_matrix_groundtruth"] = [shapic]
 
 
         print("RESULTS FOR QUERY: ", df_save_results)

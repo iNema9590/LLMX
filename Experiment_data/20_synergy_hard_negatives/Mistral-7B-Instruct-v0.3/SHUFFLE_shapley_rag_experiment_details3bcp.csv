@@ -1,0 +1,321 @@
+Question_Index,Query,Method,Pearson,Spearman,NDCG,KendallTau,Precision_at_1,Precision_at_2,Precision_at_3,Precision_at_5,Hit_rate_at_k,Reciprocal_Rank,Num_Items
+0,What kind of energy does the facility hovering the planet Xylos produce?,ContextCite32,0.9603074005163894,0.8787878787878788,0.9721413276970614,0.7333333333333333,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,KernelShap32,0.9991646015076943,0.9878787878787878,1.0,0.9555555555555554,1.0,1.0,1.0,1.0,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,WSS32,0.9944737939984043,0.9272727272727272,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,BetaShap (U)32,0.9468776516869079,0.7454545454545454,0.9857987912829919,0.6,1.0,0.5,1.0,0.8,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,TMC32,0.9654588462685961,0.8181818181818182,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,ContextCite64,0.9852357817486421,0.9393939393939393,0.9721413276970614,0.8222222222222221,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,KernelShap64,0.9979901487053299,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,WSS64,0.9949254596752172,0.8787878787878788,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,BetaShap (U)64,0.923715028733427,0.6484848484848483,0.9857987912829919,0.5111111111111111,1.0,0.5,1.0,0.8,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,TMC64,0.9803394772276872,0.7454545454545454,0.9857987912829919,0.6,1.0,0.5,1.0,0.8,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,ContextCite100,0.9931329196784304,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,KernelShap100,0.9962649216662208,0.9999999999999999,1.0,0.9999999999999999,1.0,1.0,1.0,1.0,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,WSS100,0.9989980334599786,0.9999999999999999,1.0,0.9999999999999999,1.0,1.0,1.0,1.0,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,BetaShap (U)100,0.9010682530561389,0.6121212121212121,0.9857987912829919,0.4666666666666666,1.0,0.5,1.0,0.8,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,TMC100,0.9898481946101342,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+0,What kind of energy does the facility hovering the planet Xylos produce?,LOO,0.9873266637800328,0.4424242424242424,0.9721413276970614,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,ContextCite32,0.9810119806196771,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,KernelShap32,0.9936436590244438,0.9393939393939393,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,WSS32,0.942156489332344,0.7818181818181817,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,BetaShap (U)32,0.9355476298133281,0.7454545454545454,0.9610991596680987,0.6,0.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,TMC32,0.9731739325473234,0.9030303030303028,1.0,0.7777777777777777,1.0,1.0,1.0,1.0,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,ContextCite64,0.9871222526991947,0.9272727272727272,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,KernelShap64,0.9911953298949563,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,WSS64,0.9877631941533918,0.8303030303030302,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,BetaShap (U)64,0.9268135957602984,0.6121212121212121,0.9610991596680987,0.4222222222222222,0.0,1.0,1.0,0.6,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,TMC64,0.9869218504850629,0.7333333333333332,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,ContextCite100,0.9940778641823194,0.9272727272727272,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,KernelShap100,0.9922530647462864,0.8666666666666665,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,WSS100,0.9978509500204009,0.9272727272727272,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,BetaShap (U)100,0.92524680899865,0.6848484848484848,0.9610991596680987,0.5555555555555555,0.0,1.0,1.0,0.6,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,TMC100,0.9842664359935084,0.7939393939393938,0.9610991596680987,0.6444444444444444,0.0,1.0,1.0,0.8,1,1.0,10
+1,What is the primary defense of the creatures populating the Subterranean Caves?,LOO,0.9824239744363406,0.9030303030303028,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,ContextCite32,0.9618601211468313,0.6363636363636362,0.9332529491539521,0.5111111111111111,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,KernelShap32,0.9377578297111042,0.35757575757575755,0.9459163889553382,0.28888888888888886,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,WSS32,0.8360072091034143,0.6848484848484848,0.9505381005099163,0.5111111111111111,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,BetaShap (U)32,0.9608455593706029,0.8060606060606059,0.9486778288533074,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,TMC32,0.9724443897656803,0.7818181818181817,0.9954737187850368,0.6,1.0,0.5,1.0,0.6,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,ContextCite64,0.9811982824314825,0.8060606060606059,0.9651187276283133,0.6,1.0,0.5,0.6666666666666666,1.0,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,KernelShap64,0.9817721230130296,0.7575757575757575,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,WSS64,0.9750912444394644,0.7454545454545454,0.9486778288533074,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,BetaShap (U)64,0.9118518861266153,0.6969696969696969,0.9486778288533074,0.5111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,TMC64,0.9783427244581212,0.8545454545454544,0.9954737187850368,0.6888888888888888,1.0,0.5,1.0,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,ContextCite100,0.9914827376474725,0.9393939393939393,0.9678309644417543,0.8222222222222221,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,KernelShap100,0.9801476276255899,0.8303030303030302,0.9643893650436071,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,WSS100,0.9909657568926223,0.9151515151515152,0.9678309644417543,0.7777777777777777,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,BetaShap (U)100,0.8446434403231241,0.6969696969696969,1.0,0.5555555555555555,1.0,1.0,1.0,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,TMC100,0.9815306343739905,0.8787878787878788,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+2,What is the main function of the device recently discovered in desert ruins?,LOO,0.9352968639012291,0.4424242424242424,0.8593435867957407,0.37777777777777777,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,ContextCite32,0.9787362146251148,0.8424242424242423,1.0,0.7333333333333333,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,KernelShap32,0.9750687776928948,0.8545454545454544,1.0,0.7333333333333333,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,WSS32,0.9659038202179313,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,BetaShap (U)32,0.813187252480994,0.8303030303030302,0.895257905087346,0.6888888888888888,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,TMC32,0.9350794177929161,0.8303030303030302,0.895257905087346,0.6888888888888888,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,ContextCite64,0.9880594695987892,0.8787878787878788,0.9896473902803979,0.7333333333333333,1.0,0.5,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,KernelShap64,0.9973771302110062,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,WSS64,0.9918503902010942,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,BetaShap (U)64,0.8457718943708095,0.9757575757575757,0.9223797274578709,0.911111111111111,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,TMC64,0.9874117526629795,0.9999999999999999,1.0,0.9999999999999999,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,ContextCite100,0.9948162780835679,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,KernelShap100,0.9969924693993599,0.9272727272727272,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,WSS100,0.9967586279094626,0.9636363636363635,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,BetaShap (U)100,0.8075915543319458,0.9757575757575757,0.9728781776294751,0.911111111111111,0.0,1.0,1.0,0.8,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,TMC100,0.9926378963696136,0.9878787878787878,1.0,0.9555555555555554,1.0,1.0,1.0,1.0,1,1.0,10
+3,What is the composition of the natural wonder of planet Ntunu?,LOO,0.9567594821130467,0.9878787878787878,1.0,0.9555555555555554,1.0,1.0,1.0,1.0,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,ContextCite32,0.9329335196915434,0.7818181818181817,0.9190049153827636,0.6888888888888888,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,KernelShap32,0.9715832734785531,0.7333333333333332,0.9674059174598225,0.5111111111111111,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,WSS32,0.6795394042574375,0.22424242424242422,0.8374044544321099,0.1111111111111111,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,BetaShap (U)32,0.7252672160866558,0.8666666666666665,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,TMC32,0.9724900129437475,0.9393939393939393,0.9803457488757883,0.8222222222222221,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,ContextCite64,0.9901117561394511,0.9030303030303028,0.9871096321301699,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,KernelShap64,0.9909191340698198,0.8181818181818182,0.970781382837107,0.6444444444444444,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,WSS64,0.9846872734168193,0.8909090909090909,0.9674059174598225,0.6888888888888888,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,BetaShap (U)64,0.8761174294654404,0.8303030303030302,0.9966115821229028,0.6888888888888888,1.0,0.5,1.0,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,TMC64,0.977923262635182,0.9030303030303028,0.9674059174598225,0.7333333333333333,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,ContextCite100,0.9911739832958074,0.8545454545454544,0.9871096321301699,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,KernelShap100,0.996937665864354,0.9636363636363635,0.9966115821229028,0.8666666666666666,1.0,0.5,1.0,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,WSS100,0.9925855201889088,0.8909090909090909,0.9803457488757883,0.7777777777777777,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,BetaShap (U)100,0.8909260736440083,0.6484848484848483,0.9353331646758265,0.5111111111111111,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,TMC100,0.9867982040375816,0.9030303030303028,0.9674059174598225,0.7333333333333333,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+4,What is the traditional weapon of the defenders of the Citadel?,LOO,0.9633874167078222,0.4666666666666666,0.902739082135649,0.37777777777777777,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,ContextCite32,0.9669527662691898,0.7454545454545454,0.9729719867551211,0.6,0.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,KernelShap32,0.9895422731391074,0.7212121212121211,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,WSS32,0.9259790517378801,0.4545454545454545,0.9197810602394261,0.37777777777777777,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,BetaShap (U)32,0.878802964536063,0.7575757575757575,0.946809073484305,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,TMC32,0.953531030681647,0.7818181818181817,0.946809073484305,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,ContextCite64,0.9865574484378079,0.709090909090909,0.9729719867551211,0.5555555555555555,0.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,KernelShap64,0.9922784750328674,0.9030303030303028,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,WSS64,0.9684826472020283,0.5636363636363636,0.9729719867551211,0.4222222222222222,0.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,BetaShap (U)64,0.7121572924708892,0.6848484848484848,0.9197810602394261,0.5111111111111111,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,TMC64,0.9801749710602653,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,1.0,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,ContextCite100,0.9910497413697121,0.8424242424242423,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,KernelShap100,0.9973091254491773,0.9393939393939393,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,WSS100,0.9897199704223264,0.7212121212121211,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,BetaShap (U)100,0.7289639104895211,0.41818181818181815,0.9197810602394261,0.28888888888888886,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,TMC100,0.9871411485866097,0.7818181818181817,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+5,What kind of power source is used by the ancient constructs found in the Desert of Bones?,LOO,0.9691927174844894,0.5030303030303029,1.0,0.3333333333333333,1.0,1.0,1.0,0.6,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,ContextCite32,0.99020992597282,0.8545454545454544,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,KernelShap32,0.9778756253085935,0.7212121212121211,0.9405528460505047,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,WSS32,0.9328893578995969,0.7696969696969697,0.87767241740028,0.6,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,BetaShap (U)32,0.9357398415291533,0.5272727272727272,1.0,0.4222222222222222,1.0,1.0,1.0,0.6,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,TMC32,0.9487034531885432,0.43030303030303024,0.9405528460505047,0.37777777777777777,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,ContextCite64,0.9856635830928976,0.9272727272727272,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,KernelShap64,0.9910633101419639,0.7818181818181817,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,WSS64,0.9850122452141132,0.9151515151515152,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,BetaShap (U)64,0.980823302904254,0.43030303030303024,1.0,0.28888888888888886,1.0,1.0,1.0,0.6,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,TMC64,0.9858624144191315,0.6242424242424242,1.0,0.4666666666666666,1.0,1.0,1.0,0.6,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,ContextCite100,0.9911632023736827,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,KernelShap100,0.9937578075409417,0.7818181818181817,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,WSS100,0.9960471148389377,0.9878787878787878,1.0,0.9555555555555554,1.0,1.0,1.0,1.0,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,BetaShap (U)100,0.9779303189093241,0.6969696969696969,1.0,0.6,1.0,1.0,1.0,0.6,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,TMC100,0.9936061245573877,0.6727272727272726,1.0,0.5111111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+6,What is the primary ingredient of the most famous healing potion?,LOO,0.9829031346301275,0.709090909090909,1.0,0.6,1.0,1.0,1.0,0.6,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,ContextCite32,0.9854165028979857,0.8666666666666665,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,KernelShap32,0.9919305840191105,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,WSS32,0.8600681283597827,0.6848484848484848,0.8986656240771134,0.5555555555555555,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,BetaShap (U)32,0.8832792481563086,0.16363636363636364,0.9845877207897211,0.06666666666666667,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,TMC32,0.9667555841657184,0.38181818181818183,0.9934347345119438,0.28888888888888886,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,ContextCite64,0.9941446262605207,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,KernelShap64,0.9946439183559677,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,WSS64,0.9943114794901423,0.9272727272727272,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,BetaShap (U)64,0.8939966993040727,0.13939393939393938,0.9845877207897211,0.06666666666666667,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,TMC64,0.9867200542945558,0.4424242424242424,0.9934347345119438,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,ContextCite100,0.9961309349530145,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,KernelShap100,0.9973862965455295,0.9030303030303028,0.9845877207897211,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,WSS100,0.9965578285587758,0.9272727272727272,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,BetaShap (U)100,0.9160044634370756,0.29696969696969694,0.9845877207897211,0.15555555555555553,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,TMC100,0.9886122500711242,0.5878787878787878,0.9934347345119438,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+7,What defensive ability is possessed by the strongest creature found in Bioluminescent Forest?,LOO,0.9815794547161483,0.9393939393939393,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,ContextCite32,0.9709010365511621,0.8545454545454544,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,KernelShap32,0.9868825472756699,0.7818181818181817,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,WSS32,0.9042685353344464,0.7575757575757575,0.995433273891782,0.6,1.0,0.5,1.0,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,BetaShap (U)32,0.9025471235657466,0.8181818181818182,0.9985051635696718,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,TMC32,0.9779199028974325,0.7212121212121211,0.9935470003305489,0.6,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,ContextCite64,0.9915797905626906,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,KernelShap64,0.9961889008502465,0.7696969696969697,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,WSS64,0.9890087539202853,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,BetaShap (U)64,0.9196008090258231,0.7818181818181817,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,TMC64,0.9954055354666809,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,ContextCite100,0.9968177162692937,0.9393939393939393,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,KernelShap100,0.997921997888361,0.8424242424242423,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,WSS100,0.9952997551781121,0.9393939393939393,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,BetaShap (U)100,0.9148523395269494,0.406060606060606,0.9746125599001819,0.3333333333333333,1.0,0.5,0.3333333333333333,0.4,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,TMC100,0.9901333039402769,0.8909090909090909,0.9985051635696718,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+8,What is the energy source of the massive orbital platform orbiting planet Xylos?,LOO,0.9940135635023416,0.1515151515151515,0.9746125599001819,0.06666666666666667,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,ContextCite32,0.9800787262242339,0.5151515151515151,0.9626532247717743,0.4222222222222222,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,KernelShap32,0.9945057141566156,0.7696969696969697,0.9942114036852657,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,WSS32,0.5962016646665169,0.29696969696969694,0.9188762863187924,0.19999999999999998,1.0,0.5,0.6666666666666666,0.6,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,BetaShap (U)32,0.9819155990988522,0.49090909090909085,0.9942114036852657,0.37777777777777777,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,TMC32,0.990127256689171,0.6121212121212121,0.9942114036852657,0.5111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,ContextCite64,0.9895760952392694,0.6363636363636362,0.9626532247717743,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,KernelShap64,0.9949006349651831,0.8303030303030302,0.9942114036852657,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,WSS64,0.9935413265983314,0.8666666666666665,0.9942114036852657,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,BetaShap (U)64,0.9520993560338188,0.7939393939393938,0.9999999999999998,0.6444444444444444,1.0,1.0,1.0,1.0,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,TMC64,0.991697564059072,0.8424242424242423,0.9942114036852657,0.6888888888888888,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,ContextCite100,0.9912264136913603,0.6121212121212121,0.9626532247717743,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,KernelShap100,0.9949420792223204,0.9151515151515152,0.9942114036852657,0.8222222222222221,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,WSS100,0.995225719903319,0.9151515151515152,0.9999999999999998,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,BetaShap (U)100,0.9505349715810208,0.6242424242424242,0.9999999999999998,0.4666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,TMC100,0.9952224779040638,0.8060606060606059,0.9942114036852657,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What is the population of the capital of the biggest country in Xylos-7?,LOO,0.9905286782323528,0.35757575757575755,0.9942114036852657,0.19999999999999998,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,ContextCite32,0.98463656849911,0.8424242424242423,0.9913810876848717,0.6888888888888888,1.0,0.5,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,KernelShap32,0.9817667828601784,0.8545454545454544,0.9913810876848717,0.6888888888888888,1.0,0.5,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,WSS32,0.9425305724786369,0.9636363636363635,0.9990640538877645,0.911111111111111,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,BetaShap (U)32,0.8358155630332151,0.9151515151515152,0.9086543491558927,0.7777777777777777,0.0,1.0,1.0,0.8,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,TMC32,0.9592529748544162,0.9515151515151514,1.0000000000000002,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,ContextCite64,0.988209148805807,0.9515151515151514,0.9990640538877645,0.8666666666666666,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,KernelShap64,0.9864567117898406,0.7939393939393938,0.9913810876848717,0.6,1.0,0.5,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,WSS64,0.9908185951470716,0.9272727272727272,0.9990640538877645,0.8222222222222221,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,BetaShap (U)64,0.854607156172996,0.9151515151515152,0.8802502637118182,0.7777777777777777,0.0,0.5,1.0,0.8,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,TMC64,0.9820403756356423,0.9757575757575757,1.0000000000000002,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,ContextCite100,0.9889394460711219,0.9272727272727272,0.9990640538877645,0.8222222222222221,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,KernelShap100,0.9897922321550079,0.8787878787878788,0.9990640538877645,0.7333333333333333,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,WSS100,0.993196694167676,0.8909090909090909,0.9990640538877645,0.7777777777777777,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,BetaShap (U)100,0.8860643201732317,0.9393939393939393,0.8802502637118182,0.8222222222222221,0.0,0.5,1.0,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,TMC100,0.9889470539760687,0.9515151515151514,0.9990640538877645,0.8666666666666666,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What's the weather like in the capital of Zhykara?,LOO,0.97396214798889,0.8181818181818182,0.9913810876848717,0.6444444444444444,1.0,0.5,0.6666666666666666,1.0,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,ContextCite32,0.9811955995280679,0.6121212121212121,0.9964251526145211,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,KernelShap32,0.9821800046164515,0.3939393939393939,0.9882946849046381,0.3333333333333333,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,WSS32,0.9700306766933418,0.2121212121212121,0.9882946849046381,0.15555555555555553,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,BetaShap (U)32,0.9775072283554078,0.7212121212121211,0.9972471163584213,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,TMC32,0.9805878887601543,0.7818181818181817,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,ContextCite64,0.9958468039120223,0.7575757575757575,0.9964251526145211,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,KernelShap64,0.9861920700538026,0.24848484848484845,0.9871274091569558,0.15555555555555553,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,WSS64,0.9962820010897322,0.6606060606060605,0.9972471163584213,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,BetaShap (U)64,0.9835735163681795,0.7818181818181817,0.9972471163584213,0.6,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,TMC64,0.9988183813628962,0.7939393939393938,1.0,0.6444444444444444,1.0,1.0,1.0,1.0,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,ContextCite100,0.9963011613188506,0.7696969696969697,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,KernelShap100,0.9931846286675485,0.32121212121212117,0.9886229394989218,0.28888888888888886,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,WSS100,0.9978380499008577,0.6363636363636362,0.9964251526145211,0.5111111111111111,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,BetaShap (U)100,0.9836540949327713,0.8303030303030302,1.0,0.6888888888888888,1.0,1.0,1.0,1.0,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,TMC100,0.9988568873693929,0.7939393939393938,1.0,0.6444444444444444,1.0,1.0,1.0,1.0,1,1.0,10
+11,What's the value of the element obtained by mixing Aethelite and Pyron?,LOO,0.9937865943912827,0.6848484848484848,0.9964251526145211,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,ContextCite32,0.9805468830548185,0.6727272727272726,1.0,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,KernelShap32,0.9948672993508099,0.6727272727272726,1.0,0.5111111111111111,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,WSS32,0.9796249126326424,0.7212121212121211,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,BetaShap (U)32,0.9483808466936707,0.2606060606060606,1.0,0.15555555555555553,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,TMC32,0.9892656111308696,0.2121212121212121,1.0,0.1111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,ContextCite64,0.9938511644668372,0.7333333333333332,1.0,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,KernelShap64,0.9915042414058942,0.6727272727272726,1.0,0.5111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,WSS64,0.9973190406120498,0.6848484848484848,1.0,0.4666666666666666,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,BetaShap (U)64,0.9110525485884287,0.6,1.0,0.4666666666666666,1.0,1.0,1.0,0.6,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,TMC64,0.9944501308089042,0.5515151515151515,1.0,0.4222222222222222,1.0,1.0,1.0,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,ContextCite100,0.9988931087452537,0.8181818181818182,1.0,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,KernelShap100,0.9972121736477875,0.7939393939393938,1.0,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,WSS100,0.9978913541382507,0.43030303030303024,1.0,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,BetaShap (U)100,0.9113784585615657,0.43030303030303024,1.0,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,TMC100,0.9851837227473542,0.6,1.0,0.5111111111111111,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What's the side effect of mixing Gravitium and Solara?,LOO,0.9943082974718274,0.6969696969696969,1.0,0.5555555555555555,1.0,1.0,1.0,0.6,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,ContextCite32,0.950205882370581,0.8181818181818182,1.0,0.6888888888888888,1.0,1.0,1.0,1.0,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,KernelShap32,0.949570086624575,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,WSS32,0.9179125351076648,0.6484848484848483,1.0,0.5111111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,BetaShap (U)32,0.961517173382044,0.6121212121212121,1.0,0.5111111111111111,1.0,1.0,1.0,0.6,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,TMC32,0.9891617378717913,0.8666666666666665,1.0,0.7777777777777777,1.0,1.0,1.0,0.6,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,ContextCite64,0.9769627719031571,0.8424242424242423,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,KernelShap64,0.982911881969853,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,WSS64,0.973695180379024,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,BetaShap (U)64,0.9554591056158361,0.5272727272727272,0.9474888385102584,0.4222222222222222,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,TMC64,0.9881384971335851,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,ContextCite100,0.9834910575317433,0.8666666666666665,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,KernelShap100,0.9922231494150459,0.9393939393939393,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,WSS100,0.9853101591381784,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,1.0,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,BetaShap (U)100,0.9674341867256119,0.7818181818181817,0.963043902936937,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,TMC100,0.9911566121093837,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.6,1,1.0,10
+13,What is the radius of the largest planet in the K'tharr System?,LOO,0.9829112206948534,0.7454545454545454,0.9669751560270307,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,ContextCite32,0.9926452273860986,0.8060606060606059,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,KernelShap32,0.9874772328057002,0.8424242424242423,1.0,0.7333333333333333,1.0,1.0,1.0,0.6,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,WSS32,0.8731331975128994,0.38181818181818183,0.9669476269034026,0.24444444444444444,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,BetaShap (U)32,0.9879552622153417,0.7939393939393938,0.9960840269422178,0.6444444444444444,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,TMC32,0.9952543353378235,0.8303030303030302,0.9960840269422178,0.6888888888888888,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,ContextCite64,0.9964882079761598,0.8787878787878788,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,KernelShap64,0.9975084396769807,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,WSS64,0.9985969349227544,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,BetaShap (U)64,0.954797276104763,0.32121212121212117,0.9960840269422178,0.15555555555555553,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,TMC64,0.9937102696971761,0.5636363636363636,0.9960840269422178,0.4222222222222222,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,ContextCite100,0.998097401878437,0.7333333333333332,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,KernelShap100,0.9981577525764906,0.8181818181818182,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,WSS100,0.9981838824853863,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,BetaShap (U)100,0.8661399819288268,0.6121212121212121,0.9960840269422178,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,TMC100,0.9942415188984066,0.6848484848484848,0.9960840269422178,0.5111111111111111,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+14,What is the population of the smallest planet in the Lumina System?,LOO,0.9923969023426368,0.8181818181818182,0.9669476269034026,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,ContextCite32,0.993556733762753,0.8328305948416885,1.0000000000000002,0.7191465199607916,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,KernelShap32,0.9936444858493069,0.8545454545454544,1.0000000000000002,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,WSS32,0.9911487661767563,0.8545454545454544,1.0000000000000002,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,BetaShap (U)32,0.9867693163478908,0.9272727272727272,1.0000000000000002,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,TMC32,0.9884611521997934,0.9030303030303028,1.0000000000000002,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,ContextCite64,0.9933027231884564,0.709090909090909,1.0000000000000002,0.5555555555555555,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,KernelShap64,0.9953592981308262,0.9272727272727272,1.0000000000000002,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,WSS64,0.9885531059232596,0.5515151515151515,0.952441316768957,0.4222222222222222,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,BetaShap (U)64,0.9484204401632388,0.9151515151515152,0.8486946989876999,0.7777777777777777,1.0,0.5,0.6666666666666666,1.0,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,TMC64,0.9964115485815388,0.8909090909090909,1.0000000000000002,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,ContextCite100,0.9928508193540156,0.8181818181818182,1.0000000000000002,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,KernelShap100,0.9956235491110004,0.8424242424242423,1.0000000000000002,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,WSS100,0.9917158310342461,0.6606060606060605,1.0000000000000002,0.5111111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,BetaShap (U)100,0.8979098088088622,0.6606060606060605,0.9668309972235573,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,TMC100,0.9931480786786944,0.8787878787878788,1.0000000000000002,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+15,What is the title of the latest film starring the highest-paid actor on the planet Celestia?,LOO,0.962405170352557,0.7575757575757575,1.0000000000000002,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,ContextCite32,0.989388612787537,0.8181818181818182,0.9781129805248361,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,KernelShap32,0.9604724350435984,0.7696969696969697,0.9807354997419613,0.6444444444444444,1.0,0.5,1.0,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,WSS32,0.9486790020886217,0.309090909090909,0.9781129805248361,0.24444444444444444,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,BetaShap (U)32,0.9804135171640512,0.41818181818181815,0.9646536010302212,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,TMC32,0.9883961800838252,0.6,1.0,0.4666666666666666,1.0,1.0,1.0,0.6,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,ContextCite64,0.9875377150430089,0.6848484848484848,0.9783731916570382,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,KernelShap64,0.9927100855162111,0.6,1.0,0.4666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,WSS64,0.9781640637570986,0.6848484848484848,1.0,0.5555555555555555,1.0,1.0,1.0,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,BetaShap (U)64,0.8944258713897197,0.5757575757575757,0.9646536010302212,0.5111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,TMC64,0.9929335844887919,0.7333333333333332,0.9781129805248361,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,ContextCite100,0.9863527599642602,0.6484848484848483,0.9646536010302212,0.5555555555555555,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,KernelShap100,0.9952993340648463,0.8303030303030302,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,WSS100,0.9875780221671805,0.7333333333333332,0.9783731916570382,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,BetaShap (U)100,0.9449042193362109,0.8424242424242423,0.976088388034411,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,TMC100,0.9952683787674457,0.8666666666666665,1.0,0.7777777777777777,1.0,1.0,1.0,1.0,1,1.0,10
+16,What is the salary of the most popular actor on the planet Aethelon?,LOO,0.9808563114061349,0.24848484848484845,0.976088388034411,0.15555555555555553,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,ContextCite32,0.9883534727718081,0.19999999999999998,0.9937587062751068,0.15555555555555553,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,KernelShap32,0.9814879837831292,0.8060606060606059,0.9943902562540375,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,WSS32,0.9284135799911093,0.6121212121212121,0.9937587062751068,0.5111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,BetaShap (U)32,0.9870530064920101,0.4666666666666666,0.9937587062751068,0.37777777777777777,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,TMC32,0.9836217247025902,0.5515151515151515,0.9937587062751068,0.4666666666666666,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,ContextCite64,0.9967018668471915,0.4424242424242424,0.9998536739718433,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,KernelShap64,0.9922211911988088,0.6363636363636362,0.9943902562540375,0.5111111111111111,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,WSS64,0.9841726840502042,0.6,1.0,0.5111111111111111,1.0,1.0,1.0,0.6,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,BetaShap (U)64,0.9667070663378066,0.7939393939393938,0.9937587062751068,0.6444444444444444,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,TMC64,0.99778372313433,0.6121212121212121,1.0,0.5111111111111111,1.0,1.0,1.0,0.6,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,ContextCite100,0.9957936782354253,0.5030303030303029,0.9937587062751068,0.37777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,KernelShap100,0.9943364286516356,0.5515151515151515,0.9937587062751068,0.4666666666666666,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,WSS100,0.9975158374861408,0.8060606060606059,0.9943902562540375,0.6,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,BetaShap (U)100,0.9046240263075482,0.8060606060606059,0.9998536739718433,0.6888888888888888,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,TMC100,0.9975935681797555,0.709090909090909,0.9937587062751068,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,What is the title of the first album by the most popular Chrono-Wave musician on Riven Prime?,LOO,0.9880553081427585,0.5515151515151515,0.9937587062751068,0.37777777777777777,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,ContextCite32,0.9766510876528384,0.9030303030303028,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,KernelShap32,0.9848340823037407,0.7575757575757575,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,WSS32,0.9452417023739657,0.8303030303030302,1.0,0.6888888888888888,1.0,1.0,1.0,1.0,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,BetaShap (U)32,0.8668572964102489,0.10303030303030303,0.8911202504191986,-0.022222222222222223,1.0,0.5,0.6666666666666666,0.4,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,TMC32,0.9823367788049391,0.6363636363636362,1.0,0.5111111111111111,1.0,1.0,1.0,0.6,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,ContextCite64,0.9854089224727235,0.8545454545454544,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,KernelShap64,0.9969249796368206,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,WSS64,0.9771094416554242,0.9030303030303028,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,BetaShap (U)64,0.7152971812899818,0.29696969696969694,0.8911202504191986,0.15555555555555553,1.0,0.5,0.6666666666666666,0.4,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,TMC64,0.9922576226071873,0.7454545454545454,1.0,0.6,1.0,1.0,1.0,0.6,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,ContextCite100,0.9901266607649248,0.8545454545454544,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,KernelShap100,0.9968297625128191,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,WSS100,0.9903789622043058,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,BetaShap (U)100,0.800168620907978,0.28484848484848485,0.8593578924908801,0.24444444444444444,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,TMC100,0.9900992332296704,0.8303030303030302,0.9748289268745659,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+18,What is the total number of plays for the most critically appreciated musician in the Crystalline Sound Weaving genre?,LOO,0.9718999177387176,0.5151515151515151,0.9748289268745659,0.4222222222222222,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,ContextCite32,0.9697560199669788,0.8424242424242423,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,KernelShap32,0.9658023760293212,0.9030303030303028,0.9654021186773524,0.7333333333333333,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,WSS32,0.9648922265717989,0.6848484848484848,0.9494512560258953,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,BetaShap (U)32,0.9734930757814374,0.9151515151515152,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,TMC32,0.9906621272535835,0.9393939393939393,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,ContextCite64,0.9866392528305017,0.8060606060606059,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,KernelShap64,0.9773722300894906,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,WSS64,0.9869277303347443,0.6484848484848483,1.0,0.5555555555555555,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,BetaShap (U)64,0.9617358284635,0.8424242424242423,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,TMC64,0.988873110157554,0.7818181818181817,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,ContextCite100,0.9881236659513984,0.709090909090909,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,KernelShap100,0.9854831507712535,0.9393939393939393,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,WSS100,0.9958898009371637,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,1.0,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,BetaShap (U)100,0.9515772448795307,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,TMC100,0.9974629692177173,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+19,What is the effect of drinking water from the sacred spring located in the ancient Elderwood forest?,LOO,0.968385293051955,0.6121212121212121,1.0,0.5111111111111111,1.0,1.0,1.0,0.6,1,1.0,10
