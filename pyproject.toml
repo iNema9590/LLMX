@@ -12,10 +12,13 @@ dependencies = [
 dev = [
     "accelerate>=1.7.0",
     "cython>=3.1.1",
+    "google>=3.0.0",
+    "google-oauth2-tool>=0.0.3",
     "pandas>=2.2.3",
     "pyarrow>=20.0.0",
     "pygam>=0.9.1",
     "scikit-learn>=1.6.1",
+    "vertexai>=1.71.1",
     "xgboost>=3.0.2",
 ]
 visualization = [
