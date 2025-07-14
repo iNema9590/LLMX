@@ -78,27 +78,6 @@ class ContextAttribution:
     # Core Utility Management (On-Demand)
     # --------------------------------------------------------------------------
 
-    def get_utility(self, subset_tuple: tuple) -> float:
-        """
-        Gatekeeper for utility values. Returns from cache or computes if not present.
-        This is the primary method for on-demand computation.
-        """
-        if subset_tuple in self.utility_cache:
-            return self.utility_cache[subset_tuple]
-        
-        # If not in cache, compute it, cache it, and return it.
-        if self.verbose and self.accelerator.is_main_process:
-            # This log can be noisy, enable if debugging cache misses.
-            # print(f"Cache miss for subset {subset_tuple}. Computing utility...")
-            pass
-
-        v_np = np.array(subset_tuple)
-        context_str = self._get_ablated_context_from_vector(v_np)
-        utility = self._llm_compute_logprob(context_str=context_str)
-        
-        self.utility_cache[subset_tuple] = utility
-        return utility
-
     def save_utility_cache(self, file_path: str):
         """Saves the current state of the utility cache to a file."""
         if self.accelerator.is_main_process:
@@ -113,10 +92,6 @@ class ContextAttribution:
     # LLM Interaction Methods (The "Engine")
     # --------------------------------------------------------------------------
     
-    @staticmethod
-    def _logit(p, eps=1e-7):
-        p = torch.clamp(p, eps, 1 - eps)
-        return torch.log(p / (1 - p))
 
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 100) -> str:
         messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
@@ -137,9 +112,11 @@ class ContextAttribution:
         with torch.no_grad():
             outputs_gen = unwrapped_model.generate(
                 input_ids=input_ids, attention_mask=attention_mask, max_new_tokens=max_new_tokens,
-                do_sample=False, temperature=0,
+                do_sample=False,
+                temperature=None,
+                top_p=None,
+                top_k=None,
                 pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None else unwrapped_model.config.eos_token_id,
-                top_p=1.0,
             )
         
         if isinstance(outputs_gen, torch.Tensor): generated_ids = outputs_gen
@@ -156,139 +133,114 @@ class ContextAttribution:
         torch.cuda.empty_cache()
         return cleaned_text
 
-    def _llm_compute_logprob(self, context_str: str, response=None) -> float:
-        if response is None: response = self.target_response
-        answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
-        L = answer_ids.shape[1]
-        if L == 0: return 0.0
-
-        sys_msg = {"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
-                    questions in few words. Avoid using your own knowledge or make assumptions."""}
+    def get_utility(self, subset_tuple: tuple) -> float:
+        if subset_tuple in self.utility_cache:
+            return self.utility_cache[subset_tuple]
         
+        v_np = np.array(subset_tuple)
+        context_str = self._get_ablated_context_from_vector(v_np)
+        utility = self._llm_compute_logprob(context_str=context_str)
+        
+        self.utility_cache[subset_tuple] = utility
+        return utility
+
+
+    def _llm_compute_logprob(self, context_str: str, response=None) -> float:
+        """
+        Compute the average log-prob *gain* per answer token compared to an empty context.
+        This reduces length bias and centers the utility on the *value of the context*.
+        """
+        # Use target response if none provided
+        if response is None:
+            response = self.target_response
+
+        answer_ids = self.tokenizer(
+            response, return_tensors="pt", add_special_tokens=False
+        ).input_ids.to(self.device)
+
+        L = answer_ids.shape[1]
+        if L == 0:
+            return 0.0
+
+        sys_msg = {
+            "role": "system",
+            "content": """You are a helpful assistant. You use the provided context to answer
+                    questions in few words. Avoid using your own knowledge or make assumptions."""
+        }
+        if context_str:
+            user_msg = {"role": "user", "content": f"###context: {context_str} ###question: {self.query}"}
+        else:
+            user_msg = {"role": "user", "content": self.query}
+
+
         # --- Calculate for prompt with context ---
         prompt_with_context_str = self.tokenizer.apply_chat_template(
-            [sys_msg, {"role": "user", "content": f"###context: {context_str} ###question: {self.query}" if context_str else self.query}],
-            add_generation_prompt=True, tokenize=False
+            [sys_msg, {"role": "user", "content": f"###context: {context_str} ###question: {self.query}" if context_str else self.query}], # Handle both cases
+            add_generation_prompt=True,
+            tokenize=False
         )
-        prompt_with_context_ids = self.tokenizer(prompt_with_context_str, return_tensors="pt").input_ids.to(self.device)
-        input_ids_with_context = torch.cat([prompt_with_context_ids, answer_ids], dim=1)
+        input_ids_with_context = torch.cat(
+            [self.tokenizer(prompt_with_context_str, return_tensors="pt").input_ids.to(self.device),
+            answer_ids],
+            dim=1
+        )
         with torch.no_grad():
-            logits_with = self.model(input_ids=input_ids_with_context).logits
-        
-        prompt_len_with = input_ids_with_context.shape[1] - L
-        shift_logits_with = logits_with[..., prompt_len_with-1:-1, :].contiguous()
-        answer_log_probs_with = torch.gather(F.log_softmax(shift_logits_with, dim=-1), 2, answer_ids.unsqueeze(-1)).squeeze(-1)
-        total_log_prob_with = answer_log_probs_with.sum()
+            logits_model_output_with = self.model(input_ids=input_ids_with_context).logits
 
+        prompt_len_with = input_ids_with_context.shape[1] - L
+        # Extract logits corresponding to the answer tokens
+        shift_logits_with = logits_model_output_with[..., prompt_len_with-1:-1, :].contiguous()
+        log_probs_tokens_with = F.log_softmax(shift_logits_with, dim=-1)
+        # Gather log_probs of actual answer tokens
+        answer_log_probs_with = torch.gather(log_probs_tokens_with, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        total_log_prob_with = answer_log_probs_with.sum()
         # --- Calculate for prompt with empty context ---
         prompt_empty_context_str = self.tokenizer.apply_chat_template(
-            [sys_msg, {"role": "user", "content": self.query}], add_generation_prompt=True, tokenize=False
+            [sys_msg, {"role": "user", "content": self.query}], # Query only
+            add_generation_prompt=True,
+            tokenize=False
         )
-        prompt_empty_context_ids = self.tokenizer(prompt_empty_context_str, return_tensors="pt").input_ids.to(self.device)
-        input_ids_empty_context = torch.cat([prompt_empty_context_ids, answer_ids], dim=1)
+        input_ids_empty_context = torch.cat(
+            [self.tokenizer(prompt_empty_context_str, return_tensors="pt").input_ids.to(self.device),
+            answer_ids],
+            dim=1
+        )
         with torch.no_grad():
-            logits_empty = self.model(input_ids=input_ids_empty_context).logits
+            logits_model_output_empty = self.model(input_ids=input_ids_empty_context).logits
 
         prompt_len_empty = input_ids_empty_context.shape[1] - L
-        shift_logits_empty = logits_empty[..., prompt_len_empty-1:-1, :].contiguous()
-        answer_log_probs_empty = torch.gather(F.log_softmax(shift_logits_empty, dim=-1), 2, answer_ids.unsqueeze(-1)).squeeze(-1)
-        total_log_prob_empty = answer_log_probs_empty.sum()
+        shift_logits_empty = logits_model_output_empty[..., prompt_len_empty-1:-1, :].contiguous()
+        log_probs_tokens_empty = F.log_softmax(shift_logits_empty, dim=-1)
+        answer_log_probs_empty = torch.gather(log_probs_tokens_empty, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        total_log_prob_empty = answer_log_probs_empty.sum() # This is log(P_empty)
+
+        # --- Calculate probabilities and logits ---
+        # Probability of the answer given the context
+        prob_with = torch.exp(total_log_prob_with)
+        # Probability of the answer given empty context
+        prob_empty = torch.exp(total_log_prob_empty)
+
+        # Logit of the probability of the answer given the context
+        logit_with = logit(prob_with)
+        # Logit of the probability of the answer given empty context
+        logit_empty = logit(prob_empty)
 
         # --- Calculate logit gain ---
-        logit_gain_total = self._logit(torch.exp(total_log_prob_with)) - self._logit(torch.exp(total_log_prob_empty))
-        logit_gain_per_token = logit_gain_total / L
+        # The gain on the logit scale
+        logit_gain_total = logit_with - logit_empty
 
-        del logits_with, logits_empty, shift_logits_with, shift_logits_empty, answer_log_probs_with, answer_log_probs_empty
+        # Clean up (important for long loops in CONTEXTCITE)
+        del logits_model_output_with, logits_model_output_empty, shift_logits_with, shift_logits_empty
+        del log_probs_tokens_with, log_probs_tokens_empty, answer_log_probs_with, answer_log_probs_empty
+        del total_log_prob_with, total_log_prob_empty, prob_with, prob_empty, logit_with, logit_empty
         torch.cuda.empty_cache()
-        return logit_gain_per_token.item()
+        return logit_gain_total.item()
+        
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
         if len(v_np) != self.n_items: raise ValueError("Ablation vector length mismatch")
         included_items = [self.items[i] for i, include in enumerate(v_np) if include == 1]
         return "\n\n".join(included_items)
-
-    # --------------------------------------------------------------------------
-    # Exhaustive Attribution Methods (Use with Extreme Caution)
-    # --------------------------------------------------------------------------
-    
-    def _calculate_exact_shapley(self) -> np.ndarray:
-        """
-        Computes exact Shapley values by evaluating all 2^n subsets.
-        WARNING: Incredibly slow. Triggers n * 2^(n-1) on-demand utility calls.
-        Only use for very small n (e.g., n < 12).
-        """
-        if not (self.verbose and self.accelerator.is_main_process):
-            # This calculation should likely only be run on the main process
-            # to avoid redundant (and slow) computations.
-            return np.zeros(self.n_items)
-
-        shapley_values = np.zeros(self.n_items)
-        n = self.n_items
-        all_subsets = list(itertools.product([0, 1], repeat=n))
-        
-        pbar_desc = "Calculating Exact Shapley (SLOW)"
-        pbar = tqdm(all_subsets, desc=pbar_desc, disable=not self.verbose)
-
-        for s_tuple in pbar:
-            s_size = sum(s_tuple)
-            s_util = self.get_utility(s_tuple)
-            
-            if s_util == -float('inf'): continue
-            
-            for i in range(n):
-                if s_tuple[i] == 1: # Marginal contribution of i to S\{i}
-                    s_without_i_list = list(s_tuple); s_without_i_list[i] = 0
-                    s_without_i_tuple = tuple(s_without_i_list)
-                    s_without_i_util = self.get_utility(s_without_i_tuple)
-                    
-                    marginal_contrib = s_util - s_without_i_util
-                    weight = (self._factorials[s_size - 1] * self._factorials[n - s_size]) / self._factorials[n]
-                    shapley_values[i] += weight * marginal_contrib
-                    
-        return shapley_values
-
-    def compute_shapley_interaction_index_pairs_matrix(self):
-        """
-        Computes the full matrix of pairwise Shapley interaction indices.
-        WARNING: Very slow. This will trigger on-demand utility calls for all
-        subsets relevant to each pair.
-        """
-        if not self.accelerator.is_main_process: return np.zeros((self.n_items, self.n_items))
-
-        n = self.n_items
-        interaction_matrix = np.zeros((n, n), dtype=float)
-        item_indices = list(range(n))
-        pbar_pairs = tqdm(list(itertools.combinations(item_indices, 2)), desc="Pairwise Interactions (SLOW)", disable=not self.verbose)
-
-        for i, j in pbar_pairs:
-            interaction_sum = 0.0
-            remaining_indices = [idx for idx in item_indices if idx != i and idx != j]
-            
-            for s_size in range(len(remaining_indices) + 1):
-                for s_members_indices in itertools.combinations(remaining_indices, s_size):
-                    v_S_np = np.zeros(n, dtype=int)
-                    if s_members_indices: v_S_np[list(s_members_indices)] = 1
-                    
-                    v_S_union_i_np = v_S_np.copy(); v_S_union_i_np[i] = 1
-                    v_S_union_j_np = v_S_np.copy(); v_S_union_j_np[j] = 1
-                    v_S_union_ij_np = v_S_np.copy(); v_S_union_ij_np[i] = 1; v_S_union_ij_np[j] = 1
-
-                    util_S = self.get_utility(tuple(v_S_np))
-                    util_S_i = self.get_utility(tuple(v_S_union_i_np))
-                    util_S_j = self.get_utility(tuple(v_S_union_j_np))
-                    util_S_ij = self.get_utility(tuple(v_S_union_ij_np))
-
-                    delta_ij_S = util_S_ij - util_S_i - util_S_j + util_S
-                    
-                    if n > 2:
-                        weight = (self._factorials[s_size] * self._factorials[n - s_size - 2]) / self._factorials[n - 1]
-                    else: # n=2
-                        weight = 1.0
-
-                    interaction_sum += weight * delta_ij_S
-
-            interaction_matrix[i, j] = interaction_matrix[j, i] = interaction_sum
-        return interaction_matrix
 
     # --------------------------------------------------------------------------
     # Sampling and Approximation Methods (Efficient)
@@ -371,29 +323,74 @@ class ContextAttribution:
             print("Warning: No valid utilities could be computed for ContextCite. Returning empty weights.")
             return np.array([])
 
-        _, weights, _, mse = self._train_surrogate(
+        model, weights, _ = self._train_surrogate(
             sampled_tuples_for_train, 
             utilities_for_train,
             sur_type="linear"
         )
-        return weights
+        return weights, model
 
     def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm"):
-        """Computes Weighted Subset Sampling (WSS) attributions using a surrogate model."""
-        if not self.accelerator.is_main_process: return None, None, None
+        """
+        Computes Weighted Subset Sampling (WSS) attributions using a surrogate model.
+        Returns: (shapley_values, attr, F, model, mse)
+        """
+        if not self.accelerator.is_main_process: 
+            return (np.zeros(self.n_items), np.zeros(self.n_items), None, None, 0.0)
         
+        # Generate subsets and compute utilities
         sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
-        
         pbar = tqdm(sampled_tuples, desc=f"Computing utilities for WSS ({sampling})", disable=not self.verbose)
         utilities_for_samples = [self.get_utility(v_tuple) for v_tuple in pbar]
 
+        # Filter invalid utilities
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
         sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
         utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
 
-        _, attr, F, mse = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
-        return attr, F, mse
-    
+        # Train surrogate model
+        model, attr, F = self._train_surrogate(
+            sampled_tuples_for_train, 
+            utilities_for_train, 
+            sur_type=sur_type
+        )
+        
+        # Generate all possible subsets (2^n)
+        all_subsets = list(itertools.product([0, 1], repeat=self.n_items))
+        X_all = np.array(all_subsets)
+        
+        # Predict utilities for all subsets using surrogate
+        if sur_type == "fm":
+            X_all_sparse = csr_matrix(X_all)
+            predicted_utilities = model.predict(X_all_sparse)
+        else:  # linear or full_poly2
+            predicted_utilities = model.predict(X_all)
+        
+        # Compute exact Shapley values using predicted utilities
+        utility_dict = dict(zip(all_subsets, predicted_utilities))
+        shapley_values = np.zeros(self.n_items)
+        
+        # Iterate through all subsets
+        for s_tuple in all_subsets:
+            s_size = sum(s_tuple)
+            s_util = utility_dict[s_tuple]
+            
+            for i in range(self.n_items):
+                if s_tuple[i] == 1:
+                    # Create subset without item i
+                    s_without_i_list = list(s_tuple)
+                    s_without_i_list[i] = 0
+                    s_without_i_tuple = tuple(s_without_i_list)
+                    
+                    s_without_i_util = utility_dict.get(s_without_i_tuple, 0.0)
+                    marginal_contrib = s_util - s_without_i_util
+                    
+                    # Calculate Shapley weight
+                    weight = (self._factorials[s_size - 1] * self._factorials[self.n_items - s_size]) / self._factorials[self.n_items]
+                    shapley_values[i] += weight * marginal_contrib
+        
+        return shapley_values, attr, F, model
+
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                         max_unique_lookups: int, seed: int = None, 
                         shared_cache: dict = None):
@@ -592,26 +589,23 @@ class ContextAttribution:
         if sur_type == "linear":
             model = Lasso(alpha=alpha, fit_intercept=True, random_state=42, max_iter=2000)
             model.fit(X_train, y_train)
-            y_pred = model.predict(X_train)
-            return model, model.coef_, None, mean_squared_error(y_train, y_pred)
+            return model, model.coef_, None
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
             model = als.FMRegression(n_iter=100, rank=4, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
             model.fit(X_train_fm, y_train)
-            y_pred = model.predict(X_train_fm)
             w, V = model.w_, model.V_.T
             F = V @ V.T
             np.fill_diagonal(F, 0.0)
             attr = w + 0.5 * F.sum(axis=1)
-            return model, attr, F, mean_squared_error(y_train, y_pred)
+            return model, attr, F
         
         elif sur_type == "full_poly2":
             poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
             X_poly = poly.fit_transform(X_train)
             model = Ridge(alpha=0.01, fit_intercept=True) # Small alpha for stability
             model.fit(X_poly, y_train)
-            y_pred = model.predict(X_poly)
             
             n = X_train.shape[1]
             linear, pairs = model.coef_[:n], np.zeros((n, n))
@@ -621,7 +615,7 @@ class ContextAttribution:
                     pairs[i, j] = pairs[j, i] = model.coef_[idx]
                     idx += 1
             importance = linear + 0.5 * pairs.sum(axis=1)
-            return model, importance, pairs, mean_squared_error(y_train, y_pred)
+            return model, importance, pairs
         
     def _get_response_token_distributions(self, context_str: str, response: str) -> torch.Tensor:
         """
@@ -746,179 +740,9 @@ class ContextAttribution:
             pbar.close()
         
         return jsd_scores
+    
 
-    def llm_evaluation(self, gold_answer,embedder=None, metric="cosine", model=None, tokenizer=None):
-        if metric=="cosine":
-            return cosine_similarity(embedder.encode([gold_answer], convert_to_numpy=True), embedder.encode([self.target_response], convert_to_numpy=True))
-        elif metric=="logprob":
-            return self._llm_compute_logprob(context_str="\n\n".join(self.items), response=gold_answer)
-        elif metric=="llm_judge":
-            prompt = """
-                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), 
-                and the other is a generated answer produced by another language model.Your goal is to determine if 
-                the generated answer matches the ground truth in meaning and factual accuracy. Respond in the following strict JSON format:
-                {{
-                "evaluation": "Yes" or "No",
-                "explanation": "Short, clear explanation of your judgment"
-                }}
-                Evaluation Criteria:
-                - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
-                - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
-                Be concise in your explanation. Do not add any content outside the JSON structure.
-                ---
-                Example 1
-                Question: What is the capital of France?  
-                Ground Truth Answer: Paris is the capital of France.  
-                Generated Answer: The capital of France is Paris.  
-                Response:
-                {{
-                "evaluation": "Yes",
-                "explanation": "The generated answer is semantically identical and factually correct."
-                }}
-                
-                Example 2
-                Question: What is the capital of France?  
-                Ground Truth Answer: Paris is the capital of France.  
-                Generated Answer: The capital of France is Marseille.  
-                Response:
-                {{
-                "evaluation": "No",
-                "explanation": "Marseille is not the capital of France; this is a factual error."
-                }}
-                
-                Example 3
-                Question: Who wrote *Pride and Prejudice*?  
-                Ground Truth Answer: Jane Austen  
-                Generated Answer: Charlotte Bronte wrote *Pride and Prejudice*.  
-                Response:
-                {{
-                "evaluation": "No",
-                "explanation": "The generated answer misattributes the author, which is factually incorrect."
-                }}
-                
-                Example 4
-                Question: What is the boiling point of water at sea level in Celsius?  
-                Ground Truth Answer: 100C  
-                Generated Answer: Around 100 degrees Celsius.  
-                Response:
-                {{
-                "evaluation": "Yes",
-                "explanation": "The generated answer approximates the correct value and preserves the meaning."
-                }}
-                
-                Be strict and unbiased. Always follow the exact JSON format.
-                """
-            messages = [{"role": "system", "content": """
-                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), 
-                and the other is a generated answer produced by another language model.Your goal is to determine if 
-                the generated answer matches the ground truth in meaning and factual accuracy. Respond in the following strict JSON format:
-                {
-                "evaluation": "Yes" or "No",
-                "explanation": "Short, clear explanation of your judgment"
-                }
-                Evaluation Criteria:
-                - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
-                - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
-                Be concise in your explanation. Do not add any content outside the JSON structure.
-                ---
-                Example 1
-                Question: What is the capital of France?  
-                Ground Truth Answer: Paris is the capital of France.  
-                Generated Answer: The capital of France is Paris.  
-                Response:
-                {
-                "evaluation": "Yes",
-                "explanation": "The generated answer is semantically identical and factually correct."
-                }
-                
-                Example 2
-                Question: What is the capital of France?  
-                Ground Truth Answer: Paris is the capital of France.  
-                Generated Answer: The capital of France is Marseille.  
-                Response:
-                {
-                "evaluation": "No",
-                "explanation": "Marseille is not the capital of France; this is a factual error."
-                }
-                
-                Example 3
-                Question: Who wrote *Pride and Prejudice*?  
-                Ground Truth Answer: Jane Austen  
-                Generated Answer: Charlotte Bronte wrote *Pride and Prejudice*.  
-                Response:
-                {
-                "evaluation": "No",
-                "explanation": "The generated answer misattributes the author, which is factually incorrect."
-                }
-                
-                Example 4
-                Question: What is the boiling point of water at sea level in Celsius?  
-                Ground Truth Answer: 100C  
-                Generated Answer: Around 100 degrees Celsius.  
-                Response:
-                {
-                "evaluation": "Yes",
-                "explanation": "The generated answer approximates the correct value and preserves the meaning."
-                }
-                
-                Be strict and unbiased. Always follow the exact JSON format.
-                """
-                }]
-                
-            prompt2 = f"""You are a strict evaluator comparing two responses. 
-            Question: {self.query}
-            Ground Truth Answer: {gold_answer}
-            Generated Answer: {self.target_response}
-
-            Now generate response in the defined format."""
-            
-            messages.append({"role": "user", "content": f"You are a strict evaluator comparing two responses. Question: {self.query} \
-            Ground Truth Answer: {gold_answer} Generated Answer: {self.target_response} Now generate response in the defined format."})
-            
-            chat_text = tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True, tokenize=False)
-            tokenized = tokenizer(chat_text, return_tensors="pt", padding=True)
-            input_ids = tokenized["input_ids"].to(self.device)
-            attention_mask = tokenized["attention_mask"].to(self.device)
-            unwrapped_model = self.accelerator.unwrap_model(model)
-            generated_ids = None # Initialize
-            outputs_dict = None # Initialize for potential outputs if model returns dict
-
-            with torch.no_grad():
-                outputs = unwrapped_model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                max_new_tokens=60,
-                do_sample=False,
-                pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
-                             else unwrapped_model.config.eos_token_id,
-                top_p=1.0,
-                )
-                
-                # Tokenize and run generation
-                #inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
-                #with torch.no_grad():
-                #    outputs = model.generate(
-                #        **inputs,
-                #        max_new_tokens=50,
-                #        do_sample=False,
-                #        pad_token_id=tokenizer.eos_token_id
-                #    )
-                len_prompt = len(prompt)+len(prompt2)+5
-                decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)[len_prompt:]
-                cleaned_text = decoded_output.lstrip().removeprefix("assistant").lstrip(": \n").strip().lower()
-                if '"evaluation": "yes"' in cleaned_text:
-                    return True
-                else:
-                    return False
-                #evaluation = json.loads(cleaned_text)["evaluation"]
-                
-                #return evaluation
-                
-                
-                # Decode and extract model reply
-                #decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
-                #model_reply = decoded_output[len(prompt):].strip().lower()
-                #model_reply = decoded_output.strip().lower()
-
-                #return model_reply
+def logit(p, eps=1e-7):
+    """Safe logit calculation with clamping to avoid numerical instability"""
+    p = torch.clamp(p, eps, 1 - eps)
+    return torch.log(p / (1 - p))
