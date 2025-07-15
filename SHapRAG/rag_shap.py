@@ -6,6 +6,7 @@ import pickle
 import random
 import warnings
 from collections import defaultdict
+from scipy.stats import spearmanr
 
 import numpy as np
 import torch
@@ -741,7 +742,18 @@ class ContextAttribution:
         
         return jsd_scores
     
-
+    def lds(self, model_FM, model_cc, n_eval_util):
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        X_all = np.array(eval_subsets)
+        exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
+        # Predict utilities for all subsets using surrogate
+        X_all_sparse = csr_matrix(X_all)
+        predicted_utilities_fm = model_FM.predict(X_all_sparse)
+        predicted_utilities_cc = model_cc.predict(X_all)
+        spearman_cc, _ = spearmanr(exact_utilities, predicted_utilities_cc)
+        spearman_fm, _ = spearmanr(exact_utilities, predicted_utilities_fm)
+        
+        return spearman_cc, spearman_fm
 def logit(p, eps=1e-7):
     """Safe logit calculation with clamping to avoid numerical instability"""
     p = torch.clamp(p, eps, 1 - eps)
