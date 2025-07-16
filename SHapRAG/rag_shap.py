@@ -11,7 +11,7 @@ import torch.nn.functional as F
 # import xgboost
 # from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
-from fastFM import als
+# from fastFM import als
 from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
 # from sklearn.exceptions import ConvergenceWarning
@@ -574,16 +574,16 @@ class ContextAttribution:
             y_pred = model.predict(X_train)
             return model, model.coef_, None, mean_squared_error(y_train, y_pred)
         
-        elif sur_type == "fm":
-            X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=100, rank=4, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
-            model.fit(X_train_fm, y_train)
-            y_pred = model.predict(X_train_fm)
-            w, V = model.w_, model.V_.T
-            F = V @ V.T
-            np.fill_diagonal(F, 0.0)
-            attr = w + 0.5 * F.sum(axis=1)
-            return model, attr, F, mean_squared_error(y_train, y_pred)
+        # elif sur_type == "fm":
+        #     X_train_fm = csr_matrix(X_train)
+        #     model = als.FMRegression(n_iter=100, rank=4, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
+        #     model.fit(X_train_fm, y_train)
+        #     y_pred = model.predict(X_train_fm)
+        #     w, V = model.w_, model.V_.T
+        #     F = V @ V.T
+        #     np.fill_diagonal(F, 0.0)
+        #     attr = w + 0.5 * F.sum(axis=1)
+        #     return model, attr, F, mean_squared_error(y_train, y_pred)
         
         elif sur_type == "full_poly2":
             poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)

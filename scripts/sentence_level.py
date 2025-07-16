@@ -139,6 +139,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
 
         results_for_query["LOO"] = harness.compute_loo()
         results_for_query["ARC-JSD"] = harness.compute_arc_jsd()
+        results_for_query["LLM_response"] = harness.target_response
 
         # exact_scores = results_for_query.get("ExactInter")
         all_results.append(results_for_query)

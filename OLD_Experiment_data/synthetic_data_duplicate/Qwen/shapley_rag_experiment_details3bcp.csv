@@ -1,0 +1,131 @@
+Question_Index,Query,Method,Pearson,Spearman,NDCG,KendallTau,Num_Items
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,ContextCite32,0.9870849791885735,0.8303030303030302,0.9980416578017781,0.6,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,WSS32,0.9736302879574729,0.6242424242424242,0.9734204375672934,0.4666666666666666,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,BetaShap (U)32,0.7167581083793166,0.6121212121212121,0.9361555636588451,0.5111111111111111,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,TMC32,0.9284978587981779,0.7575757575757575,0.9673750337379582,0.6444444444444444,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,ContextCite64,0.9956544124715994,0.8787878787878788,1.0,0.7333333333333333,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,WSS64,0.9945187673504732,0.7212121212121211,0.9734204375672934,0.5555555555555555,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,BetaShap (U)64,0.7219100393588612,0.4545454545454545,0.9357218483579857,0.3333333333333333,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,TMC64,0.9710081202359807,0.7696969696969697,0.9639834965601561,0.6,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,ContextCite100,0.9972228382461448,0.8424242424242423,0.9980416578017781,0.6444444444444444,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,WSS100,0.9978682353073357,0.8303030303030302,0.9980416578017781,0.6888888888888888,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,BetaShap (U)100,0.8610778367180262,0.4545454545454545,0.9282987075348846,0.37777777777777777,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,TMC100,0.9860018845783186,0.8909090909090909,0.9980416578017781,0.7777777777777777,10
+0,What is the primary component of a Xylotian 'Glimmer-sail'?,LOO,0.9878595970325866,0.13939393939393938,0.9633052545922868,0.022222222222222223,10
+1,How do Xylotians communicate over long distances on Xylos?,ContextCite32,0.9959413040889564,0.8666666666666665,1.0,0.7777777777777777,10
+1,How do Xylotians communicate over long distances on Xylos?,WSS32,0.9986509372099797,0.9030303030303028,0.9902047341781485,0.7777777777777777,10
+1,How do Xylotians communicate over long distances on Xylos?,BetaShap (U)32,0.7295036292918786,0.6727272727272726,0.9867425910618516,0.5555555555555555,10
+1,How do Xylotians communicate over long distances on Xylos?,TMC32,0.9606080082316757,0.6242424242424242,0.9909733759312312,0.4666666666666666,10
+1,How do Xylotians communicate over long distances on Xylos?,ContextCite64,0.9980220243436349,0.5151515151515151,0.9688473338096881,0.37777777777777777,10
+1,How do Xylotians communicate over long distances on Xylos?,WSS64,0.9975866971178498,0.6,0.9696159755627709,0.4666666666666666,10
+1,How do Xylotians communicate over long distances on Xylos?,BetaShap (U)64,0.7573608781063639,0.49090909090909085,0.9696159755627709,0.37777777777777777,10
+1,How do Xylotians communicate over long distances on Xylos?,TMC64,0.9821935852766318,0.6363636363636362,0.9696159755627709,0.4666666666666666,10
+1,How do Xylotians communicate over long distances on Xylos?,ContextCite100,0.9973262968513336,0.5636363636363636,0.9786425996315397,0.4222222222222222,10
+1,How do Xylotians communicate over long distances on Xylos?,WSS100,0.9980888893565326,0.6363636363636362,0.9786425996315397,0.4666666666666666,10
+1,How do Xylotians communicate over long distances on Xylos?,BetaShap (U)100,0.8955596577824825,0.406060606060606,0.9688473338096881,0.3333333333333333,10
+1,How do Xylotians communicate over long distances on Xylos?,TMC100,0.9933066139352432,0.5030303030303029,0.985772673158137,0.37777777777777777,10
+1,How do Xylotians communicate over long distances on Xylos?,LOO,0.9839492686946568,0.6848484848484848,0.9947604758956914,0.6,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,ContextCite32,0.9532541482695323,0.8424242424242423,1.0,0.7333333333333333,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,WSS32,0.9889648959921032,0.7696969696969697,1.0,0.6444444444444444,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,BetaShap (U)32,0.8445527159812443,0.6121212121212121,0.9977903684266294,0.4222222222222222,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,TMC32,0.8164065577117225,0.6242424242424242,0.9572564020256317,0.4222222222222222,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,ContextCite64,0.9495154297387767,0.7696969696969697,1.0,0.6444444444444444,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,WSS64,0.9929225334605148,0.9515151515151514,1.0,0.8666666666666666,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,BetaShap (U)64,0.8332566606547008,0.6848484848484848,0.9572564020256317,0.6,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,TMC64,0.803472643883662,0.8909090909090909,0.9572564020256317,0.7333333333333333,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,ContextCite100,0.9588100496902072,0.8424242424242423,1.0,0.7333333333333333,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,WSS100,0.9955066177827752,0.9272727272727272,0.9977903684266294,0.7777777777777777,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,BetaShap (U)100,0.7455480488331276,0.7333333333333332,0.7800694708402678,0.5555555555555555,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,TMC100,0.9081610061381383,0.8787878787878788,0.9572564020256317,0.6888888888888888,10
+2,What is the main energy source for Xylotian 'Hover-platforms'?,LOO,0.867845123833275,0.38181818181818183,0.7465239751557068,0.28888888888888886,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,ContextCite32,0.9793017136693565,0.6242424242424242,0.9946534472291589,0.5111111111111111,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,WSS32,0.9946523318281164,0.4666666666666666,0.9946534472291589,0.28888888888888886,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,BetaShap (U)32,0.0625020381701927,0.24848484848484845,0.0,0.15555555555555553,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,TMC32,0.9008729526161743,0.9030303030303028,0.9946534472291589,0.7777777777777777,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,ContextCite64,0.9942703592795497,0.5878787878787878,0.9946534472291589,0.4666666666666666,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,WSS64,0.994151900044063,0.4424242424242424,0.9946534472291589,0.3333333333333333,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,BetaShap (U)64,0.25068350521338567,0.2727272727272727,0.6779120325859787,0.19999999999999998,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,TMC64,0.9797688783852878,0.6969696969696969,1.0,0.6,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,ContextCite100,0.9956023702712504,0.7575757575757575,0.9946534472291589,0.6,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,WSS100,0.9967122104432276,0.8787878787878788,1.0,0.7333333333333333,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,BetaShap (U)100,0.5989191390860324,0.8787878787878788,0.9297381362974092,0.7333333333333333,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,TMC100,0.9847086614226874,0.8909090909090909,1.0,0.7777777777777777,10
+3,What unique property does 'Chrono-Dust' possess according to Xylotian lore?,LOO,0.9960711047373996,0.4424242424242424,0.9946534472291589,0.3333333333333333,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,ContextCite32,0.9936491861916638,0.8909090909090909,1.0,0.7777777777777777,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,WSS32,0.9951407468418338,0.8666666666666665,0.979047147040551,0.7777777777777777,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,BetaShap (U)32,0.950480486112542,0.6121212121212121,0.9050286569604079,0.5111111111111111,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,TMC32,0.992516136281725,0.9030303030303028,1.0,0.8222222222222221,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,ContextCite64,0.99889037143261,0.9636363636363635,1.0,0.911111111111111,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,WSS64,0.9992465572632985,0.9515151515151514,1.0,0.8666666666666666,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,BetaShap (U)64,0.9451733971035293,0.4545454545454545,0.8905082246444179,0.3333333333333333,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,TMC64,0.9874864016965152,0.8424242424242423,1.0,0.7333333333333333,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,ContextCite100,0.997224964409211,0.9272727272727272,1.0,0.8222222222222221,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,WSS100,0.9992069323024259,0.9515151515151514,1.0,0.8666666666666666,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,BetaShap (U)100,0.9418840756898695,0.6242424242424242,0.8829462735395395,0.4666666666666666,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,TMC100,0.9964128521491088,0.8909090909090909,1.0,0.7777777777777777,10
+4,What are 'Dream-Weavers' used for in Xylotian society?,LOO,0.9867814861403973,0.6848484848484848,1.0,0.5555555555555555,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,ContextCite32,0.9957962855914461,0.8181818181818182,0.9935735238262621,0.6888888888888888,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,WSS32,0.9967700007850735,0.709090909090909,0.9907671290168093,0.5555555555555555,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,BetaShap (U)32,0.9718010100462796,0.4424242424242424,0.9570600050728084,0.37777777777777777,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,TMC32,0.9968393959140124,0.8787878787878788,1.0,0.7333333333333333,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,ContextCite64,0.9984944819309313,0.9030303030303028,0.9935735238262621,0.7777777777777777,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,WSS64,0.9986402573952708,0.8787878787878788,0.9907671290168093,0.7333333333333333,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,BetaShap (U)64,0.9584242810688554,0.6484848484848483,0.9598253425832505,0.5555555555555555,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,TMC64,0.9992698356257127,0.9757575757575757,1.0,0.911111111111111,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,ContextCite100,0.9991668278693544,0.9636363636363635,0.9935735238262621,0.8666666666666666,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,WSS100,0.9990252610476226,0.9393939393939393,1.0,0.8222222222222221,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,BetaShap (U)100,0.9717053302700241,0.5757575757575757,0.9570600050728084,0.4222222222222222,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,TMC100,0.9992956663044447,0.9757575757575757,1.0,0.911111111111111,10
+5,What is the purpose of the 'Aqua-Harmonics' system in Xylotian underwater domes?,LOO,0.9955580396382366,0.6727272727272726,1.0,0.5555555555555555,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,ContextCite32,0.9905483660860849,0.49090909090909085,0.9546553828023632,0.37777777777777777,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,WSS32,0.993379076766034,0.309090909090909,0.9431249211224695,0.24444444444444444,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,BetaShap (U)32,0.9752817985141728,0.41818181818181815,0.9576747438149903,0.3333333333333333,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,TMC32,0.9963177873926995,0.6121212121212121,1.0,0.4666666666666666,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,ContextCite64,0.9920523943337133,0.6727272727272726,0.9790596800563744,0.6,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,WSS64,0.9956206571438426,0.6121212121212121,0.9790596800563744,0.5111111111111111,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,BetaShap (U)64,0.9645419389665757,0.6727272727272726,0.9546553828023632,0.4666666666666666,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,TMC64,0.9972751697333767,0.8787878787878788,0.9936095027488953,0.7333333333333333,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,ContextCite100,0.9941949082946393,0.49090909090909085,0.9790596800563744,0.4666666666666666,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,WSS100,0.9963788545412969,0.5515151515151515,0.9884695383201063,0.4666666666666666,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,BetaShap (U)100,0.9664839380494972,0.8060606060606059,0.9546553828023632,0.6,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,TMC100,0.9975353761567209,0.8909090909090909,1.0,0.7777777777777777,10
+6,What is 'Solaris Silk' primarily used for by the Xylotians?,LOO,0.9943640540929111,0.23636363636363633,0.9884695383201063,0.24444444444444444,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,ContextCite32,0.9755599472648706,0.17575757575757575,0.9684441878810274,0.15555555555555553,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,WSS32,0.9724709640731403,0.12727272727272726,0.9684441878810274,0.1111111111111111,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,BetaShap (U)32,0.8423670599373052,0.5272727272727272,1.0,0.4222222222222222,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,TMC32,0.9747560200958026,0.6969696969696969,1.0,0.6,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,ContextCite64,0.994187724914671,0.9030303030303028,0.9978593111685791,0.7777777777777777,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,WSS64,0.993668564251,0.7696969696969697,0.9726412476281346,0.6,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,BetaShap (U)64,0.7889850990066415,0.9030303030303028,1.0,0.7777777777777777,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,TMC64,0.990799719840268,0.9515151515151514,1.0,0.8666666666666666,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,ContextCite100,0.9933606125049365,0.8787878787878788,0.9926155002829063,0.7333333333333333,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,WSS100,0.9960806776670084,0.9030303030303028,0.9978593111685791,0.7777777777777777,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,BetaShap (U)100,0.8774668994777572,0.6484848484848483,0.9685085817248087,0.4666666666666666,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,TMC100,0.994598330659432,0.9515151515151514,1.0,0.8666666666666666,10
+7,How is 'Mind-Sculpting' primarily utilized in Xylotian education?,LOO,0.9845507725306113,0.1515151515151515,0.9937132823353071,0.15555555555555553,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,ContextCite32,0.9865835034583891,0.8424242424242423,1.0,0.7333333333333333,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,WSS32,0.99756734272637,0.5878787878787878,0.9918920655227423,0.4666666666666666,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,BetaShap (U)32,0.9164268976495313,0.7818181818181817,0.9677568090764754,0.6888888888888888,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,TMC32,0.9960739430417436,0.7696969696969697,0.9677568090764754,0.6444444444444444,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,ContextCite64,0.9962197206986747,0.6848484848484848,0.9936360763637438,0.5555555555555555,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,WSS64,0.997001829706812,0.5757575757575757,0.9918920655227423,0.4222222222222222,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,BetaShap (U)64,0.8964993956157472,0.6848484848484848,0.9662328268035295,0.5111111111111111,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,TMC64,0.9890795775825254,0.6242424242424242,0.9738438260792395,0.4666666666666666,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,ContextCite100,0.9944018816171681,0.6121212121212121,0.9918920655227423,0.5111111111111111,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,WSS100,0.9979369300565801,0.7333333333333332,0.9918920655227423,0.6,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,BetaShap (U)100,0.9575508996775703,0.6,0.9622183973216296,0.37777777777777777,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,TMC100,0.9954421170239326,0.6848484848484848,0.9738438260792395,0.5555555555555555,10
+8,What is the function of 'Geo-Stabilizers' in Xylotian floating cities?,LOO,0.9351710962854413,0.7333333333333332,0.9695008199174769,0.6,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,ContextCite32,0.9951431731509125,0.3696969696969697,0.9637301126812745,0.24444444444444444,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,WSS32,0.994434739832004,0.24848484848484845,0.9634210369664549,0.1111111111111111,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,BetaShap (U)32,0.980684855484839,0.6121212121212121,0.9764353445756544,0.5555555555555555,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,TMC32,0.9906885180870149,0.6484848484848483,0.9742663280907516,0.5555555555555555,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,ContextCite64,0.9976332470243513,0.9272727272727272,0.999529581633082,0.8222222222222221,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,WSS64,0.9987764867840242,0.7454545454545454,0.9742663280907516,0.5555555555555555,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,BetaShap (U)64,0.9203091570781057,0.7454545454545454,0.9843276645269282,0.6,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,TMC64,0.9988784224007787,0.8545454545454544,0.9872806356999513,0.7333333333333333,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,ContextCite100,0.99742637638274,0.7939393939393938,0.999529581633082,0.6444444444444444,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,WSS100,0.9991121606266441,0.8303030303030302,0.9847188207575847,0.6444444444444444,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,BetaShap (U)100,0.9361627614283318,0.9515151515151514,0.999529581633082,0.8222222222222221,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,TMC100,0.999242441036504,0.8787878787878788,0.9894497239087878,0.7333333333333333,10
+9,What are 'Spirit-Stones' believed to store according to Xylotian spiritual beliefs?,LOO,0.9955342232004377,0.5515151515151515,0.9826137696390991,0.4666666666666666,10

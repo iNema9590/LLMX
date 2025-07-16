@@ -1,0 +1,321 @@
+Question_Index,Query,Method,Pearson,Spearman,NDCG,KendallTau,Precision_at_1,Precision_at_2,Precision_at_3,Precision_at_5,Hit_rate_at_k,Reciprocal_Rank,Num_Items
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,ContextCite32,0.9356563279984011,0.9636363636363635,1.0000000000000002,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,KernelShap32,0.9209483656420352,0.8909090909090909,0.9867780791683753,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,WSS32,0.7152209585624952,0.7212121212121211,0.8629661217352985,0.5111111111111111,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,BetaShap (U)32,0.7940993671012542,0.24848484848484845,0.6993831643569293,0.24444444444444444,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,TMC32,0.9038034022550729,0.7575757575757575,0.9709483880660661,0.6444444444444444,1.0,0.5,1.0,0.8,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,ContextCite64,0.911403933644383,0.9636363636363635,1.0000000000000002,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,KernelShap64,0.976342166289808,0.9030303030303028,1.0000000000000002,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,WSS64,0.9413029044768071,0.7575757575757575,1.0000000000000002,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,BetaShap (U)64,0.9296861996679309,0.8666666666666665,0.9502447843264015,0.7333333333333333,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,TMC64,0.9676261875563064,0.9393939393939393,0.9867780791683753,0.8222222222222221,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,ContextCite100,0.9529349085544337,0.9636363636363635,1.0000000000000002,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,KernelShap100,0.980629122668121,0.9515151515151514,1.0000000000000002,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,WSS100,0.9788163134912691,0.9636363636363635,1.0000000000000002,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,BetaShap (U)100,0.9279948148756354,0.8060606060606059,0.9502447843264015,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,TMC100,0.9789256030854209,0.9515151515151514,1.0000000000000002,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,LOO,0.7648240532122852,0.10303030303030303,0.7262076622945484,0.1111111111111111,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,ContextCite32,0.998254688039924,0.8060606060606059,0.9907896785767518,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,KernelShap32,0.9978627270622948,0.6848484848484848,1.0000000000000002,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,WSS32,0.847180123779909,0.43030303030303024,0.9458633987428293,0.28888888888888886,0.0,1.0,0.6666666666666666,0.4,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,BetaShap (U)32,0.9929639443193257,0.6121212121212121,0.9967827844849091,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,TMC32,0.9961082663823119,0.8787878787878788,0.9967827844849091,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,ContextCite64,0.9993655337473117,0.8787878787878788,0.9967827844849091,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,KernelShap64,0.9987239243496717,0.6727272727272726,1.0000000000000002,0.5555555555555555,1.0,1.0,1.0,0.6,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,WSS64,0.9989450344590645,0.8424242424242423,0.9967827844849091,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,BetaShap (U)64,0.9890532860877148,0.7575757575757575,0.9967827844849091,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,TMC64,0.9985602991653991,0.9393939393939393,0.9967827844849091,0.8222222222222221,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,ContextCite100,0.9990494591842326,0.8181818181818182,0.9907896785767518,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,KernelShap100,0.9993134763199796,0.9272727272727272,1.0000000000000002,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,WSS100,0.9993247371058693,0.8545454545454544,1.0000000000000002,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,BetaShap (U)100,0.9885325580893704,0.8303030303030302,0.9967827844849091,0.6888888888888888,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,TMC100,0.9989937138487213,0.9636363636363635,0.9967827844849091,0.8666666666666666,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,LOO,0.9977891761846257,0.5151515151515151,1.0000000000000002,0.4222222222222222,1.0,1.0,1.0,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,ContextCite32,0.9907988767535736,0.8424242424242423,0.9930276700544025,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,KernelShap32,0.9956407293338052,0.7212121212121211,0.9875288788269353,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,WSS32,0.8296432209909008,0.6242424242424242,0.930652447330998,0.4666666666666666,0.0,1.0,1.0,0.6,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,BetaShap (U)32,0.9855808305007867,0.6484848484848483,0.9930276700544025,0.4666666666666666,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,TMC32,0.9853748263252057,0.6848484848484848,0.9930276700544025,0.5111111111111111,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,ContextCite64,0.99819191988678,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,KernelShap64,0.9980454377804426,0.7333333333333332,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,WSS64,0.9990217733540909,0.9272727272727272,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,BetaShap (U)64,0.9822222192249808,0.8060606060606059,0.9930276700544025,0.6888888888888888,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,TMC64,0.9960142216500985,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.6,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,ContextCite100,0.998636661247433,0.9030303030303028,0.9930276700544025,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,KernelShap100,0.9991301805313684,0.8787878787878788,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,WSS100,0.9994161275433928,0.9030303030303028,0.9933345348877749,0.8222222222222221,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,BetaShap (U)100,0.9777502038772715,0.8060606060606059,0.9930276700544025,0.6888888888888888,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,TMC100,0.9986189198887478,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,LOO,0.9883443452599115,0.7575757575757575,1.0,0.6444444444444444,1.0,1.0,1.0,0.6,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,ContextCite32,0.995168023995247,0.5393939393939393,0.9914802903735577,0.4222222222222222,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,KernelShap32,0.9952330633037698,0.8060606060606059,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,WSS32,0.9295724093004836,0.5393939393939393,0.9938558483045293,0.4222222222222222,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,BetaShap (U)32,0.9744297571313939,0.6727272727272726,1.0,0.5555555555555555,1.0,1.0,1.0,0.6,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,TMC32,0.9893519227180647,0.6606060606060605,0.9914802903735577,0.5111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,ContextCite64,0.9963440020312712,0.7575757575757575,0.9914802903735577,0.5555555555555555,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,KernelShap64,0.9972866599469397,0.7333333333333332,0.9914802903735577,0.5111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,WSS64,0.9934144551887248,0.6848484848484848,0.9938558483045293,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,BetaShap (U)64,0.9411936083079118,0.9878787878787878,1.0,0.9555555555555554,1.0,1.0,1.0,0.8,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,TMC64,0.9905272481471656,0.8787878787878788,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,ContextCite100,0.9978437697162827,0.8787878787878788,0.9914802903735577,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,KernelShap100,0.9981640068187241,0.8666666666666665,0.9914802903735577,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,WSS100,0.9977356323513858,0.6848484848484848,0.9914802903735577,0.5555555555555555,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,BetaShap (U)100,0.9633159730399741,0.9636363636363635,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,TMC100,0.9971892124385533,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,LOO,0.9981928144126441,0.5636363636363636,1.0,0.4222222222222222,1.0,1.0,1.0,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,ContextCite32,0.988525493844635,0.7939393939393938,0.9986911018170451,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,KernelShap32,0.9916817299789874,0.8666666666666665,0.9994423279910144,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,WSS32,0.8717614943438429,0.3939393939393939,0.9829822488779311,0.19999999999999998,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,BetaShap (U)32,0.9870505391142095,0.16363636363636364,0.9969670605256716,0.06666666666666667,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,TMC32,0.9918998171665212,0.28484848484848485,0.9853015938485521,0.19999999999999998,0.0,1.0,0.6666666666666666,0.4,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,ContextCite64,0.9960803842381474,0.8303030303030302,0.9946477155550506,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,KernelShap64,0.9975797499833496,0.8060606060606059,0.9994423279910144,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,WSS64,0.998392518469269,0.9272727272727272,0.9999999999999999,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,BetaShap (U)64,0.9729885796682266,0.13939393939393938,0.9946477155550506,0.06666666666666667,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,TMC64,0.9869164145149465,0.41818181818181815,0.9853015938485521,0.28888888888888886,0.0,1.0,0.6666666666666666,0.4,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,ContextCite100,0.9983110577179662,0.7939393939393938,0.9986911018170451,0.6444444444444444,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,KernelShap100,0.9993597217894774,0.9030303030303028,0.9986911018170451,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,WSS100,0.9987126551554688,0.8666666666666665,0.9999999999999999,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,BetaShap (U)100,0.957024424902771,0.5272727272727272,0.9877768613138949,0.4222222222222222,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,TMC100,0.9972500582155339,0.6,0.9969670605256716,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,LOO,0.9966929203587492,0.6121212121212121,0.9999999999999999,0.4222222222222222,1.0,1.0,1.0,0.8,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,ContextCite32,0.9496869427788179,0.7454545454545454,0.9388031025092841,0.6,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,KernelShap32,0.982214365139093,0.7333333333333332,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,WSS32,0.6497377552470471,0.10303030303030303,0.8513912166247892,0.022222222222222223,0.0,1.0,0.6666666666666666,0.4,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,BetaShap (U)32,0.8068221465425893,0.6848484848484848,1.0,0.6,1.0,1.0,1.0,0.6,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,TMC32,0.9851748043768352,0.6606060606060605,1.0,0.5555555555555555,1.0,1.0,1.0,0.6,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,ContextCite64,0.992227200348702,0.9030303030303028,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,KernelShap64,0.9915999084761851,0.709090909090909,1.0,0.5555555555555555,1.0,1.0,1.0,0.6,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,WSS64,0.9975371813004225,0.8666666666666665,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,BetaShap (U)64,0.8319607656251458,0.43030303030303024,1.0,0.28888888888888886,1.0,1.0,1.0,0.6,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,TMC64,0.9256925582962353,0.5757575757575757,0.9131685205351715,0.4222222222222222,0.0,1.0,1.0,0.8,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,ContextCite100,0.9956868195735058,0.9030303030303028,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,KernelShap100,0.9858137806425633,0.7333333333333332,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,WSS100,0.9968517994651953,0.8909090909090909,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,BetaShap (U)100,0.8454352477758817,0.5393939393939393,0.9131685205351715,0.3333333333333333,0.0,1.0,1.0,0.6,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,TMC100,0.9868127251192056,0.709090909090909,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,LOO,0.9754339812093139,0.7575757575757575,0.9382226960896177,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,ContextCite32,0.9719414169932818,0.9636363636363635,1.0,0.911111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,KernelShap32,0.9735277157261579,0.8060606060606059,0.9916707973758188,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,WSS32,0.9306820750418812,0.709090909090909,0.9916707973758188,0.5555555555555555,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,BetaShap (U)32,0.8608976410229605,0.6484848484848483,0.9916707973758188,0.5555555555555555,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,TMC32,0.9820240632152766,0.7939393939393938,1.0,0.6444444444444444,1.0,1.0,1.0,0.6,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,ContextCite64,0.9910362695708779,0.9272727272727272,0.9916707973758188,0.8666666666666666,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,KernelShap64,0.9905309809017315,0.7696969696969697,0.9907265338790225,0.6,0.0,1.0,1.0,0.6,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,WSS64,0.9941316269420324,0.9393939393939393,0.9907265338790225,0.8222222222222221,0.0,1.0,1.0,0.8,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,BetaShap (U)64,0.8016353985092703,0.4787878787878787,0.9916707973758188,0.4222222222222222,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,TMC64,0.9757662289416147,0.6848484848484848,0.9823973312548413,0.4666666666666666,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,ContextCite100,0.9936616961405309,0.7212121212121211,0.9916707973758188,0.6,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,KernelShap100,0.9951827224812129,0.8666666666666665,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,WSS100,0.9985270050045453,0.9878787878787878,1.0,0.9555555555555554,1.0,1.0,1.0,1.0,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,BetaShap (U)100,0.8224897335157837,0.5878787878787878,0.9823973312548413,0.4666666666666666,0.0,1.0,0.6666666666666666,0.4,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,TMC100,0.9920051856865078,0.7939393939393938,0.9823973312548413,0.6444444444444444,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,LOO,0.96778262380334,0.43030303030303024,0.9823973312548413,0.28888888888888886,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,ContextCite32,0.9791893065874641,0.9515151515151514,0.9999999999999998,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,KernelShap32,0.9923569781476468,0.8545454545454544,0.9850201667642214,0.6888888888888888,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,WSS32,0.8314400175655794,0.28484848484848485,0.9203373385085314,0.15555555555555553,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,BetaShap (U)32,0.9690582610959773,0.8060606060606059,0.9999999999999998,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,TMC32,0.9915342417044264,0.8060606060606059,0.9999999999999998,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,ContextCite64,0.995934830070206,0.8060606060606059,0.9999999999999998,0.6888888888888888,1.0,1.0,1.0,0.6,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,KernelShap64,0.9959801988200719,0.9030303030303028,0.9850201667642214,0.7777777777777777,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,WSS64,0.997476629729618,0.9636363636363635,0.9999999999999998,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,BetaShap (U)64,0.968724049821952,0.8909090909090909,0.9999999999999998,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,TMC64,0.9820524028609325,0.8909090909090909,0.9444120977853026,0.7333333333333333,0.0,1.0,0.6666666666666666,1.0,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,ContextCite100,0.9948403414523257,0.8303030303030302,0.9999999999999998,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,KernelShap100,0.9976108557516499,0.9272727272727272,0.9999999999999998,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,WSS100,0.9971822590745426,0.9757575757575757,0.9999999999999998,0.911111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,BetaShap (U)100,0.9212300486686352,0.9393939393939393,0.9466491835979381,0.8222222222222221,0.0,1.0,1.0,1.0,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,TMC100,0.9965426318586528,0.9757575757575757,0.9999999999999998,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,LOO,0.9910712112633462,0.6969696969696969,0.9999999999999998,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,ContextCite32,0.9880046372854602,0.8181818181818182,0.9536746691086712,0.5555555555555555,0.0,1.0,0.6666666666666666,1.0,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,KernelShap32,0.9927719044817935,0.9030303030303028,0.9996755591469821,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,WSS32,0.9613137783172174,0.4666666666666666,0.9996755591469821,0.37777777777777777,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,BetaShap (U)32,0.9563420479973459,0.8303030303030302,0.9643728016986448,0.6888888888888888,0.0,1.0,1.0,0.6,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,TMC32,0.9971568056391711,0.9030303030303028,1.0000000000000002,0.8222222222222221,1.0,1.0,1.0,0.6,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,ContextCite64,0.9952334915589924,0.5393939393939393,0.9996755591469821,0.37777777777777777,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,KernelShap64,0.9970785934634174,0.9030303030303028,0.9996755591469821,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,WSS64,0.9983267604258905,0.9515151515151514,0.9996755591469821,0.8666666666666666,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,BetaShap (U)64,0.958650549356262,0.7454545454545454,0.9643728016986448,0.5111111111111111,0.0,1.0,1.0,1.0,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,TMC64,0.9852006743125099,0.9393939393939393,1.0000000000000002,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,ContextCite100,0.9984024997417827,0.8545454545454544,0.9996755591469821,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,KernelShap100,0.9984967992266885,0.9272727272727272,0.9996755591469821,0.8222222222222221,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,WSS100,0.998500751848787,0.8060606060606059,0.9996755591469821,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,BetaShap (U)100,0.9545093946057828,0.8060606060606059,1.0000000000000002,0.6888888888888888,1.0,1.0,1.0,1.0,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,TMC100,0.9931234033929779,0.9757575757575757,1.0000000000000002,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,LOO,0.992535539313464,0.43030303030303024,0.9893018674100266,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,ContextCite32,0.9893324694238945,0.5636363636363636,1.0,0.4222222222222222,1.0,1.0,1.0,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,KernelShap32,0.9840239582396996,0.7212121212121211,0.9879014194243741,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,WSS32,0.9128786839713228,0.5393939393939393,0.9146049607564274,0.37777777777777777,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,BetaShap (U)32,0.9841572188725058,0.5636363636363636,0.9879014194243741,0.4222222222222222,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,TMC32,0.99779807396359,0.7575757575757575,1.0,0.5555555555555555,1.0,1.0,1.0,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,ContextCite64,0.997912404273406,0.7939393939393938,0.9916669875161999,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,KernelShap64,0.9933448806165146,0.7333333333333332,0.9879014194243741,0.6,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,WSS64,0.9975381015590252,0.7939393939393938,0.9879014194243741,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,BetaShap (U)64,0.9677879000435594,0.6848484848484848,1.0,0.5555555555555555,1.0,1.0,1.0,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,TMC64,0.988792237161064,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,ContextCite100,0.9971840814904904,0.6484848484848483,0.9879014194243741,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,KernelShap100,0.9973246668966085,0.5757575757575757,0.9879014194243741,0.4222222222222222,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,WSS100,0.9981900253672245,0.8909090909090909,0.9879014194243741,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,BetaShap (U)100,0.9602550197940927,0.7696969696969697,0.9889147763369068,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,TMC100,0.9948567370792598,0.8545454545454544,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,LOO,0.9958697908697316,0.8787878787878788,0.9916669875161999,0.7333333333333333,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,ContextCite32,0.9906343603291401,0.7333333333333332,1.0,0.6,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,KernelShap32,0.9931720305398916,0.9393939393939393,0.9878545425159798,0.8222222222222221,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,WSS32,0.7614047239954658,0.5878787878787878,0.9807993907501832,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,BetaShap (U)32,0.997537787982442,0.7696969696969697,1.0,0.6444444444444444,1.0,1.0,1.0,0.6,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,TMC32,0.9964561336048658,0.7939393939393938,1.0,0.6888888888888888,1.0,1.0,1.0,0.6,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,ContextCite64,0.9974333229109318,0.8545454545454544,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,KernelShap64,0.9961544477737319,0.9393939393939393,0.9878545425159798,0.8222222222222221,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,WSS64,0.997540946273932,0.9030303030303028,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,BetaShap (U)64,0.966716002202274,0.8181818181818182,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,TMC64,0.9963584642759158,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,ContextCite100,0.9987083717595504,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,KernelShap100,0.9989442298923892,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,WSS100,0.9991849149395038,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,BetaShap (U)100,0.9636744291483046,0.8060606060606059,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,TMC100,0.9971189636192632,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+10,What are the topics of the books Sarah and Michael are reading?,LOO,0.9938910329633536,0.6121212121212121,1.0,0.5111111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,ContextCite32,0.9954422144609661,0.22424242424242422,1.0,0.15555555555555553,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,KernelShap32,0.9937366183280963,0.7818181818181817,1.0,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,WSS32,0.7901419033858741,0.23636363636363633,0.9496372757468882,0.15555555555555553,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,BetaShap (U)32,0.7846908324536124,0.006060606060606061,0.9496372757468882,-0.06666666666666667,1.0,0.5,0.3333333333333333,0.4,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,TMC32,0.9445164829546316,0.23636363636363633,0.9496372757468882,0.15555555555555553,1.0,0.5,0.3333333333333333,0.4,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,ContextCite64,0.9973279997778681,0.2727272727272727,1.0,0.15555555555555553,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,KernelShap64,0.9981118256192488,0.5757575757575757,1.0,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,WSS64,0.9962018839052073,0.5636363636363636,1.0,0.4222222222222222,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,BetaShap (U)64,0.8065195135257133,0.6484848484848483,0.9496372757468882,0.5111111111111111,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,TMC64,0.9814555827664262,0.7696969696969697,0.9496372757468882,0.5555555555555555,1.0,0.5,0.3333333333333333,0.8,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,ContextCite100,0.9983639015307851,0.4666666666666666,1.0,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,KernelShap100,0.9983338770600837,0.7696969696969697,1.0,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,WSS100,0.9980770462249766,0.4666666666666666,1.0,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,BetaShap (U)100,0.8547438259943272,0.8181818181818182,0.9496372757468882,0.6444444444444444,1.0,0.5,0.3333333333333333,0.8,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,TMC100,0.9898360940940264,0.8545454545454544,1.0,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+11,Where did the family go on Saturday and what did they do?,LOO,0.99852415495568,0.38181818181818183,1.0,0.28888888888888886,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What colors did Alex use to paint his toy car?,ContextCite32,0.5702232359900465,0.5393939393939393,0.5654073070698596,0.4222222222222222,0.0,0.5,0.6666666666666666,0.6,1,1.0,10
+12,What colors did Alex use to paint his toy car?,KernelShap32,0.8513983000035121,0.5878787878787878,0.9886442179777132,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What colors did Alex use to paint his toy car?,WSS32,0.9790619927215053,0.5515151515151515,0.9572639830853996,0.4222222222222222,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What colors did Alex use to paint his toy car?,BetaShap (U)32,-0.9170955892558228,-0.5515151515151515,0.01135578202228677,-0.4222222222222222,0.0,0.0,0.3333333333333333,0.2,1,0.3333333333333333,10
+12,What colors did Alex use to paint his toy car?,TMC32,0.9875390530863963,0.6363636363636362,0.9572639830853996,0.4666666666666666,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What colors did Alex use to paint his toy car?,ContextCite64,0.9476325267333643,0.7212121212121211,0.9572639830853996,0.5111111111111111,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+12,What colors did Alex use to paint his toy car?,KernelShap64,0.9442561125726923,0.5515151515151515,0.9886442179777132,0.4222222222222222,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What colors did Alex use to paint his toy car?,WSS64,0.9980169710694045,0.7818181818181817,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+12,What colors did Alex use to paint his toy car?,BetaShap (U)64,-0.5153052685732904,-0.28484848484848485,0.01432940150586515,-0.15555555555555553,0.0,0.0,0.3333333333333333,0.4,1,0.5,10
+12,What colors did Alex use to paint his toy car?,TMC64,0.8433728886125115,0.8787878787878788,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+12,What colors did Alex use to paint his toy car?,ContextCite100,0.9695648019926,0.9636363636363635,0.9686197651076864,0.8666666666666666,0.0,1.0,1.0,0.8,1,1.0,10
+12,What colors did Alex use to paint his toy car?,KernelShap100,0.9745075548667904,0.6121212121212121,0.9886442179777132,0.4222222222222222,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+12,What colors did Alex use to paint his toy car?,WSS100,0.9990074235813821,0.9393939393939393,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+12,What colors did Alex use to paint his toy car?,BetaShap (U)100,0.6228049344820232,0.23636363636363633,0.6504324078358446,0.15555555555555553,1.0,0.5,0.6666666666666666,0.4,1,1.0,10
+12,What colors did Alex use to paint his toy car?,TMC100,0.9571428680805223,0.8060606060606059,1.0,0.6888888888888888,1.0,1.0,1.0,0.6,1,1.0,10
+12,What colors did Alex use to paint his toy car?,LOO,0.9957542718264593,0.6848484848484848,1.0,0.5555555555555555,1.0,1.0,1.0,0.6,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,ContextCite32,0.9932135950264016,0.7333333333333332,0.9960330369713839,0.6,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,KernelShap32,0.9977156294736558,0.7818181818181817,0.9960330369713839,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,WSS32,0.8551781211893907,0.5878787878787878,0.9100810364875619,0.4666666666666666,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,BetaShap (U)32,0.9683329346374088,0.8181818181818182,0.993077107103137,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,TMC32,0.9845504960101016,0.6242424242424242,0.993077107103137,0.5555555555555555,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,ContextCite64,0.9983537787082258,0.7818181818181817,0.9960330369713839,0.6444444444444444,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,KernelShap64,0.9996576660646463,0.8909090909090909,1.0000000000000002,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,WSS64,0.9995089029461097,0.9515151515151514,1.0000000000000002,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,BetaShap (U)64,0.9331504046238744,0.5272727272727272,0.9895455903821605,0.4222222222222222,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,TMC64,0.9924596457442891,0.5515151515151515,0.9924282475768266,0.4666666666666666,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,ContextCite100,0.9995672069623004,0.9515151515151514,1.0000000000000002,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,KernelShap100,0.9997650230020806,0.9878787878787878,1.0000000000000002,0.9555555555555554,1.0,1.0,1.0,1.0,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,WSS100,0.999443628988774,0.9393939393939393,1.0000000000000002,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,BetaShap (U)100,0.8873488257218882,0.49090909090909085,1.0000000000000002,0.37777777777777777,1.0,1.0,1.0,0.6,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,TMC100,0.992392559178764,0.49090909090909085,0.9924282475768266,0.4222222222222222,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+13,What special abilities do the Gleepglorp and the Flumph from planet Xylar possess?,LOO,0.9993071456927348,0.7333333333333332,1.0000000000000002,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+14,What distinct characteristics do elephants have?,ContextCite32,0.9971038497222893,0.5636363636363636,0.9900812582436997,0.4222222222222222,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+14,What distinct characteristics do elephants have?,KernelShap32,0.982143485376842,0.709090909090909,0.9665194405202022,0.5555555555555555,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+14,What distinct characteristics do elephants have?,WSS32,0.8705080679053123,0.4666666666666666,0.9609153136377131,0.37777777777777777,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+14,What distinct characteristics do elephants have?,BetaShap (U)32,0.7468601587405357,0.12727272727272726,0.9250194948913845,0.06666666666666667,1.0,0.5,0.3333333333333333,0.4,1,1.0,10
+14,What distinct characteristics do elephants have?,TMC32,0.9112644292259237,0.5151515151515151,0.9625753233764218,0.3333333333333333,1.0,0.5,0.6666666666666666,0.6,1,1.0,10
+14,What distinct characteristics do elephants have?,ContextCite64,0.9995385239968771,0.9757575757575757,0.994395873117511,0.911111111111111,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+14,What distinct characteristics do elephants have?,KernelShap64,0.9955785738673502,0.8787878787878788,0.9665194405202022,0.7333333333333333,1.0,0.5,0.6666666666666666,1.0,1,1.0,10
+14,What distinct characteristics do elephants have?,WSS64,0.9931045209626275,0.9030303030303028,0.9939823358454699,0.8222222222222221,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+14,What distinct characteristics do elephants have?,BetaShap (U)64,0.6188396186722165,-0.05454545454545454,0.949808304348527,-0.06666666666666667,1.0,0.5,0.3333333333333333,0.2,1,1.0,10
+14,What distinct characteristics do elephants have?,TMC64,0.9712399373749012,0.4424242424242424,0.9524535256201044,0.3333333333333333,1.0,0.5,0.3333333333333333,0.4,1,1.0,10
+14,What distinct characteristics do elephants have?,ContextCite100,0.9982565777747328,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+14,What distinct characteristics do elephants have?,KernelShap100,0.9985112308033472,0.9393939393939393,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+14,What distinct characteristics do elephants have?,WSS100,0.997352756004926,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+14,What distinct characteristics do elephants have?,BetaShap (U)100,0.6208504594127355,0.23636363636363633,0.949808304348527,0.1111111111111111,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+14,What distinct characteristics do elephants have?,TMC100,0.9720079235674589,0.3939393939393939,0.9524535256201044,0.24444444444444444,1.0,0.5,0.3333333333333333,0.4,1,1.0,10
+14,What distinct characteristics do elephants have?,LOO,0.9854877131860629,0.9636363636363635,1.0,0.8666666666666666,1.0,1.0,1.0,1.0,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,ContextCite32,0.9758422753932874,0.6484848484848483,0.9742681594300644,0.5111111111111111,0.0,1.0,1.0,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,KernelShap32,0.9788791906093988,0.709090909090909,1.0,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,WSS32,0.647685845188871,0.7212121212121211,0.8904575566477054,0.5555555555555555,0.0,0.5,0.6666666666666666,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,BetaShap (U)32,0.5412867226417082,0.5636363636363636,0.9742681594300644,0.37777777777777777,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,TMC32,0.8506188255176665,0.6606060606060605,0.9742681594300644,0.5111111111111111,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,ContextCite64,0.992348798068966,0.6242424242424242,1.0,0.4666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,KernelShap64,0.9944077901586683,0.6606060606060605,1.0,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,WSS64,0.9925004720048796,0.7212121212121211,1.0,0.5555555555555555,1.0,1.0,1.0,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,BetaShap (U)64,0.6125971720095669,0.6848484848484848,0.9742681594300644,0.5555555555555555,0.0,1.0,1.0,0.6,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,TMC64,0.9655880589891926,0.7333333333333332,1.0,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,ContextCite100,0.9952762116622085,0.5878787878787878,1.0,0.4666666666666666,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,KernelShap100,0.9969293126495089,0.6606060606060605,1.0,0.5555555555555555,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,WSS100,0.9927238029689953,0.6242424242424242,1.0,0.4666666666666666,1.0,1.0,1.0,0.6,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,BetaShap (U)100,0.715499948947381,0.7939393939393938,0.9742681594300644,0.6,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,TMC100,0.9784511266093125,0.8181818181818182,1.0,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+15,What are the key ingredients needed for a cake recipe?,LOO,0.9877153898431187,0.35757575757575755,1.0,0.24444444444444444,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,ContextCite32,0.9942244112202437,0.9393939393939393,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,KernelShap32,0.9799583411797848,0.8303030303030302,0.9939107154904447,0.6888888888888888,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,WSS32,0.9674375779224449,0.8545454545454544,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,BetaShap (U)32,0.976224592738087,0.6969696969696969,0.9491016493854352,0.6444444444444444,1.0,0.5,0.6666666666666666,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,TMC32,0.9958166745786003,0.8787878787878788,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,ContextCite64,0.9978396133379351,0.9636363636363635,1.0,0.911111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,KernelShap64,0.996864032620109,0.9151515151515152,0.9939107154904447,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,WSS64,0.9985377844823277,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,BetaShap (U)64,0.9545846904916941,0.3939393939393939,0.9577678822094996,0.28888888888888886,1.0,0.5,0.6666666666666666,0.6,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,TMC64,0.9902294033933785,0.8545454545454544,0.9939107154904447,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,ContextCite100,0.9984000057598068,0.9030303030303028,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,KernelShap100,0.9988631940159426,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,WSS100,0.9982866640070795,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,BetaShap (U)100,0.9284208744336014,0.35757575757575755,0.8559975576666872,0.24444444444444444,1.0,0.5,0.3333333333333333,0.6,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,TMC100,0.9890838703038473,0.7575757575757575,0.9752802467556291,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+16,Which tools does a carpenter use and what are their stated purposes?,LOO,0.9918652135808461,0.8787878787878788,0.9939107154904447,0.7333333333333333,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,ContextCite32,0.840092968529998,0.1515151515151515,0.9837598186546511,0.1111111111111111,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,KernelShap32,0.8769210906683524,0.4666666666666666,0.9719783671339266,0.28888888888888886,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,WSS32,0.9693149016500401,0.32121212121212117,0.9837598186546511,0.19999999999999998,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,BetaShap (U)32,0.8927504705868783,0.4545454545454545,0.9719783671339266,0.3333333333333333,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,TMC32,0.9761565136726802,0.4787878787878787,0.9837598186546511,0.3333333333333333,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,ContextCite64,0.9846567953793777,0.5030303030303029,0.9837598186546511,0.4222222222222222,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,KernelShap64,0.9607032445876522,0.6242424242424242,0.9719783671339266,0.4222222222222222,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,WSS64,0.9972074483912917,0.7696969696969697,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,BetaShap (U)64,0.7765414698397402,0.16363636363636364,0.9719783671339266,0.1111111111111111,0.0,1.0,0.6666666666666666,0.4,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,TMC64,0.9216027545565972,0.35757575757575755,0.9719783671339266,0.28888888888888886,0.0,1.0,0.6666666666666666,0.4,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,ContextCite100,0.9885955511445264,0.5393939393939393,1.0,0.37777777777777777,1.0,1.0,1.0,0.6,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,KernelShap100,0.9899749005391021,0.8060606060606059,0.9837598186546511,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,WSS100,0.9976335148881805,0.8787878787878788,0.9882185484792755,0.7333333333333333,0.0,1.0,1.0,0.8,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,BetaShap (U)100,0.7473072851427794,0.5272727272727272,0.9882185484792755,0.4222222222222222,0.0,1.0,1.0,0.6,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,TMC100,0.9681871111923063,0.38181818181818183,0.9719783671339266,0.28888888888888886,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+17,Where are the Orb of Zinthar and the Scepter of Mydor believed to be located?,LOO,0.9962554377062749,0.2727272727272727,0.9837598186546511,0.15555555555555553,1.0,1.0,0.6666666666666666,0.4,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,ContextCite32,0.9903053701441836,0.9636363636363635,1.0,0.911111111111111,1.0,1.0,1.0,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,KernelShap32,0.9956987283472837,0.8909090909090909,0.991738039069079,0.7777777777777777,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,WSS32,0.8090609210267304,0.5030303030303029,0.9213661568618422,0.37777777777777777,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,BetaShap (U)32,0.9891207670374994,0.6242424242424242,0.9862569011863381,0.4666666666666666,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,TMC32,0.9945525039534716,0.7333333333333332,0.9862569011863381,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,ContextCite64,0.9965332072220431,0.9515151515151514,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,KernelShap64,0.997280427925379,0.9030303030303028,0.991738039069079,0.7777777777777777,1.0,1.0,0.6666666666666666,1.0,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,WSS64,0.9968140988094449,0.8303030303030302,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,BetaShap (U)64,0.9689769911803537,0.8060606060606059,1.0,0.6888888888888888,1.0,1.0,1.0,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,TMC64,0.9953604892891064,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,ContextCite100,0.9974936210601997,0.9878787878787878,1.0,0.9555555555555554,1.0,1.0,1.0,1.0,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,KernelShap100,0.997765625236733,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,1.0,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,WSS100,0.9984087232309574,0.9757575757575757,1.0,0.911111111111111,1.0,1.0,1.0,1.0,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,BetaShap (U)100,0.9634883473911102,0.8666666666666665,1.0,0.7777777777777777,1.0,1.0,1.0,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,TMC100,0.9972511138683104,0.9272727272727272,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+18,What are the roles or professions of Elara Vayne and Jax Korden?,LOO,0.9911337735144297,0.6969696969696969,0.9862569011863381,0.6,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,ContextCite32,0.9859399750761159,0.7696969696969697,0.9725607033867675,0.6444444444444444,1.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,KernelShap32,0.9803889799154248,0.6363636363636362,0.9825920227630588,0.5111111111111111,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,WSS32,0.8867588110682356,0.5636363636363636,0.9682980453085183,0.4222222222222222,0.0,1.0,0.6666666666666666,0.6,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,BetaShap (U)32,0.8850517898567203,0.7575757575757575,0.9687094677342984,0.6,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,TMC32,0.9503266788165767,0.6363636363636362,0.9687094677342984,0.5111111111111111,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,ContextCite64,0.9953124101569374,0.8060606060606059,0.9869490070217829,0.6888888888888888,1.0,1.0,0.6666666666666666,0.6,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,KernelShap64,0.9962344726516412,0.7818181818181817,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,WSS64,0.9952744390306385,0.8424242424242423,1.0,0.7333333333333333,1.0,1.0,1.0,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,BetaShap (U)64,0.8099834776703019,0.6363636363636362,0.9687094677342984,0.4666666666666666,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,TMC64,0.9700159766076586,0.8424242424242423,0.9687094677342984,0.6888888888888888,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,ContextCite100,0.998341845488887,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,KernelShap100,0.9961627201063916,0.9151515151515152,1.0,0.8222222222222221,1.0,1.0,1.0,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,WSS100,0.9987563535161428,0.9393939393939393,1.0,0.8666666666666666,1.0,1.0,1.0,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,BetaShap (U)100,0.706847316695006,0.7575757575757575,1.0,0.6444444444444444,1.0,1.0,1.0,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,TMC100,0.9773054067011745,0.8303030303030302,0.9687094677342984,0.6444444444444444,0.0,1.0,0.6666666666666666,0.8,1,1.0,10
+19,What are the primary uses described for the 'Chrono-Modulator' or for the 'Bio-Harmonizer'?,LOO,0.9873263227936535,0.5878787878787878,0.9883234371123563,0.4222222222222222,1.0,1.0,0.6666666666666666,0.8,1,1.0,10

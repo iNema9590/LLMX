@@ -1,0 +1,131 @@
+Question_Index,Query,Method,Pearson,Spearman,NDCG,KendallTau,Num_Items
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,ContextCite32,0.9559738676420638,0.8424242424242423,1.0,0.7333333333333333,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,WSS32,0.9794886478645387,0.8909090909090909,1.0,0.7777777777777777,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,BetaShap (U)32,0.7948570076696886,0.6848484848484848,0.9116996469875738,0.5111111111111111,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,TMC32,0.9408077181173855,0.8909090909090909,1.0,0.7333333333333333,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,ContextCite64,0.9855054645407167,0.9272727272727272,1.0,0.8666666666666666,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,WSS64,0.998548083867211,0.9878787878787878,1.0,0.9555555555555554,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,BetaShap (U)64,0.774910754921061,0.406060606060606,0.9051381920068868,0.28888888888888886,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,TMC64,0.9621219710470544,0.8060606060606059,0.9609301079699,0.6444444444444444,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,ContextCite100,0.9884231291634684,0.9151515151515152,1.0,0.8222222222222221,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,WSS100,0.9987705826672211,0.9999999999999999,1.0,0.9999999999999999,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,BetaShap (U)100,0.8693923279778519,0.6848484848484848,0.9116996469875738,0.6,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,TMC100,0.9800411326633499,0.8666666666666665,0.9609301079699,0.7333333333333333,10
+0,What are the two primary materials used to construct a Xylotian 'Sky-Skiff' hull?,LOO,0.9266621337104324,0.6,1.0,0.4666666666666666,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,ContextCite32,0.998234467008804,0.8787878787878788,0.9999999999999999,0.7333333333333333,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,WSS32,0.9952233897102853,0.8303030303030302,0.9931372676988367,0.6888888888888888,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,BetaShap (U)32,0.7732455148749143,0.4787878787878787,0.9799551301068834,0.3333333333333333,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,TMC32,0.9723154591892735,0.49090909090909085,0.9931372676988367,0.37777777777777777,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,ContextCite64,0.9971263712042302,0.8424242424242423,0.9931372676988367,0.7333333333333333,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,WSS64,0.9973391113294445,0.8303030303030302,0.9931372676988367,0.6888888888888888,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,BetaShap (U)64,0.7256670224827304,0.5030303030303029,0.9799551301068834,0.3333333333333333,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,TMC64,0.9868976793193347,0.43030303030303024,0.9931372676988367,0.28888888888888886,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,ContextCite100,0.9971241527041965,0.7818181818181817,0.9931372676988367,0.6444444444444444,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,WSS100,0.9984958385700797,0.8787878787878788,0.9999999999999999,0.7333333333333333,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,BetaShap (U)100,0.8480587783162772,0.41818181818181815,0.9931372676988367,0.37777777777777777,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,TMC100,0.9910565467293591,0.5030303030303029,0.9931372676988367,0.3333333333333333,10
+1,What two distinct abilities does a Xylotian 'Chrono-Weaver' possess?,LOO,0.9954979282822973,0.5757575757575757,0.9931372676988367,0.4222222222222222,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,ContextCite32,0.9918554738987001,0.9151515151515152,0.9958826549752678,0.8222222222222221,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,WSS32,0.9978319635723113,0.7212121212121211,0.9971351081929076,0.6,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,BetaShap (U)32,0.9831364593298869,0.5636363636363636,1.0000000000000002,0.4222222222222222,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,TMC32,0.9938528031262841,0.5878787878787878,1.0000000000000002,0.4666666666666666,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,ContextCite64,0.9986985423362755,0.7818181818181817,0.9958826549752678,0.6444444444444444,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,WSS64,0.9986516493432622,0.8666666666666665,0.9958826549752678,0.7777777777777777,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,BetaShap (U)64,0.984435719909921,0.8787878787878788,1.0000000000000002,0.7333333333333333,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,TMC64,0.99550737500649,0.9030303030303028,1.0000000000000002,0.7777777777777777,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,ContextCite100,0.9995794076237374,0.9878787878787878,1.0000000000000002,0.9555555555555554,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,WSS100,0.99940696623248,0.9878787878787878,1.0000000000000002,0.9555555555555554,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,BetaShap (U)100,0.9734305034898922,0.8303030303030302,0.998381438332746,0.6888888888888888,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,TMC100,0.9981297784748717,0.9636363636363635,1.0000000000000002,0.911111111111111,10
+2,What are the two key functions of 'Symbiotic Spores' in Xylotian terraforming pods?,LOO,0.9958998004901858,0.5393939393939393,0.987650054076288,0.4222222222222222,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,ContextCite32,0.9405969236557217,0.8545454545454544,0.9665737859296434,0.6444444444444444,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,WSS32,0.9880136427864717,0.6848484848484848,0.9945430851113033,0.5111111111111111,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,BetaShap (U)32,-0.6030961618645312,-0.17575757575757575,0.043944744651545416,-0.06666666666666667,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,TMC32,0.9275861763097641,0.7939393939393938,1.0,0.6444444444444444,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,ContextCite64,0.9938119331011647,0.7818181818181817,0.9952949684113973,0.6,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,WSS64,0.9971157831388868,0.8181818181818182,0.9837834079199507,0.6444444444444444,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,BetaShap (U)64,-0.265433911905395,0.01818181818181818,0.043944744651545416,0.06666666666666667,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,TMC64,0.8445147376718037,0.9151515151515152,1.0,0.8222222222222221,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,ContextCite100,0.9878068689552569,0.7454545454545454,1.0,0.6444444444444444,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,WSS100,0.9974367022023642,0.9272727272727272,1.0,0.8222222222222221,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,BetaShap (U)100,0.46987749320156436,0.6727272727272726,0.665283684148312,0.6,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,TMC100,0.9437158757100828,0.9515151515151514,1.0,0.8666666666666666,10
+3,What two types of energy are harvested by the 'Dual-Resonance Crystals' of Xylos?,LOO,0.9795146859554948,0.6969696969696969,0.9646587068942122,0.5111111111111111,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,ContextCite32,0.9949548143745527,0.9151515151515152,1.0,0.8222222222222221,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,WSS32,0.996224663236221,0.8909090909090909,1.0,0.7777777777777777,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,BetaShap (U)32,0.9698023145636239,0.3696969696969697,0.9783014767141958,0.28888888888888886,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,TMC32,0.9889675809482719,0.709090909090909,0.9783014767141958,0.6,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,ContextCite64,0.9944316863985412,0.7575757575757575,0.9921822363736752,0.5555555555555555,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,WSS64,0.9936240268540547,0.8181818181818182,0.9921822363736752,0.6444444444444444,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,BetaShap (U)64,0.8666382532654081,0.5636363636363636,0.9783014767141958,0.4666666666666666,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,TMC64,0.9921462736082128,0.8060606060606059,0.9783014767141958,0.6888888888888888,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,ContextCite100,0.9965012699927573,0.7696969696969697,0.9921822363736752,0.6,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,WSS100,0.996195457205389,0.7818181818181817,1.0,0.6444444444444444,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,BetaShap (U)100,0.9052284701169826,0.6121212121212121,1.0,0.5111111111111111,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,TMC100,0.9977580157532832,0.9393939393939393,1.0,0.8666666666666666,10
+4,What are the two main defensive mechanisms of a Xylotian 'Guardian Orb' drone?,LOO,0.9909478798626505,0.4666666666666666,0.9886580969654879,0.37777777777777777,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,ContextCite32,0.9505684519258115,0.6242424242424242,0.9336616730688663,0.5111111111111111,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,WSS32,0.9868751667474753,0.8424242424242423,1.0,0.7333333333333333,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,BetaShap (U)32,0.5493820220230534,0.18787878787878787,0.7728646712475685,0.15555555555555553,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,TMC32,0.9657355473512886,0.5151515151515151,1.0,0.37777777777777777,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,ContextCite64,0.9911513846128526,0.7212121212121211,1.0,0.5555555555555555,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,WSS64,0.989394243485284,0.5515151515151515,1.0,0.4222222222222222,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,BetaShap (U)64,0.619199372967449,0.2121212121212121,0.6891550227215625,0.1111111111111111,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,TMC64,0.9622298198017887,0.6363636363636362,1.0,0.5111111111111111,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,ContextCite100,0.9967793894855503,0.9151515151515152,1.0,0.8222222222222221,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,WSS100,0.9959805020379349,0.8424242424242423,1.0,0.7333333333333333,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,BetaShap (U)100,0.8146656769694272,0.5030303030303029,0.7728646712475685,0.4222222222222222,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,TMC100,0.9889217011419571,0.6606060606060605,1.0,0.5555555555555555,10
+5,What are the two primary components used in the creation of 'Lumin-Ink' by Xylotian scribes?,LOO,0.9546427744122343,0.7454545454545454,0.9336616730688663,0.6,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,ContextCite32,0.9980769228225297,0.9757575757575757,1.0,0.911111111111111,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,WSS32,0.9935125955803661,0.8060606060606059,0.9949204207426208,0.6888888888888888,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,BetaShap (U)32,0.8686428216347711,0.9272727272727272,0.9801187394885192,0.8222222222222221,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,TMC32,0.9897153552672975,0.9393939393939393,0.973653682993378,0.8222222222222221,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,ContextCite64,0.9988408851138337,0.9757575757575757,1.0,0.911111111111111,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,WSS64,0.9968562615683536,0.8909090909090909,0.9949204207426208,0.7777777777777777,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,BetaShap (U)64,0.8411916635237568,0.7212121212121211,1.0,0.5555555555555555,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,TMC64,0.9930279481973798,0.7818181818181817,1.0,0.6888888888888888,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,ContextCite100,0.9991115767317036,0.9999999999999999,1.0,0.9999999999999999,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,WSS100,0.9977087171693941,0.8424242424242423,0.9949204207426208,0.6888888888888888,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,BetaShap (U)100,0.8869551056052009,0.8060606060606059,0.9801187394885192,0.6444444444444444,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,TMC100,0.9956205389634154,0.8424242424242423,1.0,0.7333333333333333,10
+6,What two sensory inputs does the 'Pathfinder Helm' integrate for Xylotian explorers?,LOO,0.9945296555604839,0.7212121212121211,1.0,0.6,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,ContextCite32,0.9889729379511193,0.9515151515151514,1.0000000000000002,0.8666666666666666,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,WSS32,0.9890335371320231,0.8545454545454544,1.0000000000000002,0.6888888888888888,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,BetaShap (U)32,0.5872747085266835,-0.07878787878787878,0.7330232130758909,-0.06666666666666667,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,TMC32,0.969836566104175,0.5030303030303029,0.9934962199083086,0.4222222222222222,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,ContextCite64,0.9936447742756198,0.9030303030303028,1.0000000000000002,0.7777777777777777,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,WSS64,0.9873421426484088,0.7818181818181817,1.0000000000000002,0.6444444444444444,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,BetaShap (U)64,0.5422776354704658,0.19999999999999998,0.7373356736938941,0.15555555555555553,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,TMC64,0.9827864111991079,0.9151515151515152,0.9756606179665509,0.7777777777777777,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,ContextCite100,0.9950814360811022,0.9636363636363635,1.0000000000000002,0.8666666666666666,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,WSS100,0.9895844418917685,0.8303030303030302,1.0000000000000002,0.7333333333333333,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,BetaShap (U)100,0.7580997988145268,0.2121212121212121,0.7187252846626946,0.15555555555555553,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,TMC100,0.9935499329003143,0.9272727272727272,0.9934962199083086,0.8222222222222221,10
+7,What two distinct phases define the operation of a Xylotian 'Matter Re-sequencer'?,LOO,0.9848986303035547,0.4424242424242424,0.9756606179665509,0.3333333333333333,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,ContextCite32,0.9940104495631333,0.8666666666666665,0.9939220117834483,0.6888888888888888,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,WSS32,0.9796956374418384,0.8060606060606059,0.9939220117834483,0.6444444444444444,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,BetaShap (U)32,0.7757133046552157,0.35757575757575755,0.9661612012487115,0.19999999999999998,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,TMC32,0.9737549739480162,0.34545454545454546,0.9833844476380363,0.24444444444444444,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,ContextCite64,0.9978049150863759,0.9393939393939393,1.0,0.8666666666666666,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,WSS64,0.9960680478075395,0.7939393939393938,1.0,0.6444444444444444,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,BetaShap (U)64,0.7255166399991154,0.709090909090909,0.9723179701193949,0.5555555555555555,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,TMC64,0.9888640718638089,0.6848484848484848,0.9895412165087198,0.5555555555555555,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,ContextCite100,0.9981874757864091,0.9393939393939393,1.0,0.8666666666666666,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,WSS100,0.9973993109217296,0.8060606060606059,1.0,0.6888888888888888,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,BetaShap (U)100,0.878404999602029,0.5030303030303029,0.9833844476380363,0.37777777777777777,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,TMC100,0.9927459939522342,0.709090909090909,0.9895412165087198,0.6,10
+8,What are the two main functions of the 'Aura-Cloak' worn by Xylotian diplomats?,LOO,0.9949394643002013,0.6848484848484848,0.9833844476380363,0.5111111111111111,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,ContextCite32,0.987096987239646,0.6121212121212121,1.0,0.4666666666666666,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,WSS32,0.9958329681165474,0.7575757575757575,1.0,0.5555555555555555,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,BetaShap (U)32,0.44794015565642253,0.5757575757575757,1.0,0.4222222222222222,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,TMC32,0.9429080025223041,0.6969696969696969,1.0,0.5555555555555555,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,ContextCite64,0.9961056875886303,0.8424242424242423,1.0,0.7333333333333333,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,WSS64,0.995279790295474,0.7212121212121211,1.0,0.5555555555555555,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,BetaShap (U)64,0.500082526401957,0.6848484848484848,1.0,0.5111111111111111,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,TMC64,0.9681835807342015,0.7696969696969697,1.0,0.6,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,ContextCite100,0.9968517226906667,0.7333333333333332,1.0,0.6,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,WSS100,0.9985673767102168,0.8545454545454544,1.0,0.7333333333333333,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,BetaShap (U)100,0.6590543319847392,0.6606060606060605,0.8986694344897335,0.5111111111111111,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,TMC100,0.9881268573832811,0.8909090909090909,1.0,0.7777777777777777,10
+9,What two types of information are encoded onto a Xylotian 'Legacy Crystal'?,LOO,0.9936460643506011,0.4666666666666666,1.0,0.3333333333333333,10
