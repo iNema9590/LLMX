@@ -137,12 +137,12 @@ class ContextAttribution:
     def get_utility(self, subset_tuple: tuple) -> float:
         if subset_tuple in self.utility_cache:
             return self.utility_cache[subset_tuple]
-        
-        v_np = np.array(subset_tuple)
-        context_str = self._get_ablated_context_from_vector(v_np)
-        utility = self._llm_compute_logprob(context_str=context_str)
-        
-        self.utility_cache[subset_tuple] = utility
+        else:
+            v_np = np.array(subset_tuple)
+            context_str = self._get_ablated_context_from_vector(v_np)
+            utility = self._llm_compute_logprob(context_str=context_str)
+            
+            self.utility_cache[subset_tuple] = utility
         return utility
 
 
@@ -740,20 +740,121 @@ class ContextAttribution:
         if pbar:
             pbar.close()
         
-        return jsd_scores
+        return np.array(jsd_scores)
     
-    def lds(self, model_FM, model_cc, n_eval_util):
+    def compute_jsd_for_ablated_indices(self, ablated_indices):
+        """
+        Computes total JSD when removing specific documents
+        
+        Args:
+            ablated_indices: List of document indices to remove
+            
+        Returns:
+            Total JSD between full context and context without specified documents
+        """
+        # Create ablated context by removing specified documents
+        ablated_items = [item for j, item in enumerate(self.items) if j not in ablated_indices]
+        ablated_context_str = "\n\n".join(ablated_items)
+        
+        # Get baseline distributions (full context)
+        full_context_str = "\n\n".join(self.items)
+        baseline_distributions = self._get_response_token_distributions(
+            context_str=full_context_str,
+            response=self.target_response
+        )
+        
+        # Get distributions for ablated context
+        ablated_distributions = self._get_response_token_distributions(
+            context_str=ablated_context_str,
+            response=self.target_response
+        )
+
+        total_jsd = 0.0
+        # Sum JSD scores over all tokens
+        if ablated_distributions.nelement() > 0:
+            for token_idx in range(len(baseline_distributions)):
+                p = baseline_distributions[token_idx]
+                q = ablated_distributions[token_idx]
+                token_jsd = self._jensen_shannon_divergence(p, q)
+                total_jsd += token_jsd
+                
+        return total_jsd
+    
+    def lds_and_faithfulness(self, model_FM, model_cc, n_eval_util):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
-        # Predict utilities for all subsets using surrogate
+
+        # Predict utilities for all subsets using surrogates
         X_all_sparse = csr_matrix(X_all)
         predicted_utilities_fm = model_FM.predict(X_all_sparse)
         predicted_utilities_cc = model_cc.predict(X_all)
+
+        # Calculate Spearman correlation
         spearman_cc, _ = spearmanr(exact_utilities, predicted_utilities_cc)
         spearman_fm, _ = spearmanr(exact_utilities, predicted_utilities_fm)
+
+        # Calculate R²
+        r2_cc = r2_score(exact_utilities, predicted_utilities_cc)
+        r2_fm = r2_score(exact_utilities, predicted_utilities_fm)
+
+        return spearman_cc, spearman_fm, r2_cc, r2_fm
+    
+    def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability"):
+        """
+        Evaluates top-k attribution performance using either:
+        1) Probability utility (logit gain difference)
+        2) Divergence utility (ARC-JSD difference)
+
+        """
+        n_docs = self.n_items
+        evaluation_results = {}
         
-        return spearman_cc, spearman_fm
+        # Get full context utility based on type
+        if utility_type == "probability":
+            full_utility = self.get_utility(tuple([1] * n_docs))
+        elif utility_type == "divergence":
+            # Full context has zero divergence by definition
+            full_utility = 0.0
+        else:
+            raise ValueError("Invalid utility_type. Choose 'probability' or 'divergence'")
+        
+        for method_name, scores in results_dict.items():
+            # Skip non-attribution results
+                
+            method_drops = {}
+            
+            for k in k_values:
+                if k > n_docs:
+                    continue
+                    
+                # Get indices of top k documents
+                topk_indices = np.argsort(scores)[-k:]
+                
+                if utility_type == "probability":
+                    # Create ablation vector without top k
+                    ablation_vector = np.ones(n_docs, dtype=int)
+                    ablation_vector[topk_indices] = 0
+                    
+                    # Compute utility without top k
+                    util_without_topk = self.get_utility(tuple(ablation_vector))
+                    
+                    # Calculate utility drop
+                    if util_without_topk != -float('inf') and full_utility != -float('inf'):
+                        drop = full_utility - util_without_topk
+                    else:
+                        drop = float('nan')
+                
+                elif utility_type == "divergence":
+                    # Compute divergence when removing top k documents
+                    drop = self.compute_jsd_for_ablated_indices(topk_indices)
+                
+                method_drops[k] = drop
+            
+            evaluation_results[method_name] = method_drops
+        
+        return evaluation_results
+
 def logit(p, eps=1e-7):
     """Safe logit calculation with clamping to avoid numerical instability"""
     p = torch.clamp(p, eps, 1 - eps)
