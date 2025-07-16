@@ -780,25 +780,17 @@ class ContextAttribution:
                 
         return total_jsd
     
-    def lds_and_faithfulness(self, model_FM, model_cc, n_eval_util):
+    def lds(self, attributions, n_eval_util):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
 
-        # Predict utilities for all subsets using surrogates
-        X_all_sparse = csr_matrix(X_all)
-        predicted_utilities_fm = model_FM.predict(X_all_sparse)
-        predicted_utilities_cc = model_cc.predict(X_all)
+        # Predict effects for all subsets using surrogates
+        predicted_effect=[np.dot(attributions, i) for i in X_all]
 
         # Calculate Spearman correlation
-        spearman_cc, _ = spearmanr(exact_utilities, predicted_utilities_cc)
-        spearman_fm, _ = spearmanr(exact_utilities, predicted_utilities_fm)
-
-        # Calculate R²
-        r2_cc = r2_score(exact_utilities, predicted_utilities_cc)
-        r2_fm = r2_score(exact_utilities, predicted_utilities_fm)
-
-        return spearman_cc, spearman_fm, r2_cc, r2_fm
+        spearman, _ = spearmanr(exact_utilities, predicted_effect)
+        return spearman
     
     def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability"):
         """
