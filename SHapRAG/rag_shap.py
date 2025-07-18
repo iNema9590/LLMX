@@ -780,18 +780,45 @@ class ContextAttribution:
                 
         return total_jsd
     
-    def lds(self, attributions, n_eval_util):
+    def lds(self, attributions, n_eval_util, utl=False, model=None):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
-
+        X_all_sparse = csr_matrix(X_all)
         # Predict effects for all subsets using surrogates
-        predicted_effect=[np.dot(attributions, i) for i in X_all]
+        if utl:
+            predicted_effect=model.predict(X_all_sparse)
+        else:
+            predicted_effect=[np.dot(attributions, i) for i in X_all]
 
         # Calculate Spearman correlation
         spearman, _ = spearmanr(exact_utilities, predicted_effect)
         return spearman
     
+    def compute_exhaustive_top_k(self, k: int):
+        n = self.n_items
+        best_k_indices_to_remove = None
+        min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
+
+        possible_indices_to_remove = list(itertools.combinations(range(n), k))
+        
+        pbar_desc = f"Exhaustive Top-{k} Search"
+        pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
+
+        for k_indices_tuple in pbar_iter:
+            ablated_set_np = np.ones(n, dtype=int)
+            ablated_set_np[list(k_indices_tuple)] = 0
+            ablated_set_tuple = tuple(ablated_set_np)
+
+            utility_of_ablated_set = self.get_utility(ablated_set_tuple)
+
+            if utility_of_ablated_set < min_utility_after_removal:
+                min_utility_after_removal = utility_of_ablated_set
+                best_k_indices_to_remove = k_indices_tuple
+
+        return best_k_indices_to_remove
+
+
     def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability"):
         """
         Evaluates top-k attribution performance using either:
@@ -821,7 +848,10 @@ class ContextAttribution:
                     continue
                     
                 # Get indices of top k documents
-                topk_indices = np.argsort(scores)[-k:]
+                if "FM" in method_name:
+                    topk_indices=self.compute_exhaustive_top_k(k)
+                else:
+                    topk_indices = np.argsort(scores)[-k:]
                 
                 if utility_type == "probability":
                     # Create ablation vector without top k
