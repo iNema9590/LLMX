@@ -1,30 +1,32 @@
 import itertools
-import json
+# import json
 import math
 import os
 import pickle
 import random
-import warnings
-from collections import defaultdict
-from scipy.stats import spearmanr
 
 import numpy as np
 import torch
 import torch.nn.functional as F
-import xgboost
-from accelerate import Accelerator
-from accelerate.utils import broadcast_object_list, gather_object
-from fastFM import als
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import Ridge
+# import xgboost
+# from accelerate import Accelerator
+from accelerate.utils import broadcast_object_list
 from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
-from sklearn.exceptions import ConvergenceWarning
-from sklearn.linear_model import Lasso
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.metrics.pairwise import cosine_similarity
+from scipy.stats import spearmanr
+# from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import Lasso, Ridge
+# from sklearn.metrics import mean_squared_error, r2_score
+# from sklearn.metrics.pairwise import cosine_similarity
+# from fastFM import als
+from sklearn.preprocessing import PolynomialFeatures
 from tqdm.auto import tqdm
-from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# import warnings
+# from collections import defaultdict
+
+# from transformers import AutoModelForCausalLM, AutoTokenizer
+
 
 class ContextAttribution:
 
@@ -592,15 +594,15 @@ class ContextAttribution:
             model.fit(X_train, y_train)
             return model, model.coef_, None
         
-        elif sur_type == "fm":
-            X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=100, rank=4, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
-            model.fit(X_train_fm, y_train)
-            w, V = model.w_, model.V_.T
-            F = V @ V.T
-            np.fill_diagonal(F, 0.0)
-            attr = w + 0.5 * F.sum(axis=1)
-            return model, attr, F
+        # elif sur_type == "fm":
+        #     X_train_fm = csr_matrix(X_train)
+        #     model = als.FMRegression(n_iter=100, rank=4, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
+        #     model.fit(X_train_fm, y_train)
+        #     w, V = model.w_, model.V_.T
+        #     F = V @ V.T
+        #     np.fill_diagonal(F, 0.0)
+        #     attr = w + 0.5 * F.sum(axis=1)
+        #     return model, attr, F
         
         elif sur_type == "full_poly2":
             poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
@@ -659,12 +661,19 @@ class ContextAttribution:
         # Get logits corresponding to the positions of the answer tokens
         # The logit for the k-th answer token is at index (prompt_len + k - 1)
         shifted_logits = logits[..., prompt_len - 1:-1, :].contiguous()
+
+        # Get top k (100) logits (top k most probable tokens)
+        topk_values, topk_indices = torch.topk(shifted_logits, k=100, dim=-1) # shape: (1, L, vocab_size)
         
         # Calculate the probability distributions
-        distributions = F.softmax(shifted_logits, dim=-1).squeeze(0) # Shape: (L, vocab_size)
+        # distributions = F.softmax(shifted_logits, dim=-1).squeeze(0) # Shape: (L, vocab_size)
+        topk_probs = F.softmax(topk_values, dim=-1).squeeze(0) # Shape: (L, 100)
+
+        distributions = torch.zeros((L, logits.shape[-1]), device = self.device) # Full vocab size
+        distributions.scatter_(dim=1, index = topk_indices.squeeze(0), src=topk_probs)
 
         # Cleanup
-        del outputs, logits, shifted_logits, prompt_ids, answer_ids, input_ids
+        del outputs, logits, shifted_logits, prompt_ids, answer_ids, input_ids, topk_values, topk_indices
         torch.cuda.empty_cache()
 
         return distributions
