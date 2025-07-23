@@ -594,7 +594,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=100, rank=4, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
+            model = als.FMRegression(n_iter=100, rank=10, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -795,6 +795,18 @@ class ContextAttribution:
         spearman, _ = spearmanr(exact_utilities, predicted_effect)
         return spearman
     
+    def r2(self, n_eval_util, model, method='fm'):
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        X_all = np.array(eval_subsets)
+        exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
+        X_all_sparse = csr_matrix(X_all)
+        if method=='fm':     
+            predicted_effect=model.predict(X_all_sparse)
+        else:
+            predicted_effect=model.predict(X_all)
+        r2 = r2_score(exact_utilities, predicted_effect)
+        return r2
+
     def compute_exhaustive_top_k(self, k: int):
         n = self.n_items
         best_k_indices_to_remove = None
@@ -824,11 +836,9 @@ class ContextAttribution:
         Evaluates top-k attribution performance using either:
         1) Probability utility (logit gain difference)
         2) Divergence utility (ARC-JSD difference)
-
         """
         n_docs = self.n_items
         evaluation_results = {}
-        
         # Get full context utility based on type
         if utility_type == "probability":
             full_utility = self.get_utility(tuple([1] * n_docs))
@@ -837,44 +847,39 @@ class ContextAttribution:
             full_utility = 0.0
         else:
             raise ValueError("Invalid utility_type. Choose 'probability' or 'divergence'")
-        
         for method_name, scores in results_dict.items():
             # Skip non-attribution results
-                
             method_drops = {}
-            
             for k in k_values:
                 if k > n_docs:
                     continue
-                    
                 # Get indices of top k documents
                 if "FM" in method_name:
                     topk_indices=self.compute_exhaustive_top_k(k)
                 else:
                     topk_indices = np.argsort(scores)[-k:]
-                
+                # Ensure topk_indices is a 1-dimensional array of integers
+                # If topk_indices could be a scalar for k=1 or similar, convert it to an array
+                if not isinstance(topk_indices, np.ndarray):
+                    topk_indices = np.array([topk_indices])
+                elif topk_indices.ndim > 1:
+                    topk_indices = topk_indices.flatten()
                 if utility_type == "probability":
                     # Create ablation vector without top k
                     ablation_vector = np.ones(n_docs, dtype=int)
                     ablation_vector[topk_indices] = 0
-                    
                     # Compute utility without top k
                     util_without_topk = self.get_utility(tuple(ablation_vector))
-                    
                     # Calculate utility drop
                     if util_without_topk != -float('inf') and full_utility != -float('inf'):
                         drop = full_utility - util_without_topk
                     else:
                         drop = float('nan')
-                
                 elif utility_type == "divergence":
                     # Compute divergence when removing top k documents
                     drop = self.compute_jsd_for_ablated_indices(topk_indices)
-                
                 method_drops[k] = drop
-            
             evaluation_results[method_name] = method_drops
-        
         return evaluation_results
 
 def logit(p, eps=1e-7):
