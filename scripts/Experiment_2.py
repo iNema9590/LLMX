@@ -42,14 +42,15 @@ start = time.time()
 csv_path = os.path.join(f'../data/{args.dataset}.csv')
 
 df = pd.read_csv(csv_path)
-df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer", "top_k", "methods_top_k", "precision_top_k", "doc_id"])
+df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer",
+                                           "lds", "rmse", "r2",
+                                           "topk_probability", "topk_divergence"])
 print("Data Loaded!")
 
 num_questions_to_run = 100
 print(f"Running experiments for {num_questions_to_run} questions...")
 
 # Parameters
-NUM_RETRIEVED_DOCS = 10
 SEED = 42
 DATASET_NAME = f"{args.dataset}"
 PRECISION = f"{args.precision}"
@@ -66,7 +67,8 @@ accelerator_main = Accelerator(mixed_precision=PRECISION)
 if accelerator_main.is_main_process:
     print(f"Main Script: Loading model...")
 model_path = available_models[args.model_name]
-MODEL_NAME = model_path.split('/')[1]
+# MODEL_NAME = model_path.split('/')[1]
+MODEL_NAME = args.modle_name
 
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
@@ -89,6 +91,10 @@ if accelerator_main.is_main_process:
     print(f"Main Script: Model prepared and set to eval.")
 
 all_queries_data = []
+k_values = [1, 2]
+LDSs=[]
+r2s = []
+RMSEs = []
 
 for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=not accelerator_main.is_main_process):
     query = df.question.loc[i]
@@ -120,68 +126,97 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         print(f"  Instantiating ShapleyExperimentHarness for Q{i} (n={len(docs)} docs)...")
     
     # Synchronize before creating harness instance to ensure directory exists for all if utility_path is used by others
-    accelerator_main.wait_for_everyone() 
-
-    harness = ShapleyExperimentHarness(
+    # accelerator_main.wait_for_everyone() 
+    harness = ContextAttribution(
         items=docs,
         query=query,
         prepared_model_for_harness=prepared_model,
         tokenizer_for_harness=tokenizer,
         accelerator_for_harness=accelerator_main,
-        verbose=True, # Verbose can be True, but most prints inside harness are main_process guarded
-        utility_path=current_utility_path
+        utility_cache_path=current_utility_path
     )
+
+    print(f'Response: {harness.target_response}')
             
     results_for_query = {}
-    
-    top_k_docs = {}
-    for k in top_k:
-        top_k_docs[str(k)] = harness.compute_exhaustive_top_k(k)
-        
     if accelerator_main.is_main_process:
-        results_for_query["Exact"] = harness.compute_exact_shap()
+        m_samples_map = {"S": 128, "M": 256, "L": 512} # Example sample sizes
+        T_iterations_map = {"L":40}  # Example iterations
 
-        m_samples_map = {"S": 32, "M": 64, "L": 100} # Example sample sizes
-        T_iterations_map = {"S": 32, "M": 64, "L":100}  # Example iterations
+    for size_key, num_s in m_samples_map.items():
+        if 2**len(docs) < num_s and size_key != "L": # Avoid sampling more than possible, except for a default
+            actual_samples = max(1, 2**len(docs)-1 if 2**len(docs)>0 else 1) # Ensure at least 1 sample if possible
+        else:
+            actual_samples = num_s
 
-        for size_key, num_s in m_samples_map.items():
-            if 2**len(docs) < num_s and size_key != "L": # Avoid sampling more than possible, except for a default
-                actual_samples = max(1, 2**len(docs)-1 if 2**len(docs)>0 else 1) # Ensure at least 1 sample if possible
-            else:
-                actual_samples = num_s
+        if actual_samples > 0: 
+            results_for_query[f"ContextCite{actual_samples}"], model_cc = harness.compute_contextcite(num_samples=actual_samples, seed=SEED) #lasso_alpha=0.01,
+        # results_for_query[f"FM_Shap{actual_samples}"], _, F, modelfm = harness.compute_wss(num_samples=actual_samples, seed=SEED, sampling="kernelshap",sur_type="fm", k=4)
 
-            if actual_samples > 0: 
-                results_for_query[f"ContextCite{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="uniform",  seed=SEED) #lasso_alpha=0.01,
-                results_for_query[f"KernelShap{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="kernel_shap",  seed=SEED) #lasso_alpha=0.01,
-                # results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
-                results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)
-                results_for_query[f"TMC{actual_samples}"] = harness.compute_tmc_shap(num_iterations_max=T_iterations_map[size_key], performance_tolerance=0.001, max_unique_lookups=actual_samples, seed=SEED)
-        
-        results_for_query["LOO"] = harness.compute_loo()
+        # results_for_query[f"KernelShap{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="kernel_shap",  seed=SEED) #lasso_alpha=0.01,
+        # results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
+        # results_for_query[f"BetaShap (U){actual_samples}"] = harness.compute_beta_shap(num_iterations_max=T_iterations_map[size_key], beta_a=0.5, beta_b=0.5, max_unique_lookups=actual_samples, seed=SEED)
+        # results_for_query[f"TMC{actual_samples}"] = harness.compute_tmc_shap(num_iterations_max=T_iterations_map[size_key], performance_tolerance=0.001, max_unique_lookups=actual_samples, seed=SEED)
+    
+    results_for_query["LOO"] = harness.compute_loo()
+    results_for_query["ARC-JSD"] = harness.compute_arc_jsd()
 
-        exact_scores = results_for_query.get("Exact")
 
-        methods_top_k = {}
-        precision_top_k = {}
-        for k in top_k:
-            for method in results_for_query:
-                method_top_k_docs = np.argsort(-np.array(results_for_query[method]))[:k]
-                methods_top_k[method] = method_top_k_docs
-                gold_top_k_docs = top_k_docs[str(k)]
-                precision_top_k[(k, method)] = len(set.intersection(set(method_top_k_docs), set(gold_top_k_docs)))/k
+    prob_topk = harness.evaluate_topk_performance(
+                                            results_for_query, 
+                                            k_values, 
+                                            utility_type="probability"
+                                        )
 
-        df_save_results.loc[i, "query"] = query
-        df_save_results.loc[i, "top_k"] = [top_k_docs]
-        df_save_results.loc[i, "methods_top_k"] = [methods_top_k]
-        df_save_results.loc[i, "precision_top_k"] = [precision_top_k]
+    div_topk = harness.evaluate_topk_performance(
+                                        results_for_query, 
+                                        k_values, 
+                                        utility_type="divergence",
+    )
+                                    
+
+
+    # exact_scores = results_for_query.get("Exact")
+
+    LDS = []
+    r2 = []
+    RMSE = []
+    for i in results_for_query:
+        if "FM_Shap" in i:
+            calculate_LDS = {i:harness.lds(results_for_query[i], 30, utl=True, model=modelfm)}
+            calculate_r2 = {i:harness.r2(30, model=modelfm)}
+            calculate_RMSE = {i:harness.RMSE(30, model=modelfm)}
+            LDS.append(calculate_LDS)
+            r2.append(calculate_r2)
+            RMSE.append(calculate_RMSE)
+        elif "ContextCite" in i:
+            calculate_LDS = {i:harness.lds(results_for_query[i], 30)}
+            calculate_r2 = {i:harness.r2(30, model=model_cc, method="notfm")}
+            calculate_RMSE = {i:harness.RMSE(30, model=model_cc, method="notfm")}
+            LDS.append(calculate_LDS)
+            r2.append(calculate_r2)
+            RMSE.append(calculate_RMSE)
+    # #LDS = [{i:harness.lds(results_for_query[i], 30)} for i in results_for_query]
+    # LDSs.append(LDS)
+    # r2s.append(r2)
+    # RMSEs.append(RMSE)
+    df_save_results.loc[i, "query"] = query
+    df_save_results.loc[i, "lds"] = [LDS]
+    df_save_results.loc[i, "r2"] = [r2]
+    df_save_results.loc[i, "rmse"] = [RMSE]
+    df_save_results.loc[i, "topk_probability"] = prob_topk
+    df_save_results.loc[i, "topk_divergence"] = div_topk
+        # df_save_results.loc[i, "top_k"] = [top_k_docs]
+        # df_save_results.loc[i, "methods_top_k"] = [methods_top_k]
+        # df_save_results.loc[i, "precision_top_k"] = [precision_top_k]
         # print("Flags Value: ", flags)
-        df_save_results.loc[i, "doc_id"] = [[flags]]
-        df_save_results.loc[i, "context"] = [[docs]]
-        df_save_results.loc[i, "provided_answer"] = harness.target_response
+        # df_save_results.loc[i, "doc_id"] = [[flags]]
+    df_save_results.loc[i, "context"] = [[docs]]
+    df_save_results.loc[i, "provided_answer"] = harness.target_response
 
 
         #print("RESULTS FOR QUERY: ", df_save_results)
-        all_queries_data.append(precision_top_k)
+        # all_queries_data.append(precision_top_k)
     
     accelerator_main.wait_for_everyone() 
     del harness
