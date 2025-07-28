@@ -1,31 +1,30 @@
 import itertools
-# import json
+import json
 import math
 import os
 import pickle
 import random
+import warnings
+from collections import defaultdict
+from scipy.stats import spearmanr
 
 import numpy as np
 import torch
 import torch.nn.functional as F
-# import xgboost
-# from accelerate import Accelerator
+import xgboost
+from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
-# from fastFM import als
+from fastFM import als
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import Ridge
 from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
-# from sklearn.exceptions import ConvergenceWarning
-from sklearn.linear_model import Lasso, Ridge
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import PolynomialFeatures
 from tqdm.auto import tqdm
-
-# import warnings
-# from collections import defaultdict
-
-# from transformers import AutoModelForCausalLM, AutoTokenizer
-
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 class ContextAttribution:
 
@@ -80,27 +79,6 @@ class ContextAttribution:
     # Core Utility Management (On-Demand)
     # --------------------------------------------------------------------------
 
-    def get_utility(self, subset_tuple: tuple) -> float:
-        """
-        Gatekeeper for utility values. Returns from cache or computes if not present.
-        This is the primary method for on-demand computation.
-        """
-        if subset_tuple in self.utility_cache:
-            return self.utility_cache[subset_tuple]
-        
-        # If not in cache, compute it, cache it, and return it.
-        if self.verbose and self.accelerator.is_main_process:
-            # This log can be noisy, enable if debugging cache misses.
-            # print(f"Cache miss for subset {subset_tuple}. Computing utility...")
-            pass
-
-        v_np = np.array(subset_tuple)
-        context_str = self._get_ablated_context_from_vector(v_np)
-        utility = self._llm_compute_logprob(context_str=context_str)
-        
-        self.utility_cache[subset_tuple] = utility
-        return utility
-
     def save_utility_cache(self, file_path: str):
         """Saves the current state of the utility cache to a file."""
         if self.accelerator.is_main_process:
@@ -115,10 +93,6 @@ class ContextAttribution:
     # LLM Interaction Methods (The "Engine")
     # --------------------------------------------------------------------------
     
-    @staticmethod
-    def _logit(p, eps=1e-7):
-        p = torch.clamp(p, eps, 1 - eps)
-        return torch.log(p / (1 - p))
 
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 100) -> str:
         messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
@@ -139,9 +113,11 @@ class ContextAttribution:
         with torch.no_grad():
             outputs_gen = unwrapped_model.generate(
                 input_ids=input_ids, attention_mask=attention_mask, max_new_tokens=max_new_tokens,
-                do_sample=False, temperature=0,
+                do_sample=False,
+                temperature=None,
+                top_p=None,
+                top_k=None,
                 pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None else unwrapped_model.config.eos_token_id,
-                top_p=1.0,
             )
         
         if isinstance(outputs_gen, torch.Tensor): generated_ids = outputs_gen
@@ -158,139 +134,114 @@ class ContextAttribution:
         torch.cuda.empty_cache()
         return cleaned_text
 
-    def _llm_compute_logprob(self, context_str: str, response=None) -> float:
-        if response is None: response = self.target_response
-        answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
-        L = answer_ids.shape[1]
-        if L == 0: return 0.0
+    def get_utility(self, subset_tuple: tuple) -> float:
+        if subset_tuple in self.utility_cache:
+            return self.utility_cache[subset_tuple]
+        else:
+            v_np = np.array(subset_tuple)
+            context_str = self._get_ablated_context_from_vector(v_np)
+            utility = self._llm_compute_logprob(context_str=context_str)
+            
+            self.utility_cache[subset_tuple] = utility
+        return utility
 
-        sys_msg = {"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
-                    questions in few words. Avoid using your own knowledge or make assumptions."""}
-        
+
+    def _llm_compute_logprob(self, context_str: str, response=None) -> float:
+        """
+        Compute the average log-prob *gain* per answer token compared to an empty context.
+        This reduces length bias and centers the utility on the *value of the context*.
+        """
+        # Use target response if none provided
+        if response is None:
+            response = self.target_response
+
+        answer_ids = self.tokenizer(
+            response, return_tensors="pt", add_special_tokens=False
+        ).input_ids.to(self.device)
+
+        L = answer_ids.shape[1]
+        if L == 0:
+            return 0.0
+
+        sys_msg = {
+            "role": "system",
+            "content": """You are a helpful assistant. You use the provided context to answer
+                    questions in few words. Avoid using your own knowledge or make assumptions."""
+        }
+        if context_str:
+            user_msg = {"role": "user", "content": f"###context: {context_str} ###question: {self.query}"}
+        else:
+            user_msg = {"role": "user", "content": self.query}
+
+
         # --- Calculate for prompt with context ---
         prompt_with_context_str = self.tokenizer.apply_chat_template(
-            [sys_msg, {"role": "user", "content": f"###context: {context_str} ###question: {self.query}" if context_str else self.query}],
-            add_generation_prompt=True, tokenize=False
+            [sys_msg, {"role": "user", "content": f"###context: {context_str} ###question: {self.query}" if context_str else self.query}], # Handle both cases
+            add_generation_prompt=True,
+            tokenize=False
         )
-        prompt_with_context_ids = self.tokenizer(prompt_with_context_str, return_tensors="pt").input_ids.to(self.device)
-        input_ids_with_context = torch.cat([prompt_with_context_ids, answer_ids], dim=1)
+        input_ids_with_context = torch.cat(
+            [self.tokenizer(prompt_with_context_str, return_tensors="pt").input_ids.to(self.device),
+            answer_ids],
+            dim=1
+        )
         with torch.no_grad():
-            logits_with = self.model(input_ids=input_ids_with_context).logits
-        
+            logits_model_output_with = self.model(input_ids=input_ids_with_context).logits
+
         prompt_len_with = input_ids_with_context.shape[1] - L
-        shift_logits_with = logits_with[..., prompt_len_with-1:-1, :].contiguous()
-        answer_log_probs_with = torch.gather(F.log_softmax(shift_logits_with, dim=-1), 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        # Extract logits corresponding to the answer tokens
+        shift_logits_with = logits_model_output_with[..., prompt_len_with-1:-1, :].contiguous()
+        log_probs_tokens_with = F.log_softmax(shift_logits_with, dim=-1)
+        # Gather log_probs of actual answer tokens
+        answer_log_probs_with = torch.gather(log_probs_tokens_with, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
         total_log_prob_with = answer_log_probs_with.sum()
-
         # --- Calculate for prompt with empty context ---
-        prompt_empty_context_str = self.tokenizer.apply_chat_template(
-            [sys_msg, {"role": "user", "content": self.query}], add_generation_prompt=True, tokenize=False
-        )
-        prompt_empty_context_ids = self.tokenizer(prompt_empty_context_str, return_tensors="pt").input_ids.to(self.device)
-        input_ids_empty_context = torch.cat([prompt_empty_context_ids, answer_ids], dim=1)
-        with torch.no_grad():
-            logits_empty = self.model(input_ids=input_ids_empty_context).logits
+        # prompt_empty_context_str = self.tokenizer.apply_chat_template(
+        #     [sys_msg, {"role": "user", "content": self.query}], # Query only
+        #     add_generation_prompt=True,
+        #     tokenize=False
+        # )
+        # input_ids_empty_context = torch.cat(
+        #     [self.tokenizer(prompt_empty_context_str, return_tensors="pt").input_ids.to(self.device),
+        #     answer_ids],
+        #     dim=1
+        # )
+        # with torch.no_grad():
+        #     logits_model_output_empty = self.model(input_ids=input_ids_empty_context).logits
 
-        prompt_len_empty = input_ids_empty_context.shape[1] - L
-        shift_logits_empty = logits_empty[..., prompt_len_empty-1:-1, :].contiguous()
-        answer_log_probs_empty = torch.gather(F.log_softmax(shift_logits_empty, dim=-1), 2, answer_ids.unsqueeze(-1)).squeeze(-1)
-        total_log_prob_empty = answer_log_probs_empty.sum()
+        # prompt_len_empty = input_ids_empty_context.shape[1] - L
+        # shift_logits_empty = logits_model_output_empty[..., prompt_len_empty-1:-1, :].contiguous()
+        # log_probs_tokens_empty = F.log_softmax(shift_logits_empty, dim=-1)
+        # answer_log_probs_empty = torch.gather(log_probs_tokens_empty, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        # total_log_prob_empty = answer_log_probs_empty.sum() # This is log(P_empty)
+
+        # --- Calculate probabilities and logits ---
+        # Probability of the answer given the context
+        prob_with = torch.exp(total_log_prob_with)
+        # Probability of the answer given empty context
+        # prob_empty = torch.exp(total_log_prob_empty)
+
+        # Logit of the probability of the answer given the context
+        logit_with = logit(prob_with)
+        # Logit of the probability of the answer given empty context
+        # logit_empty = logit(prob_empty)
 
         # --- Calculate logit gain ---
-        logit_gain_total = self._logit(torch.exp(total_log_prob_with)) - self._logit(torch.exp(total_log_prob_empty))
-        logit_gain_per_token = logit_gain_total / L
+        # The gain on the logit scale
+        logit_gain_total = logit_with
 
-        del logits_with, logits_empty, shift_logits_with, shift_logits_empty, answer_log_probs_with, answer_log_probs_empty
+        # Clean up (important for long loops in CONTEXTCITE)
+        # del logits_model_output_with, logits_model_output_empty, shift_logits_with, shift_logits_empty
+        # del log_probs_tokens_with, log_probs_tokens_empty, answer_log_probs_with, answer_log_probs_empty
+        # del total_log_prob_with, total_log_prob_empty, prob_with, prob_empty, logit_with, logit_empty
         torch.cuda.empty_cache()
-        return logit_gain_per_token.item()
+        return logit_gain_total.item()
+        
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
         if len(v_np) != self.n_items: raise ValueError("Ablation vector length mismatch")
         included_items = [self.items[i] for i, include in enumerate(v_np) if include == 1]
         return "\n\n".join(included_items)
-
-    # --------------------------------------------------------------------------
-    # Exhaustive Attribution Methods (Use with Extreme Caution)
-    # --------------------------------------------------------------------------
-    
-    def _calculate_exact_shapley(self) -> np.ndarray:
-        """
-        Computes exact Shapley values by evaluating all 2^n subsets.
-        WARNING: Incredibly slow. Triggers n * 2^(n-1) on-demand utility calls.
-        Only use for very small n (e.g., n < 12).
-        """
-        if not (self.verbose and self.accelerator.is_main_process):
-            # This calculation should likely only be run on the main process
-            # to avoid redundant (and slow) computations.
-            return np.zeros(self.n_items)
-
-        shapley_values = np.zeros(self.n_items)
-        n = self.n_items
-        all_subsets = list(itertools.product([0, 1], repeat=n))
-        
-        pbar_desc = "Calculating Exact Shapley (SLOW)"
-        pbar = tqdm(all_subsets, desc=pbar_desc, disable=not self.verbose)
-
-        for s_tuple in pbar:
-            s_size = sum(s_tuple)
-            s_util = self.get_utility(s_tuple)
-            
-            if s_util == -float('inf'): continue
-            
-            for i in range(n):
-                if s_tuple[i] == 1: # Marginal contribution of i to S\{i}
-                    s_without_i_list = list(s_tuple); s_without_i_list[i] = 0
-                    s_without_i_tuple = tuple(s_without_i_list)
-                    s_without_i_util = self.get_utility(s_without_i_tuple)
-                    
-                    marginal_contrib = s_util - s_without_i_util
-                    weight = (self._factorials[s_size - 1] * self._factorials[n - s_size]) / self._factorials[n]
-                    shapley_values[i] += weight * marginal_contrib
-                    
-        return shapley_values
-
-    def compute_shapley_interaction_index_pairs_matrix(self):
-        """
-        Computes the full matrix of pairwise Shapley interaction indices.
-        WARNING: Very slow. This will trigger on-demand utility calls for all
-        subsets relevant to each pair.
-        """
-        if not self.accelerator.is_main_process: return np.zeros((self.n_items, self.n_items))
-
-        n = self.n_items
-        interaction_matrix = np.zeros((n, n), dtype=float)
-        item_indices = list(range(n))
-        pbar_pairs = tqdm(list(itertools.combinations(item_indices, 2)), desc="Pairwise Interactions (SLOW)", disable=not self.verbose)
-
-        for i, j in pbar_pairs:
-            interaction_sum = 0.0
-            remaining_indices = [idx for idx in item_indices if idx != i and idx != j]
-            
-            for s_size in range(len(remaining_indices) + 1):
-                for s_members_indices in itertools.combinations(remaining_indices, s_size):
-                    v_S_np = np.zeros(n, dtype=int)
-                    if s_members_indices: v_S_np[list(s_members_indices)] = 1
-                    
-                    v_S_union_i_np = v_S_np.copy(); v_S_union_i_np[i] = 1
-                    v_S_union_j_np = v_S_np.copy(); v_S_union_j_np[j] = 1
-                    v_S_union_ij_np = v_S_np.copy(); v_S_union_ij_np[i] = 1; v_S_union_ij_np[j] = 1
-
-                    util_S = self.get_utility(tuple(v_S_np))
-                    util_S_i = self.get_utility(tuple(v_S_union_i_np))
-                    util_S_j = self.get_utility(tuple(v_S_union_j_np))
-                    util_S_ij = self.get_utility(tuple(v_S_union_ij_np))
-
-                    delta_ij_S = util_S_ij - util_S_i - util_S_j + util_S
-                    
-                    if n > 2:
-                        weight = (self._factorials[s_size] * self._factorials[n - s_size - 2]) / self._factorials[n - 1]
-                    else: # n=2
-                        weight = 1.0
-
-                    interaction_sum += weight * delta_ij_S
-
-            interaction_matrix[i, j] = interaction_matrix[j, i] = interaction_sum
-        return interaction_matrix
 
     # --------------------------------------------------------------------------
     # Sampling and Approximation Methods (Efficient)
@@ -373,122 +324,200 @@ class ContextAttribution:
             print("Warning: No valid utilities could be computed for ContextCite. Returning empty weights.")
             return np.array([])
 
-        _, weights, _, mse = self._train_surrogate(
+        model, weights, _ = self._train_surrogate(
             sampled_tuples_for_train, 
             utilities_for_train,
             sur_type="linear"
         )
-        return weights
+        return weights, model
 
     def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm"):
-        """Computes Weighted Subset Sampling (WSS) attributions using a surrogate model."""
-        if not self.accelerator.is_main_process: return None, None, None
+        """
+        Computes Weighted Subset Sampling (WSS) attributions using a surrogate model.
+        Returns: (shapley_values, attr, F, model, mse)
+        """
+        if not self.accelerator.is_main_process: 
+            return (np.zeros(self.n_items), np.zeros(self.n_items), None, None, 0.0)
         
+        # Generate subsets and compute utilities
         sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
-        
         pbar = tqdm(sampled_tuples, desc=f"Computing utilities for WSS ({sampling})", disable=not self.verbose)
         utilities_for_samples = [self.get_utility(v_tuple) for v_tuple in pbar]
 
+        # Filter invalid utilities
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
         sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
         utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
 
-        _, attr, F, mse = self._train_surrogate(sampled_tuples_for_train, utilities_for_train, sur_type=sur_type)
-        return attr, F, mse
-    
-    def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
-                        max_unique_lookups: int, seed: int = None):
+        # Train surrogate model
+        model, attr, F = self._train_surrogate(
+            sampled_tuples_for_train, 
+            utilities_for_train, 
+            sur_type=sur_type
+        )
+        
+        # # Generate all possible subsets (2^n)
+        # all_subsets = list(itertools.product([0, 1], repeat=self.n_items))
+        # X_all = np.array(all_subsets)
+        
+        # # Predict utilities for all subsets using surrogate
+        # if sur_type == "fm":
+        #     X_all_sparse = csr_matrix(X_all)
+        #     predicted_utilities = model.predict(X_all_sparse)
+        # else:  # linear or full_poly2
+        #     predicted_utilities = model.predict(X_all)
+        
+        # # Compute exact Shapley values using predicted utilities
+        # utility_dict = dict(zip(all_subsets, predicted_utilities))
+        # shapley_values = np.zeros(self.n_items)
+        
+        # # Iterate through all subsets
+        # for s_tuple in all_subsets:
+        #     s_size = sum(s_tuple)
+        #     s_util = utility_dict[s_tuple]
+            
+        #     for i in range(self.n_items):
+        #         if s_tuple[i] == 1:
+        #             # Create subset without item i
+        #             s_without_i_list = list(s_tuple)
+        #             s_without_i_list[i] = 0
+        #             s_without_i_tuple = tuple(s_without_i_list)
+                    
+        #             s_without_i_util = utility_dict.get(s_without_i_tuple, 0.0)
+        #             marginal_contrib = s_util - s_without_i_util
+                    
+        #             # Calculate Shapley weight
+        #             weight = (self._factorials[s_size - 1] * self._factorials[self.n_items - s_size]) / self._factorials[self.n_items]
+        #             shapley_values[i] += weight * marginal_contrib
+        
+        return attr, F, model
 
+    def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
+                        max_unique_lookups: int, seed: int = None, 
+                        shared_cache: dict = None):
+        """
+        Computes Shapley values using Truncated Monte Carlo sampling.
+        
+        This version uses a provided shared_cache to store and retrieve utilities,
+        and manages its own lookup budget independently of the cache's total size.
+        It runs on the main process.
+        """
+        if not self.accelerator.is_main_process:
+            return np.zeros(self.n_items)
             
         if seed is not None:
             random.seed(seed)
             np.random.seed(seed)
+            
+        # Use the provided shared cache or the instance's own cache if none is given.
+        cache = shared_cache if shared_cache is not None else self.utility_cache
+        
+        # This method's own counter for its budget.
+        lookups_made_by_this_call = 0
 
         shapley_values = np.zeros(self.n_items)
         marginal_counts = np.zeros(self.n_items, dtype=int)
         
-        # On-demand call for empty and full sets, which are crucial for truncation.
-        # This also populates the cache for the first lookups.
-        v_empty_util = self.get_utility(tuple([0] * self.n_items))
-        v_full_util = self.get_utility(tuple([1] * self.n_items))
+        # Nested function to handle on-demand utility calls while tracking budget.
+        def get_utility_with_budget(subset_tuple):
+            nonlocal lookups_made_by_this_call
+            # Always return from cache if available, without penalty to budget.
+            if subset_tuple in cache:
+                return cache[subset_tuple]
+                
+            # If not in cache, check if we have budget to compute it.
+            if lookups_made_by_this_call >= max_unique_lookups:
+                return -float('inf') # Budget exceeded, return failure.
+            
+            # Compute, cache, increment budget counter, and return.
+            utility = self._llm_compute_logprob(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)))
+            cache[subset_tuple] = utility
+            lookups_made_by_this_call += 1
+            return utility
+
+        v_empty_util = get_utility_with_budget(tuple([0] * self.n_items))
+        v_full_util = get_utility_with_budget(tuple([1] * self.n_items))
         
-        # Check for fatal errors in endpoint utilities needed for truncation.
-        truncation_possible = v_empty_util != -float('inf') and v_full_util != -float('inf')
-        if not truncation_possible and self.verbose:
-            print("  Warning: Truncation disabled because utility for empty or full set failed.")
+        truncation_possible = v_empty_util > -float('inf') and v_full_util > -float('inf')
 
         indices = list(range(self.n_items))
         pbar = tqdm(range(num_iterations_max), desc="TMC Iterations (Corrected)", disable=not self.verbose)
         
         for t in pbar:
-            if len(self.utility_cache) >= max_unique_lookups:
-                if self.verbose:
-                    print(f"Stopping TMC at iteration {t+1} due to lookup budget ({max_unique_lookups}).")
+            if lookups_made_by_this_call >= max_unique_lookups:
+                if self.verbose: print(f"TMC: Budget of {max_unique_lookups} lookups reached.")
+                pbar.close()
                 break 
-
+                
             permutation = random.sample(indices, self.n_items)
             v_prev_util = v_empty_util
             current_subset_np = np.zeros(self.n_items, dtype=int) 
 
             for item_idx_to_add in permutation:
-                # Check if we can truncate the rest of this permutation
-                can_truncate = t > 0 and truncation_possible and (abs(v_full_util - v_prev_util) < performance_tolerance)
-                
-                if can_truncate:
-                    # If we truncate, the utility is assumed not to change from the previous step.
-                    # The marginal contribution is therefore 0.
-                    v_curr_util = v_prev_util
+                # If the chain has already failed (e.g., v_prev_util is -inf), no point continuing.
+                if v_prev_util == -float('inf'):
+                    marginal_contribution = 0.0 # Cannot compute a valid marginal.
+                    v_curr_util = -float('inf') # The chain remains broken.
                 else:
-                    # If not truncating, compute the utility for the new subset on-demand.
-                    v_curr_np = current_subset_np.copy() 
-                    v_curr_np[item_idx_to_add] = 1
-                    v_curr_util = self.get_utility(tuple(v_curr_np))
+                    can_truncate = t > 0 and truncation_possible and (abs(v_full_util - v_prev_util) < performance_tolerance)
+                    if can_truncate:
+                        v_curr_util = v_prev_util
+                    else:
+                        v_curr_np = current_subset_np.copy(); v_curr_np[item_idx_to_add] = 1
+                        v_curr_util = get_utility_with_budget(tuple(v_curr_np))
+                    
+                    marginal_contribution = v_curr_util - v_prev_util if v_curr_util > -float('inf') else 0.0
                 
-                # Calculate marginal contribution if utilities are valid
-                marginal_contribution = 0.0
-                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
-                    marginal_contribution = v_curr_util - v_prev_util
-                
-                # Update the running average for the current item's Shapley value
                 k_count = marginal_counts[item_idx_to_add] + 1
-                shapley_values[item_idx_to_add] = ((k_count - 1) / k_count) * shapley_values[item_idx_to_add] + \
-                                                (1 / k_count) * marginal_contribution
+                shapley_values[item_idx_to_add] = ((k_count - 1) / k_count) * shapley_values[item_idx_to_add] + (1 / k_count) * marginal_contribution
                 marginal_counts[item_idx_to_add] = k_count
                 
-                # CRITICAL: Update state for the next step in the permutation
-                v_prev_util = v_curr_util 
+                # CRITICAL: Update state for the next step in the permutation.
+                v_prev_util = v_curr_util
                 current_subset_np[item_idx_to_add] = 1
         
-        pbar.close()
         return shapley_values
 
     def compute_beta_shap(self, num_iterations_max: int, beta_a: float, beta_b: float, 
-                        max_unique_lookups: int, seed: int = None):
+                        max_unique_lookups: int, seed: int = None,
+                        shared_cache: dict = None):
+        """
+        Computes Shapley values using BetaShap sampling. This version uses a
+        provided shared cache and manages its own lookup budget. It runs on the main process.
+        """
         if not self.accelerator.is_main_process:
             return np.zeros(self.n_items)
             
-        if beta_dist is None:
-            raise ImportError("BetaShap requires scipy. `pip install scipy`")
+        if beta_dist is None: raise ImportError("BetaShap requires scipy.")
+        if seed is not None: random.seed(seed); np.random.seed(seed)
             
-        if seed is not None:
-            random.seed(seed)
-            np.random.seed(seed)
+        cache = shared_cache if shared_cache is not None else self.utility_cache
+        lookups_made_by_this_call = 0
 
         weighted_marginal_sums = np.zeros(self.n_items)
         total_weights_for_item = np.zeros(self.n_items)
         
-        # On-demand call for the empty set utility. This is the crucial first step.
-        v_empty_util = self.get_utility(tuple([0] * self.n_items))
-        if v_empty_util == -float('inf') and self.verbose:
-            print("  FATAL WARNING for BetaShap: Utility of the empty set failed. All marginals will be invalid.")
+        def get_utility_with_budget(subset_tuple):
+            nonlocal lookups_made_by_this_call
+            if subset_tuple in cache: return cache[subset_tuple]
+            if lookups_made_by_this_call >= max_unique_lookups: return -float('inf')
             
+            utility = self._llm_compute_logprob(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)))
+            cache[subset_tuple] = utility
+            lookups_made_by_this_call += 1
+            return utility
+
+        v_empty_util = get_utility_with_budget(tuple([0] * self.n_items))
+        if v_empty_util == -float('inf') and self.verbose:
+            print("BetaShap Warning: Utility of empty set is -inf. This may lead to zero scores.")
+
         indices = list(range(self.n_items))
-        pbar = tqdm(range(num_iterations_max), desc="BetaShap Iterations (Fortified)", disable=not self.verbose)
+        pbar = tqdm(range(num_iterations_max), desc="BetaShap Iterations (Corrected)", disable=not self.verbose)
         
         for t in pbar:
-            if len(self.utility_cache) >= max_unique_lookups:
-                if self.verbose:
-                    print(f"Stopping BetaShap at iteration {t+1} due to lookup budget ({max_unique_lookups}).")
+            if lookups_made_by_this_call >= max_unique_lookups:
+                if self.verbose: print(f"BetaShap: Budget of {max_unique_lookups} lookups reached.")
+                pbar.close()
                 break
 
             permutation = random.sample(indices, self.n_items)
@@ -496,47 +525,37 @@ class ContextAttribution:
             current_subset_np = np.zeros(self.n_items, dtype=int)
 
             for k, item_idx_to_add in enumerate(permutation):
-                # Form the new subset by adding the item
-                v_curr_np = current_subset_np.copy()
-                v_curr_np[item_idx_to_add] = 1
+                # If the chain has already failed, break from this permutation.
+                if v_prev_util == -float('inf'):
+                    break
+
+                v_curr_np = current_subset_np.copy(); v_curr_np[item_idx_to_add] = 1
+                v_curr_util = get_utility_with_budget(tuple(v_curr_np))
                 
-                # On-demand call to get the utility for the new subset
-                v_curr_util = self.get_utility(tuple(v_curr_np))
-                
-                # Calculate the Beta distribution weight
-                if self.n_items > 1:
-                    x_pos = k / (self.n_items - 1)
-                else: # Avoid division by zero for n=1
-                    x_pos = 0.5
-                
-                try:
-                    weight = beta_dist.pdf(x_pos, beta_a, beta_b)
-                    if not np.isfinite(weight):
-                        weight = 1e6 # Use a large, stable weight if PDF is infinite (e.g., at boundaries)
-                except Exception:
-                    weight = 1.0 # Fallback weight
-                
-                # Only update sums if the marginal contribution is valid
-                if v_curr_util != -float('inf') and v_prev_util != -float('inf'):
+                # Only proceed if the new utility is valid
+                if v_curr_util > -float('inf'):
                     marginal_contribution = v_curr_util - v_prev_util
+                    
+                    # Calculate Beta weight
+                    if self.n_items > 1: x_pos = k / (self.n_items - 1)
+                    else: x_pos = 0.5
+                    
+                    try:
+                        weight = beta_dist.pdf(x_pos, beta_a, beta_b)
+                        if not np.isfinite(weight): weight = 1e6 # Use large stable weight if PDF is infinite
+                    except Exception: weight = 1.0 # Fallback
+                    
                     weighted_marginal_sums[item_idx_to_add] += weight * marginal_contribution
                     total_weights_for_item[item_idx_to_add] += weight
-                    if self.verbose and t < 2 and k < 5: # Log first few steps of first two iterations
-                        print(f"  [Iter {t+1}, Step {k+1}] item {item_idx_to_add}: "
-                            f"V(S U i)={v_curr_util:.3f}, V(S)={v_prev_util:.3f}, "
-                            f"Marginal={marginal_contribution:.3f}, Weight={weight:.3f}")
                 
-                # Update state for the next step in the permutation
                 v_prev_util = v_curr_util
-                current_subset_np = v_curr_np
+                current_subset_np[item_idx_to_add] = 1
                 
         pbar.close()
         
-        # Calculate the final Shapley values
         shapley_values = np.zeros(self.n_items)
-        # Avoid division by zero
-        non_zero_weights_mask = total_weights_for_item > 1e-9
-        shapley_values[non_zero_weights_mask] = weighted_marginal_sums[non_zero_weights_mask] / total_weights_for_item[non_zero_weights_mask]
+        non_zero_mask = total_weights_for_item > 1e-9
+        shapley_values[non_zero_mask] = weighted_marginal_sums[non_zero_mask] / total_weights_for_item[non_zero_mask]
 
         return shapley_values
 
@@ -571,26 +590,23 @@ class ContextAttribution:
         if sur_type == "linear":
             model = Lasso(alpha=alpha, fit_intercept=True, random_state=42, max_iter=2000)
             model.fit(X_train, y_train)
-            y_pred = model.predict(X_train)
-            return model, model.coef_, None, mean_squared_error(y_train, y_pred)
+            return model, model.coef_, None
         
-        # elif sur_type == "fm":
-        #     X_train_fm = csr_matrix(X_train)
-        #     model = als.FMRegression(n_iter=100, rank=4, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
-        #     model.fit(X_train_fm, y_train)
-        #     y_pred = model.predict(X_train_fm)
-        #     w, V = model.w_, model.V_.T
-        #     F = V @ V.T
-        #     np.fill_diagonal(F, 0.0)
-        #     attr = w + 0.5 * F.sum(axis=1)
-        #     return model, attr, F, mean_squared_error(y_train, y_pred)
+        elif sur_type == "fm":
+            X_train_fm = csr_matrix(X_train)
+            model = als.FMRegression(n_iter=100, rank=3, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
+            model.fit(X_train_fm, y_train)
+            w, V = model.w_, model.V_.T
+            F = V @ V.T
+            np.fill_diagonal(F, 0.0)
+            attr = w + 0.5 * F.sum(axis=1)
+            return model, attr, F
         
         elif sur_type == "full_poly2":
             poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
             X_poly = poly.fit_transform(X_train)
             model = Ridge(alpha=0.01, fit_intercept=True) # Small alpha for stability
             model.fit(X_poly, y_train)
-            y_pred = model.predict(X_poly)
             
             n = X_train.shape[1]
             linear, pairs = model.coef_[:n], np.zeros((n, n))
@@ -600,7 +616,7 @@ class ContextAttribution:
                     pairs[i, j] = pairs[j, i] = model.coef_[idx]
                     idx += 1
             importance = linear + 0.5 * pairs.sum(axis=1)
-            return model, importance, pairs, mean_squared_error(y_train, y_pred)
+            return model, importance, pairs
         
     def _get_response_token_distributions(self, context_str: str, response: str) -> torch.Tensor:
         """
@@ -724,180 +740,149 @@ class ContextAttribution:
         if pbar:
             pbar.close()
         
-        return jsd_scores
-
-    def llm_evaluation(self, gold_answer,embedder=None, metric="cosine", model=None, tokenizer=None):
-        if metric=="cosine":
-            return cosine_similarity(embedder.encode([gold_answer], convert_to_numpy=True), embedder.encode([self.target_response], convert_to_numpy=True))
-        elif metric=="logprob":
-            return self._llm_compute_logprob(context_str="\n\n".join(self.items), response=gold_answer)
-        elif metric=="llm_judge":
-            prompt = """
-                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), 
-                and the other is a generated answer produced by another language model.Your goal is to determine if 
-                the generated answer matches the ground truth in meaning and factual accuracy. Respond in the following strict JSON format:
-                {{
-                "evaluation": "Yes" or "No",
-                "explanation": "Short, clear explanation of your judgment"
-                }}
-                Evaluation Criteria:
-                - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
-                - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
-                Be concise in your explanation. Do not add any content outside the JSON structure.
-                ---
-                Example 1
-                Question: What is the capital of France?  
-                Ground Truth Answer: Paris is the capital of France.  
-                Generated Answer: The capital of France is Paris.  
-                Response:
-                {{
-                "evaluation": "Yes",
-                "explanation": "The generated answer is semantically identical and factually correct."
-                }}
-                
-                Example 2
-                Question: What is the capital of France?  
-                Ground Truth Answer: Paris is the capital of France.  
-                Generated Answer: The capital of France is Marseille.  
-                Response:
-                {{
-                "evaluation": "No",
-                "explanation": "Marseille is not the capital of France; this is a factual error."
-                }}
-                
-                Example 3
-                Question: Who wrote *Pride and Prejudice*?  
-                Ground Truth Answer: Jane Austen  
-                Generated Answer: Charlotte Bronte wrote *Pride and Prejudice*.  
-                Response:
-                {{
-                "evaluation": "No",
-                "explanation": "The generated answer misattributes the author, which is factually incorrect."
-                }}
-                
-                Example 4
-                Question: What is the boiling point of water at sea level in Celsius?  
-                Ground Truth Answer: 100C  
-                Generated Answer: Around 100 degrees Celsius.  
-                Response:
-                {{
-                "evaluation": "Yes",
-                "explanation": "The generated answer approximates the correct value and preserves the meaning."
-                }}
-                
-                Be strict and unbiased. Always follow the exact JSON format.
-                """
-            messages = [{"role": "system", "content": """
-                You are an impartial evaluator. Your task is to compare two responses: one is a ground truth answer (ideal answer), 
-                and the other is a generated answer produced by another language model.Your goal is to determine if 
-                the generated answer matches the ground truth in meaning and factual accuracy. Respond in the following strict JSON format:
-                {
-                "evaluation": "Yes" or "No",
-                "explanation": "Short, clear explanation of your judgment"
-                }
-                Evaluation Criteria:
-                - Respond "Yes" if the generated answer expresses the same meaning as the ground truth and has no critical factual errors, omissions, or contradictions.
-                - Respond "No" if the generated answer changes the meaning, omits important details, introduces factual inaccuracies, or contradicts the ground truth.
-                Be concise in your explanation. Do not add any content outside the JSON structure.
-                ---
-                Example 1
-                Question: What is the capital of France?  
-                Ground Truth Answer: Paris is the capital of France.  
-                Generated Answer: The capital of France is Paris.  
-                Response:
-                {
-                "evaluation": "Yes",
-                "explanation": "The generated answer is semantically identical and factually correct."
-                }
-                
-                Example 2
-                Question: What is the capital of France?  
-                Ground Truth Answer: Paris is the capital of France.  
-                Generated Answer: The capital of France is Marseille.  
-                Response:
-                {
-                "evaluation": "No",
-                "explanation": "Marseille is not the capital of France; this is a factual error."
-                }
-                
-                Example 3
-                Question: Who wrote *Pride and Prejudice*?  
-                Ground Truth Answer: Jane Austen  
-                Generated Answer: Charlotte Bronte wrote *Pride and Prejudice*.  
-                Response:
-                {
-                "evaluation": "No",
-                "explanation": "The generated answer misattributes the author, which is factually incorrect."
-                }
-                
-                Example 4
-                Question: What is the boiling point of water at sea level in Celsius?  
-                Ground Truth Answer: 100C  
-                Generated Answer: Around 100 degrees Celsius.  
-                Response:
-                {
-                "evaluation": "Yes",
-                "explanation": "The generated answer approximates the correct value and preserves the meaning."
-                }
-                
-                Be strict and unbiased. Always follow the exact JSON format.
-                """
-                }]
-                
-            prompt2 = f"""You are a strict evaluator comparing two responses. 
-            Question: {self.query}
-            Ground Truth Answer: {gold_answer}
-            Generated Answer: {self.target_response}
-
-            Now generate response in the defined format."""
+        return np.array(jsd_scores)
+    
+    def compute_jsd_for_ablated_indices(self, ablated_indices):
+        """
+        Computes total JSD when removing specific documents
+        
+        Args:
+            ablated_indices: List of document indices to remove
             
-            messages.append({"role": "user", "content": f"You are a strict evaluator comparing two responses. Question: {self.query} \
-            Ground Truth Answer: {gold_answer} Generated Answer: {self.target_response} Now generate response in the defined format."})
-            
-            chat_text = tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True, tokenize=False)
-            tokenized = tokenizer(chat_text, return_tensors="pt", padding=True)
-            input_ids = tokenized["input_ids"].to(self.device)
-            attention_mask = tokenized["attention_mask"].to(self.device)
-            unwrapped_model = self.accelerator.unwrap_model(model)
-            generated_ids = None # Initialize
-            outputs_dict = None # Initialize for potential outputs if model returns dict
+        Returns:
+            Total JSD between full context and context without specified documents
+        """
+        # Create ablated context by removing specified documents
+        ablated_items = [item for j, item in enumerate(self.items) if j not in ablated_indices]
+        ablated_context_str = "\n\n".join(ablated_items)
+        
+        # Get baseline distributions (full context)
+        full_context_str = "\n\n".join(self.items)
+        baseline_distributions = self._get_response_token_distributions(
+            context_str=full_context_str,
+            response=self.target_response
+        )
+        
+        # Get distributions for ablated context
+        ablated_distributions = self._get_response_token_distributions(
+            context_str=ablated_context_str,
+            response=self.target_response
+        )
 
-            with torch.no_grad():
-                outputs = unwrapped_model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                max_new_tokens=60,
-                do_sample=False,
-                pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None \
-                             else unwrapped_model.config.eos_token_id,
-                top_p=1.0,
-                )
+        total_jsd = 0.0
+        # Sum JSD scores over all tokens
+        if ablated_distributions.nelement() > 0:
+            for token_idx in range(len(baseline_distributions)):
+                p = baseline_distributions[token_idx]
+                q = ablated_distributions[token_idx]
+                token_jsd = self._jensen_shannon_divergence(p, q)
+                total_jsd += token_jsd
                 
-                # Tokenize and run generation
-                #inputs = tokenizer(prompt, return_tensors="pt").to(self.device)
-                #with torch.no_grad():
-                #    outputs = model.generate(
-                #        **inputs,
-                #        max_new_tokens=50,
-                #        do_sample=False,
-                #        pad_token_id=tokenizer.eos_token_id
-                #    )
-                len_prompt = len(prompt)+len(prompt2)+5
-                decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)[len_prompt:]
-                cleaned_text = decoded_output.lstrip().removeprefix("assistant").lstrip(": \n").strip().lower()
-                if '"evaluation": "yes"' in cleaned_text:
-                    return True
-                else:
-                    return False
-                #evaluation = json.loads(cleaned_text)["evaluation"]
-                
-                #return evaluation
-                
-                
-                # Decode and extract model reply
-                #decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
-                #model_reply = decoded_output[len(prompt):].strip().lower()
-                #model_reply = decoded_output.strip().lower()
+        return total_jsd
+    
+    def lds(self, attributions, n_eval_util, utl=False, model=None):
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        X_all = np.array(eval_subsets)
+        exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
+        X_all_sparse = csr_matrix(X_all)
+        # Predict effects for all subsets using surrogates
+        if utl:
+            predicted_effect=model.predict(X_all_sparse)
+        else:
+            predicted_effect=[np.dot(attributions, i) for i in X_all]
 
-                #return model_reply
+        # Calculate Spearman correlation
+        spearman, _ = spearmanr(exact_utilities, predicted_effect)
+        return spearman
+    
+    def r2(self, n_eval_util, model, method='fm'):
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        X_all = np.array(eval_subsets)
+        exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
+        X_all_sparse = csr_matrix(X_all)
+        if method=='fm':     
+            predicted_effect=model.predict(X_all_sparse)
+        else:
+            predicted_effect=model.predict(X_all)
+        r2 = r2_score(exact_utilities, predicted_effect)
+        return r2
+
+    def compute_exhaustive_top_k(self, k: int):
+        n = self.n_items
+        best_k_indices_to_remove = None
+        min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
+
+        possible_indices_to_remove = list(itertools.combinations(range(n), k))
+        
+        pbar_desc = f"Exhaustive Top-{k} Search"
+        pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
+
+        for k_indices_tuple in pbar_iter:
+            ablated_set_np = np.ones(n, dtype=int)
+            ablated_set_np[list(k_indices_tuple)] = 0
+            ablated_set_tuple = tuple(ablated_set_np)
+
+            utility_of_ablated_set = self.get_utility(ablated_set_tuple)
+
+            if utility_of_ablated_set < min_utility_after_removal:
+                min_utility_after_removal = utility_of_ablated_set
+                best_k_indices_to_remove = k_indices_tuple
+
+        return best_k_indices_to_remove
+
+
+    def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability"):
+        """
+        Evaluates top-k attribution performance using either:
+        1) Probability utility (logit gain difference)
+        2) Divergence utility (ARC-JSD difference)
+        """
+        n_docs = self.n_items
+        evaluation_results = {}
+        # Get full context utility based on type
+        if utility_type == "probability":
+            full_utility = self.get_utility(tuple([1] * n_docs))
+        elif utility_type == "divergence":
+            # Full context has zero divergence by definition
+            full_utility = 0.0
+        else:
+            raise ValueError("Invalid utility_type. Choose 'probability' or 'divergence'")
+        for method_name, scores in results_dict.items():
+            # Skip non-attribution results
+            method_drops = {}
+            for k in k_values:
+                if k > n_docs:
+                    continue
+                # Get indices of top k documents
+                # if "FM" in method_name:
+                #     topk_indices=self.compute_exhaustive_top_k(k)
+                # else:
+                topk_indices = np.argsort(scores)[-k:]
+                # Ensure topk_indices is a 1-dimensional array of integers
+                # If topk_indices could be a scalar for k=1 or similar, convert it to an array
+                if not isinstance(topk_indices, np.ndarray):
+                    topk_indices = np.array([topk_indices])
+                elif topk_indices.ndim > 1:
+                    topk_indices = topk_indices.flatten()
+                if utility_type == "probability":
+                    # Create ablation vector without top k
+                    ablation_vector = np.ones(n_docs, dtype=int)
+                    ablation_vector[topk_indices] = 0
+                    # Compute utility without top k
+                    util_without_topk = self.get_utility(tuple(ablation_vector))
+                    # Calculate utility drop
+                    if util_without_topk != -float('inf') and full_utility != -float('inf'):
+                        drop = full_utility - util_without_topk
+                    else:
+                        drop = float('nan')
+                elif utility_type == "divergence":
+                    # Compute divergence when removing top k documents
+                    drop = self.compute_jsd_for_ablated_indices(topk_indices)
+                method_drops[k] = drop
+            evaluation_results[method_name] = method_drops
+        return evaluation_results
+
+def logit(p, eps=1e-7):
+    """Safe logit calculation with clamping to avoid numerical instability"""
+    p = torch.clamp(p, eps, 1 - eps)
+    return torch.log(p / (1 - p))
