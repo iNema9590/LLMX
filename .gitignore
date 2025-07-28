@@ -1,6 +1,6 @@
 __pycache__/
 google-credentials.json
 .git-credentials
-wisefood.ipynb
 data
 Experiment_data
+wisefood

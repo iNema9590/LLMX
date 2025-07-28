@@ -196,44 +196,44 @@ class ContextAttribution:
         answer_log_probs_with = torch.gather(log_probs_tokens_with, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
         total_log_prob_with = answer_log_probs_with.sum()
         # --- Calculate for prompt with empty context ---
-        prompt_empty_context_str = self.tokenizer.apply_chat_template(
-            [sys_msg, {"role": "user", "content": self.query}], # Query only
-            add_generation_prompt=True,
-            tokenize=False
-        )
-        input_ids_empty_context = torch.cat(
-            [self.tokenizer(prompt_empty_context_str, return_tensors="pt").input_ids.to(self.device),
-            answer_ids],
-            dim=1
-        )
-        with torch.no_grad():
-            logits_model_output_empty = self.model(input_ids=input_ids_empty_context).logits
+        # prompt_empty_context_str = self.tokenizer.apply_chat_template(
+        #     [sys_msg, {"role": "user", "content": self.query}], # Query only
+        #     add_generation_prompt=True,
+        #     tokenize=False
+        # )
+        # input_ids_empty_context = torch.cat(
+        #     [self.tokenizer(prompt_empty_context_str, return_tensors="pt").input_ids.to(self.device),
+        #     answer_ids],
+        #     dim=1
+        # )
+        # with torch.no_grad():
+        #     logits_model_output_empty = self.model(input_ids=input_ids_empty_context).logits
 
-        prompt_len_empty = input_ids_empty_context.shape[1] - L
-        shift_logits_empty = logits_model_output_empty[..., prompt_len_empty-1:-1, :].contiguous()
-        log_probs_tokens_empty = F.log_softmax(shift_logits_empty, dim=-1)
-        answer_log_probs_empty = torch.gather(log_probs_tokens_empty, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
-        total_log_prob_empty = answer_log_probs_empty.sum() # This is log(P_empty)
+        # prompt_len_empty = input_ids_empty_context.shape[1] - L
+        # shift_logits_empty = logits_model_output_empty[..., prompt_len_empty-1:-1, :].contiguous()
+        # log_probs_tokens_empty = F.log_softmax(shift_logits_empty, dim=-1)
+        # answer_log_probs_empty = torch.gather(log_probs_tokens_empty, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+        # total_log_prob_empty = answer_log_probs_empty.sum() # This is log(P_empty)
 
         # --- Calculate probabilities and logits ---
         # Probability of the answer given the context
         prob_with = torch.exp(total_log_prob_with)
         # Probability of the answer given empty context
-        prob_empty = torch.exp(total_log_prob_empty)
+        # prob_empty = torch.exp(total_log_prob_empty)
 
         # Logit of the probability of the answer given the context
         logit_with = logit(prob_with)
         # Logit of the probability of the answer given empty context
-        logit_empty = logit(prob_empty)
+        # logit_empty = logit(prob_empty)
 
         # --- Calculate logit gain ---
         # The gain on the logit scale
-        logit_gain_total = logit_with - logit_empty
+        logit_gain_total = logit_with
 
         # Clean up (important for long loops in CONTEXTCITE)
-        del logits_model_output_with, logits_model_output_empty, shift_logits_with, shift_logits_empty
-        del log_probs_tokens_with, log_probs_tokens_empty, answer_log_probs_with, answer_log_probs_empty
-        del total_log_prob_with, total_log_prob_empty, prob_with, prob_empty, logit_with, logit_empty
+        # del logits_model_output_with, logits_model_output_empty, shift_logits_with, shift_logits_empty
+        # del log_probs_tokens_with, log_probs_tokens_empty, answer_log_probs_with, answer_log_probs_empty
+        # del total_log_prob_with, total_log_prob_empty, prob_with, prob_empty, logit_with, logit_empty
         torch.cuda.empty_cache()
         return logit_gain_total.item()
         
@@ -356,41 +356,41 @@ class ContextAttribution:
             sur_type=sur_type
         )
         
-        # Generate all possible subsets (2^n)
-        all_subsets = list(itertools.product([0, 1], repeat=self.n_items))
-        X_all = np.array(all_subsets)
+        # # Generate all possible subsets (2^n)
+        # all_subsets = list(itertools.product([0, 1], repeat=self.n_items))
+        # X_all = np.array(all_subsets)
         
-        # Predict utilities for all subsets using surrogate
-        if sur_type == "fm":
-            X_all_sparse = csr_matrix(X_all)
-            predicted_utilities = model.predict(X_all_sparse)
-        else:  # linear or full_poly2
-            predicted_utilities = model.predict(X_all)
+        # # Predict utilities for all subsets using surrogate
+        # if sur_type == "fm":
+        #     X_all_sparse = csr_matrix(X_all)
+        #     predicted_utilities = model.predict(X_all_sparse)
+        # else:  # linear or full_poly2
+        #     predicted_utilities = model.predict(X_all)
         
-        # Compute exact Shapley values using predicted utilities
-        utility_dict = dict(zip(all_subsets, predicted_utilities))
-        shapley_values = np.zeros(self.n_items)
+        # # Compute exact Shapley values using predicted utilities
+        # utility_dict = dict(zip(all_subsets, predicted_utilities))
+        # shapley_values = np.zeros(self.n_items)
         
-        # Iterate through all subsets
-        for s_tuple in all_subsets:
-            s_size = sum(s_tuple)
-            s_util = utility_dict[s_tuple]
+        # # Iterate through all subsets
+        # for s_tuple in all_subsets:
+        #     s_size = sum(s_tuple)
+        #     s_util = utility_dict[s_tuple]
             
-            for i in range(self.n_items):
-                if s_tuple[i] == 1:
-                    # Create subset without item i
-                    s_without_i_list = list(s_tuple)
-                    s_without_i_list[i] = 0
-                    s_without_i_tuple = tuple(s_without_i_list)
+        #     for i in range(self.n_items):
+        #         if s_tuple[i] == 1:
+        #             # Create subset without item i
+        #             s_without_i_list = list(s_tuple)
+        #             s_without_i_list[i] = 0
+        #             s_without_i_tuple = tuple(s_without_i_list)
                     
-                    s_without_i_util = utility_dict.get(s_without_i_tuple, 0.0)
-                    marginal_contrib = s_util - s_without_i_util
+        #             s_without_i_util = utility_dict.get(s_without_i_tuple, 0.0)
+        #             marginal_contrib = s_util - s_without_i_util
                     
-                    # Calculate Shapley weight
-                    weight = (self._factorials[s_size - 1] * self._factorials[self.n_items - s_size]) / self._factorials[self.n_items]
-                    shapley_values[i] += weight * marginal_contrib
+        #             # Calculate Shapley weight
+        #             weight = (self._factorials[s_size - 1] * self._factorials[self.n_items - s_size]) / self._factorials[self.n_items]
+        #             shapley_values[i] += weight * marginal_contrib
         
-        return shapley_values, attr, F, model
+        return attr, F, model
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                         max_unique_lookups: int, seed: int = None, 
@@ -594,7 +594,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=100, rank=10, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
+            model = als.FMRegression(n_iter=100, rank=3, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -854,10 +854,10 @@ class ContextAttribution:
                 if k > n_docs:
                     continue
                 # Get indices of top k documents
-                if "FM" in method_name:
-                    topk_indices=self.compute_exhaustive_top_k(k)
-                else:
-                    topk_indices = np.argsort(scores)[-k:]
+                # if "FM" in method_name:
+                #     topk_indices=self.compute_exhaustive_top_k(k)
+                # else:
+                topk_indices = np.argsort(scores)[-k:]
                 # Ensure topk_indices is a 1-dimensional array of integers
                 # If topk_indices could be a scalar for k=1 or similar, convert it to an array
                 if not isinstance(topk_indices, np.ndarray):
