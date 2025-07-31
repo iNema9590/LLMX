@@ -18,9 +18,11 @@ from scipy.stats import kendalltau, pearsonr, rankdata, spearmanr
 from sklearn.metrics import ndcg_score
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
-#from utils import hit_rate_at_k, precision_at_k, reciprocal_rank
 
 from SHapRAG import *
+
+#from utils import hit_rate_at_k, precision_at_k, reciprocal_rank
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type = str, required=True)
@@ -39,7 +41,7 @@ start = time.time()
 # Construct full path to CSV file in same folder
 
 #csv_path = os.path.join(current_dir, f'../data/{args.dataset}.csv')
-csv_path = os.path.join(f'../data/{args.dataset}.csv')
+csv_path = os.path.join(f'./data/{args.dataset}.csv')
 
 df = pd.read_csv(csv_path)
 df_save_results = pd.DataFrame(columns = ["query", "context", "provided_answer",
@@ -105,17 +107,14 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
     
     if isinstance(df.context, list) == True: 
         docs= df['context'].loc[i]
-        flags = df["doc_id"].loc[i]
     else: 
         docs= eval(df['context'].loc[i])
-        flags = eval(df["doc_id"].loc[i])
 
     if args.shuffle == True: 
         index_list = list(range(10))
         random.seed(i) # different seed for each query/line
         random.shuffle(index_list)
         docs = [docs[j] for j in index_list]
-        flags = [flags[j] for j in index_list]
 
     utility_cache_base_dir = f"../Experiment_data/{DATASET_NAME}/{MODEL_NAME}/{SHUFFLE}/utilities_cache3bcp"
     utility_cache_filename = f"utilities_q_idx{i}_n{len(docs)}.pkl" # More robust naming
@@ -140,7 +139,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
             
     results_for_query = {}
     if accelerator_main.is_main_process:
-        m_samples_map = {"S": 128, "M": 256, "L": 512} # Example sample sizes
+        m_samples_map = {"L": 512} # Example sample sizes
         T_iterations_map = {"L":40}  # Example iterations
 
     for size_key, num_s in m_samples_map.items():
@@ -152,6 +151,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         if actual_samples > 0: 
             results_for_query[f"ContextCite{actual_samples}"], model_cc = harness.compute_contextcite(num_samples=actual_samples, seed=SEED) #lasso_alpha=0.01,
         # results_for_query[f"FM_Shap{actual_samples}"], _, F, modelfm = harness.compute_wss(num_samples=actual_samples, seed=SEED, sampling="kernelshap",sur_type="fm", k=4)
+            results_for_query[f"FM_Weights{actual_samples}"], _, F, modelfm = harness.compute_wss(num_samples=actual_samples, seed=SEED, sampling="kernelshap",sur_type="fm", k=4)
 
         # results_for_query[f"KernelShap{actual_samples}"] = harness.compute_contextcite_weights(num_samples=actual_samples, sampling="kernel_shap",  seed=SEED) #lasso_alpha=0.01,
         # results_for_query[f"WSS{actual_samples}"] = harness.compute_wss(num_samples=actual_samples,  seed=SEED, sampling="uniform") #lasso_alpha=0.01,
@@ -213,6 +213,7 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
         # df_save_results.loc[i, "doc_id"] = [[flags]]
     df_save_results.loc[i, "context"] = [[docs]]
     df_save_results.loc[i, "provided_answer"] = harness.target_response
+    df_save_results.loc[i, "method_scores"] = [results_for_query]
 
 
         #print("RESULTS FOR QUERY: ", df_save_results)
@@ -232,55 +233,3 @@ for i in tqdm(range(num_questions_to_run), desc="Processing Questions", disable=
 
 # SAVE EXACT SHAP RESULTS FOR ANALYSIS
 df_save_results.to_csv(f"../Experiment_data/{DATASET_NAME}/{MODEL_NAME}/results_{SHUFFLE}.csv", index=False)
-
-# Save
-df_save_results.to_json(f"../Experiment_data/{DATASET_NAME}/{MODEL_NAME}/results_{SHUFFLE}.json", orient="records", lines=True)
-
-all_metrics = {}
-result_df = {}
-for row in df_save_results['precision_top_k']:
-   for method in row[0]:
-       try:
-           all_metrics[method].append(row[0][method])
-       except:
-           all_metrics[method] = [row[0][method]]
-for method in all_metrics:
-    result_df[method] = round(np.mean(all_metrics[method]), 4)
-    
-processed_data = {}
-for method, value in result_df.items():
-    method_name = method[1]
-    col_num = method[0]
-    if method_name not in processed_data:
-        processed_data[method_name] = {}
-    processed_data[method_name][col_num] = value
-
-# Create a Pandas DataFrame from the processed data
-resulting_df = pd.DataFrame(processed_data).T
-print(resulting_df)
-
-
-resulting_df.to_csv(f"../Experiment_data/{DATASET_NAME}/{MODEL_NAME}/results_top_k.csv", index=False)
-
-# Save
-resulting_df.to_json(f"../Experiment_data/{DATASET_NAME}/{MODEL_NAME}/results_top_k.json", orient="records", lines=True)
-
-# Final synchronization before script ends
-accelerator_main.wait_for_everyone()
-if accelerator_main.is_main_process:
-    print("Script finished.")
-
-if torch.distributed.is_available() and torch.distributed.is_initialized():
-    if accelerator_main.is_local_main_process:
-        print(f"Rank {accelerator_main.process_index} (Local Main): Manually destroying process group...")
-    torch.distributed.destroy_process_group()
-    if accelerator_main.is_local_main_process:
-        print(f"Rank {accelerator_main.process_index} (Local Main): Process group destroyed.")
-else:
-    if accelerator_main.is_local_main_process:
-        print(f"Rank {accelerator_main.process_index} (Local Main): Distributed environment not initialized or not available, skipping destroy_process_group.")
-
-if accelerator_main.is_main_process:
-    print("Script fully exited.")
-end = time.time()
-print(f"Execution time: {end - start:.4f} seconds")

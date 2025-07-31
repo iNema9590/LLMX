@@ -6,7 +6,6 @@ import pickle
 import random
 import warnings
 from collections import defaultdict
-from scipy.stats import spearmanr
 
 import numpy as np
 import torch
@@ -15,16 +14,17 @@ import xgboost
 from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
 from fastFM import als
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import Ridge
 from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
+from scipy.stats import spearmanr
 from sklearn.exceptions import ConvergenceWarning
-from sklearn.linear_model import Lasso
+from sklearn.linear_model import Lasso, Ridge
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import PolynomialFeatures
 from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
+
 
 class ContextAttribution:
 
@@ -331,7 +331,7 @@ class ContextAttribution:
         )
         return weights, model
 
-    def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm"):
+    def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm", k = 4):
         """
         Computes Weighted Subset Sampling (WSS) attributions using a surrogate model.
         Returns: (shapley_values, attr, F, model, mse)
@@ -353,44 +353,13 @@ class ContextAttribution:
         model, attr, F = self._train_surrogate(
             sampled_tuples_for_train, 
             utilities_for_train, 
-            sur_type=sur_type
+            sur_type=sur_type,
+            k = k
         )
         
-        # # Generate all possible subsets (2^n)
-        # all_subsets = list(itertools.product([0, 1], repeat=self.n_items))
-        # X_all = np.array(all_subsets)
-        
-        # # Predict utilities for all subsets using surrogate
-        # if sur_type == "fm":
-        #     X_all_sparse = csr_matrix(X_all)
-        #     predicted_utilities = model.predict(X_all_sparse)
-        # else:  # linear or full_poly2
-        #     predicted_utilities = model.predict(X_all)
-        
-        # # Compute exact Shapley values using predicted utilities
-        # utility_dict = dict(zip(all_subsets, predicted_utilities))
-        # shapley_values = np.zeros(self.n_items)
-        
-        # # Iterate through all subsets
-        # for s_tuple in all_subsets:
-        #     s_size = sum(s_tuple)
-        #     s_util = utility_dict[s_tuple]
-            
-        #     for i in range(self.n_items):
-        #         if s_tuple[i] == 1:
-        #             # Create subset without item i
-        #             s_without_i_list = list(s_tuple)
-        #             s_without_i_list[i] = 0
-        #             s_without_i_tuple = tuple(s_without_i_list)
-                    
-        #             s_without_i_util = utility_dict.get(s_without_i_tuple, 0.0)
-        #             marginal_contrib = s_util - s_without_i_util
-                    
-        #             # Calculate Shapley weight
-        #             weight = (self._factorials[s_size - 1] * self._factorials[self.n_items - s_size]) / self._factorials[self.n_items]
-        #             shapley_values[i] += weight * marginal_contrib
-        
         return attr, F, model
+    
+
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                         max_unique_lookups: int, seed: int = None, 
@@ -582,7 +551,7 @@ class ContextAttribution:
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
     
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear", alpha=0.01):
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear", alpha=0.01, k = 4):
         """Internal method to train a surrogate model on utility data."""
         X_train = np.array(ablations)
         y_train = np.array(utilities)
@@ -594,7 +563,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=100, rank=3, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
+            model = als.FMRegression(n_iter=100, rank=k, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -806,6 +775,18 @@ class ContextAttribution:
             predicted_effect=model.predict(X_all)
         r2 = r2_score(exact_utilities, predicted_effect)
         return r2
+    
+    def RMSE(self, n_eval_util, model, method='fm'):
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        X_all = np.array(eval_subsets)
+        exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
+        X_all_sparse = csr_matrix(X_all)
+        if method=='fm':     
+            predicted_effect=model.predict(X_all_sparse)
+        else:
+            predicted_effect=model.predict(X_all)
+        rmse = mean_squared_error(exact_utilities, predicted_effect)
+        return rmse
 
     def compute_exhaustive_top_k(self, k: int):
         n = self.n_items
