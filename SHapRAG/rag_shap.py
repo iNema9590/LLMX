@@ -7,11 +7,11 @@ import random
 import warnings
 from collections import defaultdict
 from scipy.stats import spearmanr
-
+import functools
+import spectralexplain as spex
 import numpy as np
 import torch
 import torch.nn.functional as F
-import xgboost
 from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
 from fastFM import als
@@ -28,215 +28,234 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 class ContextAttribution:
 
-    def __init__(self, items, query, 
-                 prepared_model_for_harness, tokenizer_for_harness, accelerator_for_harness, 
-                 verbose=False, utility_cache_path=None):
-        self.accelerator = accelerator_for_harness
+    def __init__(self, items: list[str], query: str,
+                 prepared_model: AutoModelForCausalLM,
+                 prepared_tokenizer: AutoTokenizer,
+                 accelerator: Accelerator = None,
+                 verbose: bool = True,
+                 utility_cache_path: str = None):
+        
+        self.accelerator = accelerator if accelerator else Accelerator()
         self.items = items
         self.query = query
-        self.model = prepared_model_for_harness 
-        self.tokenizer = tokenizer_for_harness
+        self.model = prepared_model
+        self.tokenizer = prepared_tokenizer
         self.verbose = verbose
         self.n_items = len(items)
         self.device = self.accelerator.device
 
-        # The on-demand utility cache.
-        self.utility_cache = {}
-
+        if not items: raise ValueError("items list cannot be empty")
+        
+        # Nested cache for multiple utility types
+        self.utility_cache = defaultdict(dict)
+        
+        # Model and tokenizer setup
+        self.model.eval()
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
-        
+            # Note: This line might modify a model config shared across processes.
+            # It's generally safe but good to be aware of.
+            # self.model.config.pad_token_id = self.model.config.eos_token_id
+
         self._factorials = {k: math.factorial(k) for k in range(self.n_items + 1)}
 
-        # Load existing cache if provided to warm-start the harness.
+        # --- Corrected Utility Cache Loading and Broadcasting ---
+        
+        # Step 1: Main process attempts to load the cache.
+        loaded_cache_on_main = None
         if utility_cache_path and os.path.exists(utility_cache_path):
             if self.accelerator.is_main_process:
-                print(f"Loading existing utility cache from {utility_cache_path}...")
+                if self.verbose: print(f"Main Process: Attempting to load utility cache from {utility_cache_path}...")
                 try:
                     with open(utility_cache_path, "rb") as f:
-                        self.utility_cache = pickle.load(f)
-                    print(f"Successfully loaded {len(self.utility_cache)} cached utilities.")
+                        loaded_cache_on_main = pickle.load(f)
+                    if not isinstance(loaded_cache_on_main, (dict, defaultdict)):
+                        print("Warning: Loaded cache is not a dictionary. Ignoring.")
+                        loaded_cache_on_main = None
+                    elif self.verbose:
+                        print(f"Successfully loaded {len(loaded_cache_on_main)} cached utility entries.")
                 except Exception as e:
-                    print(f"Warning: Failed to load cache from {utility_cache_path}: {e}")
-            # Ensure all processes are synchronized after main process loads the cache
-            self.accelerator.wait_for_everyone()
-            # Broadcast the loaded cache to all processes
-            object_to_broadcast = [self.utility_cache]
-            broadcast_object_list(object_to_broadcast, from_process=0)
-            self.utility_cache = object_to_broadcast[0]
-            if self.verbose and not self.accelerator.is_main_process:
-                print(f"Rank {self.accelerator.process_index} received {len(self.utility_cache)} items in broadcasted cache.")
+                    if self.verbose: print(f"Warning: Failed to load cache from {utility_cache_path}: {e}")
+                    loaded_cache_on_main = None
+        
+        # Step 2: Main process puts its result (loaded cache or None) into a list for broadcasting.
+        # All other processes have None.
+        object_to_broadcast = [loaded_cache_on_main] if self.accelerator.is_main_process else [None]
 
+        # Step 3: Broadcast the object from the main process to all others.
+        broadcast_object_list(object_to_broadcast, from_process=0)
+        
+        # Step 4: All processes now have the same cache object.
+        loaded_cache_from_broadcast = object_to_broadcast[0]
+        
+        # Initialize the instance's cache.
+        if loaded_cache_from_broadcast:
+            self.utility_cache = defaultdict(dict, loaded_cache_from_broadcast)
+        else:
+            # If nothing was loaded, it remains an empty defaultdict.
+            self.utility_cache = defaultdict(dict)
 
-        # Generate the target response once, as it's the reference for all utility calculations.
-        if self.verbose and self.accelerator.is_main_process:
-            print("Generating target response based on full context...")
-        self.target_response = self._llm_generate_response(context_str="\n".join(self.items))
-        if self.verbose and self.accelerator.is_main_process:
-            print(f"Target response: '{self.target_response}'")
+        # Synchronize all processes to ensure the cache is set before proceeding.
+        self.accelerator.wait_for_everyone()
+        
+        # --- Target Response Generation (Main process generates, then broadcasts) ---
+        target_response_obj = [None]
+        if self.accelerator.is_main_process:
+            target_response_obj[0] = self._llm_generate_response(context_str="\n\n".join(self.items))
+        
+        broadcast_object_list(target_response_obj, from_process=0)
+        self.target_response = target_response_obj[0]
 
-    # --------------------------------------------------------------------------
-    # Core Utility Management (On-Demand)
-    # --------------------------------------------------------------------------
+    def get_utility(self, subset_tuple: tuple, mode: str) -> float:
+        """Gatekeeper for utility values. Returns from cache or computes if not present."""
+        if mode in self.utility_cache.get(subset_tuple, {}):
+            return self.utility_cache[subset_tuple][mode]
+        
+        # Compute the utility if not found in cache
+        context_str = self._get_ablated_context_from_vector(np.array(subset_tuple))
+        utility = self._compute_response_metric(context_str=context_str, mode=mode)
+        
+        # Store in the nested cache structure
+        self.utility_cache[subset_tuple][mode] = utility
+        return utility
 
     def save_utility_cache(self, file_path: str):
-        """Saves the current state of the utility cache to a file."""
+        """
+        Saves the current state of the utility cache to a file.
+        This operation is only performed by the main process to prevent race conditions.
+        """
+        # --- CORRECTED: Added main process guard ---
         if self.accelerator.is_main_process:
             if self.verbose:
-                print(f"Main process: Saving {len(self.utility_cache)} utilities to {file_path}...")
-            with open(file_path, "wb") as f:
-                pickle.dump(self.utility_cache, f)
-            if self.verbose:
-                print("Save complete.")
+                print(f"Main Process: Saving {len(self.utility_cache)} utility entries to {file_path}...")
+            
+            # Convert defaultdict to a standard dict for safer pickling/reloading
+            cache_to_save = dict(self.utility_cache)
+            
+            try:
+                with open(file_path, "wb") as f:
+                    pickle.dump(cache_to_save, f)
+                if self.verbose:
+                    print("Save complete.")
+            except Exception as e:
+                print(f"Error: Failed to save utility cache to {file_path}. Reason: {e}")
+        
+        # It's good practice to wait for the main process to finish writing
+        # before other processes might proceed to exit or do other things.
+        self.accelerator.wait_for_everyone()
     
-    # --------------------------------------------------------------------------
-    # LLM Interaction Methods (The "Engine")
-    # --------------------------------------------------------------------------
-    
-
+    # --- LLM Interaction Methods ---
     def _llm_generate_response(self, context_str: str, max_new_tokens: int = 100) -> str:
+        # ... (same as previous implementation)
         messages = [{"role": "system", "content": """You are a helpful assistant. You use the provided context to answer
-                    questions in few words. Avoid using your own knowledge or make assumptions.
-                    """}]
+                questions in few words. Avoid using your own knowledge or make assumptions.
+                """}]
         if context_str:
             messages.append({"role": "user", "content": f"###context: {context_str}. ###question: {self.query}."})
         else:
             messages.append({"role": "user", "content": self.query})
-
         chat_text = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
         tokenized = self.tokenizer(chat_text, return_tensors="pt", padding=True)
-
-        input_ids = tokenized["input_ids"].to(self.device)
-        attention_mask = tokenized["attention_mask"].to(self.device)
+        input_ids, attention_mask = tokenized["input_ids"].to(self.device), tokenized["attention_mask"].to(self.device)
         unwrapped_model = self.accelerator.unwrap_model(self.model)
-
         with torch.no_grad():
             outputs_gen = unwrapped_model.generate(
-                input_ids=input_ids, attention_mask=attention_mask, max_new_tokens=max_new_tokens,
-                do_sample=False,
-                temperature=None,
-                top_p=None,
-                top_k=None,
-                pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None else unwrapped_model.config.eos_token_id,
+                input_ids=input_ids, attention_mask=attention_mask, max_new_tokens=max_new_tokens, do_sample=False,temperature=None, top_p=None, top_k=None,
+                pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None else unwrapped_model.config.eos_token_id
             )
-        
-        if isinstance(outputs_gen, torch.Tensor): generated_ids = outputs_gen
-        elif hasattr(outputs_gen, 'sequences'): generated_ids = outputs_gen.sequences
-        else:
-            print(f"Warning: Unexpected output type from model.generate: {type(outputs_gen)}")
-            del input_ids, attention_mask, unwrapped_model, outputs_gen
-            torch.cuda.empty_cache()
-            return ""
-
+        generated_ids = outputs_gen.sequences if hasattr(outputs_gen, 'sequences') else outputs_gen
         response_text = self.tokenizer.decode(generated_ids[0][input_ids.shape[1]:], skip_special_tokens=True)
         cleaned_text = response_text.lstrip().removeprefix("assistant").lstrip(": \n").strip()
-        del input_ids, attention_mask, generated_ids, unwrapped_model, outputs_gen
-        torch.cuda.empty_cache()
+        del input_ids, attention_mask, generated_ids, unwrapped_model, outputs_gen; torch.cuda.empty_cache()
         return cleaned_text
 
-    def get_utility(self, subset_tuple: tuple) -> float:
-        if subset_tuple in self.utility_cache:
-            return self.utility_cache[subset_tuple]
-        else:
-            v_np = np.array(subset_tuple)
-            context_str = self._get_ablated_context_from_vector(v_np)
-            utility = self._llm_compute_logprob(context_str=context_str)
+    def _compute_response_metric(self, context_str: str, mode: str, response: str = None) -> float:
+        if response is None: response = self.target_response
+        answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
+        num_answer_tokens = answer_ids.shape[1]
+        if num_answer_tokens == 0: return 0.0
+
+        if mode in ['log-prob', 'raw-prob', 'logit-prob', 'log-perplexity']:
+            sys_msg = {"role": "system",
+            "content": """You are a helpful assistant. You use the provided context to answer
+                    questions in few words. Avoid using your own knowledge or make assumptions."""}
+            user_content = f"### Context:\n{context_str}\n\n### Question:\n{self.query}" if context_str else self.query
+            messages = [sys_msg, {"role": "user", "content": user_content}]
+            prompt_str = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
+            prompt_ids = self.tokenizer(prompt_str, return_tensors="pt").input_ids.to(self.device)
+            full_input_ids = torch.cat([prompt_ids, answer_ids], dim=1)
+            prompt_len = prompt_ids.shape[1]
+            with torch.no_grad(): logits = self.model(input_ids=full_input_ids).logits
+            shift_logits = logits[..., prompt_len - 1:-1, :].contiguous()
+            log_probs_all = F.log_softmax(shift_logits, dim=-1)
+            answer_log_probs = torch.gather(log_probs_all, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
+            total_log_prob = answer_log_probs.sum()
+
+            final_metric = 0.0
+            if mode == 'log-prob': final_metric = total_log_prob
+            elif mode == 'raw-prob': final_metric = torch.exp(total_log_prob)
+            elif mode == 'logit-prob':
+                prob = torch.exp(total_log_prob)
+                final_metric = logit(prob) if 0.0 < prob < 1.0 else (float('inf') if prob >= 1.0 else -float('inf'))
+            elif mode == 'log-perplexity': final_metric = total_log_prob / num_answer_tokens
             
-            self.utility_cache[subset_tuple] = utility
-        return utility
+            del logits, shift_logits, log_probs_all, answer_log_probs, total_log_prob; torch.cuda.empty_cache()
+            return final_metric.item() if isinstance(final_metric, torch.Tensor) else final_metric
 
+        elif mode == 'divergence_utility':
+            # --- MODIFIED DIVERGENCE LOGIC ---
+            if not hasattr(self, '_baseline_distributions'):
+                if self.verbose and self.accelerator.is_main_process: print("  (Divergence Utility) Caching baseline token distributions for full context...")
+                full_context = "\n\n".join(self.items)
+                self._baseline_distributions = self._get_response_token_distributions(full_context, response)
+            
+            baseline_distributions = self._baseline_distributions
+            if baseline_distributions.nelement() == 0: return 0.0
 
-    def _llm_compute_logprob(self, context_str: str, response=None) -> float:
-        """
-        Compute the average log-prob *gain* per answer token compared to an empty context.
-        This reduces length bias and centers the utility on the *value of the context*.
-        """
-        # Use target response if none provided
-        if response is None:
-            response = self.target_response
+            ablated_distributions = self._get_response_token_distributions(context_str, response)
+            total_jsd = 0.0
+            if ablated_distributions.nelement() > 0 and len(baseline_distributions) == len(ablated_distributions):
+                for token_idx in range(len(baseline_distributions)):
+                    p, q = baseline_distributions[token_idx], ablated_distributions[token_idx]
+                    total_jsd += self._jensen_shannon_divergence(p, q)
+            else: return 0.0 # Return low utility if distributions are invalid/mismatched
 
-        answer_ids = self.tokenizer(
-            response, return_tensors="pt", add_special_tokens=False
-        ).input_ids.to(self.device)
+            # --- MODIFIED: Return utility based on exponential kernel ---
+            beta_param = 1.0 # Controls sensitivity. Higher beta = more sensitive to small divergences.
+            utility = math.exp(-beta_param * total_jsd)
+            return utility
+        else:
+            raise ValueError(f"Invalid mode for _compute_response_metric: '{mode}'")
 
-        L = answer_ids.shape[1]
-        if L == 0:
-            return 0.0
-
-        sys_msg = {
+    def _get_response_token_distributions(self, context_str: str, response: str) -> torch.Tensor:
+        # ... (same as previous implementation)
+        answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
+        L = answer_ids.shape[1];
+        if L == 0: return torch.tensor([], device=self.device)
+        messages = [{
             "role": "system",
             "content": """You are a helpful assistant. You use the provided context to answer
                     questions in few words. Avoid using your own knowledge or make assumptions."""
-        }
-        if context_str:
-            user_msg = {"role": "user", "content": f"###context: {context_str} ###question: {self.query}"}
-        else:
-            user_msg = {"role": "user", "content": self.query}
+        },
+                    {"role": "user", "content": f"###context: {context_str}. ###question: {self.query}." if context_str else self.query}]
+        prompt_str = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
+        prompt_ids = self.tokenizer(prompt_str, return_tensors="pt").input_ids.to(self.device)
+        input_ids = torch.cat([prompt_ids, answer_ids], dim=1); prompt_len = prompt_ids.shape[1]
+        with torch.no_grad(): logits = self.model(input_ids=input_ids).logits
+        shifted_logits = logits[..., prompt_len - 1:-1, :].contiguous()
+        distributions = F.softmax(shifted_logits, dim=-1).squeeze(0)
+        del logits, shifted_logits, prompt_ids, answer_ids, input_ids; torch.cuda.empty_cache()
+        return distributions
 
+    @staticmethod
+    def _jensen_shannon_divergence(p: torch.Tensor, q: torch.Tensor, epsilon: float = 1e-10) -> float:
+        # ... (same as previous implementation)
+        p, q = p + epsilon, q + epsilon; p /= p.sum(); q /= q.sum()
+        m = 0.5 * (p + q)
+        return 0.5 * (F.kl_div(m.log(), p, reduction='sum') + F.kl_div(m.log(), q, reduction='sum')).item()
+    
+    # --- Public Compute Methods ---
 
-        # --- Calculate for prompt with context ---
-        prompt_with_context_str = self.tokenizer.apply_chat_template(
-            [sys_msg, {"role": "user", "content": f"###context: {context_str} ###question: {self.query}" if context_str else self.query}], # Handle both cases
-            add_generation_prompt=True,
-            tokenize=False
-        )
-        input_ids_with_context = torch.cat(
-            [self.tokenizer(prompt_with_context_str, return_tensors="pt").input_ids.to(self.device),
-            answer_ids],
-            dim=1
-        )
-        with torch.no_grad():
-            logits_model_output_with = self.model(input_ids=input_ids_with_context).logits
-
-        prompt_len_with = input_ids_with_context.shape[1] - L
-        # Extract logits corresponding to the answer tokens
-        shift_logits_with = logits_model_output_with[..., prompt_len_with-1:-1, :].contiguous()
-        log_probs_tokens_with = F.log_softmax(shift_logits_with, dim=-1)
-        # Gather log_probs of actual answer tokens
-        answer_log_probs_with = torch.gather(log_probs_tokens_with, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
-        total_log_prob_with = answer_log_probs_with.sum()
-        # --- Calculate for prompt with empty context ---
-        # prompt_empty_context_str = self.tokenizer.apply_chat_template(
-        #     [sys_msg, {"role": "user", "content": self.query}], # Query only
-        #     add_generation_prompt=True,
-        #     tokenize=False
-        # )
-        # input_ids_empty_context = torch.cat(
-        #     [self.tokenizer(prompt_empty_context_str, return_tensors="pt").input_ids.to(self.device),
-        #     answer_ids],
-        #     dim=1
-        # )
-        # with torch.no_grad():
-        #     logits_model_output_empty = self.model(input_ids=input_ids_empty_context).logits
-
-        # prompt_len_empty = input_ids_empty_context.shape[1] - L
-        # shift_logits_empty = logits_model_output_empty[..., prompt_len_empty-1:-1, :].contiguous()
-        # log_probs_tokens_empty = F.log_softmax(shift_logits_empty, dim=-1)
-        # answer_log_probs_empty = torch.gather(log_probs_tokens_empty, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
-        # total_log_prob_empty = answer_log_probs_empty.sum() # This is log(P_empty)
-
-        # --- Calculate probabilities and logits ---
-        # Probability of the answer given the context
-        prob_with = torch.exp(total_log_prob_with)
-        # Probability of the answer given empty context
-        # prob_empty = torch.exp(total_log_prob_empty)
-
-        # Logit of the probability of the answer given the context
-        logit_with = logit(prob_with)
-        # Logit of the probability of the answer given empty context
-        # logit_empty = logit(prob_empty)
-
-        # --- Calculate logit gain ---
-        # The gain on the logit scale
-        logit_gain_total = logit_with
-
-        # Clean up (important for long loops in CONTEXTCITE)
-        # del logits_model_output_with, logits_model_output_empty, shift_logits_with, shift_logits_empty
-        # del log_probs_tokens_with, log_probs_tokens_empty, answer_log_probs_with, answer_log_probs_empty
-        # del total_log_prob_with, total_log_prob_empty, prob_with, prob_empty, logit_with, logit_empty
-        torch.cuda.empty_cache()
-        return logit_gain_total.item()
-        
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
         if len(v_np) != self.n_items: raise ValueError("Ablation vector length mismatch")
@@ -290,7 +309,7 @@ class ContextAttribution:
 
         return list(sampled_tuples_set)
 
-    def compute_contextcite(self, num_samples: int, seed: int = None):
+    def compute_contextcite(self, num_samples: int, seed: int = None, utility_mode="logit-prob"):
 
         if not self.accelerator.is_main_process:
             # Return None or empty array on non-main processes
@@ -310,7 +329,7 @@ class ContextAttribution:
 
         # Compute utilities on-demand for the sampled subsets
         pbar = tqdm(sampled_tuples, desc="Computing utilities for ContextCite", disable=not self.verbose)
-        utilities_for_samples = [self.get_utility(v_tuple) for v_tuple in pbar]
+        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in pbar]
 
         # Filter out any samples where utility computation failed
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
@@ -331,7 +350,7 @@ class ContextAttribution:
         )
         return weights, model
 
-    def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm"):
+    def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm", utility_mode="logit-prob"):
         """
         Computes Weighted Subset Sampling (WSS) attributions using a surrogate model.
         Returns: (shapley_values, attr, F, model, mse)
@@ -342,7 +361,7 @@ class ContextAttribution:
         # Generate subsets and compute utilities
         sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
         pbar = tqdm(sampled_tuples, desc=f"Computing utilities for WSS ({sampling})", disable=not self.verbose)
-        utilities_for_samples = [self.get_utility(v_tuple) for v_tuple in pbar]
+        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in pbar]
 
         # Filter invalid utilities
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
@@ -394,7 +413,7 @@ class ContextAttribution:
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                         max_unique_lookups: int, seed: int = None, 
-                        shared_cache: dict = None):
+                        shared_cache: dict = None, utility_mode="logit-prob"):
         """
         Computes Shapley values using Truncated Monte Carlo sampling.
         
@@ -430,7 +449,7 @@ class ContextAttribution:
                 return -float('inf') # Budget exceeded, return failure.
             
             # Compute, cache, increment budget counter, and return.
-            utility = self._llm_compute_logprob(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)))
+            utility = self._compute_response_metric(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)), mode=utility_mode)
             cache[subset_tuple] = utility
             lookups_made_by_this_call += 1
             return utility
@@ -478,9 +497,9 @@ class ContextAttribution:
         
         return shapley_values
 
-    def compute_beta_shap(self, num_iterations_max: int, beta_a: float, beta_b: float, 
+    def compute_beta_shap(self, num_iterations_max: int, beta_a: float, beta_b: float,  
                         max_unique_lookups: int, seed: int = None,
-                        shared_cache: dict = None):
+                        shared_cache: dict = None, utility_mode="logit-prob"):
         """
         Computes Shapley values using BetaShap sampling. This version uses a
         provided shared cache and manages its own lookup budget. It runs on the main process.
@@ -502,7 +521,7 @@ class ContextAttribution:
             if subset_tuple in cache: return cache[subset_tuple]
             if lookups_made_by_this_call >= max_unique_lookups: return -float('inf')
             
-            utility = self._llm_compute_logprob(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)))
+            utility = self._compute_response_metric(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)), mode=utility_mode)
             cache[subset_tuple] = utility
             lookups_made_by_this_call += 1
             return utility
@@ -559,25 +578,108 @@ class ContextAttribution:
 
         return shapley_values
 
-    def compute_loo(self):
-        """Computes Leave-One-Out (LOO) scores for each item."""
-        if not self.accelerator.is_main_process: return np.zeros(self.n_items)
+    def compute_loo(self, utility_mode= "logit-prob"):
+        """
+        Computes general Leave-One-Out (LOO) scores for each item
+        using the specified utility function mode.
+        """
+        loo_scores = [0.0] * self.n_items
+        
+        # V(FullSet) for the given utility mode
+        utility_full_context = self.get_utility(
+            tuple([1] * self.n_items), 
+            mode=utility_mode
+        )
 
-        loo_scores = np.zeros(self.n_items)
-        util_all = self.get_utility(tuple([1] * self.n_items))
-
-        pbar = tqdm(range(self.n_items), desc="Computing LOO scores", disable=not self.verbose)
+        pbar = tqdm(range(self.n_items), desc=f"LOO Calls ({utility_mode})", disable=not self.verbose)
         for i in pbar:
-            v_loo_list = [1] * self.n_items
-            v_loo_list[i] = 0
-            util_loo = self.get_utility(tuple(v_loo_list))
+            v_loo_tuple = tuple(1 if j != i else 0 for j in range(self.n_items))
+            utility_ablated = self.get_utility(v_loo_tuple, mode=utility_mode)
             
-            if util_all != -float('inf') and util_loo != -float('inf'):
-                loo_scores[i] = util_all - util_loo
+            if utility_full_context > -float('inf') and utility_ablated > -float('inf'):
+                loo_scores[i] = utility_full_context - utility_ablated
             else:
-                loo_scores[i] = -float('inf') # Indicate failure
+                loo_scores[i] = 0.0 # Or some other indicator of failure
+
         return loo_scores
 
+    def compute_arc_jsd(self):
+        """
+        Computes ARC-JSD scores. This is a specific application of Leave-One-Out
+        using a divergence-based utility.
+        """
+        # This is now just a convenient wrapper around the general LOO method.
+        return self.compute_loo(utility_mode="divergence_utility")
+
+    def compute_spex(self, sample_budget: int, max_order: int = 1, utility_mode: str ="log-perplexity", spex_method="fourier"):
+        """
+        Computes attribution scores using Spectral Explainability (SPEX)
+        Args:
+            sample_budget: Total number of utility evaluations allowed
+            max_order: Maximum interaction order to compute (1 for main effects)
+            seed: Random seed for reproducibility
+        Returns:
+            Tuple: (attributions, interactions)
+            - attributions: First-order attribution scores (main effects)
+            - interactions: Full Fourier interaction coefficients
+        """
+        if not self.accelerator.is_main_process:
+            return (np.zeros(self.n_items), {})
+            
+        # Create wrapped value function with call counting
+        def raw_value_function(context_str):
+            return self._compute_response_metric(context_str=context_str, mode=utility_mode)
+        
+        # Create call counter wrapper
+        class CallCounter:
+            def __init__(self, func):
+                self.func = func
+                functools.update_wrapper(self, func)
+                self.count = 0
+                
+            def __call__(self, *args, **kwargs):
+                self.count += 1
+                return self.func(*args, **kwargs)
+        
+        valuef_counter = CallCounter(raw_value_function)
+        
+        # Define value function for SPEX
+        def value_function(X):
+            out_values = []
+            for x in X:
+                # Convert binary vector to context string
+                selected_indexes = np.where(np.array(x) == 1)[0]
+                ablated_context = [self.items[i] for i in selected_indexes]
+                ablated_context_str = "\n\n".join(ablated_context)
+                out_values.append(valuef_counter(ablated_context_str))
+            return out_values
+        
+        # Initialize explainer
+        explainer = spex.Explainer(
+            value_function=value_function,
+            features=[f"doc_{i}" for i in range(self.n_items)],  # Placeholder names
+            sample_budget=sample_budget,
+            max_order=max_order
+        )
+        attributions={}
+        ints={}
+        for i in ['fourier', 'fsii', 'fbii']:
+            # Compute Fourier interactions
+            interactions = explainer.interactions(index=spex_method)
+            
+            
+            # Extract first-order attributions
+            attribution = np.zeros(self.n_items)
+            int = {}
+            for pattern, coef in interactions.convert_fourier_interactions().items():
+                if sum(pattern) == 1:  # Main effects
+                    idx = pattern.index(1)
+                    attribution[idx] = coef.__abs__()  
+                elif sum(pattern) == 2:
+                    int[pattern]=coef
+            attributions[i]=attribution
+            ints[i]=int
+        return attributions, ints
     # --------------------------------------------------------------------------
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
@@ -594,7 +696,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=100, rank=3, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
+            model = als.FMRegression(n_iter=1000, rank=6, l2_reg_w=0.01, l2_reg_V=0.01, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -617,131 +719,7 @@ class ContextAttribution:
                     idx += 1
             importance = linear + 0.5 * pairs.sum(axis=1)
             return model, importance, pairs
-        
-    def _get_response_token_distributions(self, context_str: str, response: str) -> torch.Tensor:
-        """
-        Computes the probability distribution for each token in the given response.
-
-        Args:
-            context_str (str): The context to condition the generation on.
-            response (str): The response for which to calculate token distributions.
-
-        Returns:
-            torch.Tensor: A tensor of shape (num_response_tokens, vocab_size) containing
-                          the probability distribution for each token in the response.
-        """
-        answer_ids = self.tokenizer(
-            response, return_tensors="pt", add_special_tokens=False
-        ).input_ids.to(self.device)
-        
-        L = answer_ids.shape[1]
-        if L == 0:
-            return torch.tensor([], device=self.device)
-
-        # Prepare the prompt
-        messages = [
-            {"role": "system", "content": """You are a helpful assistant. You use the provided context to answer questions in few words. Avoid using your own knowledge or make assumptions."""},
-            {"role": "user", "content": f"###context: {context_str}. ###question: {self.query}." if context_str else self.query}
-        ]
-        prompt_str = self.tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True, tokenize=False
-        )
-        prompt_ids = self.tokenizer(prompt_str, return_tensors="pt").input_ids.to(self.device)
-
-        # Concatenate prompt and answer to get full input
-        input_ids = torch.cat([prompt_ids, answer_ids], dim=1)
-        prompt_len = prompt_ids.shape[1]
-
-        with torch.no_grad():
-            outputs = self.model(input_ids=input_ids)
-            logits = outputs.logits
-
-        # Get logits corresponding to the positions of the answer tokens
-        # The logit for the k-th answer token is at index (prompt_len + k - 1)
-        shifted_logits = logits[..., prompt_len - 1:-1, :].contiguous()
-        
-        # Calculate the probability distributions
-        distributions = F.softmax(shifted_logits, dim=-1).squeeze(0) # Shape: (L, vocab_size)
-
-        # Cleanup
-        del outputs, logits, shifted_logits, prompt_ids, answer_ids, input_ids
-        torch.cuda.empty_cache()
-
-        return distributions
-
-    @staticmethod
-    def _jensen_shannon_divergence(p: torch.Tensor, q: torch.Tensor, epsilon: float = 1e-10) -> float:
-
-        # Add epsilon to avoid log(0) issues
-        p = p + epsilon
-        q = q + epsilon
-
-        # Normalize to ensure they sum to 1 after adding epsilon
-        p /= p.sum()
-        q /= q.sum()
-
-        m = 0.5 * (p + q)
-        
-        # PyTorch's F.kl_div expects (input, target) where input is log-probabilities
-        # It calculates sum(target * (log(target) - input))
-        # So D_KL(p || m) is equivalent to F.kl_div(m.log(), p, reduction='sum')
-        kl_p_m = F.kl_div(m.log(), p, reduction='sum')
-        kl_q_m = F.kl_div(m.log(), q, reduction='sum')
-        
-        jsd = 0.5 * (kl_p_m + kl_q_m)
-        return jsd.item()
-
-    def compute_arc_jsd(self) -> list[float]:
-
-        # Step 1: Get the baseline distributions for the target response with full context
-        full_context_str = "\n\n".join(self.items)
-        baseline_distributions = self._get_response_token_distributions(
-            context_str=full_context_str,
-            response=self.target_response
-        )
-
-        if baseline_distributions.nelement() == 0:
-            if self.accelerator.is_main_process:
-                print("Warning: Target response is empty. Cannot run ARC-JSD.")
-            return [0.0] * self.n_items
-
-        jsd_scores = [0.0] * self.n_items
-        
-        pbar = None
-        if self.accelerator.is_main_process:
-            pbar = tqdm(total=self.n_items)
-        
-        # Step 2 & 3: Iterate, ablate each document, and compute JSD
-        for i in range(self.n_items):
-            # Create ablated context by removing the i-th document
-            ablated_items = [item for j, item in enumerate(self.items) if i != j]
-            ablated_context_str = "\n\n".join(ablated_items)
-            
-            # Get distributions for the ablated context
-            ablated_distributions = self._get_response_token_distributions(
-                context_str=ablated_context_str,
-                response=self.target_response
-            )
-
-            total_jsd_for_item = 0.0
-            # Sum the JSD scores over all tokens in the response
-            if ablated_distributions.nelement() > 0:
-                for token_idx in range(len(baseline_distributions)):
-                    p = baseline_distributions[token_idx]
-                    q = ablated_distributions[token_idx]
-                    token_jsd = self._jensen_shannon_divergence(p, q)
-                    total_jsd_for_item += token_jsd
-            
-            jsd_scores[i] = total_jsd_for_item
-            
-            if pbar:
-                pbar.update(1)
-
-        if pbar:
-            pbar.close()
-        
-        return np.array(jsd_scores)
-    
+   
     def compute_jsd_for_ablated_indices(self, ablated_indices):
         """
         Computes total JSD when removing specific documents
@@ -783,7 +761,7 @@ class ContextAttribution:
     def lds(self, attributions, n_eval_util, utl=False, model=None):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
+        exact_utilities = [self.get_utility(v_tuple, mode="divergence_utility") for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         # Predict effects for all subsets using surrogates
         if utl:
@@ -795,17 +773,18 @@ class ContextAttribution:
         spearman, _ = spearmanr(exact_utilities, predicted_effect)
         return spearman
     
-    def r2(self, n_eval_util, model, method='fm'):
+    def r2_mse(self, n_eval_util, model, method='fm'):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple) for v_tuple in eval_subsets]
+        exact_utilities = [self.get_utility(v_tuple, mode="logit-prob") for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         if method=='fm':     
             predicted_effect=model.predict(X_all_sparse)
         else:
             predicted_effect=model.predict(X_all)
         r2 = r2_score(exact_utilities, predicted_effect)
-        return r2
+        mean_squared_error = mean_squared_error(exact_utilities, predicted_effect)
+        return r2, mean_squared_error
 
     def compute_exhaustive_top_k(self, k: int):
         n = self.n_items
@@ -830,7 +809,6 @@ class ContextAttribution:
 
         return best_k_indices_to_remove
 
-
     def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability"):
         """
         Evaluates top-k attribution performance using either:
@@ -841,7 +819,7 @@ class ContextAttribution:
         evaluation_results = {}
         # Get full context utility based on type
         if utility_type == "probability":
-            full_utility = self.get_utility(tuple([1] * n_docs))
+            full_utility = self.get_utility(tuple([1] * n_docs), mode="log-prob")
         elif utility_type == "divergence":
             # Full context has zero divergence by definition
             full_utility = 0.0
@@ -869,7 +847,7 @@ class ContextAttribution:
                     ablation_vector = np.ones(n_docs, dtype=int)
                     ablation_vector[topk_indices] = 0
                     # Compute utility without top k
-                    util_without_topk = self.get_utility(tuple(ablation_vector))
+                    util_without_topk = self.get_utility(tuple(ablation_vector), mode="log-prob")
                     # Calculate utility drop
                     if util_without_topk != -float('inf') and full_utility != -float('inf'):
                         drop = full_utility - util_without_topk
