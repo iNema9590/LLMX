@@ -58,8 +58,6 @@ class ContextAttribution:
             # self.model.config.pad_token_id = self.model.config.eos_token_id
 
         self._factorials = {k: math.factorial(k) for k in range(self.n_items + 1)}
-
-        # --- Corrected Utility Cache Loading and Broadcasting ---
         
         # Step 1: Main process attempts to load the cache.
         loaded_cache_on_main = None
@@ -627,9 +625,18 @@ class ContextAttribution:
             return (np.zeros(self.n_items), {})
             
         # Create wrapped value function with call counting
+        # def raw_value_function(context_str):
+        #     return self._compute_response_metric(context_str=context_str, mode=utility_mode)
         def raw_value_function(context_str):
-            return self._compute_response_metric(context_str=context_str, mode=utility_mode)
-        
+            # Split ablated context back into items
+            ablated_items = context_str.split("\n\n")
+            
+            # Reconstruct binary subset vector as tuple
+            subset_vector = tuple(1 if item in ablated_items else 0 for item in self.items)
+            
+            # Use cached utility function
+            return self.get_utility(subset_vector, mode=utility_mode)
+
         # Create call counter wrapper
         class CallCounter:
             def __init__(self, func):
@@ -665,7 +672,7 @@ class ContextAttribution:
         ints={}
         for i in ['fourier', 'fsii', 'fbii']:
             # Compute Fourier interactions
-            interactions = explainer.interactions(index=spex_method)
+            interactions = explainer.interactions(index=i)
             
             
             # Extract first-order attributions
@@ -783,8 +790,8 @@ class ContextAttribution:
         else:
             predicted_effect=model.predict(X_all)
         r2 = r2_score(exact_utilities, predicted_effect)
-        mean_squared_error = mean_squared_error(exact_utilities, predicted_effect)
-        return r2, mean_squared_error
+        mse = mean_squared_error(exact_utilities, predicted_effect)
+        return r2, mse
 
     def compute_exhaustive_top_k(self, k: int):
         n = self.n_items
@@ -859,6 +866,13 @@ class ContextAttribution:
                 method_drops[k] = drop
             evaluation_results[method_name] = method_drops
         return evaluation_results
+
+    def precision(self, gtset_k, inf_scores):
+        k=len(gtset_k)
+        topk= np.array(inf_scores).argsort()[-k:]
+        prec= len(set(gtset_k).intersection(topk))/k
+        return prec
+    
 
 def logit(p, eps=1e-7):
     """Safe logit calculation with clamping to avoid numerical instability"""
