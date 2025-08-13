@@ -609,7 +609,7 @@ class ContextAttribution:
         # This is now just a convenient wrapper around the general LOO method.
         return self.compute_loo(utility_mode="divergence_utility")
 
-    def compute_spex(self, sample_budget: int, max_order: int = 1, utility_mode: str ="log-perplexity", spex_method="fourier"):
+    def compute_spex(self, sample_budget: int, max_order: int = 1, utility_mode: str ="log-perplexity"):
         """
         Computes attribution scores using Spectral Explainability (SPEX)
         Args:
@@ -768,7 +768,7 @@ class ContextAttribution:
     def lds(self, attributions, n_eval_util, utl=False, model=None):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple, mode="divergence_utility") for v_tuple in eval_subsets]
+        exact_utilities = [self.get_utility(v_tuple, mode="raw-prob") for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         # Predict effects for all subsets using surrogates
         if utl:
@@ -780,10 +780,10 @@ class ContextAttribution:
         spearman, _ = spearmanr(exact_utilities, predicted_effect)
         return spearman
     
-    def r2_mse(self, n_eval_util, model, method='fm'):
+    def r2_mse(self, n_eval_util, mode, model, method='fm'):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple, mode="logit-prob") for v_tuple in eval_subsets]
+        exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         if method=='fm':     
             predicted_effect=model.predict(X_all_sparse)
@@ -808,13 +808,45 @@ class ContextAttribution:
             ablated_set_np[list(k_indices_tuple)] = 0
             ablated_set_tuple = tuple(ablated_set_np)
 
-            utility_of_ablated_set = self.get_utility(ablated_set_tuple)
+            utility_of_ablated_set = self.get_utility(ablated_set_tuple, mode="divergence_utility")
 
             if utility_of_ablated_set < min_utility_after_removal:
                 min_utility_after_removal = utility_of_ablated_set
                 best_k_indices_to_remove = k_indices_tuple
 
         return best_k_indices_to_remove
+
+    def top_k_response_probability(self, results_dict, k_values=[1, 3, 5]):
+
+        n_docs = self.n_items
+        evaluation_results = {}
+
+        for method_name, scores in results_dict.items():
+            method_probs = {}
+            for k in k_values:
+                if k > n_docs:
+                    continue
+
+                # Get top-k indices (largest scores)
+                topk_indices = np.argsort(scores)[-k:]
+                if not isinstance(topk_indices, np.ndarray):
+                    topk_indices = np.array([topk_indices])
+                elif topk_indices.ndim > 1:
+                    topk_indices = topk_indices.flatten()
+
+                # Create vector: 1 for selected docs, 0 for the rest
+                selection_vector = np.zeros(n_docs, dtype=int)
+                selection_vector[topk_indices] = 1
+
+                # Get utility using only the selected docs
+                prob_util = self.get_utility(tuple(selection_vector), mode="raw-prob")
+
+                method_probs[k] = prob_util
+
+            evaluation_results[method_name] = method_probs
+
+        return evaluation_results
+
 
     def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability"):
         """
