@@ -703,7 +703,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=1000, rank=6, l2_reg_w=0.01, l2_reg_V=0.01, random_state=42)
+            model = als.FMRegression(n_iter=1000, rank=4, l2_reg_w=0.01, l2_reg_V=0.01, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -791,9 +791,10 @@ class ContextAttribution:
             predicted_effect=model.predict(X_all)
         r2 = r2_score(exact_utilities, predicted_effect)
         mse = mean_squared_error(exact_utilities, predicted_effect)
+        
         return r2, mse
 
-    def compute_exhaustive_top_k(self, k: int):
+    def compute_exhaustive_top_k(self, k: int, model=None):
         n = self.n_items
         best_k_indices_to_remove = None
         min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
@@ -806,9 +807,9 @@ class ContextAttribution:
         for k_indices_tuple in pbar_iter:
             ablated_set_np = np.ones(n, dtype=int)
             ablated_set_np[list(k_indices_tuple)] = 0
-            ablated_set_tuple = tuple(ablated_set_np)
+            # ablated_set_tuple = tuple(ablated_set_np)
 
-            utility_of_ablated_set = self.get_utility(ablated_set_tuple, mode="divergence_utility")
+            utility_of_ablated_set = model.predict(csr_matrix(ablated_set_np))
 
             if utility_of_ablated_set < min_utility_after_removal:
                 min_utility_after_removal = utility_of_ablated_set
@@ -848,7 +849,7 @@ class ContextAttribution:
         return evaluation_results
 
 
-    def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability"):
+    def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability", model=None):
         """
         Evaluates top-k attribution performance using either:
         1) Probability utility (logit gain difference)
@@ -871,10 +872,10 @@ class ContextAttribution:
                 if k > n_docs:
                     continue
                 # Get indices of top k documents
-                # if "FM" in method_name:
-                #     topk_indices=self.compute_exhaustive_top_k(k)
-                # else:
-                topk_indices = np.argsort(scores)[-k:]
+                if "FM" in method_name:
+                    topk_indices=self.compute_exhaustive_top_k(k, model=model)
+                else:
+                    topk_indices = np.argsort(scores)[-k:]
                 # Ensure topk_indices is a 1-dimensional array of integers
                 # If topk_indices could be a scalar for k=1 or similar, convert it to an array
                 if not isinstance(topk_indices, np.ndarray):
