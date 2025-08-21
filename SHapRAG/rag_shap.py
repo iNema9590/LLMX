@@ -304,6 +304,8 @@ class ContextAttribution:
                 indices_to_set = random.sample(range(n), z)
                 v_np[indices_to_set] = 1
                 sampled_tuples_set.add(tuple(v_np))
+        else:
+            print("Please input a valid sampling method")
 
         return list(sampled_tuples_set)
 
@@ -703,7 +705,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=1000, rank=4, l2_reg_w=0.01, l2_reg_V=0.01, random_state=42)
+            model = als.FMRegression(n_iter=2000, rank=4, l2_reg_w=0.05, l2_reg_V=0.05, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -785,7 +787,7 @@ class ContextAttribution:
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
-        if method=='fm':     
+        if method=='fm':
             predicted_effect=model.predict(X_all_sparse)
         else:
             predicted_effect=model.predict(X_all)
@@ -794,12 +796,12 @@ class ContextAttribution:
         
         return r2, mse
 
-    def compute_exhaustive_top_k(self, k: int, model=None):
+    def compute_exhaustive_top_k(self, k: int, search_list, model=None):
         n = self.n_items
         best_k_indices_to_remove = None
         min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
 
-        possible_indices_to_remove = list(itertools.combinations(range(n), k))
+        possible_indices_to_remove = list(itertools.combinations(search_list, k))
         
         pbar_desc = f"Exhaustive Top-{k} Search"
         pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
@@ -849,17 +851,13 @@ class ContextAttribution:
         return evaluation_results
 
 
-    def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type="probability", model=None):
-        """
-        Evaluates top-k attribution performance using either:
-        1) Probability utility (logit gain difference)
-        2) Divergence utility (ARC-JSD difference)
-        """
+    def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type=None, modelk=None, modelu=None):
+    
         n_docs = self.n_items
         evaluation_results = {}
         # Get full context utility based on type
         if utility_type == "probability":
-            full_utility = self.get_utility(tuple([1] * n_docs), mode="log-prob")
+            full_utility = self.get_utility(tuple([1] * n_docs), mode="logit-prob")
         elif utility_type == "divergence":
             # Full context has zero divergence by definition
             full_utility = 0.0
@@ -872,8 +870,10 @@ class ContextAttribution:
                 if k > n_docs:
                     continue
                 # Get indices of top k documents
-                if "FM" in method_name:
-                    topk_indices=self.compute_exhaustive_top_k(k, model=model)
+                if "FM_WeightsLK" in method_name:
+                    topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=modelk)
+                elif "FM_WeightsLU" in method_name:
+                    topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=modelu)
                 else:
                     topk_indices = np.argsort(scores)[-k:]
                 # Ensure topk_indices is a 1-dimensional array of integers
@@ -887,7 +887,7 @@ class ContextAttribution:
                     ablation_vector = np.ones(n_docs, dtype=int)
                     ablation_vector[topk_indices] = 0
                     # Compute utility without top k
-                    util_without_topk = self.get_utility(tuple(ablation_vector), mode="log-prob")
+                    util_without_topk = self.get_utility(tuple(ablation_vector), mode="logit-prob")
                     # Calculate utility drop
                     if util_without_topk != -float('inf') and full_utility != -float('inf'):
                         drop = full_utility - util_without_topk
