@@ -6,19 +6,38 @@ import time
 import torch
 import numpy as np
 import pandas as pd
+import pickle
 import ast
 from tqdm import tqdm
+from scipy.sparse import csr_matrix
+import itertools
 from scipy.stats import spearmanr, pearsonr, kendalltau, rankdata
 from sklearn.metrics import ndcg_score
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from accelerate import Accelerator
-# os.environ["CUDA_VISIBLE_DEVICES"] = "3" 
+import nltk
+nltk.download('punkt')
+os.environ["CUDA_VISIBLE_DEVICES"] = "1,2"
 current_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 from SHapRAG import *
-starttime=time.time()
-df= pd.read_csv("../data/synthetic_data/20_synergy_hard_negatives.csv",index_col=False, sep=";")
+from SHapRAG.utils import *
+
+df=pd.read_json("../data/musique/musique_ans_v1.0_train.jsonl", lines=True)
+
+def get_titles(lst):
+    # Titles where is_supporting is True
+    supporting = [d['paragraph_text'] for d in lst if d.get('is_supporting') == True]
+    # Titles where is_supporting is False or missing AND not already in supporting
+    others = [d['paragraph_text'] for d in lst if d.get('is_supporting') != True and d['paragraph_text'] not in supporting]
+    # Combine: all supporting + as many others as needed to reach 10
+    result = supporting + others
+    return result[:10]
+
+df.paragraphs=df.paragraphs.apply(get_titles)
+
+df["paragraphs"] = df["paragraphs"].apply(lambda p: p[:5]+ [p[1]] + p[5:])
 
 SEED = 42
 # Initialize Accelerator
@@ -54,9 +73,7 @@ if accelerator_main.is_main_process:
 
 accelerator_main.wait_for_everyone()
 
-num_questions_to_run=len(df.question)
-# num_questions_to_run=50
-# num_questions_to_run = 20
+num_questions_to_run = 50
 k_values = [1, 2, 3, 4, 5]
 all_results = []
 extras = []
@@ -64,12 +81,12 @@ m_samples_map = {"XS": 32, "S": 64, "M": 128, "L": 264, "XL": 528}
 
 for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_process):
     query = df.question[i]
+    
     if accelerator_main.is_main_process:
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
-    p = ast.literal_eval(df.context[i])
-    docs = p[:5] + [p[1]] + p[5:]
-    utility_cache_base_dir = f"../Experiment_data/synthetic/{model_path.split('/')[1]}/duplicates"
+    docs = df.paragraphs[i]
+    utility_cache_base_dir = f"../Experiment_data/musique/{model_path.split('/')[1]}/duplicate"
     utility_cache_filename = f"utilities_q_idx{i}.pkl"
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
 
