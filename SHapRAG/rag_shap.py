@@ -350,7 +350,7 @@ class ContextAttribution:
         )
         return weights, model
 
-    def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm", utility_mode="logit-prob"):
+    def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm",rank: int=None, utility_mode="logit-prob"):
         """
         Computes Weighted Subset Sampling (WSS) attributions using a surrogate model.
         Returns: (shapley_values, attr, F, model, mse)
@@ -372,7 +372,7 @@ class ContextAttribution:
         model, attr, F = self._train_surrogate(
             sampled_tuples_for_train, 
             utilities_for_train, 
-            sur_type=sur_type
+            sur_type=sur_type, rank=rank
         )
         
         # # Generate all possible subsets (2^n)
@@ -693,7 +693,7 @@ class ContextAttribution:
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
     
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear", alpha=0.01):
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None, alpha=0.01):
         """Internal method to train a surrogate model on utility data."""
         X_train = np.array(ablations)
         y_train = np.array(utilities)
@@ -705,7 +705,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=2000, rank=4, l2_reg_w=0.05, l2_reg_V=0.05, random_state=42)
+            model = als.FMRegression(n_iter=2000, rank=rank, l2_reg_w=0.1, l2_reg_V=0.1, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -767,34 +767,40 @@ class ContextAttribution:
                 
         return total_jsd
     
-    def lds(self, attributions, n_eval_util, utl=False, model=None):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
-        X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple, mode="raw-prob") for v_tuple in eval_subsets]
-        X_all_sparse = csr_matrix(X_all)
-        # Predict effects for all subsets using surrogates
-        if utl:
-            predicted_effect=model.predict(X_all_sparse)
-        else:
-            predicted_effect=[np.dot(attributions, i) for i in X_all]
-
-        # Calculate Spearman correlation
-        spearman, _ = spearmanr(exact_utilities, predicted_effect)
-        return spearman
-    
-    def r2_mse(self, n_eval_util, mode, model, method='fm'):
+    def lds(self, results_dict, n_eval_util,mode, models):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
-        if method=='fm':
-            predicted_effect=model.predict(X_all_sparse)
-        else:
-            predicted_effect=model.predict(X_all)
-        r2 = r2_score(exact_utilities, predicted_effect)
-        mse = mean_squared_error(exact_utilities, predicted_effect)
-        
-        return r2, mse
+        lds={}
+        # Predict effects for all subsets using surrogates
+        for method_name, scores in results_dict.items():
+            if "FM" in method_name:
+                predicted_effect=models[method_name].predict(X_all_sparse)
+            else:
+                predicted_effect=[np.dot(scores, i) for i in X_all]
+
+            # Calculate Spearman correlation
+            lds[method_name], _ = spearmanr(exact_utilities, predicted_effect)
+        return lds
+    
+    def r2(self, results_dict, n_eval_util, mode, models):
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        X_all = np.array(eval_subsets)
+        exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
+        X_all_sparse = csr_matrix(X_all)
+        r2={}
+        for method_name, scores in results_dict.items():
+            if "FM" in method_name:
+                predicted_effect=models[method_name].predict(X_all_sparse)
+            elif "ContextCite" in method_name:
+                predicted_effect=models[method_name].predict(X_all)
+            else:
+                predicted_effect=[np.dot(scores, i) for i in X_all]
+            try:
+                r2[method_name]=r2_score(exact_utilities, predicted_effect)
+            except Exception: pass
+        return r2
 
     def compute_exhaustive_top_k(self, k: int, search_list, model=None):
         n = self.n_items
@@ -851,18 +857,13 @@ class ContextAttribution:
         return evaluation_results
 
 
-    def evaluate_topk_performance(self, results_dict, k_values=[1, 3, 5], utility_type=None, modelk=None, modelu=None):
+    def evaluate_topk_performance(self, results_dict, models, k_values:list):
     
         n_docs = self.n_items
         evaluation_results = {}
         # Get full context utility based on type
-        if utility_type == "probability":
-            full_utility = self.get_utility(tuple([1] * n_docs), mode="logit-prob")
-        elif utility_type == "divergence":
-            # Full context has zero divergence by definition
-            full_utility = 0.0
-        else:
-            raise ValueError("Invalid utility_type. Choose 'probability' or 'divergence'")
+        full_utility = self.get_utility(tuple([1] * n_docs), mode="logit-prob")
+
         for method_name, scores in results_dict.items():
             # Skip non-attribution results
             method_drops = {}
@@ -870,10 +871,8 @@ class ContextAttribution:
                 if k > n_docs:
                     continue
                 # Get indices of top k documents
-                if "FM_WeightsLK" in method_name:
-                    topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=modelk)
-                elif "FM_WeightsLU" in method_name:
-                    topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=modelu)
+                if "FM_WeightsLU" in method_name:
+                    topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=models[method_name])
                 else:
                     topk_indices = np.argsort(scores)[-k:]
                 # Ensure topk_indices is a 1-dimensional array of integers
@@ -882,23 +881,21 @@ class ContextAttribution:
                     topk_indices = np.array([topk_indices])
                 elif topk_indices.ndim > 1:
                     topk_indices = topk_indices.flatten()
-                if utility_type == "probability":
-                    # Create ablation vector without top k
-                    ablation_vector = np.ones(n_docs, dtype=int)
-                    ablation_vector[topk_indices] = 0
-                    # Compute utility without top k
-                    util_without_topk = self.get_utility(tuple(ablation_vector), mode="logit-prob")
-                    # Calculate utility drop
-                    if util_without_topk != -float('inf') and full_utility != -float('inf'):
-                        drop = full_utility - util_without_topk
-                    else:
-                        drop = float('nan')
-                elif utility_type == "divergence":
-                    # Compute divergence when removing top k documents
-                    drop = self.compute_jsd_for_ablated_indices(topk_indices)
+                # Create ablation vector without top k
+                ablation_vector = np.ones(n_docs, dtype=int)
+                ablation_vector[topk_indices] = 0
+                # Compute utility without top k
+                util_without_topk = self.get_utility(tuple(ablation_vector), mode="logit-prob")
+                # Calculate utility drop
+                if util_without_topk != -float('inf') and full_utility != -float('inf'):
+                    drop = full_utility - util_without_topk
+                else:
+                    drop = float('nan')
                 method_drops[k] = drop
             evaluation_results[method_name] = method_drops
         return evaluation_results
+
+
 
     def precision(self, gtset_k, inf_scores):
         k=len(gtset_k)
