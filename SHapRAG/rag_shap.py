@@ -168,47 +168,75 @@ class ContextAttribution:
         return cleaned_text
 
     def _compute_response_metric(self, context_str: str, mode: str, response: str = None) -> float:
-        if response is None: response = self.target_response
+        if response is None:
+            response = self.target_response
+
         answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
         num_answer_tokens = answer_ids.shape[1]
-        if num_answer_tokens == 0: return 0.0
+        if num_answer_tokens == 0:
+            return 0.0
 
-        if mode in ['log-prob', 'raw-prob', 'logit-prob', 'log-perplexity']:
-            sys_msg = {"role": "system",
-            "content": """You are a helpful assistant. You use the provided context to answer
-                    questions in few words. Avoid using your own knowledge or make assumptions."""}
-            user_content = f"### Context:\n{context_str}\n\n### Question:\n{self.query}" if context_str else self.query
+        def _compute_logprob_for_context(c_str: str):
+            sys_msg = {
+                "role": "system",
+                "content": """You are a helpful assistant. You use the provided context to answer
+                            questions in few words. Avoid using your own knowledge or make assumptions."""
+            }
+            user_content = f"### Context:\n{c_str}\n\n### Question:\n{self.query}" if c_str else self.query
             messages = [sys_msg, {"role": "user", "content": user_content}]
             prompt_str = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
             prompt_ids = self.tokenizer(prompt_str, return_tensors="pt").input_ids.to(self.device)
             full_input_ids = torch.cat([prompt_ids, answer_ids], dim=1)
             prompt_len = prompt_ids.shape[1]
-            with torch.no_grad(): logits = self.model(input_ids=full_input_ids).logits
+
+            with torch.no_grad():
+                logits = self.model(input_ids=full_input_ids).logits
+
             shift_logits = logits[..., prompt_len - 1:-1, :].contiguous()
             log_probs_all = F.log_softmax(shift_logits, dim=-1)
             answer_log_probs = torch.gather(log_probs_all, 2, answer_ids.unsqueeze(-1)).squeeze(-1)
             total_log_prob = answer_log_probs.sum()
 
-            final_metric = 0.0
-            if mode == 'log-prob': final_metric = total_log_prob
-            elif mode == 'raw-prob': final_metric = torch.exp(total_log_prob)
+            # cleanup
+            del logits, shift_logits, log_probs_all, answer_log_probs
+            torch.cuda.empty_cache()
+
+            return total_log_prob
+
+        if mode in ['log-prob', 'raw-prob', 'logit-prob', 'log-perplexity']:
+            # compute log-probs with context and with empty context
+            log_prob_with = _compute_logprob_for_context(context_str)
+            log_prob_empty = _compute_logprob_for_context("")
+
+            # normalize by length if needed
+            if mode == 'log-prob':
+                final_metric = log_prob_with - log_prob_empty
+            elif mode == 'raw-prob':
+                prob_with = torch.exp(log_prob_with)
+                prob_empty = torch.exp(log_prob_empty)
+                final_metric = prob_with - prob_empty
             elif mode == 'logit-prob':
-                prob = torch.exp(total_log_prob)
-                final_metric = logit(prob) if 0.0 < prob < 1.0 else (float('inf') if prob >= 1.0 else -float('inf'))
-            elif mode == 'log-perplexity': final_metric = total_log_prob / num_answer_tokens
-            
-            del logits, shift_logits, log_probs_all, answer_log_probs, total_log_prob; torch.cuda.empty_cache()
+                prob_with = torch.exp(log_prob_with)
+                prob_empty = torch.exp(log_prob_empty)
+                logit_with = logit(prob_with) if 0.0 < prob_with < 1.0 else (float('inf') if prob_with >= 1.0 else -float('inf'))
+                logit_empty = logit(prob_empty) if 0.0 < prob_empty < 1.0 else (float('inf') if prob_empty >= 1.0 else -float('inf'))
+                final_metric = logit_with - logit_empty
+            elif mode == 'log-perplexity':
+                final_metric = (log_prob_with - log_prob_empty) / num_answer_tokens
+
             return final_metric.item() if isinstance(final_metric, torch.Tensor) else final_metric
 
         elif mode == 'divergence_utility':
-            # --- MODIFIED DIVERGENCE LOGIC ---
+            # keep your divergence-based utility as-is
             if not hasattr(self, '_baseline_distributions'):
-                if self.verbose and self.accelerator.is_main_process: print("  (Divergence Utility) Caching baseline token distributions for full context...")
+                if self.verbose and self.accelerator.is_main_process:
+                    print("  (Divergence Utility) Caching baseline token distributions for full context...")
                 full_context = "\n\n".join(self.items)
                 self._baseline_distributions = self._get_response_token_distributions(full_context, response)
-            
+
             baseline_distributions = self._baseline_distributions
-            if baseline_distributions.nelement() == 0: return 0.0
+            if baseline_distributions.nelement() == 0:
+                return 0.0
 
             ablated_distributions = self._get_response_token_distributions(context_str, response)
             total_jsd = 0.0
@@ -216,14 +244,114 @@ class ContextAttribution:
                 for token_idx in range(len(baseline_distributions)):
                     p, q = baseline_distributions[token_idx], ablated_distributions[token_idx]
                     total_jsd += self._jensen_shannon_divergence(p, q)
-            else: return 0.0 # Return low utility if distributions are invalid/mismatched
+            else:
+                return 0.0  # Return low utility if distributions are invalid/mismatched
 
-            # --- MODIFIED: Return utility based on exponential kernel ---
-            beta_param = 1.0 # Controls sensitivity. Higher beta = more sensitive to small divergences.
+            beta_param = 1.0
             utility = math.exp(-beta_param * total_jsd)
             return utility
         else:
             raise ValueError(f"Invalid mode for _compute_response_metric: '{mode}'")
+
+
+    def _calculate_shapley(self, mode: str = "logit-prob") -> np.ndarray:
+        shapley_values = np.zeros(self.n_items)
+        n = self.n_items
+        factorials_local = self._factorials  # Already initialized in __init__
+
+        pbar_desc = f"Calculating Shapley (mode={mode})"
+        # Show tqdm only on main process for this CPU-bound calculation
+        pbar_enabled = self.verbose and self.accelerator.is_main_process and n > 10  # heuristic threshold
+
+        item_indices_iterator = range(n)
+        if pbar_enabled:
+            item_indices_iterator = tqdm(item_indices_iterator, desc=pbar_desc, leave=False)
+
+        # Iterate over all items
+        for i in item_indices_iterator:
+            shap_i = 0.0
+            # Iterate through all subsets of items that exclude i
+            for subset_int in range(1 << n):
+                if (subset_int >> i) & 1:
+                    continue  # skip subsets that already contain i
+
+                # Build subset as tuple of 0/1 indicators
+                s_tuple = tuple((subset_int >> j) & 1 for j in range(n))
+                s_size = sum(s_tuple)
+
+                # Get utility of S
+                s_util = self.get_utility(s_tuple, mode=mode)
+                if s_util == -float("inf"):
+                    continue  # skip failed utility
+
+                # Get utility of S ∪ {i}
+                s_union_i_list = list(s_tuple)
+                s_union_i_list[i] = 1
+                s_union_i_tuple = tuple(s_union_i_list)
+                s_union_i_util = self.get_utility(s_union_i_tuple, mode=mode)
+
+                # Marginal contribution
+                marginal_contribution = s_union_i_util - s_util
+                weight = (factorials_local[s_size] * factorials_local[n - s_size - 1]) / factorials_local[n]
+                shap_i += weight * marginal_contribution
+
+            shapley_values[i] = shap_i
+
+        return shapley_values
+
+
+    def compute_shapley_interaction_index_pairs_matrix(self, mode: str = "logit-prob") -> np.ndarray:
+        n = self.n_items
+        interaction_matrix = np.zeros((n, n), dtype=float)
+
+        item_indices = list(range(n))
+        pbar_pairs = tqdm(
+            list(itertools.combinations(item_indices, 2)),
+            desc=f"Pairwise Interactions (mode={mode})",
+            disable=not self.verbose,
+        )
+
+        for i, j in pbar_pairs:  # i < j guaranteed
+            interaction_sum_for_pair_ij = 0.0
+            remaining_indices = [idx for idx in item_indices if idx != i and idx != j]
+            num_subsets = 2 ** len(remaining_indices)
+
+            for k_s in range(num_subsets):
+                # build subset S from bits of k_s
+                v_S_np = np.zeros(n, dtype=int)
+                for bit_pos, idx in enumerate(remaining_indices):
+                    if (k_s >> bit_pos) & 1:
+                        v_S_np[idx] = 1
+                v_S_tuple = tuple(v_S_np)
+
+                # construct S ∪ {i}, S ∪ {j}, S ∪ {i,j}
+                v_S_union_i_tuple = tuple(v_S_np | (np.arange(n) == i))
+                v_S_union_j_tuple = tuple(v_S_np | (np.arange(n) == j))
+                v_S_union_ij_tuple = tuple(v_S_np | (np.arange(n) == i) | (np.arange(n) == j))
+
+                # fetch utilities through cache/computation
+                util_S = self.get_utility(v_S_tuple, mode=mode)
+                util_S_i = self.get_utility(v_S_union_i_tuple, mode=mode)
+                util_S_j = self.get_utility(v_S_union_j_tuple, mode=mode)
+                util_S_ij = self.get_utility(v_S_union_ij_tuple, mode=mode)
+
+                delta_ij_S = util_S_ij - util_S_i - util_S_j + util_S
+
+                if n == 2:
+                    weight = 1.0
+                else:
+                    size_S = sum(v_S_np)
+                    numerator = self._factorials[size_S] * self._factorials[n - size_S - 2]
+                    denominator = self._factorials[n - 1]
+                    weight = numerator / denominator
+
+                interaction_sum_for_pair_ij += weight * delta_ij_S
+
+            interaction_matrix[i, j] = interaction_sum_for_pair_ij
+            interaction_matrix[j, i] = interaction_sum_for_pair_ij  # symmetry
+
+        return interaction_matrix
+
 
     def _get_response_token_distributions(self, context_str: str, response: str) -> torch.Tensor:
         # ... (same as previous implementation)
@@ -611,84 +739,75 @@ class ContextAttribution:
         # This is now just a convenient wrapper around the general LOO method.
         return self.compute_loo(utility_mode="divergence_utility")
 
-    def compute_spex(self, sample_budget: int, max_order: int = 1, utility_mode: str ="log-perplexity"):
+# Faithfull methods {Faith-Shap, Faith-Banzhaf, Spex}
+
+    def _make_value_function(self, utility_mode: str):
         """
-        Computes attribution scores using Spectral Explainability (SPEX)
-        Args:
-            sample_budget: Total number of utility evaluations allowed
-            max_order: Maximum interaction order to compute (1 for main effects)
-            seed: Random seed for reproducibility
-        Returns:
-            Tuple: (attributions, interactions)
-            - attributions: First-order attribution scores (main effects)
-            - interactions: Full Fourier interaction coefficients
+        Build a value function for SPEX given a utility mode.
+        Returns a callable that maps binary subset vectors -> utility.
         """
-        if not self.accelerator.is_main_process:
-            return (np.zeros(self.n_items), {})
-            
-        # Create wrapped value function with call counting
-        # def raw_value_function(context_str):
-        #     return self._compute_response_metric(context_str=context_str, mode=utility_mode)
-        def raw_value_function(context_str):
-            # Split ablated context back into items
-            ablated_items = context_str.split("\n\n")
-            
-            # Reconstruct binary subset vector as tuple
+        def raw_value_function(context_str: str) -> float:
+            ablated_items = context_str.split("\n\n") if context_str else []
             subset_vector = tuple(1 if item in ablated_items else 0 for item in self.items)
-            
-            # Use cached utility function
             return self.get_utility(subset_vector, mode=utility_mode)
 
-        # Create call counter wrapper
-        class CallCounter:
-            def __init__(self, func):
-                self.func = func
-                functools.update_wrapper(self, func)
-                self.count = 0
-                
-            def __call__(self, *args, **kwargs):
-                self.count += 1
-                return self.func(*args, **kwargs)
-        
         valuef_counter = CallCounter(raw_value_function)
-        
-        # Define value function for SPEX
-        def value_function(X):
-            out_values = []
-            for x in X:
-                # Convert binary vector to context string
-                selected_indexes = np.where(np.array(x) == 1)[0]
-                ablated_context = [self.items[i] for i in selected_indexes]
+
+        def value_function(subsets: list) -> list:
+            results = []
+            for subset in subsets:
+                selected_idxs = np.where(np.array(subset) == 1)[0]
+                ablated_context = [self.items[i] for i in selected_idxs]
                 ablated_context_str = "\n\n".join(ablated_context)
-                out_values.append(valuef_counter(ablated_context_str))
-            return out_values
-        
-        # Initialize explainer
+                results.append(valuef_counter(ablated_context_str))
+            return results
+
+        return value_function
+
+    def _run_spex(self, method: str, sample_budget: int, max_order: int, utility_mode: str):
+        """
+        Internal runner for SPEX methods.
+        Returns (attributions, interactions).
+        """
+        if not self.accelerator.is_main_process:
+            return np.zeros(self.n_items), {}
+
+        value_function = self._make_value_function(utility_mode)
+
         explainer = spex.Explainer(
             value_function=value_function,
-            features=[f"doc_{i}" for i in range(self.n_items)],  # Placeholder names
+            features=[f"doc_{i}" for i in range(self.n_items)],
             sample_budget=sample_budget,
-            max_order=max_order
+            max_order=max_order,
         )
-        attributions={}
-        ints={}
-        for i in ['fourier', 'fsii', 'fbii']:
-            # Compute Fourier interactions
-            interactions = explainer.interactions(index=i)
-            
-            
-            # Extract first-order attributions
-            attribution = np.zeros(self.n_items)
-            int = {}
-            for pattern, coef in interactions.convert_fourier_interactions().items():
-                if sum(pattern) == 1:  # Main effects
-                    idx = pattern.index(1)
-                    attribution[idx] = coef.__abs__()  
-                elif sum(pattern) == 2:
-                    int[pattern]=coef
-            attributions[i]=attribution
-            ints[i]=int
-        return attributions, ints
+
+        method_interactions = explainer.interactions(index=method)
+        converted = method_interactions.convert_fourier_interactions()
+
+        attribution = np.zeros(self.n_items)
+        interaction_terms = {}
+
+        for pattern, coef in converted.items():
+            order = sum(pattern)
+            if order == 1:
+                idx = pattern.index(1)
+                attribution[idx] = abs(coef)
+            elif order == 2:
+                interaction_terms[pattern] = coef
+
+        return attribution, interaction_terms
+
+    def compute_spex(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
+        """Compute attribution scores using SPEX (Fourier method)."""
+        return self._run_spex("fourier", sample_budget, max_order, utility_mode)
+
+    def compute_fsii(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
+        """Compute attribution scores using SPEX (FSII method)."""
+        return self._run_spex("fsii", sample_budget, max_order, utility_mode)
+
+    def compute_fbii(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
+        """Compute attribution scores using SPEX (FBII method)."""
+        return self._run_spex("fbii", sample_budget, max_order, utility_mode)
     # --------------------------------------------------------------------------
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
@@ -768,7 +887,7 @@ class ContextAttribution:
         return total_jsd
     
     def lds(self, results_dict, n_eval_util,mode, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
@@ -785,9 +904,10 @@ class ContextAttribution:
         return lds
     
     def r2(self, results_dict, n_eval_util, mode, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
+        # exact_utilities_perplexity = [self.get_utility(v_tuple, mode="log-perplexity") for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         r2={}
         for method_name, scores in results_dict.items():
@@ -798,6 +918,9 @@ class ContextAttribution:
             else:
                 predicted_effect=[np.dot(scores, i) for i in X_all]
             try:
+                # if "FSI" in method_name or "FB" in method_name or "Spex" in method_name:
+                #     r2[method_name]=r2_score(exact_utilities_perplexity, predicted_effect)
+                # else:
                 r2[method_name]=r2_score(exact_utilities, predicted_effect)
             except Exception: pass
         return r2
@@ -816,9 +939,10 @@ class ContextAttribution:
             ablated_set_np = np.ones(n, dtype=int)
             ablated_set_np[list(k_indices_tuple)] = 0
             # ablated_set_tuple = tuple(ablated_set_np)
-
-            utility_of_ablated_set = model.predict(csr_matrix(ablated_set_np))
-
+            if model:
+                utility_of_ablated_set = model.predict(csr_matrix(ablated_set_np))
+            else:
+                utility_of_ablated_set = self.get_utility(tuple(ablated_set_np), mode="logit-prob")
             if utility_of_ablated_set < min_utility_after_removal:
                 min_utility_after_removal = utility_of_ablated_set
                 best_k_indices_to_remove = k_indices_tuple
@@ -856,7 +980,17 @@ class ContextAttribution:
 
         return evaluation_results
 
-
+    def recall_at_k(self, gtset_k, results_dict, k_val ):
+        recall={}
+        for method_name, scores in results_dict.items():
+            rec=[]
+            for i in k_val:
+                topk= np.array(scores).argsort()[-i:]
+                rec.append(len(set(gtset_k).intersection(topk))/len(gtset_k))
+            recall[method_name]=rec
+        return recall
+    
+    
     def evaluate_topk_performance(self, results_dict, models, k_values:list):
     
         n_docs = self.n_items
@@ -873,6 +1007,8 @@ class ContextAttribution:
                 # Get indices of top k documents
                 if "FM_WeightsLU" in method_name:
                     topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=models[method_name])
+                elif "Exact" in method_name:
+                    topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:])
                 else:
                     topk_indices = np.argsort(scores)[-k:]
                 # Ensure topk_indices is a 1-dimensional array of integers
@@ -895,8 +1031,6 @@ class ContextAttribution:
             evaluation_results[method_name] = method_drops
         return evaluation_results
 
-
-
     def precision(self, gtset_k, inf_scores):
         k=len(gtset_k)
         topk= np.array(inf_scores).argsort()[-k:]
@@ -908,3 +1042,14 @@ def logit(p, eps=1e-7):
     """Safe logit calculation with clamping to avoid numerical instability"""
     p = torch.clamp(p, eps, 1 - eps)
     return torch.log(p / (1 - p))
+
+class CallCounter:
+    """Wrapper to count function calls."""
+    def __init__(self, func):
+        functools.update_wrapper(self, func)
+        self.func = func
+        self.count = 0
+
+    def __call__(self, *args, **kwargs):
+        self.count += 1
+        return self.func(*args, **kwargs)

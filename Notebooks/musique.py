@@ -46,8 +46,8 @@ accelerator_main = Accelerator(mixed_precision="fp16")
 # Load Model
 if accelerator_main.is_main_process:
     print("Main Script: Loading model...")
-model_path = "mistralai/Mistral-7B-Instruct-v0.3"
-# model_path = "meta-llama/Llama-3.1-8B-Instruct"
+# model_path = "mistralai/Mistral-7B-Instruct-v0.3"
+model_path = "meta-llama/Llama-3.1-8B-Instruct"
 # model_path = "Qwen/Qwen2.5-3B-Instruct"
 
 model_cpu = AutoModelForCausalLM.from_pretrained(
@@ -73,11 +73,13 @@ if accelerator_main.is_main_process:
 
 accelerator_main.wait_for_everyone()
 
+def gtset_k():
+    return [0, 1,5]
+
 num_questions_to_run = 50
 k_values = [1, 2, 3, 4, 5]
 all_results = []
 extras = []
-m_samples_map = {"XS": 32, "S": 64, "M": 128, "L": 264, "XL": 528}
 
 for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_process):
     query = df.question[i]
@@ -86,7 +88,7 @@ for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
     docs = df.paragraphs[i]
-    utility_cache_base_dir = f"../Experiment_data/musique/{model_path.split('/')[1]}/duplicate"
+    utility_cache_base_dir = f"../Experiment_data/musique/{model_path.split('/')[1]}/new/duplicate"
     utility_cache_filename = f"utilities_q_idx{i}.pkl"
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
 
@@ -101,6 +103,7 @@ for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_
         accelerator=accelerator_main,
         utility_cache_path=current_utility_path
     )
+    full_budget=pow(2,harness.n_items)
     res = evaluate(df.question[i], harness.target_response, df.answer[i])
     if res=="True":
         if accelerator_main.is_main_process:
@@ -108,7 +111,7 @@ for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_
             metrics_results = {}
             extra_results = {}
 
-            m_samples_map = {"XS": 32, "S":64, "M":128, "L":264, "XL":528}
+            m_samples_map = {"XS": 32, "S":64, "M":128, "L":264, "XL":528, "XXL":724}
 
             # Store FM models for later R²/MSE
             fm_models = {}
@@ -123,27 +126,34 @@ for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_
                     methods_results[f"FM_WeightsLU_{rank}_{actual_samples}"], extra_results[f"Flu_{rank}_{actual_samples}"], fm_models[f"FM_WeightsLU_{rank}_{actual_samples}"] = harness.compute_wss(
                         num_samples=actual_samples,
                         seed=SEED,
-                        sampling="uniform",
+                        sampling="kernelshap",
                         sur_type="fm",
                         rank=rank
                     )
 
                 try:
-                    attributions, interactions = harness.compute_spex(sample_budget=actual_samples, max_order=2)
-                    methods_results[f"FBII_{actual_samples}"] = attributions['fbii']
-                    methods_results[f"Spex_{actual_samples}"] = attributions['fourier']
-                    methods_results[f"FSII_{actual_samples}"] = attributions['fsii']
+                    attributionsspex, interactionspex = harness.compute_spex(sample_budget=actual_samples, max_order=2)
+                    attributionshap, interactionshap = harness.compute_fsii(sample_budget=actual_samples, max_order=2)
+                    attributionban, interactionban = harness.compute_fbii(sample_budget=actual_samples, max_order=2)
+                    methods_results[f"FBII_{actual_samples}"] = attributionban
+                    methods_results[f"Spex_{actual_samples}"] = attributionsspex
+                    methods_results[f"FSII_{actual_samples}"] = attributionshap
 
                     extra_results.update({
-                    f"Int_FSII_{actual_samples}":interactions['fsii'],
-                    f"Int_FBII_{actual_samples}":interactions['fbii'],
-                    f"Int_Spex_{actual_samples}":interactions['fourier']
+                    f"Int_FSII_{actual_samples}":interactionshap,
+                    f"Int_FBII_{actual_samples}":interactionban,
+                    f"Int_Spex_{actual_samples}":interactionspex
                                                                             })
                 except Exception: pass
 
 
             methods_results["LOO"] = harness.compute_loo()
             methods_results["ARC-JSD"] = harness.compute_arc_jsd()
+            attributionxs, interactionxs = harness.compute_fsii(sample_budget=full_budget, max_order=2)
+            extra_results.update({
+            "Exact-Faith-Shap": interactionxs
+        })
+            methods_results["Exact-Faith-Shap"]=attributionxs
 
             # --- Evaluation Metrics ---
             metrics_results["topk_probability"] = harness.evaluate_topk_performance(
@@ -152,10 +162,10 @@ for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_
 
             # R²
             metrics_results["R2"] = harness.r2(methods_results,30,mode='logit-prob', models=fm_models)
-
+            metrics_results['Recall']=harness.recall_at_k(gtset_k(), methods_results, k_values)
 
             # LDS per method
-            metrics_results["LDS"] = harness.lds(methods_results,30,mode='raw-prob', models=fm_models)
+            metrics_results["LDS"] = harness.lds(methods_results,30,mode='logit-prob', models=fm_models)
 
 
 
