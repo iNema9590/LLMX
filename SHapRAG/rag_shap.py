@@ -9,6 +9,7 @@ from collections import defaultdict
 from scipy.stats import spearmanr
 import functools
 import spectralexplain as spex
+import shapiq
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -773,41 +774,40 @@ class ContextAttribution:
             return np.zeros(self.n_items), {}
 
         value_function = self._make_value_function(utility_mode)
+        approximator = shapiq.SPEX(n=self.n_items, index=method, max_order=max_order)
+        # explainer = spex.Explainer(
+        #     value_function=value_function,
+        #     features=self.items,
+        #     sample_budget=sample_budget,
+        #     max_order=max_order,
+        # )
 
-        explainer = spex.Explainer(
-            value_function=value_function,
-            features=[f"doc_{i}" for i in range(self.n_items)],
-            sample_budget=sample_budget,
-            max_order=max_order,
-        )
-
-        method_interactions = explainer.interactions(index=method)
-        converted = method_interactions.convert_fourier_interactions()
-
+        # method_interactions = explainer.interactions(index=method)
+        # converted = method_interactions.convert_fourier_interactions()
+        moebius_interactions = approximator.approximate(budget=sample_budget, game=value_function)
         attribution = np.zeros(self.n_items)
         interaction_terms = {}
 
-        for pattern, coef in converted.items():
-            order = sum(pattern)
+        for pattern, coef in moebius_interactions.dict_values.items():
+            order = len(pattern)
             if order == 1:
-                idx = pattern.index(1)
-                attribution[idx] = abs(coef)
+                attribution[pattern] = coef
             elif order == 2:
                 interaction_terms[pattern] = coef
 
-        return attribution, interaction_terms
+        return attribution, interaction_terms, moebius_interactions
 
-    def compute_spex(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
-        """Compute attribution scores using SPEX (Fourier method)."""
-        return self._run_spex("fourier", sample_budget, max_order, utility_mode)
+    # def compute_spex(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
+    #     """Compute attribution scores using SPEX (Fourier method)."""
+    #     return self._run_spex("fourier", sample_budget, max_order, utility_mode)
 
-    def compute_fsii(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
+    def compute_fsii(self, sample_budget: int, max_order: int, utility_mode: str = "logit-prob"):
         """Compute attribution scores using SPEX (FSII method)."""
-        return self._run_spex("fsii", sample_budget, max_order, utility_mode)
+        return self._run_spex("FSII", sample_budget, max_order, utility_mode)
 
-    def compute_fbii(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
+    def compute_fbii(self, sample_budget: int, max_order: int, utility_mode: str = "logit-prob"):
         """Compute attribution scores using SPEX (FBII method)."""
-        return self._run_spex("fbii", sample_budget, max_order, utility_mode)
+        return self._run_spex("FBII", sample_budget, max_order, utility_mode)
     # --------------------------------------------------------------------------
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
@@ -887,7 +887,7 @@ class ContextAttribution:
         return total_jsd
     
     def lds(self, results_dict, n_eval_util,mode, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
@@ -896,6 +896,13 @@ class ContextAttribution:
         for method_name, scores in results_dict.items():
             if "FM" in method_name:
                 predicted_effect=models[method_name].predict(X_all_sparse)
+            elif "II" in method_name:
+                predicted_effect = np.zeros(len(X_all))
+                for i, x in enumerate(X_all):
+                    for loc, coef in models[method_name].dict_values.items():
+                        # print(loc)
+                        if all(x[l] == 1 for l in loc):
+                            predicted_effect[i] += coef
             else:
                 predicted_effect=[np.dot(scores, i) for i in X_all]
 
@@ -904,7 +911,7 @@ class ContextAttribution:
         return lds
     
     def r2(self, results_dict, n_eval_util, mode, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         # exact_utilities_perplexity = [self.get_utility(v_tuple, mode="log-perplexity") for v_tuple in eval_subsets]
@@ -915,6 +922,13 @@ class ContextAttribution:
                 predicted_effect=models[method_name].predict(X_all_sparse)
             elif "ContextCite" in method_name:
                 predicted_effect=models[method_name].predict(X_all)
+            elif "II" in method_name:
+                predicted_effect = np.zeros(len(X_all))
+                for i, x in enumerate(X_all):
+                    for loc, coef in models[method_name].dict_values.items():
+                        # print(loc)
+                        if all(x[l] == 1 for l in loc):
+                            predicted_effect[i] += coef
             else:
                 predicted_effect=[np.dot(scores, i) for i in X_all]
             try:
@@ -1005,7 +1019,7 @@ class ContextAttribution:
                 if k > n_docs:
                     continue
                 # Get indices of top k documents
-                if "FM_WeightsLU" in method_name:
+                if "FM_Weights" in method_name:
                     topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=models[method_name])
                 elif "Exact" in method_name:
                     topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:])

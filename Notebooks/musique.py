@@ -17,7 +17,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from accelerate import Accelerator
 import nltk
 nltk.download('punkt')
-os.environ["CUDA_VISIBLE_DEVICES"] = "1,2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 current_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
@@ -37,7 +37,7 @@ def get_titles(lst):
 
 df.paragraphs=df.paragraphs.apply(get_titles)
 
-df["paragraphs"] = df["paragraphs"].apply(lambda p: p[:5]+ [p[1]] + p[5:])
+# df["paragraphs"] = df["paragraphs"].apply(lambda p: p[:5]+ [p[1]] + p[5:])
 
 SEED = 42
 # Initialize Accelerator
@@ -88,7 +88,7 @@ for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
     docs = df.paragraphs[i]
-    utility_cache_base_dir = f"../Experiment_data/musique/{model_path.split('/')[1]}/new/duplicate"
+    utility_cache_base_dir = f"../Experiment_data/musique/{model_path.split('/')[1]}/new"
     utility_cache_filename = f"utilities_q_idx{i}.pkl"
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
 
@@ -123,10 +123,17 @@ for i in tqdm(range(num_questions_to_run), disable=not accelerator_main.is_main_
                 )
                 # FM Weights (loop over ranks 0–5)
                 for rank in range(5, -1, -1):
-                    methods_results[f"FM_WeightsLU_{rank}_{actual_samples}"], extra_results[f"Flu_{rank}_{actual_samples}"], fm_models[f"FM_WeightsLU_{rank}_{actual_samples}"] = harness.compute_wss(
+                    methods_results[f"FM_WeightsLK_{rank}_{actual_samples}"], extra_results[f"Flk_{rank}_{actual_samples}"], fm_models[f"FM_WeightsLK_{rank}_{actual_samples}"] = harness.compute_wss(
                         num_samples=actual_samples,
                         seed=SEED,
                         sampling="kernelshap",
+                        sur_type="fm",
+                        rank=rank
+                    )
+                    methods_results[f"FM_WeightsLU_{rank}_{actual_samples}"], extra_results[f"Flu_{rank}_{actual_samples}"], fm_models[f"FM_WeightsLU_{rank}_{actual_samples}"] = harness.compute_wss(
+                        num_samples=actual_samples,
+                        seed=SEED,
+                        sampling="uniform",
                         sur_type="fm",
                         rank=rank
                     )
@@ -188,4 +195,4 @@ with open(f"{utility_cache_base_dir}/results.pkl", "wb") as f:
     pickle.dump(all_results, f)
 
 with open(f"{utility_cache_base_dir}/extras.pkl", "wb") as f:
-    pickle.dump(extras, f)
+    pickle.dump(extras, f)  
