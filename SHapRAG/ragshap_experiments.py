@@ -10,19 +10,25 @@ from scipy.stats import spearmanr
 import functools
 import spectralexplain as spex
 import shapiq
+from scipy.special import comb
+import tensorflow as tf
+from tensorflow import keras
+from keras import layers
 import numpy as np
 import torch
 import torch.nn.functional as F
 from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
+# from fastFM.sgd import FMRegression as FMRegressionSGD   
 from fastFM import als
+from sklearn.utils import resample
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import Ridge
 from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import Lasso
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import r2_score
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -211,7 +217,7 @@ class ContextAttribution:
 
             # normalize by length if needed
             if mode == 'log-prob':
-                final_metric = log_prob_with-log_prob_empty
+                final_metric = log_prob_with - log_prob_empty
             elif mode == 'raw-prob':
                 prob_with = torch.exp(log_prob_with)
                 prob_empty = torch.exp(log_prob_empty)
@@ -393,12 +399,8 @@ class ContextAttribution:
     # Sampling and Approximation Methods (Efficient)
     # --------------------------------------------------------------------------
 
-    def _generate_sampled_ablations(self, num_samples: int, sampling_method: str = "uniform", seed: int = None) -> list[tuple]:
-        """Generates a list of subset tuples based on a sampling strategy.
-        
-        - uniform: each coalition is drawn uniformly at random.
-        - kernelshap: coalition sizes follow KernelSHAP distribution, then subsets are uniform within that size.
-        """
+    def _generate_sampled_ablations(self, num_samples: int, seed: int = None) -> list[tuple]:
+        """Generates a list of random subset tuples (coalitions)."""
         if seed is not None:
             random.seed(seed)
             np.random.seed(seed)
@@ -406,87 +408,37 @@ class ContextAttribution:
         n = self.n_items
         sampled_tuples_set = set()
 
-        # Always include empty and full set (good for surrogate stability)
-        if num_samples >= 1:
-            sampled_tuples_set.add(tuple([0] * n))
-        if num_samples >= 2:
-            sampled_tuples_set.add(tuple([1] * n))
-
-        remaining_to_sample = num_samples - len(sampled_tuples_set)
-        if remaining_to_sample <= 0:
-            return list(sampled_tuples_set)
-
-        if sampling_method == "uniform":
-            while len(sampled_tuples_set) < num_samples:
-                v_tuple = tuple(np.random.randint(0, 2, n))
-                sampled_tuples_set.add(v_tuple)
-
-        elif sampling_method == "kernelshap":
-            # KernelSHAP distribution over coalition sizes
-            sizes = np.arange(1, n)  # exclude 0 and n (already added)
-            weights = (n - 1) / (sizes * (n - sizes))
-            probabilities = weights / weights.sum()
-
-            # Sample subset sizes directly from KernelSHAP distribution
-            sampled_sizes = np.random.choice(sizes, size=remaining_to_sample, p=probabilities)
-
-            for z in sampled_sizes:
-                indices_to_set = np.random.choice(n, size=z, replace=False)
-                v_np = np.zeros(n, dtype=int)
-                v_np[indices_to_set] = 1
-                sampled_tuples_set.add(tuple(v_np))
-
-            # If duplicates caused fewer samples, fill up by retrying
-            while len(sampled_tuples_set) < num_samples:
-                z = np.random.choice(sizes, p=probabilities)
-                indices_to_set = np.random.choice(n, size=z, replace=False)
-                v_np = np.zeros(n, dtype=int)
-                v_np[indices_to_set] = 1
-                sampled_tuples_set.add(tuple(v_np))
-
-        else:
-            raise ValueError("Please input a valid sampling method: 'uniform' or 'kernelshap'")
+        # Always include the empty and full sets, as they are crucial for KernelSHAP
+        if num_samples >= 1: sampled_tuples_set.add(tuple([0] * n))
+        if num_samples >= 2: sampled_tuples_set.add(tuple([1] * n))
+        
+        # Sample the rest uniformly
+        while len(sampled_tuples_set) < num_samples:
+            v_tuple = tuple(np.random.randint(0, 2, n))
+            sampled_tuples_set.add(v_tuple)
 
         return list(sampled_tuples_set)
+    
+    def _calculate_shap_kernel_weights(self, ablations: list[tuple]) -> np.ndarray:
+        n_features = self.n_items
+        weights = []
+        for v_tuple in ablations:
+            k = sum(v_tuple)
+            # Rather than infinite, use finite clipping and avoid zero/NaN
+            if k == 0 or k == n_features:
+                # Give them a stable but not infinite weight (they're usually important)
+                weight = 1e3
+            else:
+                weight = (n_features - 1) / (comb(n_features, k) * k * (n_features - k))
+            weights.append(weight)
+        weights = np.array(weights, dtype=float)
+        # numerical safety: replace inf/nan and clip extremes
+        weights = np.nan_to_num(weights, posinf=1e6, neginf=0.0)
+        # Optionally normalize to have mean 1 so scale doesn't blow up optimizers
+        weights = weights / np.mean(weights)
+        return weights
 
-
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None, alpha=0.01):
-        """Internal method to train a surrogate model on utility data."""
-        X_train = np.array(ablations)
-        y_train = np.array(utilities)
-
-        if sur_type == "linear":
-            model = Lasso(alpha=alpha, fit_intercept=True, random_state=42, max_iter=1000)
-            model.fit(X_train, y_train)
-            return model, model.coef_, None
-        
-        elif sur_type == "fm":
-            X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=1000, rank=rank, l2_reg_w=0.2, l2_reg_V=0.05, random_state=42)
-            model.fit(X_train_fm, y_train)
-            w, V = model.w_, model.V_.T
-            F = V @ V.T
-            np.fill_diagonal(F, 0.0)
-            attr = w + 0.5 * F.sum(axis=1)
-            return model, attr, F
-        
-        elif sur_type == "full_poly2":
-            poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=True)
-            X_poly = poly.fit_transform(X_train)
-            model = Ridge(alpha=0.01, fit_intercept=True) # Small alpha for stability
-            model.fit(X_poly, y_train)
-            
-            n = X_train.shape[1]
-            linear, pairs = model.coef_[:n], np.zeros((n, n))
-            idx = n
-            for i in range(n):
-                for j in range(i + 1, n):
-                    pairs[i, j] = pairs[j, i] = model.coef_[idx]
-                    idx += 1
-            importance = linear + 0.5 * pairs.sum(axis=1)
-            return model, importance, pairs
-
-    def compute_contextcite(self, num_samples: int, seed: int = None, utility_mode="logit-prob"):
+    def compute_contextcite(self, num_samples: int, seed: int = 42, utility_mode="logit-prob"):
 
         if not self.accelerator.is_main_process:
             # Return None or empty array on non-main processes
@@ -500,7 +452,6 @@ class ContextAttribution:
         # ContextCite uses uniform sampling of subsets.
         sampled_tuples = self._generate_sampled_ablations(
             num_samples, 
-            sampling_method="uniform", 
             seed=seed
         )
 
@@ -527,25 +478,82 @@ class ContextAttribution:
         )
         return weights, model
 
-    def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm",rank: int=None, utility_mode="logit-prob"):
-  
-        # Generate subsets and compute utilities
-        sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
-        pbar = tqdm(sampled_tuples, desc=f"Computing utilities for WSS ({sampling})", disable=not self.verbose)
-        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in pbar]
+    def compute_wss(self, num_samples: int, seed: int = 42, 
+                    attribution_method="kernelshap", # Renamed for clarity
+                    sur_type="fm", rank: int=None, utility_mode="logit-prob"):
+        """
+        Computes attributions using a weighted surrogate model.
+        Returns: (main_effects, interaction_effects, model)
+        """
+        if not self.accelerator.is_main_process: 
+            return (np.zeros(self.n_items), np.zeros(self.n_items), None)
+        
+        # Step 1: Generate UNIFORM random subsets
+        # The 'sampling' parameter is removed from the call as it's always uniform now.
+        sampled_tuples = self._generate_sampled_ablations(num_samples, seed=seed)
+        
+        # Step 2: Compute utilities for these subsets
+        # pbar = tqdm(sampled_tuples, desc=f"Computing utilities for {sur_type} surrogate", disable=not self.verbose)
+        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
 
         # Filter invalid utilities
-        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
+        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u is not None and u != -float('inf')]
         sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
         utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
-
-        # Train surrogate model
+        
+        # Step 3: Calculate weights for the valid samples
+        weights_for_train = None
+        if attribution_method == "kernelshap":
+            # print("Calculating KernelSHAP weights for training...")
+            weights_for_train = self._calculate_shap_kernel_weights(sampled_tuples_for_train)
+        
+        # Step 4: Train the surrogate model with the calculated weights
         model, attr, F = self._train_surrogate(
             sampled_tuples_for_train, 
             utilities_for_train, 
-            sur_type=sur_type, rank=rank
+            sur_type=sur_type, 
+            rank=rank,
+            sample_weights=weights_for_train
         )
+        
         return attr, F, model
+
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], 
+                         sur_type="linear", rank=None, alpha=0.01, 
+                         sample_weights: np.ndarray = None): # <-- Added parameter
+        """Internal method to train a surrogate model on utility data."""
+        X_train = np.array(ablations)
+        y_train = np.array(utilities)
+
+        if sur_type == "linear":
+            model = Lasso(alpha=alpha, fit_intercept=True, random_state=42, max_iter=2000)
+            # Pass weights to the fit method
+            model.fit(X_train, y_train, sample_weight=sample_weights)
+            return model, model.coef_, None
+        
+        if sur_type == "fm":
+            # set defaults
+            if rank is None:
+                rank = min(8, X_train.shape[1] // 2)
+            model, attr, F = train_fm_torch(X_train, y_train, sample_weights=sample_weights, rank=rank, n_iter=1500, lr=1e-3, l2_reg=1e-4, device=str(self.device))
+            return model, attr, F
+        
+        elif sur_type == "full_poly2":
+            poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
+            X_poly = poly.fit_transform(X_train)
+            model = Ridge(alpha=alpha, fit_intercept=True)
+            # Pass weights to the fit method
+            model.fit(X_poly, y_train, sample_weight=sample_weights)
+            
+            n = X_train.shape[1]
+            linear, pairs = model.coef_[:n], np.zeros((n, n))
+            idx = n
+            for i in range(n):
+                for j in range(i + 1, n):
+                    pairs[i, j] = pairs[j, i] = model.coef_[idx]
+                    idx += 1
+            importance = linear + 0.5 * pairs.sum(axis=1)
+            return model, importance, pairs
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                         max_unique_lookups: int, seed: int = None, 
@@ -768,7 +776,7 @@ class ContextAttribution:
                 ablated_context = [self.items[i] for i in selected_idxs]
                 ablated_context_str = "\n\n".join(ablated_context)
                 results.append(valuef_counter(ablated_context_str))
-            return np.array(results)
+            return results
 
         return value_function
 
@@ -807,44 +815,6 @@ class ContextAttribution:
     # def compute_spex(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
     #     """Compute attribution scores using SPEX (Fourier method)."""
     #     return self._run_spex("fourier", sample_budget, max_order, utility_mode)
-    # def compute_exact_fsii(self, max_order: int, utility_mode: str = "logit-prob"):
-    #     explainer = shapiq.game_theory.exact.ExactComputer(n_players=self.n_items, game=self._make_value_function(utility_mode))
-    #     interaction_values = explainer.compute_fii('FSII', max_order)
-    #     attribution = np.zeros(self.n_items)
-    #     interaction_terms = {}
-    #     for pattern, coef in interaction_values.dict_values.items():
-    #         order = len(pattern)
-    #         if order == 1:
-    #             attribution[pattern] = coef
-    #         elif order == 2:
-    #             interaction_terms[pattern] = coef
-    #     return attribution, interaction_terms, interaction_values.dict_values()
-    def compute_exact_fsii(self, max_order: int, utility_mode: str = "logit-prob", aggregate: bool = True):
-  
-        explainer = shapiq.game_theory.exact.ExactComputer(
-            n_players=self.n_items,
-            game=self._make_value_function(utility_mode)
-        )
-        interaction_values = explainer.compute_fii('FSII', max_order)
-
-        n = self.n_items
-        attribution = np.zeros(n)         # main + optional split interactions
-        main_effects = np.zeros(n)        # store only main effects
-        interaction_terms = {}            # (tuple of players) -> value
-
-        for pattern, coef in interaction_values.dict_values.items():
-            order = len(pattern)
-            if order == 1:
-                main_effects[pattern[0]] = coef
-                attribution[pattern[0]] += coef
-            elif order ==2:
-                interaction_terms[pattern] = coef
-                if aggregate:  # split equally among participants
-                    share = coef / order
-                    for p in pattern:
-                        attribution[p] += share
-
-        return attribution, interaction_terms, interaction_values
 
     def compute_fsii(self, sample_budget: int, max_order: int, utility_mode: str = "logit-prob"):
         """Compute attribution scores using SPEX (FSII method)."""
@@ -856,7 +826,7 @@ class ContextAttribution:
     # --------------------------------------------------------------------------
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
-    
+   
     def compute_jsd_for_ablated_indices(self, ablated_indices):
         """
         Computes total JSD when removing specific documents
@@ -896,7 +866,7 @@ class ContextAttribution:
         return total_jsd
     
     def lds(self, results_dict, n_eval_util,mode, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
@@ -920,7 +890,7 @@ class ContextAttribution:
         return lds
     
     def r2(self, results_dict, n_eval_util, mode, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         # exact_utilities_perplexity = [self.get_utility(v_tuple, mode="log-perplexity") for v_tuple in eval_subsets]
@@ -995,7 +965,7 @@ class ContextAttribution:
                 selection_vector[topk_indices] = 1
 
                 # Get utility using only the selected docs
-                prob_util = self.get_utility(tuple(selection_vector), mode="logit-prob")
+                prob_util = self.get_utility(tuple(selection_vector), mode="raw-prob")
 
                 method_probs[k] = prob_util
 
@@ -1076,3 +1046,68 @@ class CallCounter:
     def __call__(self, *args, **kwargs):
         self.count += 1
         return self.func(*args, **kwargs)
+
+
+
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+
+class FMDataset(Dataset):
+    def __init__(self, X, y, sample_weights=None):
+        self.X = torch.tensor(X, dtype=torch.float32)
+        self.y = torch.tensor(y, dtype=torch.float32)
+        if sample_weights is None:
+            self.w = torch.ones(len(y), dtype=torch.float32)
+        else:
+            self.w = torch.tensor(sample_weights, dtype=torch.float32)
+    def __len__(self): return self.X.shape[0]
+    def __getitem__(self, idx): return self.X[idx], self.y[idx], self.w[idx]
+
+class FactorizationMachine(nn.Module):
+    def __init__(self, n_features, rank=8):
+        super().__init__()
+        self.n = n_features
+        self.rank = rank
+        # linear term
+        self.w0 = nn.Parameter(torch.zeros(1))
+        self.w = nn.Parameter(torch.zeros(n_features))
+        # latent factors (n_features x rank)
+        self.V = nn.Parameter(torch.randn(n_features, rank) * 0.01)
+    def forward(self, x):
+        # x: batch x n
+        linear = self.w0 + (x * self.w).sum(dim=1)
+        # pairwise interactions: 0.5 * sum((xV)^2 - (x^2)(V^2))
+        xv = torch.matmul(x, self.V)  # batch x rank
+        xv2 = xv * xv
+        x2 = x * x
+        v2 = self.V * self.V
+        x2v2 = torch.matmul(x2, v2)  # batch x rank
+        interactions = 0.5 * torch.sum(xv2 - x2v2, dim=1)
+        return linear + interactions
+
+def train_fm_torch(X, y, sample_weights=None, rank=8, n_iter=2000, lr=1e-3, batch_size=128, l2_reg=1e-4, seed=42, device=None):
+    device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
+    ds = FMDataset(X, y, sample_weights=sample_weights)
+    loader = DataLoader(ds, batch_size=batch_size, shuffle=True)
+    model = FactorizationMachine(X.shape[1], rank=rank).to(device)
+    opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=l2_reg)
+    total_loss = 0.0
+    for epoch in range(n_iter):
+        for xb, yb, wb in loader:
+            # ...
+            pred = model(xb)
+            loss = (wb * ((pred - yb) ** 2)).mean() # Much cleaner!
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+            total_loss += loss.item() * xb.shape[0]
+    # extract weights
+    w0 = model.w0.detach().cpu().numpy().reshape(-1)
+    w = model.w.detach().cpu().numpy()
+    V = model.V.detach().cpu().numpy()  # n x rank
+    # compute interaction matrix F = V @ V.T
+    F = V @ V.T
+    np.fill_diagonal(F, 0.0)
+    attr = w + 0.5 * F.sum(axis=1)
+    return model, attr, F
