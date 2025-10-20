@@ -22,7 +22,7 @@ from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import Lasso
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, ndcg_score
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -462,7 +462,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=1000, rank=rank, l2_reg_w=0.2, l2_reg_V=0.05, random_state=42)
+            model = als.FMRegression(n_iter=1000, rank=rank, l2_reg_w=0.1, l2_reg_V=0.01, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -485,6 +485,9 @@ class ContextAttribution:
                     idx += 1
             importance = linear + 0.5 * pairs.sum(axis=1)
             return model, importance, pairs
+        
+        else:
+            print("Please insert a valid surrogate type")
 
     def compute_contextcite(self, num_samples: int, seed: int = None, utility_mode="logit-prob"):
 
@@ -526,6 +529,214 @@ class ContextAttribution:
             sur_type="linear"
         )
         return weights, model
+
+    def compute_wss_dynamic_pruning_split_budget(self, num_samples: int, seed: int = None,
+                                                initial_rank: int = 1, final_rank: int = 5,
+                                                pruning_strategy: str = 'top_k',
+                                                utility_mode="logit-prob", sur_type="fm"):
+        """
+        Computes attributions using a two-stage process with a split computational budget.
+        1. A low-rank FM is trained on the FIRST HALF of the sample budget to find important docs.
+        2. A high-rank FM is trained on the FULL sample budget using only the pruned docs.
+        """
+        
+        # === PREPARATION: Generate full dataset once to be efficient ===
+        
+        sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method="kernelshap", seed=seed)
+        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
+
+        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u is not None and u != -float('inf')]
+        sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
+        utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
+        
+        # Define the budget split
+        stage1_n_samples = len(utilities_for_train) // 2
+
+        # === STAGE 1: Low-Rank Model on HALF the Budget ===
+                
+        # Use the first half of the data for the initial training
+        stage1_tuples = sampled_tuples_for_train[:stage1_n_samples]
+        stage1_utilities = utilities_for_train[:stage1_n_samples]
+
+        _, initial_attr, _ = self._train_surrogate(
+            stage1_tuples, 
+            stage1_utilities, 
+            sur_type=sur_type, 
+            rank=initial_rank
+        )
+        if initial_attr is None:
+            raise ValueError("Initial surrogate model failed to train. Cannot proceed with pruning.")
+        
+        # 1c. DYNAMIC PRUNING LOGIC (same as before)
+        abs_attr = np.abs(initial_attr)
+        sorted_indices = np.argsort(abs_attr)[::-1]
+
+        if pruning_strategy == 'elbow':
+            # ... (elbow logic is the same)
+            sorted_attr = abs_attr[sorted_indices]
+            gaps = sorted_attr[:-1] - sorted_attr[1:]
+            elbow_point = np.argmax(gaps) + 1 if len(gaps) > 0 else len(sorted_indices)
+            docs_to_keep_indices = sorted_indices[:elbow_point]
+        elif pruning_strategy == 'top_k':
+            # ... (top_k logic is the same)
+            num_to_keep = self.n_items // 2
+            if num_to_keep == 0 and self.n_items > 0: num_to_keep = 1
+            docs_to_keep_indices = sorted_indices[:num_to_keep]
+        else:
+            raise ValueError(f"Unknown pruning_strategy: '{pruning_strategy}'.")
+        
+        # ... (edge case handling is the same) ...
+        docs_to_prune_indices = np.setdiff1d(np.arange(self.n_items), docs_to_keep_indices)
+        if len(docs_to_keep_indices) == self.n_items:
+            return self.compute_wss(num_samples, seed, rank=len(docs_to_keep_indices), utility_mode=utility_mode, sur_type=sur_type)
+        if len(docs_to_keep_indices) == 0:
+            return np.zeros(self.n_items), np.zeros((self.n_items, self.n_items)), (None, None)
+
+
+        # === STAGE 2: High-Rank Model on FULL Budget with Pruned Features ===
+        
+        full_n_samples = len(utilities_for_train)
+        
+        # 2a. Create the new training set by pruning features from the ENTIRE dataset
+        pruned_sampled_tuples = [tuple(np.array(t)[docs_to_keep_indices]) for t in sampled_tuples_for_train]
+
+        # 2b. Use the FULL list of original utilities
+        final_utilities = utilities_for_train
+
+        # 2c. Train the final, higher-rank model
+        final_model_pruned, attr_pruned, F_pruned = self._train_surrogate(
+            pruned_sampled_tuples,
+            final_utilities,
+            sur_type=sur_type,
+            rank=len(docs_to_keep_indices)
+        )
+        if attr_pruned is None:
+            raise ValueError("Final surrogate model failed to train.")
+
+        # 2d. Re-integrate the results (same as before)
+        final_attr = np.zeros(self.n_items)
+        final_F = np.zeros((self.n_items, self.n_items))
+        final_attr[docs_to_keep_indices] = attr_pruned
+        for i_idx, i_original in enumerate(docs_to_keep_indices):
+            for j_idx, j_original in enumerate(docs_to_keep_indices):
+                if i_idx < F_pruned.shape[0] and j_idx < F_pruned.shape[1]:
+                    final_F[i_original, j_original] = F_pruned[i_idx, j_idx]
+
+        # Return the model and kept indices for the r2 function
+        model_info = (final_model_pruned, docs_to_keep_indices)
+        return final_attr, final_F, model_info
+    
+    def compute_wss_dynamic_pruning_reuse_utility(self, num_samples: int, seed: int = None,
+                                                initial_rank: int = 1, final_rank: int = 5,
+                                                pruning_strategy: str = 'top_k', # New parameter: 'elbow' or 'top_k'
+                                                utility_mode="logit-prob", sur_type="fm", sampling_method="kernelshap"):
+        """
+        Computes attributions using a two-stage process with a choice of pruning strategies.
+        - 'elbow': Dynamically finds the drop-off point in importance scores.
+        - 'top_k': Keeps the top n_items / 2 most important documents.
+        """
+        
+        # === STAGE 1: Initial Low-Rank Model to Identify Important Documents ===
+        
+        # 1a. Generate initial samples and utilities (no changes here)
+        sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling_method, seed=seed)
+        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
+        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u is not None and u != -float('inf')]
+        sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
+        utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
+
+        # 1b. Train initial low-rank surrogate model (no changes here)
+        _, initial_attr, _ = self._train_surrogate(
+           sampled_tuples_for_train, 
+            utilities_for_train,
+            sur_type="linear"
+        )
+        # initial_attr=np.sum(in_weight+initial_F, axis=1)
+        if initial_attr is None:
+            raise ValueError("Initial surrogate model failed to train. Cannot proceed with pruning.")
+        
+        # 1c. === DYNAMIC PRUNING LOGIC ===
+        
+        abs_attr = np.abs(initial_attr)
+        print(f'Initial scores: {abs_attr}')
+        # print(f'Initial scores no abs: {initial_attr}')
+        sorted_indices = np.argsort(initial_attr)[::-1] # Sort indices from most to least important
+        sorted_attr = initial_attr[sorted_indices]
+        if pruning_strategy == 'elbow':
+            gaps = sorted_attr[:-1] / sorted_attr[1:]  
+            if len(gaps) > 0:
+                elbow_point = np.argmax(gaps) + 1
+            else:
+                elbow_point = len(sorted_indices)
+            
+            docs_to_keep_indices = sorted_indices[:elbow_point]
+
+        elif pruning_strategy == 'top_k':
+            # Keep the top half of the documents
+            num_to_keep = 7
+            # Ensure we keep at least one document
+            if num_to_keep == 0 and self.n_items > 0:
+                num_to_keep = 1
+                
+            docs_to_keep_indices = sorted_indices[:num_to_keep]
+        elif pruning_strategy== "hybrid":
+            Q1, Q3 = np.percentile(sorted_attr, [25, 75])
+            IQR = Q3 - Q1
+            upper_cutoff = Q3 + 1.5 * IQR
+            lower_cutoff = Q1 - 1.5 * IQR
+
+            # Also ensure you always keep top 10%
+            upper_quant = np.quantile(sorted_attr, 0.9)
+            lower_quant = np.quantile(sorted_attr, 0.1)
+
+            upper_final = max(upper_cutoff, upper_quant)
+            lower_final = min(lower_cutoff, lower_quant)
+
+            docs_to_keep_indices = np.where((sorted_attr >= upper_final) | (sorted_attr <= lower_final))[0]
+        else:
+            raise ValueError(f"Unknown pruning_strategy: '{pruning_strategy}'. Choose 'elbow' or 'top_k'.")
+
+        # The rest of the logic remains the same...
+        docs_to_prune_indices = np.setdiff1d(np.arange(self.n_items), docs_to_keep_indices)
+
+        if len(docs_to_keep_indices) == self.n_items:
+            return self.compute_wss(num_samples, seed, rank=final_rank, utility_mode=utility_mode, sur_type=sur_type)
+        if len(docs_to_keep_indices) == 0:
+            return np.zeros(self.n_items), np.zeros((self.n_items, self.n_items)), None
+        print(f'We are keeping {len(docs_to_keep_indices)} documents')
+        # === STAGE 2: High-Rank Model on Pruned Document Set with Reused Utilities ===
+        
+        # 2a. Create the new, smaller training set
+        pruned_sampled_tuples = [tuple(np.array(t)[docs_to_keep_indices]) for t in sampled_tuples_for_train]
+
+        # 2b. Reuse the original utilities
+        reused_utilities = utilities_for_train
+
+        # 2c. Train the final, higher-rank model
+        final_model_pruned, attr_pruned, F_pruned = self._train_surrogate(
+            pruned_sampled_tuples,
+            reused_utilities,
+            sur_type=sur_type,
+            rank=final_rank if final_rank<len(docs_to_keep_indices) else len(docs_to_keep_indices)
+        )
+        if attr_pruned is None:
+            raise ValueError("Final surrogate model failed to train.")
+
+        # 2d. Re-integrate the results back into the original M-dimensional space
+        final_attr = np.zeros(self.n_items)
+        final_F = np.zeros((self.n_items, self.n_items))
+        
+        final_attr[docs_to_keep_indices] = attr_pruned
+        
+        # Reconstruct the interaction matrix
+        for i_idx, i_original in enumerate(docs_to_keep_indices):
+            for j_idx, j_original in enumerate(docs_to_keep_indices):
+                if i_idx < F_pruned.shape[0] and j_idx < F_pruned.shape[1]:
+                    final_F[i_original, j_original] = F_pruned[i_idx, j_idx]
+
+        # Don't forget to also return the kept indices for the r2 function!
+        model_info = (final_model_pruned, docs_to_keep_indices)
+        return final_attr, final_F, model_info
 
     def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm",rank: int=None, utility_mode="logit-prob"):
   
@@ -799,7 +1010,7 @@ class ContextAttribution:
             order = len(pattern)
             if order == 1:
                 attribution[pattern] = coef
-            elif order == 2:
+            elif order <= max_order:
                 interaction_terms[pattern] = coef
 
         return attribution, interaction_terms, moebius_interactions
@@ -837,14 +1048,14 @@ class ContextAttribution:
             if order == 1:
                 main_effects[pattern[0]] = coef
                 attribution[pattern[0]] += coef
-            elif order ==2:
+            elif order <= max_order:
                 interaction_terms[pattern] = coef
-                if aggregate:  # split equally among participants
-                    share = coef / order
-                    for p in pattern:
-                        attribution[p] += share
+                # if aggregate:  # split equally among participants
+                #     share = coef / order
+                #     for p in pattern:
+                #         attribution[p] += share
 
-        return attribution, interaction_terms, interaction_values
+        return main_effects, interaction_terms, interaction_values
 
     def compute_fsii(self, sample_budget: int, max_order: int, utility_mode: str = "logit-prob"):
         """Compute attribution scores using SPEX (FSII method)."""
@@ -858,15 +1069,7 @@ class ContextAttribution:
     # --------------------------------------------------------------------------
     
     def compute_jsd_for_ablated_indices(self, ablated_indices):
-        """
-        Computes total JSD when removing specific documents
-        
-        Args:
-            ablated_indices: List of document indices to remove
-            
-        Returns:
-            Total JSD between full context and context without specified documents
-        """
+
         # Create ablated context by removing specified documents
         ablated_items = [item for j, item in enumerate(self.items) if j not in ablated_indices]
         ablated_context_str = "\n\n".join(ablated_items)
@@ -903,8 +1106,22 @@ class ContextAttribution:
         lds={}
         # Predict effects for all subsets using surrogates
         for method_name, scores in results_dict.items():
-            if "FM" in method_name:
-                predicted_effect=models[method_name].predict(X_all_sparse)
+            if "FMshs" in method_name:
+                model_or_info = models[method_name]
+                
+                # Check if this is a pruned model (i.e., we stored a tuple)
+                if isinstance(model_or_info, tuple):
+                    model, kept_indices = model_or_info
+                    
+                    # Slice the full evaluation data to get the pruned feature space
+                    X_pruned = X_all[:, kept_indices]
+                    X_pruned_sparse = csr_matrix(X_pruned)
+                    
+                    predicted_effect = model.predict(X_pruned_sparse)
+                else:
+                    # This is a standard, non-pruned model
+                    model = model_or_info
+                    predicted_effect = model.predict(X_all_sparse)
             elif "II" in method_name:
                 predicted_effect = np.zeros(len(X_all))
                 for i, x in enumerate(X_all):
@@ -925,10 +1142,25 @@ class ContextAttribution:
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         # exact_utilities_perplexity = [self.get_utility(v_tuple, mode="log-perplexity") for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
-        r2={}
+        r2_scores={}
         for method_name, scores in results_dict.items():
             if "FM" in method_name:
-                predicted_effect=models[method_name].predict(X_all_sparse)
+                # --- THIS IS THE NEW LOGIC ---
+                model_or_info = models[method_name]
+                # print(f"for {method_name} type is {isinstance(model_or_info, tuple)}")
+                # Check if this is a pruned model (i.e., we stored a tuple)
+                if isinstance(model_or_info, tuple):
+                    model, kept_indices = model_or_info
+                    
+                    # Slice the full evaluation data to get the pruned feature space
+                    X_pruned = X_all[:, kept_indices]
+                    X_pruned_sparse = csr_matrix(X_pruned)
+                    
+                    predicted_effect = model.predict(X_pruned_sparse)
+                else:
+                    # This is a standard, non-pruned model
+                    model = model_or_info
+                    predicted_effect = model.predict(X_all_sparse)
             elif "ContextCite" in method_name:
                 predicted_effect=models[method_name].predict(X_all)
             elif "II" in method_name:
@@ -944,9 +1176,9 @@ class ContextAttribution:
                 # if "FSI" in method_name or "FB" in method_name or "Spex" in method_name:
                 #     r2[method_name]=r2_score(exact_utilities_perplexity, predicted_effect)
                 # else:
-                r2[method_name]=r2_score(exact_utilities, predicted_effect)
+                r2_scores[method_name]=r2_score(exact_utilities, predicted_effect)
             except Exception: pass
-        return r2
+        return r2_scores
 
     def compute_exhaustive_top_k(self, k: int, search_list, model=None):
         n = self.n_items
@@ -1028,12 +1260,12 @@ class ContextAttribution:
                 if k > n_docs:
                     continue
                 # Get indices of top k documents
-                if "FM_Weights" in method_name:
-                    topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=models[method_name])
-                elif "Exact" in method_name:
-                    topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:])
-                else:
-                    topk_indices = np.argsort(scores)[-k:]
+                # if "FM_Weights" in method_name:
+                #     topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:], model=models[method_name])
+                # elif "Exact" in method_name:
+                #     topk_indices=self.compute_exhaustive_top_k(k, np.argsort(scores)[-10:])
+                # else:
+                topk_indices = np.argsort(scores)[-k:]
                 # Ensure topk_indices is a 1-dimensional array of integers
                 # If topk_indices could be a scalar for k=1 or similar, convert it to an array
                 if not isinstance(topk_indices, np.ndarray):
