@@ -256,49 +256,13 @@ class ContextAttribution:
 
 
     def _calculate_shapley(self, mode: str = "logit-prob") -> np.ndarray:
-        shapley_values = np.zeros(self.n_items)
-        n = self.n_items
-        factorials_local = self._factorials  # Already initialized in __init__
+        explainer = shapiq.game_theory.exact.ExactComputer(
+            n_players=self.n_items,
+            game=self._make_value_function(mode)
+        )
+        shapley_values = explainer('SV')
 
-        pbar_desc = f"Calculating Shapley (mode={mode})"
-        # Show tqdm only on main process for this CPU-bound calculation
-        pbar_enabled = self.verbose and self.accelerator.is_main_process and n > 10  # heuristic threshold
-
-        item_indices_iterator = range(n)
-        if pbar_enabled:
-            item_indices_iterator = tqdm(item_indices_iterator, desc=pbar_desc, leave=False)
-
-        # Iterate over all items
-        for i in item_indices_iterator:
-            shap_i = 0.0
-            # Iterate through all subsets of items that exclude i
-            for subset_int in range(1 << n):
-                if (subset_int >> i) & 1:
-                    continue  # skip subsets that already contain i
-
-                # Build subset as tuple of 0/1 indicators
-                s_tuple = tuple((subset_int >> j) & 1 for j in range(n))
-                s_size = sum(s_tuple)
-
-                # Get utility of S
-                s_util = self.get_utility(s_tuple, mode=mode)
-                if s_util == -float("inf"):
-                    continue  # skip failed utility
-
-                # Get utility of S ∪ {i}
-                s_union_i_list = list(s_tuple)
-                s_union_i_list[i] = 1
-                s_union_i_tuple = tuple(s_union_i_list)
-                s_union_i_util = self.get_utility(s_union_i_tuple, mode=mode)
-
-                # Marginal contribution
-                marginal_contribution = s_union_i_util - s_util
-                weight = (factorials_local[s_size] * factorials_local[n - s_size - 1]) / factorials_local[n]
-                shap_i += weight * marginal_contribution
-
-            shapley_values[i] = shap_i
-
-        return shapley_values
+        return shapley_values.values[1:]
 
 
     def compute_shapley_interaction_index_pairs_matrix(self, mode: str = "logit-prob") -> np.ndarray:
@@ -450,19 +414,19 @@ class ContextAttribution:
         return list(sampled_tuples_set)
 
 
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None, alpha=0.01):
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None):
         """Internal method to train a surrogate model on utility data."""
         X_train = np.array(ablations)
         y_train = np.array(utilities)
 
         if sur_type == "linear":
-            model = Lasso(alpha=alpha, fit_intercept=True, random_state=42, max_iter=1000)
+            model = Lasso(alpha=0.01, fit_intercept=True, random_state=42, max_iter=1000)
             model.fit(X_train, y_train)
             return model, model.coef_, None
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=1000, rank=rank, l2_reg_w=0.1, l2_reg_V=0.01, random_state=42)
+            model = als.FMRegression(n_iter=1000, rank=rank, l2_reg_w=0.001, l2_reg_V=0.001, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -508,8 +472,7 @@ class ContextAttribution:
         )
 
         # Compute utilities on-demand for the sampled subsets
-        pbar = tqdm(sampled_tuples, desc="Computing utilities for ContextCite", disable=not self.verbose)
-        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in pbar]
+        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
 
         # Filter out any samples where utility computation failed
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
@@ -627,7 +590,7 @@ class ContextAttribution:
         return final_attr, final_F, model_info
     
     def compute_wss_dynamic_pruning_reuse_utility(self, num_samples: int, seed: int = None,
-                                                initial_rank: int = 1, final_rank: int = 5,
+                                                initial_rank: int = 0, final_rank: int = 5,
                                                 pruning_strategy: str = 'top_k', # New parameter: 'elbow' or 'top_k'
                                                 utility_mode="logit-prob", sur_type="fm", sampling_method="kernelshap"):
         """
@@ -646,11 +609,13 @@ class ContextAttribution:
         utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
 
         # 1b. Train initial low-rank surrogate model (no changes here)
-        _, initial_attr, _ = self._train_surrogate(
+        _,initial_attr , _ = self._train_surrogate(
            sampled_tuples_for_train, 
             utilities_for_train,
-            sur_type="linear"
+            rank=initial_rank,
+            sur_type="fm"
         )
+        # initial_attr=F.sum(axis=1)
         # initial_attr=np.sum(in_weight+initial_F, axis=1)
         if initial_attr is None:
             raise ValueError("Initial surrogate model failed to train. Cannot proceed with pruning.")
@@ -742,8 +707,7 @@ class ContextAttribution:
   
         # Generate subsets and compute utilities
         sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
-        pbar = tqdm(sampled_tuples, desc=f"Computing utilities for WSS ({sampling})", disable=not self.verbose)
-        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in pbar]
+        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
 
         # Filter invalid utilities
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
@@ -938,8 +902,7 @@ class ContextAttribution:
             mode=utility_mode
         )
 
-        pbar = tqdm(range(self.n_items), desc=f"LOO Calls ({utility_mode})", disable=not self.verbose)
-        for i in pbar:
+        for i in range(self.n_items):
             v_loo_tuple = tuple(1 if j != i else 0 for j in range(self.n_items))
             utility_ablated = self.get_utility(v_loo_tuple, mode=utility_mode)
             
@@ -992,7 +955,9 @@ class ContextAttribution:
             return np.zeros(self.n_items), {}
 
         value_function = self._make_value_function(utility_mode)
+        print(f"Running SPEX with method")
         approximator = shapiq.SPEX(n=self.n_items, index=method, max_order=max_order)
+        print(f"SPEX approximator initialized.")
         # explainer = spex.Explainer(
         #     value_function=value_function,
         #     features=self.items,
@@ -1003,6 +968,7 @@ class ContextAttribution:
         # method_interactions = explainer.interactions(index=method)
         # converted = method_interactions.convert_fourier_interactions()
         moebius_interactions = approximator.approximate(budget=sample_budget, game=value_function)
+        print(f"SPEX approximation completed.")
         attribution = np.zeros(self.n_items)
         interaction_terms = {}
 
@@ -1010,7 +976,7 @@ class ContextAttribution:
             order = len(pattern)
             if order == 1:
                 attribution[pattern] = coef
-            elif order <= max_order:
+            elif order == 2:
                 interaction_terms[pattern] = coef
 
         return attribution, interaction_terms, moebius_interactions
@@ -1048,7 +1014,7 @@ class ContextAttribution:
             if order == 1:
                 main_effects[pattern[0]] = coef
                 attribution[pattern[0]] += coef
-            elif order <= max_order:
+            elif order ==2:
                 interaction_terms[pattern] = coef
                 # if aggregate:  # split equally among participants
                 #     share = coef / order
@@ -1106,7 +1072,7 @@ class ContextAttribution:
         lds={}
         # Predict effects for all subsets using surrogates
         for method_name, scores in results_dict.items():
-            if "FMshs" in method_name:
+            if "FM" in method_name:
                 model_or_info = models[method_name]
                 
                 # Check if this is a pruned model (i.e., we stored a tuple)
@@ -1173,9 +1139,6 @@ class ContextAttribution:
             else:
                 predicted_effect=[np.dot(scores, i) for i in X_all]
             try:
-                # if "FSI" in method_name or "FB" in method_name or "Spex" in method_name:
-                #     r2[method_name]=r2_score(exact_utilities_perplexity, predicted_effect)
-                # else:
                 r2_scores[method_name]=r2_score(exact_utilities, predicted_effect)
             except Exception: pass
         return r2_scores
@@ -1186,11 +1149,8 @@ class ContextAttribution:
         min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
 
         possible_indices_to_remove = list(itertools.combinations(search_list, k))
-        
-        pbar_desc = f"Exhaustive Top-{k} Search"
-        pbar_iter = tqdm(possible_indices_to_remove, desc=pbar_desc, disable=not self.verbose)
-
-        for k_indices_tuple in pbar_iter:
+    
+        for k_indices_tuple in possible_indices_to_remove:
             ablated_set_np = np.ones(n, dtype=int)
             ablated_set_np[list(k_indices_tuple)] = 0
             # ablated_set_tuple = tuple(ablated_set_np)
