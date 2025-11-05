@@ -111,6 +111,7 @@ class ContextAttribution:
             return self.utility_cache[subset_tuple][mode]
         
         # Compute the utility if not found in cache
+        print(f"Computing utility for subset {subset_tuple} in mode '{mode}'...")
         context_str = self._get_ablated_context_from_vector(np.array(subset_tuple))
         utility = self._compute_response_metric(context_str=context_str, mode=mode)
         
@@ -359,7 +360,6 @@ class ContextAttribution:
 
     def _generate_sampled_ablations(self, num_samples: int, sampling_method: str = "uniform", seed: int = None) -> list[tuple]:
         """Generates a list of subset tuples based on a sampling strategy.
-        
         - uniform: each coalition is drawn uniformly at random.
         - kernelshap: coalition sizes follow KernelSHAP distribution, then subsets are uniform within that size.
         """
@@ -426,7 +426,7 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=1000, rank=rank, l2_reg_w=0.001, l2_reg_V=0.001, random_state=42)
+            model = als.FMRegression(n_iter=1000, rank=rank, l2_reg_w=0.001, l2_reg_V=0.01/rank, random_state=42)
             model.fit(X_train_fm, y_train)
             w, V = model.w_, model.V_.T
             F = V @ V.T
@@ -590,7 +590,7 @@ class ContextAttribution:
         return final_attr, final_F, model_info
     
     def compute_wss_dynamic_pruning_reuse_utility(self, num_samples: int, seed: int = None,
-                                                initial_rank: int = 0, final_rank: int = 5,
+                                                initial_rank: int = 1, final_rank: int = 5,
                                                 pruning_strategy: str = 'top_k', # New parameter: 'elbow' or 'top_k'
                                                 utility_mode="logit-prob", sur_type="fm", sampling_method="kernelshap"):
         """
@@ -615,7 +615,6 @@ class ContextAttribution:
             rank=initial_rank,
             sur_type="fm"
         )
-        # initial_attr=F.sum(axis=1)
         # initial_attr=np.sum(in_weight+initial_F, axis=1)
         if initial_attr is None:
             raise ValueError("Initial surrogate model failed to train. Cannot proceed with pruning.")
@@ -923,26 +922,40 @@ class ContextAttribution:
 
 # Faithfull methods {Faith-Shap, Faith-Banzhaf, Spex}
 
+    # def _make_value_function(self, utility_mode: str):
+    #     """
+    #     Build a value function for SPEX given a utility mode.
+    #     Returns a callable that maps binary subset vectors -> utility.
+    #     """
+    #     def raw_value_function(context_str: str) -> float:
+    #         ablated_items = context_str.split("\n\n") if context_str else []
+    #         subset_vector = tuple(1 if item in ablated_items else 0 for item in self.items)
+    #         return self.get_utility(subset_vector, mode=utility_mode)
+
+    #     valuef_counter = CallCounter(raw_value_function)
+
+    #     def value_function(subsets: list) -> list:
+    #         results = []
+    #         for subset in subsets:
+    #             selected_idxs = np.where(np.array(subset) == 1)[0]
+    #             ablated_context = [self.items[i] for i in selected_idxs]
+    #             ablated_context_str = "\n\n".join(ablated_context)
+    #             results.append(valuef_counter(ablated_context_str))
+    #         return np.array(results)
+
+    #     return value_function
+
     def _make_value_function(self, utility_mode: str):
         """
-        Build a value function for SPEX given a utility mode.
-        Returns a callable that maps binary subset vectors -> utility.
+        Returns a callable mapping binary subset vectors -> utility,
+        using cached results when available.
         """
-        def raw_value_function(context_str: str) -> float:
-            ablated_items = context_str.split("\n\n") if context_str else []
-            subset_vector = tuple(1 if item in ablated_items else 0 for item in self.items)
-            return self.get_utility(subset_vector, mode=utility_mode)
-
-        valuef_counter = CallCounter(raw_value_function)
-
-        def value_function(subsets: list) -> list:
+        def value_function(subsets: list[np.ndarray | list | tuple]) -> np.ndarray:
             results = []
             for subset in subsets:
-                selected_idxs = np.where(np.array(subset) == 1)[0]
-                ablated_context = [self.items[i] for i in selected_idxs]
-                ablated_context_str = "\n\n".join(ablated_context)
-                results.append(valuef_counter(ablated_context_str))
-            return np.array(results)
+                subset_tuple = tuple(int(x) for x in subset)
+                results.append(self.get_utility(subset_tuple, mode=utility_mode))
+            return np.array(results, dtype=float)
 
         return value_function
 
@@ -955,16 +968,14 @@ class ContextAttribution:
             return np.zeros(self.n_items), {}
 
         value_function = self._make_value_function(utility_mode)
-        print(f"Running SPEX with method")
         approximator = shapiq.SPEX(n=self.n_items, index=method, max_order=max_order)
-        print(f"SPEX approximator initialized.")
+        
         # explainer = spex.Explainer(
         #     value_function=value_function,
         #     features=self.items,
         #     sample_budget=sample_budget,
         #     max_order=max_order,
         # )
-
         # method_interactions = explainer.interactions(index=method)
         # converted = method_interactions.convert_fourier_interactions()
         moebius_interactions = approximator.approximate(budget=sample_budget, game=value_function)
@@ -1139,6 +1150,9 @@ class ContextAttribution:
             else:
                 predicted_effect=[np.dot(scores, i) for i in X_all]
             try:
+                # if "FSI" in method_name or "FB" in method_name or "Spex" in method_name:
+                #     r2[method_name]=r2_score(exact_utilities_perplexity, predicted_effect)
+                # else:
                 r2_scores[method_name]=r2_score(exact_utilities, predicted_effect)
             except Exception: pass
         return r2_scores
@@ -1204,6 +1218,150 @@ class ContextAttribution:
                 rec.append(len(set(gtset_k).intersection(topk))/len(gtset_k))
             recall[method_name]=rec
         return recall
+        
+    def delta_r2(self, results_dict, num_samples=100, mode='logit-prob', models=None):
+        """
+        Computes delta R² scores that measure how well a method predicts the actual change in utility
+        when removing a player from different coalitions.
+
+        Args:
+            results_dict: Dictionary mapping method names to their attribution scores
+            num_samples: Number of coalitions to sample for evaluation
+            mode: Utility mode to use for evaluation
+            models: Dictionary of fitted surrogate models for methods that use them
+
+        Returns:
+            Dictionary mapping method names to their delta R² scores
+        """
+        # Generate evaluation samples using KernelSHAP distribution
+        eval_subsets = self._generate_sampled_ablations(num_samples, sampling_method='kernelshap', seed=2)
+        
+        # Compute actual deltas between S and S\{i}
+        actual_deltas = []
+        subset_player_pairs = []  # Track which (S,i) pairs we computed
+        
+        # For progress tracking
+        total_pairs = sum(sum(s) for s in eval_subsets)  # Number of 1s across all subsets
+        if self.verbose:
+            print(f"Computing actual utility deltas for {total_pairs} (subset, player) pairs...")
+        
+        for S in eval_subsets:
+            S_array = np.array(S)
+            S_utility = self.get_utility(tuple(S), mode=mode)
+            
+            # Only consider removing present players (where S[i] = 1)
+            for i in np.where(S_array == 1)[0]:
+                # Create S\{i} by flipping bit i
+                S_without_i = S_array.copy()
+                S_without_i[i] = 0
+                
+                # Only compute delta if both utilities are valid
+                if S_utility is not None and S_utility != -float('inf'):
+                    utility_without_i = self.get_utility(tuple(S_without_i), mode=mode)
+                    if utility_without_i is not None and utility_without_i != -float('inf'):
+                        actual_deltas.append(S_utility - utility_without_i)
+                        subset_player_pairs.append((S, i))
+        
+        if not actual_deltas:  # If no valid deltas found
+            return {method: 0.0 for method in results_dict.keys()}
+            
+        actual_deltas = np.array(actual_deltas)
+        delta_r2_scores = {}
+        
+        # For each method, compute predicted deltas and calculate R²
+        for method_name, scores in results_dict.items():
+            if self.verbose:
+                print(f"Computing delta R² for {method_name}...")
+                
+            predicted_deltas = []
+            
+            # Handle factorization machine models
+            if "FM" in method_name and models is not None:
+                # Prepare all S vectors and S\{i} vectors in batch
+                all_S = []
+                all_S_without_i = []
+                all_kept_indices = []
+                
+                model_or_info = models[method_name]
+                if isinstance(model_or_info, tuple):
+                    model, kept_indices = model_or_info
+                    # For pruned models, need to track which indices to use for each prediction
+                    for S, i in subset_player_pairs:
+                        S_pruned = np.array(S)[kept_indices]
+                        S_without_i_pruned = S_pruned.copy()
+                        if i in kept_indices:
+                            idx = np.where(kept_indices == i)[0][0]
+                            S_without_i_pruned[idx] = 0
+                        all_S.append(S_pruned)
+                        all_S_without_i.append(S_without_i_pruned)
+                        all_kept_indices.append(kept_indices)
+                else:
+                    model = model_or_info
+                    # For standard models, use full feature space
+                    for S, i in subset_player_pairs:
+                        S_array = np.array(S)
+                        S_without_i = S_array.copy()
+                        S_without_i[i] = 0
+                        all_S.append(S_array)
+                        all_S_without_i.append(S_without_i)
+                        all_kept_indices.append(None)
+                
+                # Batch predict for all S and S\{i}
+                all_S = np.stack(all_S)
+                all_S_without_i = np.stack(all_S_without_i)
+                
+                # Convert to sparse matrices
+                S_sparse = csr_matrix(all_S)
+                S_without_i_sparse = csr_matrix(all_S_without_i)
+                
+                # Get predictions
+                pred_S = model.predict(S_sparse)
+                pred_S_without_i = model.predict(S_without_i_sparse)
+                predicted_deltas = pred_S - pred_S_without_i
+            
+            # Handle interaction-based models
+            elif "II" in method_name and models is not None:
+                for S, i in subset_player_pairs:
+                    S_array = np.array(S)
+                    S_without_i = S_array.copy()
+                    S_without_i[i] = 0
+                    
+                    # Accumulate predictions from interaction terms
+                    pred_S = 0.0
+                    pred_S_without_i = 0.0
+                    
+                    for loc, coef in models[method_name].dict_values.items():
+                        # Add coefficient if all players in interaction are present
+                        if all(S_array[l] == 1 for l in loc):
+                            pred_S += coef
+                        if all(S_without_i[l] == 1 for l in loc):
+                            pred_S_without_i += coef
+                            
+                    predicted_deltas.append(pred_S - pred_S_without_i)
+            
+            # Handle linear attribution models
+            else:
+                # Direct prediction using attribution scores (linear model)
+                for S, i in subset_player_pairs:
+                    pred_S = np.dot(scores, S)
+                    S_without_i = list(S)
+                    S_without_i[i] = 0
+                    pred_S_without_i = np.dot(scores, S_without_i)
+                    predicted_deltas.append(pred_S - pred_S_without_i)
+            
+            predicted_deltas = np.array(predicted_deltas)
+            
+            # Calculate R² between actual and predicted deltas
+            if len(predicted_deltas) > 0:
+                delta_r2_scores[method_name] = r2_score(actual_deltas, predicted_deltas)
+                if self.verbose:
+                    print(f"{method_name} delta R² score: {delta_r2_scores[method_name]:.4f}")
+            else:
+                delta_r2_scores[method_name] = 0.0
+                if self.verbose:
+                    print(f"Warning: No valid predictions for {method_name}")
+                
+        return delta_r2_scores
     
     
     def evaluate_topk_performance(self, results_dict, models, k_values:list):
