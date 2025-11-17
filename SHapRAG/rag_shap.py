@@ -11,6 +11,7 @@ import functools
 import spectralexplain as spex
 import shapiq
 import numpy as np
+from scipy.special import comb
 import torch
 import torch.nn.functional as F
 from accelerate import Accelerator
@@ -21,11 +22,13 @@ from sklearn.linear_model import Ridge
 from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
 from sklearn.exceptions import ConvergenceWarning
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error, r2_score, ndcg_score
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from .Weightedfm import*
 
 class ContextAttribution:
 
@@ -49,14 +52,13 @@ class ContextAttribution:
         
         # Nested cache for multiple utility types
         self.utility_cache = defaultdict(dict)
-        
+        self.full_budget=pow(2,self.n_items)
+        # self.scaler = StandardScaler()
         # Model and tokenizer setup
         self.model.eval()
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
-            # Note: This line might modify a model config shared across processes.
-            # It's generally safe but good to be aware of.
-            # self.model.config.pad_token_id = self.model.config.eos_token_id
+
 
         self._factorials = {k: math.factorial(k) for k in range(self.n_items + 1)}
         
@@ -256,10 +258,10 @@ class ContextAttribution:
             raise ValueError(f"Invalid mode for _compute_response_metric: '{mode}'")
 
 
-    def _calculate_shapley(self, mode: str = "logit-prob") -> np.ndarray:
+    def _calculate_shapley(self, mode: str = "log-perplexity") -> np.ndarray:
         explainer = shapiq.game_theory.exact.ExactComputer(
             n_players=self.n_items,
-            game=self._make_value_function(mode)
+            game=self._make_value_function(mode, scale=True)
         )
         shapley_values = explainer('SV')
 
@@ -346,27 +348,19 @@ class ContextAttribution:
         m = 0.5 * (p + q)
         return 0.5 * (F.kl_div(m.log(), p, reduction='sum') + F.kl_div(m.log(), q, reduction='sum')).item()
     
-    # --- Public Compute Methods ---
-
 
     def _get_ablated_context_from_vector(self, v_np: np.ndarray) -> str:
         if len(v_np) != self.n_items: raise ValueError("Ablation vector length mismatch")
         included_items = [self.items[i] for i, include in enumerate(v_np) if include == 1]
         return "\n\n".join(included_items)
 
-    # --------------------------------------------------------------------------
-    # Sampling and Approximation Methods (Efficient)
-    # --------------------------------------------------------------------------
+    def _generate_sampled_ablations(self, num_samples: int, sampling_method: str = "uniform", seed: int = None):
 
-    def _generate_sampled_ablations(self, num_samples: int, sampling_method: str = "uniform", seed: int = None) -> list[tuple]:
-        """Generates a list of subset tuples based on a sampling strategy.
-        - uniform: each coalition is drawn uniformly at random.
-        - kernelshap: coalition sizes follow KernelSHAP distribution, then subsets are uniform within that size.
-        """
+        # Set random seeds for reproducibility
         if seed is not None:
             random.seed(seed)
             np.random.seed(seed)
-        
+
         n = self.n_items
         sampled_tuples_set = set()
 
@@ -416,6 +410,7 @@ class ContextAttribution:
 
     def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None):
         """Internal method to train a surrogate model on utility data."""
+        # utilities_scaled=self.scaler.transform(np.array(utilities).reshape(-1,1)).flatten()
         X_train = np.array(ablations)
         y_train = np.array(utilities)
 
@@ -426,13 +421,87 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
-            model = als.FMRegression(n_iter=1000, rank=rank, l2_reg_w=0.001, l2_reg_V=0.01/rank, random_state=42)
+
+            # --- Rank tuning if rank not provided ---
+            if rank is None:
+                candidate_ranks = [1, 2, 4, 8]
+                n_splits = 5
+                kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+                results = {}
+                warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+                for r in candidate_ranks:
+                    fold_mse = []
+                    for train_idx, val_idx in kf.split(X_train_fm):
+                        X_tr, X_val = X_train_fm[train_idx], X_train_fm[val_idx]
+                        y_tr, y_val = y_train[train_idx], y_train[val_idx]
+
+                        model = als.FMRegression(
+                            n_iter=200,
+                            rank=r,
+                            l2_reg_w=0.01,
+                            l2_reg_V=0.001,
+                            random_state=42
+                        )
+
+                        model.fit(X_tr, y_tr)
+                        preds = model.predict(X_val)
+                        mse = np.mean((preds - y_val) ** 2)
+                        fold_mse.append(mse)
+
+                    results[r] = np.mean(fold_mse)
+                best_rank = min(results, key=results.get)
+                print(f"[fastFM] Selected rank={best_rank}")
+
+            # --- Train final model with best rank ---
+            model = als.FMRegression(
+                n_iter=1000,
+                rank=best_rank,
+                l2_reg_w=0.01,
+                l2_reg_V=0.001,
+                random_state=42
+            )
             model.fit(X_train_fm, y_train)
+
             w, V = model.w_, model.V_.T
             F = V @ V.T
             np.fill_diagonal(F, 0.0)
             attr = w + 0.5 * F.sum(axis=1)
+
             return model, attr, F
+
+        elif sur_type == "fmsgd":
+            weights = shapley_kernel_weight(X_train)
+            # ablations: list[tuple] -> X, utilities -> y
+            X_train = np.array(ablations, dtype=np.int32)
+            y_train = np.array(utilities, dtype=np.float32)
+            best_rank=tune_fm_rank_cv(
+                            X_train,
+                            y_train,
+                            shapley_kernel_weights=weights,
+                            ranks=(1,2,4,8),
+                            n_splits=5,
+                            n_epochs=30,
+                            lambda_l2_w=1e-3,
+                            lambda_l2_V=1e-3,
+                            device='cuda',
+                            verbose=False,
+                            warm_start=True,
+                            random_state=42,
+                        )
+            print(f"Best rank selected: {best_rank}")
+            wrapper_model, attr, F = train_torch_fm_surrogate_shapley_als(
+                                                X_train,
+                                                y_train,
+                                                shapley_kernel_weights=weights,
+                                                rank= best_rank,
+                                                lambda_l2_w= 1e-3,
+                                                lambda_l2_V= 1e-3,
+                                                n_epochs= 200,
+                                                device="cuda" ,
+                                                verbose= False)
+            return wrapper_model, attr, F
+
         
         elif sur_type == "full_poly2":
             poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=True)
@@ -453,7 +522,7 @@ class ContextAttribution:
         else:
             print("Please insert a valid surrogate type")
 
-    def compute_contextcite(self, num_samples: int, seed: int = None, utility_mode="logit-prob"):
+    def compute_contextcite(self, num_samples: int, seed: int = None, utility_mode="log-perplexity"):
 
         if not self.accelerator.is_main_process:
             # Return None or empty array on non-main processes
@@ -493,106 +562,11 @@ class ContextAttribution:
         )
         return weights, model
 
-    def compute_wss_dynamic_pruning_split_budget(self, num_samples: int, seed: int = None,
-                                                initial_rank: int = 1, final_rank: int = 5,
-                                                pruning_strategy: str = 'top_k',
-                                                utility_mode="logit-prob", sur_type="fm"):
-        """
-        Computes attributions using a two-stage process with a split computational budget.
-        1. A low-rank FM is trained on the FIRST HALF of the sample budget to find important docs.
-        2. A high-rank FM is trained on the FULL sample budget using only the pruned docs.
-        """
-        
-        # === PREPARATION: Generate full dataset once to be efficient ===
-        
-        sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method="kernelshap", seed=seed)
-        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
-
-        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u is not None and u != -float('inf')]
-        sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
-        utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
-        
-        # Define the budget split
-        stage1_n_samples = len(utilities_for_train) // 2
-
-        # === STAGE 1: Low-Rank Model on HALF the Budget ===
-                
-        # Use the first half of the data for the initial training
-        stage1_tuples = sampled_tuples_for_train[:stage1_n_samples]
-        stage1_utilities = utilities_for_train[:stage1_n_samples]
-
-        _, initial_attr, _ = self._train_surrogate(
-            stage1_tuples, 
-            stage1_utilities, 
-            sur_type=sur_type, 
-            rank=initial_rank
-        )
-        if initial_attr is None:
-            raise ValueError("Initial surrogate model failed to train. Cannot proceed with pruning.")
-        
-        # 1c. DYNAMIC PRUNING LOGIC (same as before)
-        abs_attr = np.abs(initial_attr)
-        sorted_indices = np.argsort(abs_attr)[::-1]
-
-        if pruning_strategy == 'elbow':
-            # ... (elbow logic is the same)
-            sorted_attr = abs_attr[sorted_indices]
-            gaps = sorted_attr[:-1] - sorted_attr[1:]
-            elbow_point = np.argmax(gaps) + 1 if len(gaps) > 0 else len(sorted_indices)
-            docs_to_keep_indices = sorted_indices[:elbow_point]
-        elif pruning_strategy == 'top_k':
-            # ... (top_k logic is the same)
-            num_to_keep = self.n_items // 2
-            if num_to_keep == 0 and self.n_items > 0: num_to_keep = 1
-            docs_to_keep_indices = sorted_indices[:num_to_keep]
-        else:
-            raise ValueError(f"Unknown pruning_strategy: '{pruning_strategy}'.")
-        
-        # ... (edge case handling is the same) ...
-        docs_to_prune_indices = np.setdiff1d(np.arange(self.n_items), docs_to_keep_indices)
-        if len(docs_to_keep_indices) == self.n_items:
-            return self.compute_wss(num_samples, seed, rank=len(docs_to_keep_indices), utility_mode=utility_mode, sur_type=sur_type)
-        if len(docs_to_keep_indices) == 0:
-            return np.zeros(self.n_items), np.zeros((self.n_items, self.n_items)), (None, None)
-
-
-        # === STAGE 2: High-Rank Model on FULL Budget with Pruned Features ===
-        
-        full_n_samples = len(utilities_for_train)
-        
-        # 2a. Create the new training set by pruning features from the ENTIRE dataset
-        pruned_sampled_tuples = [tuple(np.array(t)[docs_to_keep_indices]) for t in sampled_tuples_for_train]
-
-        # 2b. Use the FULL list of original utilities
-        final_utilities = utilities_for_train
-
-        # 2c. Train the final, higher-rank model
-        final_model_pruned, attr_pruned, F_pruned = self._train_surrogate(
-            pruned_sampled_tuples,
-            final_utilities,
-            sur_type=sur_type,
-            rank=len(docs_to_keep_indices)
-        )
-        if attr_pruned is None:
-            raise ValueError("Final surrogate model failed to train.")
-
-        # 2d. Re-integrate the results (same as before)
-        final_attr = np.zeros(self.n_items)
-        final_F = np.zeros((self.n_items, self.n_items))
-        final_attr[docs_to_keep_indices] = attr_pruned
-        for i_idx, i_original in enumerate(docs_to_keep_indices):
-            for j_idx, j_original in enumerate(docs_to_keep_indices):
-                if i_idx < F_pruned.shape[0] and j_idx < F_pruned.shape[1]:
-                    final_F[i_original, j_original] = F_pruned[i_idx, j_idx]
-
-        # Return the model and kept indices for the r2 function
-        model_info = (final_model_pruned, docs_to_keep_indices)
-        return final_attr, final_F, model_info
     
     def compute_wss_dynamic_pruning_reuse_utility(self, num_samples: int, seed: int = None,
-                                                initial_rank: int = 1, final_rank: int = 5,
+                                                initial_rank: int = 1, final_rank: int = 2,
                                                 pruning_strategy: str = 'top_k', # New parameter: 'elbow' or 'top_k'
-                                                utility_mode="logit-prob", sur_type="fm", sampling_method="kernelshap"):
+                                                utility_mode="log-perplexity", sur_type="fm", sampling_method="kernelshap"):
         """
         Computes attributions using a two-stage process with a choice of pruning strategies.
         - 'elbow': Dynamically finds the drop-off point in importance scores.
@@ -702,7 +676,7 @@ class ContextAttribution:
         model_info = (final_model_pruned, docs_to_keep_indices)
         return final_attr, final_F, model_info
 
-    def compute_wss(self, num_samples: int, seed: int = None, sampling="kernelshap", sur_type="fm",rank: int=None, utility_mode="logit-prob"):
+    def compute_wss(self, num_samples: int, seed: int = None, sampling=None, sur_type="fmsgd",rank=None, utility_mode="log-perplexity"):
   
         # Generate subsets and compute utilities
         sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
@@ -888,7 +862,7 @@ class ContextAttribution:
 
         return shapley_values
 
-    def compute_loo(self, utility_mode= "logit-prob"):
+    def compute_loo(self, utility_mode= "log-perplexity"):
         """
         Computes general Leave-One-Out (LOO) scores for each item
         using the specified utility function mode.
@@ -920,32 +894,8 @@ class ContextAttribution:
         # This is now just a convenient wrapper around the general LOO method.
         return self.compute_loo(utility_mode="divergence_utility")
 
-# Faithfull methods {Faith-Shap, Faith-Banzhaf, Spex}
 
-    # def _make_value_function(self, utility_mode: str):
-    #     """
-    #     Build a value function for SPEX given a utility mode.
-    #     Returns a callable that maps binary subset vectors -> utility.
-    #     """
-    #     def raw_value_function(context_str: str) -> float:
-    #         ablated_items = context_str.split("\n\n") if context_str else []
-    #         subset_vector = tuple(1 if item in ablated_items else 0 for item in self.items)
-    #         return self.get_utility(subset_vector, mode=utility_mode)
-
-    #     valuef_counter = CallCounter(raw_value_function)
-
-    #     def value_function(subsets: list) -> list:
-    #         results = []
-    #         for subset in subsets:
-    #             selected_idxs = np.where(np.array(subset) == 1)[0]
-    #             ablated_context = [self.items[i] for i in selected_idxs]
-    #             ablated_context_str = "\n\n".join(ablated_context)
-    #             results.append(valuef_counter(ablated_context_str))
-    #         return np.array(results)
-
-    #     return value_function
-
-    def _make_value_function(self, utility_mode: str):
+    def _make_value_function(self, utility_mode: str, scale=False):
         """
         Returns a callable mapping binary subset vectors -> utility,
         using cached results when available.
@@ -955,6 +905,9 @@ class ContextAttribution:
             for subset in subsets:
                 subset_tuple = tuple(int(x) for x in subset)
                 results.append(self.get_utility(subset_tuple, mode=utility_mode))
+            # if scale:
+            #     self.scaler.fit(np.array(results).reshape(-1,1))
+            # results = self.scaler.transform(np.array(results).reshape(-1,1)).flatten()
             return np.array(results, dtype=float)
 
         return value_function
@@ -970,14 +923,6 @@ class ContextAttribution:
         value_function = self._make_value_function(utility_mode)
         approximator = shapiq.SPEX(n=self.n_items, index=method, max_order=max_order)
         
-        # explainer = spex.Explainer(
-        #     value_function=value_function,
-        #     features=self.items,
-        #     sample_budget=sample_budget,
-        #     max_order=max_order,
-        # )
-        # method_interactions = explainer.interactions(index=method)
-        # converted = method_interactions.convert_fourier_interactions()
         moebius_interactions = approximator.approximate(budget=sample_budget, game=value_function)
         print(f"SPEX approximation completed.")
         attribution = np.zeros(self.n_items)
@@ -990,24 +935,9 @@ class ContextAttribution:
             elif order == 2:
                 interaction_terms[pattern] = coef
 
-        return attribution, interaction_terms, moebius_interactions
+        return attribution, interaction_terms, moebius_interactions.dict_values
 
-    # def compute_spex(self, sample_budget: int, max_order: int = 2, utility_mode: str = "logit-prob"):
-    #     """Compute attribution scores using SPEX (Fourier method)."""
-    #     return self._run_spex("fourier", sample_budget, max_order, utility_mode)
-    # def compute_exact_fsii(self, max_order: int, utility_mode: str = "logit-prob"):
-    #     explainer = shapiq.game_theory.exact.ExactComputer(n_players=self.n_items, game=self._make_value_function(utility_mode))
-    #     interaction_values = explainer.compute_fii('FSII', max_order)
-    #     attribution = np.zeros(self.n_items)
-    #     interaction_terms = {}
-    #     for pattern, coef in interaction_values.dict_values.items():
-    #         order = len(pattern)
-    #         if order == 1:
-    #             attribution[pattern] = coef
-    #         elif order == 2:
-    #             interaction_terms[pattern] = coef
-    #     return attribution, interaction_terms, interaction_values.dict_values()
-    def compute_exact_fsii(self, max_order: int, utility_mode: str = "logit-prob", aggregate: bool = True):
+    def compute_exact_fsii(self, max_order: int, utility_mode: str = "log-perplexity", aggregate: bool = True):
   
         explainer = shapiq.game_theory.exact.ExactComputer(
             n_players=self.n_items,
@@ -1032,13 +962,27 @@ class ContextAttribution:
                 #     for p in pattern:
                 #         attribution[p] += share
 
-        return main_effects, interaction_terms, interaction_values
+        return main_effects, interaction_terms, interaction_values.dict_values
 
-    def compute_fsii(self, sample_budget: int, max_order: int, utility_mode: str = "logit-prob"):
+
+    def compute_shapiq_fsii(self, budget, utility_mode: str = "log-perplexity"):
+  
+        explainer = shapiq.approximator.montecarlo.shapiq.SHAPIQ(
+            n=self.n_items, max_order=1
+        )
+        main_effects=explainer.approximate(budget=budget, game=self._make_value_function(utility_mode)).dict_values
+        explainer2 = shapiq.approximator.montecarlo.shapiq.SHAPIQ(
+            n=self.n_items, max_order=2
+        )
+        interaction_terms=explainer2.approximate(budget=budget, game=self._make_value_function(utility_mode)).dict_values
+        interaction_values = interaction_terms|main_effects
+        return np.array(list(main_effects.values())[1:]), interaction_terms, interaction_values
+
+    def compute_fsii(self, sample_budget: int, max_order: int, utility_mode: str = "log-perplexity"):
         """Compute attribution scores using SPEX (FSII method)."""
         return self._run_spex("FSII", sample_budget, max_order, utility_mode)
 
-    def compute_fbii(self, sample_budget: int, max_order: int, utility_mode: str = "logit-prob"):
+    def compute_fbii(self, sample_budget: int, max_order: int, utility_mode: str = "log-perplexity"):
         """Compute attribution scores using SPEX (FBII method)."""
         return self._run_spex("FBII", sample_budget, max_order, utility_mode)
     # --------------------------------------------------------------------------
@@ -1075,25 +1019,22 @@ class ContextAttribution:
                 
         return total_jsd
     
-    def lds(self, results_dict, n_eval_util,mode, models):
+    def lds(self, results_dict, n_eval_util, mode, models):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
-        lds={}
+        lds = {}
         # Predict effects for all subsets using surrogates
         for method_name, scores in results_dict.items():
             if "FM" in method_name:
                 model_or_info = models[method_name]
-                
                 # Check if this is a pruned model (i.e., we stored a tuple)
                 if isinstance(model_or_info, tuple):
                     model, kept_indices = model_or_info
-                    
                     # Slice the full evaluation data to get the pruned feature space
                     X_pruned = X_all[:, kept_indices]
                     X_pruned_sparse = csr_matrix(X_pruned)
-                    
                     predicted_effect = model.predict(X_pruned_sparse)
                 else:
                     # This is a standard, non-pruned model
@@ -1102,15 +1043,17 @@ class ContextAttribution:
             elif "II" in method_name:
                 predicted_effect = np.zeros(len(X_all))
                 for i, x in enumerate(X_all):
-                    for loc, coef in models[method_name].dict_values.items():
-                        # print(loc)
+                    for loc, coef in models[method_name].items():
                         if all(x[l] == 1 for l in loc):
                             predicted_effect[i] += coef
             else:
-                predicted_effect=[np.dot(scores, i) for i in X_all]
+                predicted_effect = [np.dot(scores, i) for i in X_all]
 
-            # Calculate Spearman correlation
-            lds[method_name], _ = spearmanr(exact_utilities, predicted_effect)
+            try:
+                ndcg = ndcg_score([exact_utilities], [predicted_effect])
+            except Exception:
+                ndcg = float('nan')
+            lds[method_name] = ndcg
         return lds
     
     def r2(self, results_dict, n_eval_util, mode, models):
@@ -1143,7 +1086,7 @@ class ContextAttribution:
             elif "II" in method_name:
                 predicted_effect = np.zeros(len(X_all))
                 for i, x in enumerate(X_all):
-                    for loc, coef in models[method_name].dict_values.items():
+                    for loc, coef in models[method_name].items():
                         # print(loc)
                         if all(x[l] == 1 for l in loc):
                             predicted_effect[i] += coef
@@ -1171,43 +1114,14 @@ class ContextAttribution:
             if model:
                 utility_of_ablated_set = model.predict(csr_matrix(ablated_set_np))
             else:
-                utility_of_ablated_set = self.get_utility(tuple(ablated_set_np), mode="logit-prob")
+                utility_of_ablated_set = self.get_utility(tuple(ablated_set_np), mode="log-perplexity")
             if utility_of_ablated_set < min_utility_after_removal:
                 min_utility_after_removal = utility_of_ablated_set
                 best_k_indices_to_remove = k_indices_tuple
 
         return best_k_indices_to_remove
 
-    def top_k_response_probability(self, results_dict, k_values=[1, 3, 5]):
 
-        n_docs = self.n_items
-        evaluation_results = {}
-
-        for method_name, scores in results_dict.items():
-            method_probs = {}
-            for k in k_values:
-                if k > n_docs:
-                    continue
-
-                # Get top-k indices (largest scores)
-                topk_indices = np.argsort(scores)[-k:]
-                if not isinstance(topk_indices, np.ndarray):
-                    topk_indices = np.array([topk_indices])
-                elif topk_indices.ndim > 1:
-                    topk_indices = topk_indices.flatten()
-
-                # Create vector: 1 for selected docs, 0 for the rest
-                selection_vector = np.zeros(n_docs, dtype=int)
-                selection_vector[topk_indices] = 1
-
-                # Get utility using only the selected docs
-                prob_util = self.get_utility(tuple(selection_vector), mode="logit-prob")
-
-                method_probs[k] = prob_util
-
-            evaluation_results[method_name] = method_probs
-
-        return evaluation_results
 
     def recall_at_k(self, gtset_k, results_dict, k_val ):
         recall={}
@@ -1219,20 +1133,8 @@ class ContextAttribution:
             recall[method_name]=rec
         return recall
         
-    def delta_r2(self, results_dict, num_samples=100, mode='logit-prob', models=None):
-        """
-        Computes delta R² scores that measure how well a method predicts the actual change in utility
-        when removing a player from different coalitions.
+    def delta_r2(self, results_dict, num_samples=100, mode='log-perplexity', models=None):
 
-        Args:
-            results_dict: Dictionary mapping method names to their attribution scores
-            num_samples: Number of coalitions to sample for evaluation
-            mode: Utility mode to use for evaluation
-            models: Dictionary of fitted surrogate models for methods that use them
-
-        Returns:
-            Dictionary mapping method names to their delta R² scores
-        """
         # Generate evaluation samples using KernelSHAP distribution
         eval_subsets = self._generate_sampled_ablations(num_samples, sampling_method='kernelshap', seed=2)
         
@@ -1330,7 +1232,7 @@ class ContextAttribution:
                     pred_S = 0.0
                     pred_S_without_i = 0.0
                     
-                    for loc, coef in models[method_name].dict_values.items():
+                    for loc, coef in models[method_name].items():
                         # Add coefficient if all players in interaction are present
                         if all(S_array[l] == 1 for l in loc):
                             pred_S += coef
@@ -1369,7 +1271,7 @@ class ContextAttribution:
         n_docs = self.n_items
         evaluation_results = {}
         # Get full context utility based on type
-        full_utility = self.get_utility(tuple([1] * n_docs), mode="logit-prob")
+        full_utility = self.get_utility(tuple([1] * n_docs), mode="log-perplexity")
 
         for method_name, scores in results_dict.items():
             # Skip non-attribution results
@@ -1394,7 +1296,7 @@ class ContextAttribution:
                 ablation_vector = np.ones(n_docs, dtype=int)
                 ablation_vector[topk_indices] = 0
                 # Compute utility without top k
-                util_without_topk = self.get_utility(tuple(ablation_vector), mode="logit-prob")
+                util_without_topk = self.get_utility(tuple(ablation_vector), mode="log-perplexity")
                 # Calculate utility drop
                 if util_without_topk != -float('inf') and full_utility != -float('inf'):
                     drop = full_utility - util_without_topk
@@ -1416,13 +1318,18 @@ def logit(p, eps=1e-7):
     p = torch.clamp(p, eps, 1 - eps)
     return torch.log(p / (1 - p))
 
-class CallCounter:
-    """Wrapper to count function calls."""
-    def __init__(self, func):
-        functools.update_wrapper(self, func)
-        self.func = func
-        self.count = 0
 
-    def __call__(self, *args, **kwargs):
-        self.count += 1
-        return self.func(*args, **kwargs)
+def shapley_kernel_weight(ablations: np.ndarray) -> np.ndarray:
+
+    n_features = ablations.shape[1]
+    coalition_sizes = ablations.sum(axis=1)
+    
+    # Avoid division by zero for empty or full sets
+    weights = np.zeros_like(coalition_sizes, dtype=float)
+    mask = (coalition_sizes > 0) & (coalition_sizes < n_features)
+    
+    weights[mask] = ((n_features - 1) / 
+                     (comb(n_features, coalition_sizes[mask]) * 
+                      coalition_sizes[mask] * (n_features - coalition_sizes[mask])))
+    
+    return weights
