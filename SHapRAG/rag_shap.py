@@ -421,6 +421,24 @@ class ContextAttribution:
         
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
+            model = als.FMRegression(
+                n_iter=1000,
+                rank=2,
+                l2_reg_w=0.01,
+                l2_reg_V=0.001,
+                random_state=42
+            )
+            model.fit(X_train_fm, y_train)
+
+            w, V = model.w_, model.V_.T
+            F = V @ V.T
+            np.fill_diagonal(F, 0.0)
+            attr = w + 0.5 * F.sum(axis=1)
+
+            return model, attr, F
+        
+        elif sur_type == "fm_tuning":
+            X_train_fm = csr_matrix(X_train)
 
             # --- Rank tuning if rank not provided ---
             if rank is None:
@@ -967,16 +985,13 @@ class ContextAttribution:
 
     def compute_shapiq_fsii(self, budget, utility_mode: str = "log-perplexity"):
   
-        explainer = shapiq.approximator.montecarlo.shapiq.SHAPIQ(
-            n=self.n_items, max_order=1
-        )
-        main_effects=explainer.approximate(budget=budget, game=self._make_value_function(utility_mode)).dict_values
-        explainer2 = shapiq.approximator.montecarlo.shapiq.SHAPIQ(
-            n=self.n_items, max_order=2
-        )
-        interaction_terms=explainer2.approximate(budget=budget, game=self._make_value_function(utility_mode)).dict_values
+        explainer = shapiq.explainer.agnostic.AgnosticExplainer(game=self._make_value_function(utility_mode), n_players=self.n_items, index='FSII', max_order=1, approximator='montecarlo', random_state=42)
+        main_effects=explainer.explain_function(budget).dict_values
+
+        explainer2 = shapiq.explainer.agnostic.AgnosticExplainer(game=self._make_value_function(utility_mode), n_players=self.n_items, index='FSII', max_order=2, approximator='montecarlo', random_state=42)
+        interaction_terms=explainer2.explain_function(budget).dict_values
         interaction_values = interaction_terms|main_effects
-        return np.array(list(main_effects.values())[1:]), interaction_terms, interaction_values
+        return np.array(list(main_effects.values())), interaction_terms, interaction_values
 
     def compute_fsii(self, sample_budget: int, max_order: int, utility_mode: str = "log-perplexity"):
         """Compute attribution scores using SPEX (FSII method)."""
@@ -1050,10 +1065,10 @@ class ContextAttribution:
                 predicted_effect = [np.dot(scores, i) for i in X_all]
 
             try:
-                ndcg = ndcg_score([exact_utilities], [predicted_effect])
+                spearman,_ = spearmanr(exact_utilities, predicted_effect)
             except Exception:
-                ndcg = float('nan')
-            lds[method_name] = ndcg
+                spearman = float('nan')
+            lds[method_name] = spearman
         return lds
     
     def r2(self, results_dict, n_eval_util, mode, models):
