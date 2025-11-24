@@ -268,7 +268,7 @@ class ContextAttribution:
         return shapley_values.values[1:]
 
 
-    def compute_shapley_interaction_index_pairs_matrix(self, mode: str = "logit-prob") -> np.ndarray:
+    def compute_shapley_interaction_index_pairs_matrix(self, mode: str = "log-perplexity") -> np.ndarray:
         n = self.n_items
         interaction_matrix = np.zeros((n, n), dtype=float)
 
@@ -422,7 +422,7 @@ class ContextAttribution:
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
             model = als.FMRegression(
-                n_iter=1000,
+                n_iter=2000,
                 rank=2,
                 l2_reg_w=0.01,
                 l2_reg_V=0.001,
@@ -442,7 +442,7 @@ class ContextAttribution:
 
             # --- Rank tuning if rank not provided ---
             if rank is None:
-                candidate_ranks = [1, 2, 4, 8]
+                candidate_ranks = [1, 2, 3, 4, 5, 8]
                 n_splits = 5
                 kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
                 results = {}
@@ -473,10 +473,10 @@ class ContextAttribution:
 
             # --- Train final model with best rank ---
             model = als.FMRegression(
-                n_iter=1000,
+                n_iter=2000,
                 rank=best_rank,
                 l2_reg_w=0.01,
-                l2_reg_V=0.001,
+                l2_reg_V=0.01,
                 random_state=42
             )
             model.fit(X_train_fm, y_train)
@@ -715,7 +715,7 @@ class ContextAttribution:
 
     def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
                         max_unique_lookups: int, seed: int = None, 
-                        shared_cache: dict = None, utility_mode="logit-prob"):
+                        shared_cache: dict = None, utility_mode="log-perplexity"):
         """
         Computes Shapley values using Truncated Monte Carlo sampling.
         
@@ -801,7 +801,7 @@ class ContextAttribution:
 
     def compute_beta_shap(self, num_iterations_max: int, beta_a: float, beta_b: float,  
                         max_unique_lookups: int, seed: int = None,
-                        shared_cache: dict = None, utility_mode="logit-prob"):
+                        shared_cache: dict = None, utility_mode="log-perplexity"):
         """
         Computes Shapley values using BetaShap sampling. This version uses a
         provided shared cache and manages its own lookup budget. It runs on the main process.
