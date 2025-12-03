@@ -24,19 +24,9 @@ sys.path.append(parent_dir)
 from SHapRAG import *
 from SHapRAG.utils import *
 
-df=pd.read_json("../data/musique/musique_ans_v1.0_train.jsonl", lines=True)
-
-def get_titles(lst):
-    # Titles where is_supporting is True
-    supporting = [d['paragraph_text'] for d in lst if d.get('is_supporting') == True]
-    # Titles where is_supporting is False or missing AND not already in supporting
-    others = [d['paragraph_text'] for d in lst if d.get('is_supporting') != True and d['paragraph_text'] not in supporting]
-    # Combine: all supporting + as many others as needed to reach 10
-    result = supporting + others
-    return result[:10]
-
-df.paragraphs=df.paragraphs.apply(get_titles)
-
+df=pd.read_csv("../data/sampled_musique.csv")
+df.paragraphs=df.paragraphs.apply(ast.literal_eval)
+df["paragraphs"] = df["paragraphs"].apply(lambda p: p[:5]+ [p[1]] + p[5:])
 SEED = 42
 # Initialize Accelerator
 accelerator_main = Accelerator(mixed_precision="fp16")
@@ -44,9 +34,9 @@ accelerator_main = Accelerator(mixed_precision="fp16")
 # Load Model
 if accelerator_main.is_main_process:
     print("Main Script: Loading model...")
-model_path = "mistralai/Mistral-7B-Instruct-v0.3"
+# model_path = "mistralai/Mistral-7B-Instruct-v0.3"
 # model_path = "meta-llama/Llama-3.1-8B-Instruct"
-# model_path = "Qwen/Qwen2.5-3B-Instruct"
+model_path = "Qwen/Qwen2.5-3B-Instruct"
 
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
@@ -71,22 +61,26 @@ if accelerator_main.is_main_process:
 
 accelerator_main.wait_for_everyone()
 
-num_questions_to_run = 50
+num_questions_to_run = len(df)
 k_values = [1, 2, 3, 4, 5]
 all_results = []
 extras = []
-def gtset_k():
-    return [0, 1,2,3,5]
+def gtset_k(i):
+    if df["id_type"][i]=="2hop":
+        return [0,1]
+    elif df["id_type"][i]=="3hop":
+        return [0,1,2]
+    elif df["id_type"][i]=="4hop":
+        return [0,1,2,3]
 
 resposes = []
 for i in range(num_questions_to_run):
-    i=i+19850
     query = df.question[i]
     if accelerator_main.is_main_process:
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
     docs = df.paragraphs[i]
-    utility_cache_base_dir = f"../Experiment_data/musique/{model_path.split('/')[1]}/four/"
+    utility_cache_base_dir = f"../Experiment_data/sampled_musique/{model_path.split('/')[1]}/duplicate/"
     utility_cache_filename = f"utilities_q_idx{i}.pkl"
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
 
@@ -99,19 +93,19 @@ for i in range(num_questions_to_run):
         prepared_model=prepared_model,
         prepared_tokenizer=tokenizer,
         accelerator=accelerator_main,
-        utility_cache_path=current_utility_path
+        utility_cache_path=current_utility_path,
+        utility_mode='log-perplexity'
     )
     full_budget=pow(2,harness.n_items)
     print(f'Target response: {harness.target_response} - GT: {df.answer[i]})')
-    resposes.append(harness.target_response)
     # res = evaluate(df.question[i], harness.target_response, df.answer[i])
-    # res='True'
+    # resposes.append(res)
     if accelerator_main.is_main_process:
         methods_results = {}
         metrics_results = {}
         extra_results = {}
 
-        m_samples_map = {"XS": 32, "S":64, "M":128, "L":264, "XL":528, "XXL":724, "XXXL":1024}
+        m_samples_map = {"S":64, "M":128, "L":264, "XL":528, "XXL":724}
 
         # Store FM models for later R²/MSE
         fm_models = {}
@@ -199,5 +193,5 @@ for i in range(num_questions_to_run):
 #     pickle.dump(extras, f)
 
 
-with open(f"{utility_cache_base_dir}/responses4.pkl", "wb") as f:
-    pickle.dump(resposes, f)            
+# with open(f"{utility_cache_base_dir}/responses.pkl", "wb") as f:
+#     pickle.dump(resposes, f)            

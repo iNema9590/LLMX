@@ -37,11 +37,13 @@ class ContextAttribution:
                  prepared_tokenizer: AutoTokenizer,
                  accelerator: Accelerator = None,
                  verbose: bool = True,
-                 utility_cache_path: str = None):
+                 utility_cache_path: str = None,
+                 utility_mode: str=None):
         
         self.accelerator = accelerator if accelerator else Accelerator()
         self.items = items
         self.query = query
+        self.utility_mode = utility_mode
         self.model = prepared_model
         self.tokenizer = prepared_tokenizer
         self.verbose = verbose
@@ -113,7 +115,7 @@ class ContextAttribution:
             return self.utility_cache[subset_tuple][mode]
         
         # Compute the utility if not found in cache
-        print(f"Computing utility for subset {subset_tuple} in mode '{mode}'...")
+        # print(f"Computing utility for subset {subset_tuple} in mode '{mode}'...")
         context_str = self._get_ablated_context_from_vector(np.array(subset_tuple))
         utility = self._compute_response_metric(context_str=context_str, mode=mode)
         
@@ -126,7 +128,6 @@ class ContextAttribution:
         Saves the current state of the utility cache to a file.
         This operation is only performed by the main process to prevent race conditions.
         """
-        # --- CORRECTED: Added main process guard ---
         if self.accelerator.is_main_process:
             if self.verbose:
                 print(f"Main Process: Saving {len(self.utility_cache)} utility entries to {file_path}...")
@@ -258,24 +259,24 @@ class ContextAttribution:
             raise ValueError(f"Invalid mode for _compute_response_metric: '{mode}'")
 
 
-    def _calculate_shapley(self, mode: str = "log-perplexity") -> np.ndarray:
+    def _calculate_shapley(self) -> np.ndarray:
         explainer = shapiq.game_theory.exact.ExactComputer(
             n_players=self.n_items,
-            game=self._make_value_function(mode, scale=True)
+            game=self._make_value_function(self.utility_mode, scale=True)
         )
         shapley_values = explainer('SV')
 
         return shapley_values.values[1:]
 
 
-    def compute_shapley_interaction_index_pairs_matrix(self, mode: str = "log-perplexity") -> np.ndarray:
+    def compute_shapley_interaction_index_pairs_matrix(self) -> np.ndarray:
         n = self.n_items
         interaction_matrix = np.zeros((n, n), dtype=float)
 
         item_indices = list(range(n))
         pbar_pairs = tqdm(
             list(itertools.combinations(item_indices, 2)),
-            desc=f"Pairwise Interactions (mode={mode})",
+            desc=f"Pairwise Interactions (mode={self.utility_mode})",
             disable=not self.verbose,
         )
 
@@ -298,10 +299,10 @@ class ContextAttribution:
                 v_S_union_ij_tuple = tuple(v_S_np | (np.arange(n) == i) | (np.arange(n) == j))
 
                 # fetch utilities through cache/computation
-                util_S = self.get_utility(v_S_tuple, mode=mode)
-                util_S_i = self.get_utility(v_S_union_i_tuple, mode=mode)
-                util_S_j = self.get_utility(v_S_union_j_tuple, mode=mode)
-                util_S_ij = self.get_utility(v_S_union_ij_tuple, mode=mode)
+                util_S = self.get_utility(v_S_tuple, mode=self.utility_mode)
+                util_S_i = self.get_utility(v_S_union_i_tuple, mode=self.utility_mode)
+                util_S_j = self.get_utility(v_S_union_j_tuple, mode=self.utility_mode)
+                util_S_ij = self.get_utility(v_S_union_ij_tuple, mode=self.utility_mode)
 
                 delta_ij_S = util_S_ij - util_S_i - util_S_j + util_S
 
@@ -423,7 +424,7 @@ class ContextAttribution:
             X_train_fm = csr_matrix(X_train)
             model = als.FMRegression(
                 n_iter=2000,
-                rank=2,
+                rank=rank,
                 l2_reg_w=0.01,
                 l2_reg_V=0.001,
                 random_state=42
@@ -540,7 +541,7 @@ class ContextAttribution:
         else:
             print("Please insert a valid surrogate type")
 
-    def compute_contextcite(self, num_samples: int, seed: int = None, utility_mode="log-perplexity"):
+    def compute_contextcite(self, num_samples: int, seed: int = None):
 
         if not self.accelerator.is_main_process:
             # Return None or empty array on non-main processes
@@ -559,7 +560,7 @@ class ContextAttribution:
         )
 
         # Compute utilities on-demand for the sampled subsets
-        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
+        utilities_for_samples = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in sampled_tuples]
 
         # Filter out any samples where utility computation failed
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
@@ -584,7 +585,7 @@ class ContextAttribution:
     def compute_wss_dynamic_pruning_reuse_utility(self, num_samples: int, seed: int = None,
                                                 initial_rank: int = 1, final_rank: int = 2,
                                                 pruning_strategy: str = 'top_k', # New parameter: 'elbow' or 'top_k'
-                                                utility_mode="log-perplexity", sur_type="fm", sampling_method="kernelshap"):
+                                                 sur_type="fm", sampling_method="kernelshap"):
         """
         Computes attributions using a two-stage process with a choice of pruning strategies.
         - 'elbow': Dynamically finds the drop-off point in importance scores.
@@ -595,7 +596,7 @@ class ContextAttribution:
         
         # 1a. Generate initial samples and utilities (no changes here)
         sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling_method, seed=seed)
-        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
+        utilities_for_samples = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in sampled_tuples]
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u is not None and u != -float('inf')]
         sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
         utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
@@ -656,7 +657,7 @@ class ContextAttribution:
         docs_to_prune_indices = np.setdiff1d(np.arange(self.n_items), docs_to_keep_indices)
 
         if len(docs_to_keep_indices) == self.n_items:
-            return self.compute_wss(num_samples, seed, rank=final_rank, utility_mode=utility_mode, sur_type=sur_type)
+            return self.compute_wss(num_samples, seed, rank=final_rank, utility_mode=self.utility_mode, sur_type=sur_type)
         if len(docs_to_keep_indices) == 0:
             return np.zeros(self.n_items), np.zeros((self.n_items, self.n_items)), None
         print(f'We are keeping {len(docs_to_keep_indices)} documents')
@@ -690,15 +691,14 @@ class ContextAttribution:
                 if i_idx < F_pruned.shape[0] and j_idx < F_pruned.shape[1]:
                     final_F[i_original, j_original] = F_pruned[i_idx, j_idx]
 
-        # Don't forget to also return the kept indices for the r2 function!
         model_info = (final_model_pruned, docs_to_keep_indices)
         return final_attr, final_F, model_info
 
-    def compute_wss(self, num_samples: int, seed: int = None, sampling=None, sur_type="fmsgd",rank=None, utility_mode="log-perplexity"):
+    def compute_wss(self, num_samples: int, seed: int = None, sampling=None, sur_type="fmsgd",rank=None):
   
         # Generate subsets and compute utilities
         sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
-        utilities_for_samples = [self.get_utility(v_tuple, mode=utility_mode) for v_tuple in sampled_tuples]
+        utilities_for_samples = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in sampled_tuples]
 
         # Filter invalid utilities
         valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
@@ -880,7 +880,7 @@ class ContextAttribution:
 
         return shapley_values
 
-    def compute_loo(self, utility_mode= "log-perplexity"):
+    def compute_loo(self):
         """
         Computes general Leave-One-Out (LOO) scores for each item
         using the specified utility function mode.
@@ -890,12 +890,12 @@ class ContextAttribution:
         # V(FullSet) for the given utility mode
         utility_full_context = self.get_utility(
             tuple([1] * self.n_items), 
-            mode=utility_mode
+            mode=self.utility_mode
         )
 
         for i in range(self.n_items):
             v_loo_tuple = tuple(1 if j != i else 0 for j in range(self.n_items))
-            utility_ablated = self.get_utility(v_loo_tuple, mode=utility_mode)
+            utility_ablated = self.get_utility(v_loo_tuple, mode=self.utility_mode)
             
             if utility_full_context > -float('inf') and utility_ablated > -float('inf'):
                 loo_scores[i] = utility_full_context - utility_ablated
@@ -955,11 +955,11 @@ class ContextAttribution:
 
         return attribution, interaction_terms, moebius_interactions.dict_values
 
-    def compute_exact_fsii(self, max_order: int, utility_mode: str = "log-perplexity", aggregate: bool = True):
+    def compute_exact_fsii(self, max_order: int, aggregate: bool = True):
   
         explainer = shapiq.game_theory.exact.ExactComputer(
             n_players=self.n_items,
-            game=self._make_value_function(utility_mode)
+            game=self._make_value_function(self.utility_mode)
         )
         interaction_values = explainer.compute_fii('FSII', max_order)
 
@@ -983,23 +983,23 @@ class ContextAttribution:
         return main_effects, interaction_terms, interaction_values.dict_values
 
 
-    def compute_shapiq_fsii(self, budget, utility_mode: str = "log-perplexity"):
-  
-        explainer = shapiq.explainer.agnostic.AgnosticExplainer(game=self._make_value_function(utility_mode), n_players=self.n_items, index='FSII', max_order=1, approximator='montecarlo', random_state=42)
-        main_effects=explainer.explain_function(budget).dict_values
+    def compute_shapiq_fsii(self, budget):
+        from shapiq import SHAPIQ
+        explainer = SHAPIQ(n=self.n_items, index='FSII', max_order=1, top_order=False, random_state=42)
+        main_effects=explainer(game=self._make_value_function(self.utility_mode), budget=budget).dict_values
 
-        explainer2 = shapiq.explainer.agnostic.AgnosticExplainer(game=self._make_value_function(utility_mode), n_players=self.n_items, index='FSII', max_order=2, approximator='montecarlo', random_state=42)
-        interaction_terms=explainer2.explain_function(budget).dict_values
+        explainer2 = SHAPIQ(n=self.n_items, index='FSII', max_order=2, top_order=False, random_state=42)
+        interaction_terms=explainer2(game=self._make_value_function(self.utility_mode), budget=budget).dict_values
         interaction_values = interaction_terms|main_effects
         return np.array(list(main_effects.values())), interaction_terms, interaction_values
 
-    def compute_fsii(self, sample_budget: int, max_order: int, utility_mode: str = "log-perplexity"):
+    def compute_fsii(self, sample_budget: int, max_order: int):
         """Compute attribution scores using SPEX (FSII method)."""
-        return self._run_spex("FSII", sample_budget, max_order, utility_mode)
+        return self._run_spex("FSII", sample_budget, max_order, self.utility_mode)
 
-    def compute_fbii(self, sample_budget: int, max_order: int, utility_mode: str = "log-perplexity"):
+    def compute_fbii(self, sample_budget: int, max_order: int):
         """Compute attribution scores using SPEX (FBII method)."""
-        return self._run_spex("FBII", sample_budget, max_order, utility_mode)
+        return self._run_spex("FBII", sample_budget, max_order, self.utility_mode)
     # --------------------------------------------------------------------------
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
@@ -1034,10 +1034,10 @@ class ContextAttribution:
                 
         return total_jsd
     
-    def lds(self, results_dict, n_eval_util, mode, models):
+    def lds(self, results_dict, n_eval_util, models):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
         X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
+        exact_utilities = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         lds = {}
         # Predict effects for all subsets using surrogates
@@ -1071,10 +1071,10 @@ class ContextAttribution:
             lds[method_name] = spearman
         return lds
     
-    def r2(self, results_dict, n_eval_util, mode, models):
+    def r2(self, results_dict, n_eval_util, models):
         eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
         X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple, mode=mode) for v_tuple in eval_subsets]
+        exact_utilities = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in eval_subsets]
         # exact_utilities_perplexity = [self.get_utility(v_tuple, mode="log-perplexity") for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         r2_scores={}
@@ -1129,7 +1129,7 @@ class ContextAttribution:
             if model:
                 utility_of_ablated_set = model.predict(csr_matrix(ablated_set_np))
             else:
-                utility_of_ablated_set = self.get_utility(tuple(ablated_set_np), mode="log-perplexity")
+                utility_of_ablated_set = self.get_utility(tuple(ablated_set_np), mode=self.utility_mode)
             if utility_of_ablated_set < min_utility_after_removal:
                 min_utility_after_removal = utility_of_ablated_set
                 best_k_indices_to_remove = k_indices_tuple
@@ -1148,7 +1148,7 @@ class ContextAttribution:
             recall[method_name]=rec
         return recall
         
-    def delta_r2(self, results_dict, num_samples=100, mode='log-perplexity', models=None):
+    def delta_r2(self, results_dict, num_samples=100, models=None):
 
         # Generate evaluation samples using KernelSHAP distribution
         eval_subsets = self._generate_sampled_ablations(num_samples, sampling_method='kernelshap', seed=2)
@@ -1164,7 +1164,7 @@ class ContextAttribution:
         
         for S in eval_subsets:
             S_array = np.array(S)
-            S_utility = self.get_utility(tuple(S), mode=mode)
+            S_utility = self.get_utility(tuple(S), mode=self.utility_mode)
             
             # Only consider removing present players (where S[i] = 1)
             for i in np.where(S_array == 1)[0]:
@@ -1174,7 +1174,7 @@ class ContextAttribution:
                 
                 # Only compute delta if both utilities are valid
                 if S_utility is not None and S_utility != -float('inf'):
-                    utility_without_i = self.get_utility(tuple(S_without_i), mode=mode)
+                    utility_without_i = self.get_utility(tuple(S_without_i), mode=self.utility_mode)
                     if utility_without_i is not None and utility_without_i != -float('inf'):
                         actual_deltas.append(S_utility - utility_without_i)
                         subset_player_pairs.append((S, i))
@@ -1286,7 +1286,7 @@ class ContextAttribution:
         n_docs = self.n_items
         evaluation_results = {}
         # Get full context utility based on type
-        full_utility = self.get_utility(tuple([1] * n_docs), mode="log-perplexity")
+        full_utility = self.get_utility(tuple([1] * n_docs), mode=self.utility_mode)
 
         for method_name, scores in results_dict.items():
             # Skip non-attribution results
@@ -1311,7 +1311,7 @@ class ContextAttribution:
                 ablation_vector = np.ones(n_docs, dtype=int)
                 ablation_vector[topk_indices] = 0
                 # Compute utility without top k
-                util_without_topk = self.get_utility(tuple(ablation_vector), mode="log-perplexity")
+                util_without_topk = self.get_utility(tuple(ablation_vector), mode=self.utility_mode)
                 # Calculate utility drop
                 if util_without_topk != -float('inf') and full_utility != -float('inf'):
                     drop = full_utility - util_without_topk
