@@ -20,21 +20,22 @@ from sklearn.metrics import ndcg_score, average_precision_score
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-# CONFIG
-# You can change these two paths if needed
-DATA_CSV = Path("../data/sampled_musique.csv")
-UTILITY_CACHE_BASE_DIR_ROOT = Path("../Experiment_data/sampled_musique")
+# DATA_CSV = Path("../data/sampled_musique.csv")
+DATA_CSV = Path("../data/sampled_hotpot.csv")
+UTILITY_CACHE_BASE_DIR_ROOT = Path(f"../Experiment_data/{DATA_CSV.stem}")
+
 MODEL_PATH = "meta-llama/Llama-3.1-8B-Instruct"  # change as needed
 # MODEL_PATH = "mistralai/Mistral-7B-Instruct-v0.3"
 # MODEL_PATH = "Qwen/Qwen2.5-3B-Instruct"
-FIGURE_BASE = Path("../Figures") / MODEL_PATH.split("/")[1].split("-")[0]
+
+FIGURE_BASE = Path("../Figures") /DATA_CSV.stem/ MODEL_PATH.split("/")[1].split("-")[0]
 
 # plotting aesthetics
 METHOD_COLORS = {
     "FM-Shapley": "#ff7f0e",
     "Spex": "#d62728",
     "Shapiq": "#2ca02c",
-    "Flk": "#9467bd",
+    "ProxySpex": "#9467bd",
     "Exact-FSII": "#8c564b",
     "Exact-Shap": "#e377c2",
     "LOO": "#7f7f7f",
@@ -43,7 +44,7 @@ METHOD_COLORS = {
     "default": "#17becf",
 }
 mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=list(METHOD_COLORS.values()))
-plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'font.size': 24})
 plt.rcParams['pdf.fonttype'] = 42
 plt.rcParams['ps.fonttype'] = 42
 
@@ -57,15 +58,15 @@ def family_of(method_key: str) -> str:
     """Map a method key to a color family."""
     if method_key.startswith("FM"):
         return "FM-Shapley"
-    if method_key.startswith("Spex"):
+    elif method_key.startswith("Spex"):
         return "Spex"
-    if method_key.startswith("Shapiq"):
+    elif method_key.startswith("Shapiq"):
         return "Shapiq"
-    if method_key.startswith("Flk"):
-        return "Flk"
-    if method_key.startswith("ContextCite"):
+    elif method_key.startswith("ProxySpex"):
+        return "ProxySpex"
+    elif method_key.startswith("ContextCite"):
         return "ContextCite"
-    if method_key in ("Exact-FSII", "Exact-Shap", "LOO", "ARC-JSD"):
+    elif method_key in ("Exact-FSII", "Exact-Shap", "LOO", "ARC-JSD"):
         return method_key
     return "default"
 
@@ -99,19 +100,29 @@ def load_inputs():
     return dfin, all_results, extras
 
 
+# def GT(dfin, i):
+#     """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
+#     t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
+#     if t == "2hop":
+#         return [0, 1]
+#     if t == "3hop":
+#         return [0, 1, 2]
+#     if t == "4hop":
+#         return [0, 1, 2, 3]
+#     # fallback: empty
+#     return []
+
 def GT(dfin, i):
-    """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
-    t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
-    if t == "2hop":
-        return [0, 1]
-    if t == "3hop":
-        return [0, 1, 2]
-    if t == "4hop":
-        return [0, 1, 2, 3]
-    # fallback: empty
-    return []
+    if dfin["len_gt"][i]==2:
+        return [0,1]
+    elif dfin["len_gt"][i]==3:
+        return [0,1,2]
+    elif dfin["len_gt"][i]==4:
+        return [0,1,2,3]
 
-
+# ---------------------
+# 1. Marginal metrics summary
+# ---------------------
 def scale_pair_preserve_order(ref_arr, att_arr):
     """
     Scale reference and attribution together to [0,1] using the combined min/max so
@@ -224,7 +235,7 @@ def compute_ndcg_per_k(all_results, save_path):
                 fixed_results.setdefault(method, {})[k] = results[FIXED_BUDGET]
             elif None in results:
                 fixed_results.setdefault(method, {})[k] = results[None]
-
+    pd.DataFrame(fixed_results).to_csv(save_path / f"ndcg@k{FIXED_BUDGET}.csv")
     plt.figure(figsize=(8, 6))
     for method, k_dict in fixed_results.items():
         ks_sorted = sorted(k_dict.keys())
@@ -238,7 +249,7 @@ def compute_ndcg_per_k(all_results, save_path):
     plt.savefig(out, bbox_inches='tight')
     plt.close()
     logging.info("Saved %s", out)
-
+                
 
 def average_precision_for_query(scores, true_indices):
     # Reuse sklearn AP for binary relevance if possible; otherwise implement fallback
@@ -328,7 +339,7 @@ def compute_prauc(all_results, dfin, save_path):
 
 
 # ---------------------
-# SURROGATE / metrics summary
+# 2. SURROGATE / metrics summary
 # ---------------------
 def summarize_and_print(all_results, k_values=[1, 2, 3, 4, 5]):
     """
@@ -409,10 +420,68 @@ def plot_surrogate_metrics(df_summary, save_path):
     for metric, ylabel in [("R2", "R2"), ("LDS", "LDS"), ("Delta_R2", "Delta R2")]:
         if metric in df_budgeted.columns:
             plot_metric(metric, ylabel)
+        
+    #Plot topk_probability at fixed budget 
+    metric = f"topk_probability_k"
+
+    plt.figure(figsize=(8, 6))
+    plt.xlabel("K-Values")
+    plt.ylabel("Top-K Utility Drop")
+    for fam in df_budgeted['family'].unique():
+        subset = df_budgeted[df_budgeted['family'] == fam]
+        if subset.empty:
+            continue
+        ks = []
+        vals = []
+        for k in K_VALUES:
+            col_name = f"{metric}{k}"
+            row = subset[subset['budget'] == 528]
+            if not row.empty and col_name in row.columns:
+                val = row.iloc[0][col_name]
+                if not pd.isna(val):
+                    ks.append(k)
+                    vals.append(val)
+        if ks and vals:
+            plt.plot(ks, vals, marker='o', label=fam, color=get_color(fam))
+    plt.grid(True)
+    plt.tight_layout()
+    out = save_path / f"topk_probability_vs_k_fixed_budget_{FIXED_BUDGET}.pdf"
+    plt.savefig(out, bbox_inches='tight')
+    plt.close()
+    logging.info("Saved %s", out)
+
+    # Plot recall at fixed budget
+    metric = f"Recall@"
+    plt.figure(figsize=(8, 6))
+    plt.xlabel("K-Values")
+    plt.ylabel("Recall@K")
+    for fam in df_budgeted['family'].unique():
+        subset = df_budgeted[df_budgeted['family'] == fam]
+        if subset.empty:
+            continue
+        ks = []
+        vals = []
+        for k in K_VALUES:
+            col_name = f"{metric}{k}"
+            row = subset[subset['budget'] == 528]
+            if not row.empty and col_name in row.columns:
+                val = row.iloc[0][col_name]
+                if not pd.isna(val):
+                    ks.append(k)
+                    vals.append(val)
+        if ks and vals:
+            plt.plot(ks, vals, marker='o', label=fam, color=get_color(fam))
+    plt.grid(True)
+    plt.tight_layout()
+    out = save_path / f"recall_vs_k_fixed_budget_{FIXED_BUDGET}.pdf"
+    plt.savefig(out, bbox_inches='tight')
+    plt.close()
+    logging.info("Saved %s", out)
+       
 
 
 # ---------------------
-# Interaction quality (RR, NDCG over pairs)
+# 3. Interaction quality (RR, NDCG over pairs)
 # ---------------------
 def compute_rr_at_k(interaction, ground_truth, k):
     """
@@ -449,6 +518,8 @@ def extract_family(key):
         return "FM"
     if key.startswith("Spex"):
         return "Spex"
+    if key.startswith("ProxySpex"):
+        return "ProxySpex"
     if key.startswith("Flk"):
         parts = key.split("_")
         return parts[0] + "_" + parts[1] if len(parts) > 1 else key
@@ -558,6 +629,68 @@ def interaction_rr_and_ndcg(extras, dfin, save_path):
     plt.savefig(out, bbox_inches='tight')
     plt.close()
     logging.info("Saved %s", out)
+
+    # === Save K-based metrics for the fixed budget ===
+    FIXED_BUDGET = 264
+    K_VALUES = [1, 2, 3, 4, 5]
+
+    logging.info(f"Saving RR and NDCG metrics for K={K_VALUES} at budget={FIXED_BUDGET}...")
+
+    rows = []  # store CSV rows
+
+    # compute RR and NDCG for each experiment and family
+    for fam in family_budget_avg.keys():  # loop families
+        for k in K_VALUES:
+            rr_scores = []
+            ndcg_scores = []
+
+            for i, exp in enumerate(extras):
+                gt = set(GT(dfin, i))
+
+                # process RR@k for the family at fixed budget
+                for method, interaction in exp.items():
+                    budget = extract_budget(method)
+                    family = extract_family(method)
+                    if family == fam and budget == FIXED_BUDGET:
+                        try:
+                            rr_scores.append(compute_rr_at_k(interaction, gt, k=k))
+                        except Exception:
+                            pass
+
+                # process NDCG@k
+                exact = exp.get("Exact-FSII", {})
+                exact_vec = vector_for_pairs(exact, pairs)
+                if np.allclose(exact_vec, 0.0):
+                    continue
+
+                for method, val in exp.items():
+                    budget = extract_budget(method)
+                    family = extract_family(method)
+                    if family == fam and budget == FIXED_BUDGET:
+                        try:
+                            vec = vector_for_pairs(val, pairs)
+                            ndcg = ndcg_score([exact_vec], [vec], k=k)
+                            ndcg_scores.append(ndcg)
+                        except Exception:
+                            pass
+
+            if rr_scores or ndcg_scores:
+                rows.append({
+                    "family": fam,
+                    "k": k,
+                    "rr": np.mean(rr_scores) if rr_scores else None,
+                    "ndcg": np.mean(ndcg_scores) if ndcg_scores else None
+                })
+
+    # write output CSV
+    csv_path = save_path / "rr_ndcg_k_metrics.csv"
+    import csv
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["family", "k", "rr", "ndcg"])
+        writer.writeheader()
+        writer.writerows(rows)
+
+    logging.info("Saved RR/NDCG per K to %s", csv_path)
 
 
 def main():

@@ -982,6 +982,30 @@ class ContextAttribution:
 
         return main_effects, interaction_terms, interaction_values.dict_values
 
+    def _run_proxyspex(self, method: str, sample_budget: int, max_order: int, utility_mode: str):
+        """
+        Internal runner for SPEX methods.
+        Returns (attributions, interactions).
+        """
+        if not self.accelerator.is_main_process:
+            return np.zeros(self.n_items), {}
+
+        value_function = self._make_value_function(utility_mode)
+        approximator = shapiq.ProxySPEX(n=self.n_items, index=method, max_order=max_order)
+        
+        moebius_interactions = approximator.approximate(budget=sample_budget, game=value_function)
+        print(f"SPEX approximation completed.")
+        attribution = np.zeros(self.n_items)
+        interaction_terms = {}
+
+        for pattern, coef in moebius_interactions.dict_values.items():
+            order = len(pattern)
+            if order == 1:
+                attribution[pattern] = coef
+            elif order == 2:
+                interaction_terms[pattern] = coef
+
+        return attribution, interaction_terms, moebius_interactions.dict_values
 
     def compute_shapiq_fsii(self, budget):
         from shapiq import SHAPIQ
@@ -999,7 +1023,7 @@ class ContextAttribution:
 
     def compute_fbii(self, sample_budget: int, max_order: int):
         """Compute attribution scores using SPEX (FBII method)."""
-        return self._run_spex("FBII", sample_budget, max_order, self.utility_mode)
+        return self._run_proxyspex("FSII", sample_budget, max_order, self.utility_mode)
     # --------------------------------------------------------------------------
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
