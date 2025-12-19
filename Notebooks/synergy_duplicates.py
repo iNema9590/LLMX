@@ -2,6 +2,7 @@ import sys
 import os
 import random
 import gc
+import re
 import time
 import torch
 import numpy as np
@@ -12,32 +13,118 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 import itertools
 from scipy.stats import spearmanr, pearsonr, kendalltau, rankdata
-from sklearn.metrics import ndcg_score
+from sklearn.metrics import ndcg_score, average_precision_score, precision_recall_curve
+from sklearn.preprocessing import MinMaxScaler
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from accelerate import Accelerator
 # import nltk
 # nltk.download('punkt')
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 current_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 from SHapRAG import *
 from SHapRAG.utils import *
 
-df=pd.read_json("../data/musique/musique_ans_v1.0_train.jsonl", lines=True)
+df=pd.read_parquet("../data/train_2wiki.parquet")
+df=df[df.type=="comparison"]
+df=df.reset_index().drop(columns=["index"],inplace=False)
 
-def get_titles(lst):
-    # Titles where is_supporting is True
-    supporting = [d['paragraph_text'] for d in lst if d.get('is_supporting') == True]
-    # Titles where is_supporting is False or missing AND not already in supporting
-    others = [d['paragraph_text'] for d in lst if d.get('is_supporting') != True and d['paragraph_text'] not in supporting]
-    # Combine: all supporting + as many others as needed to reach 10
-    result = supporting + others
-    return result[:10]
+# 2wiki
+def annotate(gt, context):
+    docs = []
+    sents = []
+    gt_docs = set()
+    gt_sents = set()
+    gt_anns = {}
+    for gt_ann in gt:
+        try:
+            gt_anns[gt_ann[0]].append(gt_ann[1])
+        except:
+            gt_anns[gt_ann[0]]= [gt_ann[1]]
+    gt_i = 0
+    for para in range(len(context)):
+        title, sentences = context[para]
+        if title in gt_anns:
+            gt_indices = gt_anns[title]
+            #print('title', title, '\nsentences', sentences)
+            gt_docs.add(para)
+            for idx in gt_indices:
+                gt_id = gt_i + idx
+                gt_sents.add(gt_id)
+        gt_i += len(sentences)
+        doc = ''.join(sentences)
+        docs.append(doc)
+        sents = sents + [x.strip() for x in sentences]
+    return docs, sents, gt_docs, gt_sents
+ 
+all_docs = []
+all_sents = []
+all_gt_docs = []
+all_gt_sents = []
+all_reordered_docs = []
+all_reordered_sents = []
+all_len_gt = []
+#all_labels = []
+num_gt_docs = 0
+num_gt_sents = 0
+for i in range(len(df.context)):
+    gt = ast.literal_eval(df.supporting_facts[i])
+    context = ast.literal_eval(df.context[i])
+    docs, sents, gt_docs, gt_sents = annotate(gt, context)
+    arr_gt_docs = list(gt_docs)
+    num_gt_docs += len(arr_gt_docs)
+    arr_gt_sents = list(gt_sents)
+    num_gt_sents += len(arr_gt_sents)
+    not_gt = [i for i in range(len(docs)) if i not in gt_docs]
+    not_gt_sents = [i for i in range(len(sents)) if i not in gt_sents]
 
-df.paragraphs=df.paragraphs.apply(get_titles)
-df["paragraphs"] = df["paragraphs"].apply(lambda p: p[:5]+ [p[1]] + p[5:])
-SEED = 42
+    if len(arr_gt_docs) == 2:
+        all_len_gt.append(2)
+        # NO DUPLICATES
+        reordered_docs = [docs[arr_gt_docs[0]]] + [docs[arr_gt_docs[1]]] + [docs[not_gt[0]]] + [docs[not_gt[1]]] + [docs[not_gt[2]]] + \
+                         [docs[x] for x in not_gt[3:]]
+        reordered_sents = [sents[arr_gt_sents[0]]] + [sents[arr_gt_sents[1]]] + [sents[not_gt_sents[0]]] + [sents[not_gt_sents[1]]] + \
+                         [sents[not_gt_sents[2]]] + [sents[x] for x in not_gt_sents[3:]]
+
+    elif len(arr_gt_docs) == 3:
+        all_len_gt.append(3)
+        # NO DUPLICATES
+        reordered_docs = [docs[arr_gt_docs[0]]] + [docs[arr_gt_docs[1]]] + [docs[arr_gt_docs[2]]] + [docs[not_gt[0]]] + [docs[not_gt[1]]] + \
+                         [docs[x] for x in not_gt[2:]]
+        reordered_sents = [sents[arr_gt_sents[0]]] + [sents[arr_gt_sents[1]]] + [sents[arr_gt_sents[2]]] + [sents[not_gt_sents[0]]] + \
+                         [sents[not_gt_sents[1]]] + [sents[x] for x in not_gt_sents[2:]]
+
+    elif len(arr_gt_docs) == 4:
+        all_len_gt.append(4)
+        # NO DUPLICATES
+        reordered_docs = [docs[arr_gt_docs[0]]] + [docs[arr_gt_docs[1]]] + [docs[arr_gt_docs[2]]] + [docs[arr_gt_docs[3]]] + \
+                         [docs[not_gt[0]]] + [docs[x] for x in not_gt[1:]]
+        reordered_sents = [sents[arr_gt_sents[0]]] + [sents[arr_gt_sents[1]]] + [sents[arr_gt_sents[2]]] + [sents[arr_gt_sents[3]]] + \
+                         [sents[not_gt_sents[0]]] + [sents[x] for x in not_gt_sents[1:]]
+
+    all_docs.append(docs)
+    all_sents.append(sents)
+    all_gt_docs.append(list(gt_docs))
+    all_gt_sents.append(list(gt_sents))
+    all_reordered_docs.append(reordered_docs)
+    all_reordered_sents.append(reordered_sents)
+av_gt_docs = num_gt_docs / len(df.context)
+av_gt_sents = num_gt_sents / len(df.context)
+print('average gt docs: ', av_gt_docs, '\naverage gt sents: ', av_gt_sents)
+ 
+df['paragraphs'] = all_docs
+df['sentences'] = all_sents
+df['gt_paragraphs'] = all_gt_docs
+df['gt_sentences'] = all_gt_sents
+df['reordered_paragraphs'] = all_reordered_docs
+df['reordered_sentences'] = all_reordered_sents
+df['len_gt'] = all_len_gt
+
+with open("../data/new_questions_2wiki.txt", "r", encoding="utf-8") as f:
+    new_questions = [line.strip() for line in f.readlines()]
+
+    SEED = 42
 # Initialize Accelerator
 accelerator_main = Accelerator(mixed_precision="fp16")
 
@@ -67,25 +154,21 @@ unwrapped_prepared_model.eval()
 if accelerator_main.is_main_process:
     print("Main Script: Model prepared and set to eval.")
 
-# Define utility cache
-
 accelerator_main.wait_for_everyone()
+utility_cache_base_dir = f"../Experiment_data/complementary/{model_path.split('/')[1]}/new"
 
-num_questions_to_run = 50
-k_values = [1, 2, 3, 4, 5]
+num_questions_to_run = 100
+K_VALUES = [1, 2, 3, 4, 5]
 all_results = []
 extras = []
-def gtset_k():
-    return [0, 1,2,3,5]
 
-resposes = []
 for i in range(num_questions_to_run):
-    query = df.question[i]
+    query = new_questions[i]
+    # if res[i]=="True":
     if accelerator_main.is_main_process:
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
-    docs = df.paragraphs[i]
-    utility_cache_base_dir = f"../Experiment_data/musique/{model_path.split('/')[1]}/duplicate/"
+    docs = df.reordered_paragraphs[i]
     utility_cache_filename = f"utilities_q_idx{i}.pkl"
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
 
@@ -98,105 +181,21 @@ for i in range(num_questions_to_run):
         prepared_model=prepared_model,
         prepared_tokenizer=tokenizer,
         accelerator=accelerator_main,
-        utility_cache_path=current_utility_path
+        utility_cache_path=current_utility_path,
+        utility_mode='log-perplexity'
     )
+    
     full_budget=pow(2,harness.n_items)
-    print(f'Target response: {harness.target_response} - GT: {df.answer[i]})')
-    resposes.append(harness.target_response)
     # res = evaluate(df.question[i], harness.target_response, df.answer[i])
-    # res='True'
+    # print(res)
     if accelerator_main.is_main_process:
         methods_results = {}
         metrics_results = {}
         extra_results = {}
 
-        m_samples_map = {"XS": 32, "S":64, "M":128, "L":264, "XL":528, "XXL":724, "XXXL":1024}
+        m_samples_map = {"XS":32, "S":64, "M":128, "L":264, "XL":528, "XXL":724}
 
         # Store FM models for later R²/MSE
         fm_models = {}
         methods_results['Exact-Shap']=harness._calculate_shapley()
-        # for size_key, actual_samples in m_samples_map.items():
-        #     print(f"Running sample size: {actual_samples}")
-        #     methods_results[f"ContextCite_{actual_samples}"], fm_models[f"ContextCite_{actual_samples}"] = harness.compute_contextcite(
-        #         num_samples=actual_samples, seed=SEED
-        #     )
-            # FM Weights (loop over ranks 0–5)
-            # for rank in [1,2,4,8]:
-            #     methods_results[f"FM_WeightsLK_{rank}_{actual_samples}"], extra_results[f"Flk_{rank}_{actual_samples}"], fm_models[f"FM_WeightsLK_{rank}_{actual_samples}"] = harness.compute_wss(
-            #         num_samples=actual_samples,
-            #         seed=SEED,
-            #         sampling="kernelshap",
-            #         sur_type="fm",
-            #         rank=rank
-            #     )
-                # methods_results[f"FM_WeightsLU_{rank}_{actual_samples}"], extra_results[f"Flu_{rank}_{actual_samples}"], fm_models[f"FM_WeightsLU_{rank}_{actual_samples}"] = harness.compute_wss(
-                #     num_samples=actual_samples,
-                #     seed=SEED,
-                #     sampling="kernelshap",
-                #     sur_type="fm",
-                #     rank=rank
-                # )
-            # methods_results[f"FM_u_dynamic_{actual_samples}"], extra_results[f"FM_u_dynamic_{actual_samples}"], fm_models[f"FM_u_dynamic_{actual_samples}"] = harness.compute_wss_dynamic_pruning_reuse_utility(num_samples=actual_samples)
-            # methods_results[f"FM_k_dynamic_{actual_samples}"], extra_results[f"FM_k_dynamic_{actual_samples}"], fm_models[f"FM_k_dynamic_{actual_samples}"] = harness.compute_wss_dynamic_pruning_reuse_utility(num_samples=actual_samples, initial_rank=1, final_rank=2)
-            # methods_results[f"FM_k_dynamice_{actual_samples}"], extra_results[f"FM_k_dynamice_{actual_samples}"], fm_models[f"FM_k_dynamice_{actual_samples}"] = harness.compute_wss_dynamic_pruning_reuse_utility(num_samples=actual_samples, pruning_strategy='elbow')
-            # try:
-                # attributionsspex, interactionspex = harness.compute_spex(sample_budget=actual_samples, max_order=2)
-                # attributionshap, interactionshap, fm_models[f"FSII_{actual_samples}"] = harness.compute_fsii(sample_budget=actual_samples, max_order=2)
-                # attributionban, interactionban, fm_models[f"FBII_{actual_samples}"] = harness.compute_fbii(sample_budget=actual_samples, max_order=harness.n_items)
-                # methods_results[f"FBII_{actual_samples}"] = attributionban
-                # methods_results[f"FSII_{actual_samples}"] = attributionshap
-                # methods_results[f"Spex_{actual_samples}"] = attributionsspex
-
-
-            #     extra_results.update({
-            #     f"Int_FSII_{actual_samples}":interactionshap,
-            #     f"Int_FBII_{actual_samples}":interactionban,
-            #     # f"Int_Spex_{actual_samples}":interactionspex
-            #                                                             })
-            # except Exception: pass
-
-
-    #     methods_results["LOO"] = harness.compute_loo()
-    #     methods_results["ARC-JSD"] = harness.compute_arc_jsd()
-    #     attributionxs, interactionxs, fm_models["Exact-FSII"] = harness.compute_exact_fsii(max_order=2)
-
-    #     extra_results.update({
-    #     "Exact-FSII": interactionxs
-    # })
-    #     methods_results["Exact-FSII"]=attributionxs
-
-    #     # --- Evaluation Metrics ---
-    #     metrics_results["topk_probability"] = harness.evaluate_topk_performance(
-    #         methods_results, fm_models, k_values
-    #     )
-
-        # R²
-        # metrics_results["R2"] = harness.r2(methods_results,100,mode='logit-prob', models=fm_models)
-        # metrics_results['Recall']=harness.recall_at_k(gtset_k(), methods_results, k_values)
-
-        # # LDS per method
-        # metrics_results["LDS"] = harness.lds(methods_results,100,mode='logit-prob', models=fm_models)
-
-
-
-#         all_results.append({
-#             "query_index": i,
-#             "query": query,
-#             "ground_truth": df.answer[i],
-#             "response": harness.target_response,
-#             "methods": methods_results,
-#             "metrics": metrics_results
-#         })
-#         extras.append(extra_results)
         harness.save_utility_cache(current_utility_path)
-
-
-# with open(f"{utility_cache_base_dir}/results4.pkl", "wb") as f:
-#     pickle.dump(all_results, f)
-
-# with open(f"{utility_cache_base_dir}/extras4.pkl", "wb") as f:
-#     pickle.dump(extras, f)
-
-
-with open(f"{utility_cache_base_dir}/responses.pkl", "wb") as f:
-    pickle.dump(resposes, f)            

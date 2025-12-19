@@ -34,8 +34,8 @@ accelerator_main = Accelerator(mixed_precision="fp16")
 if accelerator_main.is_main_process:
     print("Main Script: Loading model...")
 # model_path = "mistralai/Mistral-7B-Instruct-v0.3"
-model_path = "meta-llama/Llama-3.1-8B-Instruct"
-# model_path = "Qwen/Qwen2.5-3B-Instruct"
+# model_path = "meta-llama/Llama-3.1-8B-Instruct"
+model_path = "Qwen/Qwen2.5-3B-Instruct"
 
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
@@ -78,7 +78,7 @@ for i in range(num_questions_to_run):
     if accelerator_main.is_main_process:
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
-    docs = df.reordered_sentences[i]
+    docs = df.reordered_sentences[i][:20]
     utility_cache_filename = f"utilities_q_idx{i}.pkl"
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
 
@@ -175,23 +175,23 @@ for i in range(num_questions_to_run):
 
 
 
-#         all_results.append({
-#             "query_index": i,
-#             "query": query,
-#             "ground_truth": df.answer[i],
-#             "response": harness.target_response,
-#             "methods": methods_results,
-#             "metrics": metrics_results
-#         })
-#         extras.append(extra_results)
+        all_results.append({
+            "query_index": i,
+            "query": query,
+            "ground_truth": df.answer[i],
+            "response": harness.target_response,
+            "methods": methods_results,
+            "metrics": metrics_results
+        })
+        extras.append(extra_results)
         harness.save_utility_cache(current_utility_path)
 
 
-# with open(f"{utility_cache_base_dir}/results4.pkl", "wb") as f:
-#     pickle.dump(all_results, f)
+with open(f"{utility_cache_base_dir}/results4.pkl", "wb") as f:
+    pickle.dump(all_results, f)
 
-# with open(f"{utility_cache_base_dir}/extras4.pkl", "wb") as f:
-#     pickle.dump(extras, f)
+with open(f"{utility_cache_base_dir}/extras4.pkl", "wb") as f:
+    pickle.dump(extras, f)
 
 
 # with open(f"{utility_cache_base_dir}/responses.pkl", "wb") as f:

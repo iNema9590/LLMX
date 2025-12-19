@@ -184,7 +184,7 @@ class ContextAttribution:
         def _compute_logprob_for_context(c_str: str):
             sys_msg = {
                 "role": "system",
-                "content": """You are a helpful assistant. You use the provided context to answer
+                "content": """You use the provided context to answer
                             questions in few words. Avoid using your own knowledge or make assumptions."""
             }
             user_content = f"### Context:\n{c_str}\n\n### Question:\n{self.query}" if c_str else self.query
@@ -443,14 +443,14 @@ class ContextAttribution:
 
             # --- Rank tuning if rank not provided ---
             if rank is None:
-                candidate_ranks = [1, 2, 3, 4, 5, 8]
+                candidate_ranks = [0, 1, 2, 5, 8]
                 n_splits = 5
                 kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
                 results = {}
                 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
                 for r in candidate_ranks:
-                    fold_mse = []
+                    fold_r2 = []
                     for train_idx, val_idx in kf.split(X_train_fm):
                         X_tr, X_val = X_train_fm[train_idx], X_train_fm[val_idx]
                         y_tr, y_val = y_train[train_idx], y_train[val_idx]
@@ -465,12 +465,19 @@ class ContextAttribution:
 
                         model.fit(X_tr, y_tr)
                         preds = model.predict(X_val)
-                        mse = np.mean((preds - y_val) ** 2)
-                        fold_mse.append(mse)
 
-                    results[r] = np.mean(fold_mse)
-                best_rank = min(results, key=results.get)
-                print(f"[fastFM] Selected rank={best_rank}")
+                        # --- R² score ---
+                        ss_res = np.sum((y_val - preds)**2)
+                        ss_tot = np.sum((y_val - np.mean(y_val))**2)
+                        r2 = 1 - ss_res/ss_tot
+                        fold_r2.append(r2)
+
+                    # Average R² across folds
+                    results[r] = np.mean(fold_r2)
+
+                # Pick rank with maximum R² instead of minimum MSE
+                best_rank = max(results, key=results.get)
+                print(f"[fastFM] Selected rank={best_rank} (R²={results[best_rank]:.4f})")
 
             # --- Train final model with best rank ---
             model = als.FMRegression(
@@ -488,6 +495,7 @@ class ContextAttribution:
             attr = w + 0.5 * F.sum(axis=1)
 
             return model, attr, F
+
 
         elif sur_type == "fmsgd":
             weights = shapley_kernel_weight(X_train)
