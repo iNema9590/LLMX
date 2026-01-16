@@ -267,6 +267,15 @@ class ContextAttribution:
         shapley_values = explainer('SV')
 
         return shapley_values.values[1:]
+    
+    def _calculate_banzhaf(self) -> np.ndarray:
+        explainer = shapiq.game_theory.exact.ExactComputer(
+            n_players=self.n_items,
+            game=self._make_value_function(self.utility_mode, scale=True)
+        )
+        shapley_values = explainer('BV')
+
+        return shapley_values.values[1:]
 
 
     def compute_shapley_interaction_index_pairs_matrix(self) -> np.ndarray:
@@ -414,19 +423,24 @@ class ContextAttribution:
         # utilities_scaled=self.scaler.transform(np.array(utilities).reshape(-1,1)).flatten()
         X_train = np.array(ablations)
         y_train = np.array(utilities)
-
         if sur_type == "linear":
             model = Lasso(alpha=0.01, fit_intercept=True, random_state=42, max_iter=1000)
             model.fit(X_train, y_train)
             return model, model.coef_, None
         
+        elif sur_type == "hybridfm":
+
+            fm = FactorizationMachine(rank=0, alpha=0.01, n_iter=1000)
+            fm.fit(X_train, y_train)
+            return fm, fm.w, None
+
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
             model = als.FMRegression(
                 n_iter=2000,
                 rank=rank,
                 l2_reg_w=0.01,
-                l2_reg_V=0.001,
+                l2_reg_V=0.01,
                 random_state=42
             )
             model.fit(X_train_fm, y_train)
@@ -443,7 +457,7 @@ class ContextAttribution:
 
             # --- Rank tuning if rank not provided ---
             if rank is None:
-                candidate_ranks = [0, 1, 2, 5, 8]
+                candidate_ranks = [0, 1, 2, 4, 8]
                 n_splits = 5
                 kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
                 results = {}
@@ -454,15 +468,13 @@ class ContextAttribution:
                     for train_idx, val_idx in kf.split(X_train_fm):
                         X_tr, X_val = X_train_fm[train_idx], X_train_fm[val_idx]
                         y_tr, y_val = y_train[train_idx], y_train[val_idx]
-
                         model = als.FMRegression(
                             n_iter=200,
                             rank=r,
                             l2_reg_w=0.01,
-                            l2_reg_V=0.001,
+                            l2_reg_V=0.01,
                             random_state=42
                         )
-
                         model.fit(X_tr, y_tr)
                         preds = model.predict(X_val)
 
@@ -638,7 +650,7 @@ class ContextAttribution:
 
         elif pruning_strategy == 'top_k':
             # Keep the top half of the documents
-            num_to_keep = 7
+            num_to_keep = 10
             # Ensure we keep at least one document
             if num_to_keep == 0 and self.n_items > 0:
                 num_to_keep = 1
@@ -1067,7 +1079,7 @@ class ContextAttribution:
         return total_jsd
     
     def lds(self, results_dict, n_eval_util, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
@@ -1104,7 +1116,7 @@ class ContextAttribution:
         return lds
     
     def r2(self, results_dict, n_eval_util, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
         X_all = np.array(eval_subsets)
         exact_utilities = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in eval_subsets]
         # exact_utilities_perplexity = [self.get_utility(v_tuple, mode="log-perplexity") for v_tuple in eval_subsets]
@@ -1183,7 +1195,7 @@ class ContextAttribution:
     def delta_r2(self, results_dict, num_samples=100, models=None):
 
         # Generate evaluation samples using KernelSHAP distribution
-        eval_subsets = self._generate_sampled_ablations(num_samples, sampling_method='kernelshap', seed=2)
+        eval_subsets = self._generate_sampled_ablations(num_samples, sampling_method='uniform', seed=2)
         
         # Compute actual deltas between S and S\{i}
         actual_deltas = []
@@ -1380,3 +1392,87 @@ def shapley_kernel_weight(ablations: np.ndarray) -> np.ndarray:
                       coalition_sizes[mask] * (n_features - coalition_sizes[mask])))
     
     return weights
+
+
+def soft_threshold(z, alpha):
+    if z > alpha:
+        return z - alpha
+    if z < -alpha:
+        return z + alpha
+    return 0.0
+
+
+class FactorizationMachine:
+    def __init__(
+        self,
+        rank=0,
+        alpha=1.0,        # L1 for w
+        lambda_v=0.1,     # L2 for V
+        n_iter=50,
+        fit_intercept=True,
+        random_state=42
+    ):
+        self.rank = rank
+        self.alpha = alpha
+        self.lambda_v = lambda_v
+        self.n_iter = n_iter
+        self.fit_intercept = fit_intercept
+        self.random_state = random_state
+
+    def predict(self, X):
+        y = X @ self.w
+        if self.fit_intercept:
+            y += self.w0
+
+        if self.rank > 0:
+            XV = X @ self.V
+            y += 0.5 * np.sum(
+                XV ** 2 - (X ** 2) @ (self.V ** 2),
+                axis=1
+            )
+
+        return y
+
+    def fit(self, X, y):
+        n, p = X.shape
+        rng = np.random.default_rng(self.random_state)
+
+        self.w = np.zeros(p)
+        self.w0 = y.mean() if self.fit_intercept else 0.0
+
+        if self.rank > 0:
+            self.V = rng.normal(scale=0.01, size=(p, self.rank))
+        else:
+            self.V = None
+
+        for _ in range(self.n_iter):
+            # ---- Update bias ----
+            if self.fit_intercept:
+                self.w0 = np.mean(y - self.predict(X) + self.w0)
+
+            # ---- Update linear weights (LASSO via CD) ----
+            for j in range(p):
+                r = y - self.predict(X) + self.w[j] * X[:, j]
+                rho = X[:, j].T @ r / n
+                z = (X[:, j] ** 2).mean()
+                self.w[j] = soft_threshold(rho, self.alpha) / (z + 1e-12)
+
+            # ---- Update factors via ALS ----
+            if self.rank > 0:
+                for f in range(self.rank):
+                    s_f = X @ self.V[:, f]
+                    for j in range(p):
+                        xj = X[:, j]
+                        tmp = s_f - self.V[j, f] * xj
+
+                        r = (
+                            y
+                            - self.predict(X)
+                            + self.V[j, f] * xj * tmp
+                        )
+
+                        numer = (xj * tmp @ r) / n
+                        denom = ((xj * tmp) ** 2).mean() + self.lambda_v
+                        self.V[j, f] = numer / denom
+
+        return self

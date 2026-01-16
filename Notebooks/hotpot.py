@@ -103,7 +103,7 @@ for i in range(num_questions_to_run):
         metrics_results = {}
         extra_results = {}
 
-        m_samples_map = {"S":64, "M":128, "L":264, "XL":528, "XXL":724}
+        m_samples_map = {"XS":32, "S":64, "M":128, "L":264, "XL":528, "XXL":724}
 
         # Store FM models for later R²/MSE
         fm_models = {}
@@ -114,19 +114,24 @@ for i in range(num_questions_to_run):
                 num_samples=actual_samples, seed=SEED
             )
             # FM Weights (loop over ranks 0–5)
-            # for rank in [1,2,4,8]:
-            #     methods_results[f"FM_WeightsLK_{rank}_{actual_samples}"], extra_results[f"Flk_{rank}_{actual_samples}"], fm_models[f"FM_WeightsLK_{rank}_{actual_samples}"] = harness.compute_wss(
-            #         num_samples=actual_samples,
-            #         seed=SEED,
-            #         sampling="kernelshap",
-            #         sur_type="fm",
-            #         rank=rank
-            #     )
+            for rank in [0, 1, 2, 4, 8, 16, 32]:
+                methods_results[f"FM_WeightsLK_{rank}_{actual_samples}"], extra_results[f"Flk_{rank}_{actual_samples}"], fm_models[f"FM_WeightsLK_{rank}_{actual_samples}"] = harness.compute_wss(
+                    num_samples=actual_samples,
+                    seed=SEED,
+                    sampling="kernelshap",
+                    sur_type="fm",
+                    rank=rank
+                )
             methods_results[f"FM_{actual_samples}"], extra_results[f"FM_{actual_samples}"], fm_models[f"FM_{actual_samples}"] = harness.compute_wss(
                     num_samples=actual_samples,
                     seed=SEED,
                     sampling="kernelshap",
                     sur_type="fm_tuning")
+            methods_results[f"FM_k_dynamic_{actual_samples}"], extra_results[f"FM_k_dynamic_{actual_samples}"], fm_models[f"FM_k_dynamic_{actual_samples}"] = harness.compute_wss_dynamic_pruning_reuse_utility(
+                num_samples=actual_samples, 
+                initial_rank=1, 
+                final_rank=3,
+            )
             attributionshapiq, interactionshapiq, fm_models[f"Shapiq_{actual_samples}"] = harness.compute_shapiq_fsii(budget=actual_samples)
             methods_results[f"Shapiq_{actual_samples}"] = attributionshapiq
             extra_results.update({
