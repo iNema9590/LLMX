@@ -17,6 +17,7 @@ import torch.nn.functional as F
 from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
 from fastFM import als
+from shapiq import SHAPIQ
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import Ridge
 from scipy.sparse import csr_matrix
@@ -259,23 +260,17 @@ class ContextAttribution:
             raise ValueError(f"Invalid mode for _compute_response_metric: '{mode}'")
 
 
-    def _calculate_shapley(self) -> np.ndarray:
+    def _calculate_exact(self, method: str) -> np.ndarray:
         explainer = shapiq.game_theory.exact.ExactComputer(
             n_players=self.n_items,
             game=self._make_value_function(self.utility_mode, scale=True)
         )
-        shapley_values = explainer('SV')
-
-        return shapley_values.values[1:]
+        if method == 'SV':
+            values = explainer('SV')
+        elif method == 'BV':
+            values = explainer('BV')
+        return values.values[1:]
     
-    def _calculate_banzhaf(self) -> np.ndarray:
-        explainer = shapiq.game_theory.exact.ExactComputer(
-            n_players=self.n_items,
-            game=self._make_value_function(self.utility_mode, scale=True)
-        )
-        shapley_values = explainer('BV')
-
-        return shapley_values.values[1:]
 
 
     def compute_shapley_interaction_index_pairs_matrix(self) -> np.ndarray:
@@ -418,7 +413,7 @@ class ContextAttribution:
         return list(sampled_tuples_set)
 
 
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None):
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None, candidate_ranks=None):
         """Internal method to train a surrogate model on utility data."""
         # utilities_scaled=self.scaler.transform(np.array(utilities).reshape(-1,1)).flatten()
         X_train = np.array(ablations)
@@ -457,7 +452,7 @@ class ContextAttribution:
 
             # --- Rank tuning if rank not provided ---
             if rank is None:
-                candidate_ranks = [0, 1, 2, 4, 8]
+                candidate_ranks = candidate_ranks
                 n_splits = 5
                 kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
                 results = {}
@@ -714,7 +709,7 @@ class ContextAttribution:
         model_info = (final_model_pruned, docs_to_keep_indices)
         return final_attr, final_F, model_info
 
-    def compute_wss(self, num_samples: int, seed: int = None, sampling=None, sur_type="fmsgd",rank=None):
+    def compute_wss(self, num_samples: int, seed: int = None, sampling=None, sur_type="fmsgd",rank=None, candidate_ranks=[1,2,4,8]):
   
         # Generate subsets and compute utilities
         sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
@@ -729,7 +724,7 @@ class ContextAttribution:
         model, attr, F = self._train_surrogate(
             sampled_tuples_for_train, 
             utilities_for_train, 
-            sur_type=sur_type, rank=rank
+            sur_type=sur_type, rank=rank, candidate_ranks=candidate_ranks
         )
         return attr, F, model
 
@@ -975,13 +970,16 @@ class ContextAttribution:
 
         return attribution, interaction_terms, moebius_interactions.dict_values
 
-    def compute_exact_fsii(self, max_order: int, aggregate: bool = True):
+    def compute_exact_faith(self, max_order: int, aggregate: bool = True, method: str = "FSII"):
   
         explainer = shapiq.game_theory.exact.ExactComputer(
             n_players=self.n_items,
             game=self._make_value_function(self.utility_mode)
         )
-        interaction_values = explainer.compute_fii('FSII', max_order)
+        if method == 'FSII':
+            interaction_values = explainer.compute_fii('FSII', max_order)
+        elif method == 'FBII':
+            interaction_values = explainer.compute_fii('FBII', max_order)
 
         n = self.n_items
         attribution = np.zeros(n)         # main + optional split interactions
@@ -1027,23 +1025,22 @@ class ContextAttribution:
 
         return attribution, interaction_terms, moebius_interactions.dict_values
 
-    def compute_shapiq_fsii(self, budget):
-        from shapiq import SHAPIQ
-        explainer = SHAPIQ(n=self.n_items, index='FSII', max_order=1, top_order=False, random_state=42)
+    def compute_shapiq(self, budget, method: str = "FSII"):
+        explainer = SHAPIQ(n=self.n_items, index=method, max_order=1, top_order=False, random_state=42)
         main_effects=explainer(game=self._make_value_function(self.utility_mode), budget=budget).dict_values
 
-        explainer2 = SHAPIQ(n=self.n_items, index='FSII', max_order=2, top_order=False, random_state=42)
+        explainer2 = SHAPIQ(n=self.n_items, index=method, max_order=2, top_order=False, random_state=42)
         interaction_terms=explainer2(game=self._make_value_function(self.utility_mode), budget=budget).dict_values
         interaction_values = interaction_terms|main_effects
         return np.array(list(main_effects.values())), interaction_terms, interaction_values
 
-    def compute_fsii(self, sample_budget: int, max_order: int):
+    def compute_spex(self, sample_budget: int, max_order: int, method: str = "FSII"):
         """Compute attribution scores using SPEX (FSII method)."""
-        return self._run_spex("FSII", sample_budget, max_order, self.utility_mode)
+        return self._run_spex(method, sample_budget, max_order, self.utility_mode)
 
-    def compute_fbii(self, sample_budget: int, max_order: int):
+    def compute_proxyspex(self, sample_budget: int, max_order: int, method: str = "FBII"):
         """Compute attribution scores using SPEX (FBII method)."""
-        return self._run_proxyspex("FSII", sample_budget, max_order, self.utility_mode)
+        return self._run_proxyspex(method, sample_budget, max_order, self.utility_mode)
     # --------------------------------------------------------------------------
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
