@@ -1,306 +1,207 @@
+from math import comb
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from scipy.sparse import csr_matrix
+from sklearn.metrics import r2_score
 
-# ---------------------------
-# Torch FM model and wrapper
-# ---------------------------
-class _TorchFMImpl(nn.Module):
+class DeltaOptimizedFM(nn.Module):
     """
-    Minimal Factorization Machine implementation:
-      - n_features: number of original features (players/documents)
-      - rank: latent dimension for interactions
-    Predicts scalar value per row of X.
+    Factorization Machine optimized for delta (marginal contribution) prediction.
+    Predicts utilities, but optimizes R² of deltas.
     """
-    def __init__(self, n_features, rank, device=None):
-        super().__init__()
-        self.device = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
-        self.n_features = int(n_features)
-        self.rank = int(rank)
-        # bias and linear weights
-        self.w0 = nn.Parameter(torch.tensor(0.0, dtype=torch.float32, device=self.device))
-        self.w = nn.Parameter(torch.zeros(self.n_features, dtype=torch.float32, device=self.device))
-        # latent factors: shape (n_features, rank)
-        self.V = nn.Parameter(torch.randn(self.n_features, self.rank, dtype=torch.float32, device=self.device) * 0.01)
-
-    def forward(self, X):
-        # X: dense torch tensor float32 shape (batch, n_features)
-        # linear
-        linear = torch.matmul(X, self.w) + self.w0
-        # pairwise term via factorization trick
-        XV = X @ self.V  # (batch, rank)
-        XV_sq = XV * XV
-        X_sq = X * X
-        V_sq = self.V * self.V
-        pairwise = 0.5 * torch.sum(XV_sq - (X_sq @ V_sq), dim=1)
-        return linear + pairwise
-
-
-class TorchFMSurrogate:
-    """
-    Wrapper to provide a sklearn-like .predict interface and to extract attributions.
-    Holds the trained torch model and helper numpy copies of parameters.
-    """
-    def __init__(self, torch_model: _TorchFMImpl, device=None):
-        self.device = device or torch.device("cpu")
-        self.model = torch_model
-        # After training, we'll copy params to numpy for quick CPU prediction on csr matrices
-        self._synced = False
-        self._sync_to_numpy()
-
-    def _sync_to_numpy(self):
-        # Sync parameters to numpy arrays for efficient non-grad predictions (csr-based)
+    def __init__(self, n_features, latent_dim=10):
+        super(DeltaOptimizedFM, self).__init__()
+        self.n_features = n_features
+        
+        # Linear terms (for Shapley value components)
+        self.w0 = nn.Parameter(torch.zeros(1))  # global bias
+        self.w = nn.Parameter(torch.zeros(n_features))  # linear weights
+        
+        # Factorization terms (for interactions)
+        self.v = nn.Parameter(torch.randn(n_features, latent_dim) * 0.01)
+        
+    def forward(self, x):
+        """
+        x: [batch_size, n_features] binary coalition vector
+        Returns: predicted utility v(S)
+        """
+        # Linear terms
+        linear_terms = torch.sum(self.w * x, dim=1) + self.w0
+        
+        # Interaction terms
+        vx = torch.matmul(x, self.v)  # [batch_size, latent_dim]
+        
+        # Sum of squares of row-wise dot products
+        square_of_sum = torch.sum(vx * vx, dim=1)  # (Σ v_i*x_i)²
+        sum_of_squares = torch.sum((x.unsqueeze(-1) * self.v.unsqueeze(0))**2, dim=(1, 2))  # Σ (v_i*x_i)²
+        
+        interaction_terms = 0.5 * (square_of_sum - sum_of_squares)
+        
+        return linear_terms + interaction_terms
+    
+    def predict(self, S_with_i):
+        """
+        Predict marginal contribution: v(S∪{i}) - v(S)
+        """
         with torch.no_grad():
-            self.w0_ = float(self.model.w0.detach().cpu().numpy())
-            self.w_ = self.model.w.detach().cpu().numpy().astype(np.float64)
-            self.V_ = self.model.V.detach().cpu().numpy().astype(np.float64)  # shape (n_features, rank)
-            self.n_features_, self.rank_ = self.V_.shape
-            # compute F = V V^T (pairwise interactions)
-            self.F_ = self.V_.dot(self.V_.T)
-            np.fill_diagonal(self.F_, 0.0)
-            # marginal attribution: w + 0.5 * sum_j F_ij
-            self.attr_ = self.w_.copy() + 0.5 * np.sum(self.F_, axis=1)
-            self._synced = True
+            util_with = self.forward(torch.tensor(S_with_i, dtype=torch.float32))
+            return util_with.detach().numpy()
+    
+    def compute_shapley_from_weights(self):
+        """
+        Extract Shapley values from model weights.
+        For FM, linear weights approximate Shapley values when interaction terms are small.
+        """
+        with torch.no_grad():
+            w = self.w.cpu().numpy()
+            V = self.v.cpu().numpy()
+            
+        F = V @ V.T
+        
+        # Set diagonal to 0 (self-interactions not included in Shapley)
+        np.fill_diagonal(F, 0.0)
+        shapley = w + 0.5 * F.sum(axis=1)
+        return shapley, F
 
-    def predict(self, X):
+class DeltaLossFM:
+    """
+    Training wrapper that optimizes R² of deltas
+    """
+    def __init__(self, n_features, latent_dim=10, lr=0.001):
+        self.model = DeltaOptimizedFM(n_features, latent_dim)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
+        self.loss_type = 'pairwise'  # or 'pairwise'
+        self.n_features = n_features
+        self.l2_lambda = 0.01
+        
+    def r2_delta_loss(self, pred_deltas, true_deltas):
         """
-        Accepts:
-          - scipy csr_matrix of shape (n_samples, n_features)
-          - numpy ndarray (dense)
-        Returns numpy array of length n_samples
+        Compute negative R² (to minimize) for deltas
+        R² = 1 - SS_res / SS_tot
+        We minimize -R² to maximize R²
         """
-        if isinstance(X, csr_matrix):
-            # use numpy operations for speed and memory (no torch)
-            # linear term
-            linear = X.dot(self.w_) + self.w0_
-            # pairwise term: 0.5 * sum( (X*V)^2 - (X^2) * (V^2) )
-            XV = X.dot(self.V_)              # (n_samples, rank)
-            XV_sq = XV * XV
-            X_sq = X.multiply(X)             # still sparse
-            V_sq = self.V_ * self.V_
-            second = X_sq.dot(V_sq)          # (n_samples, rank)
-            pairwise = 0.5 * np.sum(XV_sq - second, axis=1)
-            return np.asarray(linear).ravel() + pairwise
+        # Convert to numpy for R² calculation
+        pred_np = pred_deltas.detach().numpy()
+        true_np = true_deltas.numpy()
+        
+        # Compute R²
+        ss_res = np.sum((true_np - pred_np) ** 2)
+        ss_tot = np.sum((true_np - np.mean(true_np)) ** 2)
+        
+        if ss_tot == 0:
+            return torch.tensor(0.0)
+        
+        r2 = 1 - ss_res / ss_tot
+        return torch.tensor(-r2)  # Negative because we want to maximize R²
+    
+    def pairwise_logistic_loss(self, pred_deltas, true_deltas):
+        """
+        Calculate the pairwise logistic loss for ranking deltas.
+        loss = sum_i sum_j I[y_true_i > y_true_j] * log(1 + exp(-(y_pred_i - y_pred_j)))
+        
+        Args:
+            pred_deltas: Predicted deltas tensor [batch_size]
+            true_deltas: True deltas tensor [batch_size]
+        """
+        n = pred_deltas.shape[0]
+        
+        # Create masks for pairs where true_deltas[i] > true_deltas[j]
+        true_expanded_i = true_deltas.unsqueeze(1)  # [n, 1]
+        true_expanded_j = true_deltas.unsqueeze(0)  # [1, n]
+        mask = (true_expanded_i > true_expanded_j).float()  # [n, n]
+        
+        # Compute pairwise differences for predictions
+        pred_expanded_i = pred_deltas.unsqueeze(1)  # [n, 1]
+        pred_expanded_j = pred_deltas.unsqueeze(0)  # [1, n]
+        pred_diff = pred_expanded_i - pred_expanded_j  # [n, n]
+        
+        # Compute logistic loss for all pairs
+        logistic_loss = torch.log(1 + torch.exp(-pred_diff))  # [n, n]
+        
+        # Apply mask and sum
+        loss = torch.sum(mask * logistic_loss)
+        
+        # Normalize by number of valid pairs (optional but recommended)
+        num_valid_pairs = torch.sum(mask)
+        if num_valid_pairs > 0:
+            loss = loss / num_valid_pairs
+            
+        return loss    
+    
+    def compute_loss(self, pred_deltas, true_deltas):
+        """
+        Compute loss based on selected loss type
+        """
+        if self.loss_type == 'r2':
+            return self.r2_delta_loss(pred_deltas, true_deltas)
+        elif self.loss_type == 'pairwise':
+            return self.pairwise_logistic_loss(pred_deltas, true_deltas)
         else:
-            # assume dense numpy
-            X_np = np.asarray(X, dtype=np.float64)
-            linear = X_np.dot(self.w_) + self.w0_
-            XV = X_np.dot(self.V_)
-            XV_sq = XV * XV
-            X_sq = X_np * X_np
-            second = X_sq.dot(self.V_ * self.V_)
-            pairwise = 0.5 * np.sum(XV_sq - second, axis=1)
-            return linear + pairwise
+            raise ValueError(f"Unknown loss type: {self.loss_type}. Use 'r2' or 'pairwise'.")
+    
+    def train_step(self, coalitions, utilities, pair_indices):
+        """
+        Train on paired coalitions to optimize delta R²
+        """
+        self.model.train()
+        self.optimizer.zero_grad()
+        
+        # Convert to tensors
+        X = torch.FloatTensor(np.array(coalitions))
+        y_true = torch.FloatTensor(utilities)
+        
+        # Predict all utilities 
+        y_pred = self.model(X)
+        # Extract pairs for delta computation
+        pred_deltas = []
+        true_deltas = []
+        
+        for i in range(0, len(y_pred), 2):
+            idx_with = i
+            idx_without = i + 1
 
-    def get_attr_and_F(self):
-        if not self._synced:
-            self._sync_to_numpy()
-        return self.attr_, self.F_
+            pred_delta = y_pred[idx_with] - y_pred[idx_without]
+            true_delta = y_true[idx_with] - y_true[idx_without]
 
-# ---------------------------
-# Training function (KernelSHAP weighted + Ridge)
-# ---------------------------
+            pred_deltas.append(pred_delta)
+            true_deltas.append(true_delta)
+        
+        pred_deltas = torch.stack(pred_deltas)
+        true_deltas = torch.stack(true_deltas)
+        
+        # # Compute loss (negative R² of deltas)
+        # main_loss = self.compute_loss(pred_deltas, true_deltas)
+        
+        # Alternative: weighted with true_deltas MSE of deltas (more stable gradient)
+        weights = 1 + true_deltas.abs()/ true_deltas.abs().quantile(0.7)  # or true_deltas, depending on your intent
 
-def train_torch_fm_surrogate_shapley_als(
-    ablations: list[tuple],
-    utilities: list[float],
-    shapley_kernel_weights: list[float] = None,
-    rank= None,
-    lambda_l2_w: float = 1e-3,
-    lambda_l2_V: float = 1e-3,
-    n_epochs: int = 50,
-    V_init=None,
-    device: torch.device = None,
-    verbose: bool = False,
-):
-    """
-    Train a Factorization Machine surrogate using Alternating Least Squares (ALS)
-    with KernelSHAP-style weighted loss.
-    """
-
-    # ---- Data prep ----
-    X_np = np.asarray(ablations, dtype=np.float64)
-    y_np = np.asarray(utilities, dtype=np.float64)
-    n_samples, n_features = X_np.shape
-
-    # ---- Kernel weights ----
-    if shapley_kernel_weights is None:
-        kernel_w = np.ones(n_samples, dtype=np.float64)
-    else:
-        kernel_w = np.asarray(shapley_kernel_weights, dtype=np.float64)
-        kernel_w = np.maximum(kernel_w, 0.0)
-        if kernel_w.sum() == 0:
-            kernel_w = np.ones_like(kernel_w)
-    kernel_w = kernel_w / np.mean(kernel_w)
-
-    # ---- Model init ----
-    device = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
-    model = _TorchFMImpl(n_features, rank, device=device).to(device)
-
-    if V_init is not None:
-        Vinit = np.asarray(V_init, dtype=np.float64)
-        if Vinit.shape == (rank, n_features):
-            Vinit = Vinit.T
-        assert Vinit.shape == (n_features, rank)
-        model.V.data = torch.tensor(Vinit, dtype=torch.float32, device=device)
-
-    # ---- Convert to numpy ----
-    X, y, w_kernel = X_np, y_np, kernel_w
-    w0 = model.w0.detach().cpu().item()
-    w = model.w.detach().cpu().numpy().astype(np.float64)
-    V = model.V.detach().cpu().numpy().astype(np.float64)
-
-    # ---- ALS loop ----
-    for epoch in range(n_epochs):
-        # Step 1: Update w (ridge regression)
-        pairwise_term = 0.5 * np.sum((X @ V) ** 2 - (X ** 2) @ (V ** 2), axis=1)
-        y_resid = y - pairwise_term - w0
-        WX = X * w_kernel[:, None]
-        A = WX.T @ X + lambda_l2_w * np.eye(n_features)
-        b = WX.T @ y_resid
-        w = np.linalg.solve(A, b)
-
-        # Step 2: Update each factor column in V
-        for f in range(rank):
-            # Temporarily zero out column f
-            V[:, f] = 0.0
-            # Compute residual excluding factor f
-            pred_no_f = (X @ w) + w0 + 0.5 * np.sum((X @ V) ** 2 - (X ** 2) @ (V ** 2), axis=1)
-            r = y - pred_no_f  # residual signal to fit with factor f
-
-            # Weighted regression for factor f
-            # Define design matrix for factor f
-            X_f = X
-            WXf = X_f * w_kernel[:, None]
-            A_f = WXf.T @ X_f + lambda_l2_V * np.eye(n_features)
-            b_f = WXf.T @ r
-            # Solve for the single vector of shape (n_features,)
-            V[:, f] = np.linalg.solve(A_f, b_f)
-
-        # Step 3: Update intercept
-        preds = (X @ w) + 0.5 * np.sum((X @ V) ** 2 - (X ** 2) @ (V ** 2), axis=1)
-        w0 = np.average(y - preds, weights=w_kernel)
-
-        if verbose and (epoch % max(1, n_epochs // 10) == 0 or epoch == n_epochs - 1):
-            preds_all = w0 + (X @ w) + 0.5 * np.sum((X @ V) ** 2 - (X ** 2) @ (V ** 2), axis=1)
-            mse_all = np.average((preds_all - y) ** 2, weights=w_kernel)
-            print(f"[FM ALS] epoch {epoch+1}/{n_epochs}, weighted MSE={mse_all:.6f}")
-
-    # ---- Copy back to Torch ----
-    with torch.no_grad():
-        model.w0.copy_(torch.tensor(w0, dtype=torch.float32, device=device))
-        model.w.copy_(torch.tensor(w, dtype=torch.float32, device=device))
-        model.V.copy_(torch.tensor(V, dtype=torch.float32, device=device))
-
-    wrapper = TorchFMSurrogate(model, device=device)
-    attr, F = wrapper.get_attr_and_F()
-    return wrapper, attr, F
-
-from sklearn.model_selection import KFold
-
-def tune_fm_rank_cv(
-    ablations,
-    utilities,
-    shapley_kernel_weights=None,
-    ranks=(1,2,4,8),
-    n_splits=5,
-    n_epochs=30,
-    lambda_l2_w=1e-3,
-    lambda_l2_V=1e-3,
-    device=None,
-    verbose=False,
-    warm_start=True,
-    random_state=42,
-):
-    X_full = np.asarray(ablations, dtype=np.float64)
-    y_full = np.asarray(utilities, dtype=np.float64)
-    n_samples = X_full.shape[0]
-
-    # default kernel weights
-    if shapley_kernel_weights is None:
-        kernel_w_full = np.ones(n_samples, dtype=np.float64)
-    else:
-        kernel_w_full = np.asarray(shapley_kernel_weights, dtype=np.float64)
-        kernel_w_full = np.maximum(kernel_w_full, 0.0)
-        if kernel_w_full.sum() == 0:
-            kernel_w_full = np.ones_like(kernel_w_full)
-        kernel_w_full = kernel_w_full / np.mean(kernel_w_full)
-
-    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
-
-    results = {}
-    prev_V = None
-    prev_rank = None
-
-    for rank in ranks:
-        fold_scores = []
-        if verbose:
-            print(f"\n=== Evaluating rank={rank} ===")
-
-        for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X_full)):
-            X_train = X_full[train_idx]
-            y_train = y_full[train_idx]
-            w_train = kernel_w_full[train_idx]
-
-            X_val = X_full[val_idx]
-            y_val = y_full[val_idx]
-            w_val = kernel_w_full[val_idx]
-
-            # Convert training ablations to list-of-tuples or dense np arrays as expected by your trainer
-            # Your trainer expects ablations: list[tuple] or np.ndarray (n_samples, n_features)
-            # It will convert internally, so pass numpy arrays
-            V_init = None
-            if warm_start and (prev_V is not None) and (prev_rank is not None):
-                # If prev_rank <= rank, expand prev_V with small random cols; if prev_rank > rank, truncate
-                if prev_rank <= rank:
-                    # prev_V shape: (n_features, prev_rank)
-                    n_features = X_train.shape[1]
-                    pad_cols = rank - prev_rank
-                    rnd = np.random.randn(n_features, pad_cols) * 0.01
-                    V_init = np.hstack([prev_V, rnd])
-                else:
-                    # truncate
-                    V_init = prev_V[:, :rank].copy()
-
-            # Train on this fold
-            wrapper, attr, F = train_torch_fm_surrogate_shapley_als(
-                ablations=X_train,
-                utilities=y_train,
-                shapley_kernel_weights=w_train,
-                rank=rank,
-                lambda_l2_w=lambda_l2_w,
-                lambda_l2_V=lambda_l2_V,
-                n_epochs=n_epochs,
-                V_init=V_init,
-                device=device,
-                verbose=False,
-            )
-
-            # Save V for warm start (use last fold's V; will be overwritten by next fold/rank)
-            prev_V = wrapper.model.V.detach().cpu().numpy().astype(np.float64)
-            prev_rank = rank
-
-            # Predict on validation set (wrapper.predict accepts numpy or csr)
-            # Convert val X to csr if it's sparse-like; wrapper.predict handles csr_matrix efficiently
-            X_val_input = csr_matrix(X_val) if not isinstance(X_val, np.ndarray) else (csr_matrix(X_val) if (X_val.size > 0 and float(np.count_nonzero(X_val)) / X_val.size < 0.5) else X_val)
-            preds = wrapper.predict(X_val_input)
-            # weighted MSE
-            mse = np.average((preds - y_val) ** 2, weights=w_val)
-            fold_scores.append(mse)
-
-            if verbose:
-                print(f" rank={rank} fold={fold_idx+1}/{n_splits} weighted_mse={mse:.6f}")
-
-        mean_mse = float(np.mean(fold_scores))
-        std_mse = float(np.std(fold_scores, ddof=1)) if len(fold_scores) > 1 else 0.0
-        results[rank] = {"mean_mse": mean_mse, "std_mse": std_mse, "folds": fold_scores}
-
-    # choose best rank (lowest mean_mse)
-    ranks_sorted = sorted(results.keys())
-    means = [results[r]["mean_mse"] for r in ranks_sorted]
-    best_idx = int(np.argmin(means))
-    best_rank = ranks_sorted[best_idx]
-
-    return best_rank
+        mse = weights * (pred_deltas - true_deltas) ** 2
+        weighted_mse = mse.sum() / len(mse)
+        mseut = (y_pred - y_true) ** 2
+        weighted_mseut = mseut.sum() / len(mseut)
+        
+        l2_reg = torch.tensor(0.)
+        for param in self.model.parameters():
+            l2_reg += torch.norm(param)
+        combined_loss = weighted_mse + weighted_mseut + self.l2_lambda * l2_reg
+        combined_loss.backward()
+        self.optimizer.step()
+        
+        return combined_loss.item()
+    
+    def train(self, X_train, utilities, n_epochs=100, pair_indices=None):
+        """
+        Complete training procedure with paired sampling
+        """
+        for epoch in range(n_epochs):
+                        
+            # Training step
+            metrics = self.train_step(X_train, utilities, pair_indices)
+       
+   
+    def get_shapley_values(self):
+        """
+        Get Shapley values from trained model weights
+        """
+        return self.model.compute_shapley_from_weights()

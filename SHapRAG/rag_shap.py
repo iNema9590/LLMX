@@ -5,8 +5,12 @@ import os
 import pickle
 import random
 import warnings
+from typing import Optional, Tuple
+from itertools import product
 from collections import defaultdict
+from weakref import ref
 from scipy.stats import spearmanr
+from sklearn.model_selection import KFold
 import functools
 import spectralexplain as spex
 import shapiq
@@ -18,7 +22,7 @@ from accelerate import Accelerator
 from accelerate.utils import broadcast_object_list, gather_object
 from fastFM import als
 from shapiq import SHAPIQ
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
 from sklearn.linear_model import Ridge
 from scipy.sparse import csr_matrix
 from scipy.stats import beta as beta_dist
@@ -26,6 +30,7 @@ from sklearn.exceptions import ConvergenceWarning
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error, r2_score, ndcg_score
+from scipy.stats import spearmanr, pearsonr
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -110,7 +115,7 @@ class ContextAttribution:
         broadcast_object_list(target_response_obj, from_process=0)
         self.target_response = target_response_obj[0]
 
-    def get_utility(self, subset_tuple: tuple, mode: str) -> float:
+    def get_utility(self, subset_tuple: tuple, mode: str="log-perplexity") -> float:
         """Gatekeeper for utility values. Returns from cache or computes if not present."""
         if mode in self.utility_cache.get(subset_tuple, {}):
             return self.utility_cache[subset_tuple][mode]
@@ -259,7 +264,6 @@ class ContextAttribution:
         else:
             raise ValueError(f"Invalid mode for _compute_response_metric: '{mode}'")
 
-
     def _calculate_exact(self, method: str) -> np.ndarray:
         explainer = shapiq.game_theory.exact.ExactComputer(
             n_players=self.n_items,
@@ -271,8 +275,6 @@ class ContextAttribution:
             values = explainer('BV')
         return values.values[1:]
     
-
-
     def compute_shapley_interaction_index_pairs_matrix(self) -> np.ndarray:
         n = self.n_items
         interaction_matrix = np.zeros((n, n), dtype=float)
@@ -325,7 +327,6 @@ class ContextAttribution:
 
         return interaction_matrix
 
-
     def _get_response_token_distributions(self, context_str: str, response: str) -> torch.Tensor:
         # ... (same as previous implementation)
         answer_ids = self.tokenizer(response, return_tensors="pt", add_special_tokens=False).input_ids.to(self.device)
@@ -359,9 +360,14 @@ class ContextAttribution:
         included_items = [self.items[i] for i, include in enumerate(v_np) if include == 1]
         return "\n\n".join(included_items)
 
-    def _generate_sampled_ablations(self, num_samples: int, sampling_method: str = "uniform", seed: int = None):
+    def _generate_sampled_ablations(
+        self,
+        num_samples: int,
+        sampling_method: str = "uniform",
+        seed: int = None,
+        pair_fraction=0.75
+    ) -> list[tuple]:
 
-        # Set random seeds for reproducibility
         if seed is not None:
             random.seed(seed)
             np.random.seed(seed)
@@ -369,51 +375,101 @@ class ContextAttribution:
         n = self.n_items
         sampled_tuples_set = set()
 
-        # Always include empty and full set (good for surrogate stability)
+        empty = tuple([0] * n)
+        full = tuple([1] * n)
+
+        # Always include empty and full
         if num_samples >= 1:
-            sampled_tuples_set.add(tuple([0] * n))
+            sampled_tuples_set.add(empty)
         if num_samples >= 2:
-            sampled_tuples_set.add(tuple([1] * n))
+            sampled_tuples_set.add(full)
 
         remaining_to_sample = num_samples - len(sampled_tuples_set)
         if remaining_to_sample <= 0:
             return list(sampled_tuples_set)
 
-        if sampling_method == "uniform":
-            while len(sampled_tuples_set) < num_samples:
-                v_tuple = tuple(np.random.randint(0, 2, n))
-                sampled_tuples_set.add(v_tuple)
+        # ------------------------------------------------------------------
+        # Helper functions
+        # ------------------------------------------------------------------
 
-        elif sampling_method == "kernelshap":
-            # KernelSHAP distribution over coalition sizes
-            sizes = np.arange(1, n)  # exclude 0 and n (already added)
+        def hamming_neighbors(base_tuple, k):
+            """Generate all tuples at Hamming distance k from base_tuple."""
+            indices = range(n)
+            for combo in itertools.combinations(indices, k):
+                v = list(base_tuple)
+                for idx in combo:
+                    v[idx] = 1 - v[idx]
+                yield tuple(v)
+
+        def kernelshap_sample_one():
+            sizes = np.arange(1, n)
             weights = (n - 1) / (sizes * (n - sizes))
             probabilities = weights / weights.sum()
 
-            # Sample subset sizes directly from KernelSHAP distribution
-            sampled_sizes = np.random.choice(sizes, size=remaining_to_sample, p=probabilities)
+            z = np.random.choice(sizes, p=probabilities)
+            indices = np.random.choice(n, size=z, replace=False)
+            v = np.zeros(n, dtype=int)
+            v[indices] = 1
+            return tuple(v)
 
-            for z in sampled_sizes:
-                indices_to_set = np.random.choice(n, size=z, replace=False)
-                v_np = np.zeros(n, dtype=int)
-                v_np[indices_to_set] = 1
-                sampled_tuples_set.add(tuple(v_np))
+        # ------------------------------------------------------------------
+        # Sampling strategies
+        # ------------------------------------------------------------------
 
-            # If duplicates caused fewer samples, fill up by retrying
+        if sampling_method == "uniform":
             while len(sampled_tuples_set) < num_samples:
-                z = np.random.choice(sizes, p=probabilities)
-                indices_to_set = np.random.choice(n, size=z, replace=False)
-                v_np = np.zeros(n, dtype=int)
-                v_np[indices_to_set] = 1
-                sampled_tuples_set.add(tuple(v_np))
+                sampled_tuples_set.add(tuple(np.random.randint(0, 2, n)))
+
+        elif sampling_method == "kernelshap":
+            while len(sampled_tuples_set) < num_samples:
+                sampled_tuples_set.add(kernelshap_sample_one())
+
+        elif sampling_method == "bf":
+            # Deterministic BFS over Hamming distance
+            for k in range(1, n + 1):
+                for v in hamming_neighbors(empty, k):
+                    if len(sampled_tuples_set) >= num_samples:
+                        break
+                    sampled_tuples_set.add(v)
+
+                for v in hamming_neighbors(full, k):
+                    if len(sampled_tuples_set) >= num_samples:
+                        break
+                    sampled_tuples_set.add(v)
+
+                if len(sampled_tuples_set) >= num_samples:
+                    break
+
+        elif sampling_method == "bf_uniform":
+            # First: Hamming distance 1 neighbors
+            for v in hamming_neighbors(empty, 1):
+                sampled_tuples_set.add(v)
+            for v in hamming_neighbors(full, 1):
+                sampled_tuples_set.add(v)
+
+            # Fill rest uniformly
+            while len(sampled_tuples_set) < num_samples:
+                v = tuple(np.random.randint(0, 2, n))
+                sampled_tuples_set.add(v)
+
+        elif sampling_method == "bf_kernelshap":
+            # First: Hamming distance 1 neighbors
+            for v in hamming_neighbors(empty, 1):
+                sampled_tuples_set.add(v)
+            for v in hamming_neighbors(full, 1):
+                sampled_tuples_set.add(v)
+
+            # Fill rest using KernelSHAP distribution
+            while len(sampled_tuples_set) < num_samples:
+                sampled_tuples_set.add(kernelshap_sample_one())
 
         else:
-            raise ValueError("Please input a valid sampling method: 'uniform' or 'kernelshap'")
+            raise ValueError("Please input a valid sampling method")
 
         return list(sampled_tuples_set)
 
 
-    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None, candidate_ranks=None):
+    def _train_surrogate(self, ablations: list[tuple], utilities: list[float], sur_type="linear",rank=None, candidate_ranks=None, pair_indices=None, selection_metric=None) -> Tuple[object, np.ndarray, Optional[np.ndarray]]:
         """Internal method to train a surrogate model on utility data."""
         # utilities_scaled=self.scaler.transform(np.array(utilities).reshape(-1,1)).flatten()
         X_train = np.array(ablations)
@@ -422,20 +478,14 @@ class ContextAttribution:
             model = Lasso(alpha=0.01, fit_intercept=True, random_state=42, max_iter=1000)
             model.fit(X_train, y_train)
             return model, model.coef_, None
-        
-        elif sur_type == "hybridfm":
-
-            fm = FactorizationMachine(rank=0, alpha=0.01, n_iter=1000)
-            fm.fit(X_train, y_train)
-            return fm, fm.w, None
 
         elif sur_type == "fm":
             X_train_fm = csr_matrix(X_train)
             model = als.FMRegression(
                 n_iter=2000,
                 rank=rank,
-                l2_reg_w=0.01,
-                l2_reg_V=0.01,
+                l2_reg_w=0.1,
+                l2_reg_V=0.1,
                 random_state=42
             )
             model.fit(X_train_fm, y_train)
@@ -451,47 +501,72 @@ class ContextAttribution:
             X_train_fm = csr_matrix(X_train)
 
             # --- Rank tuning if rank not provided ---
-            if rank is None:
-                candidate_ranks = candidate_ranks
-                n_splits = 5
-                kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
-                results = {}
-                warnings.filterwarnings("ignore", category=RuntimeWarning)
+            n_splits = 4
+            kf = KFold(n_splits=n_splits, shuffle=True)
+            results = {}
 
-                for r in candidate_ranks:
-                    fold_r2 = []
-                    for train_idx, val_idx in kf.split(X_train_fm):
-                        X_tr, X_val = X_train_fm[train_idx], X_train_fm[val_idx]
-                        y_tr, y_val = y_train[train_idx], y_train[val_idx]
-                        model = als.FMRegression(
-                            n_iter=200,
-                            rank=r,
-                            l2_reg_w=0.01,
-                            l2_reg_V=0.01,
-                            random_state=42
-                        )
-                        model.fit(X_tr, y_tr)
-                        preds = model.predict(X_val)
+            for r in candidate_ranks:
+                fold_metrics = defaultdict(list)
+                for train_idx, val_idx in kf.split(X_train_fm):
+                    X_tr, X_val = X_train_fm[train_idx], X_train_fm[val_idx]
+                    y_tr, y_val = y_train[train_idx], y_train[val_idx]
+                    model = als.FMRegression(
+                        n_iter=200,
+                        rank=r,
+                        l2_reg_w=0.01,
+                        l2_reg_V=0.1,
+                        random_state=42
+                    )
+                    model.fit(X_tr, y_tr)
+                    preds = model.predict(X_val)
+                    pairs = pairs_hamming_1_bitmask(np.asarray(X_train[val_idx]).astype(np.uint8))
+                    if len(pairs)==0:
+                        continue
 
-                        # --- R² score ---
-                        ss_res = np.sum((y_val - preds)**2)
-                        ss_tot = np.sum((y_val - np.mean(y_val))**2)
-                        r2 = 1 - ss_res/ss_tot
-                        fold_r2.append(r2)
+                    i, j = pairs[:, 0], pairs[:, 1]
 
-                    # Average R² across folds
-                    results[r] = np.mean(fold_r2)
+                    pred_deltas = preds[i] - preds[j]
+                    true_deltas = y_val[i] - y_val[j]
+                    weights = np.abs(true_deltas)
+                    weights = weights / (weights.mean() + 1e-8)               
+                    
+                    # r2_util = model.score(X_val, y_val)
+                    r2_delta = r2_score(true_deltas, pred_deltas, sample_weight=weights)
+                    # mse_util = mean_squared_error(y_val, preds)
+                    # mse_delta = mean_squared_error(true_deltas,pred_deltas, sample_weight=weights)
+                    # fold_metrics["r2_util"].append(r2_util)
+                    fold_metrics["r2_delta"].append(r2_delta)
+                    # fold_metrics["mse_util"].append(mse_util)
+                    # fold_metrics["mse_delta"].append(mse_delta)
+                # Average R² across folds
+                results[r] = {k: np.mean(v) for k, v in fold_metrics.items()}
 
-                # Pick rank with maximum R² instead of minimum MSE
-                best_rank = max(results, key=results.get)
-                print(f"[fastFM] Selected rank={best_rank} (R²={results[best_rank]:.4f})")
+            # Pick rank with maximum R² instead of minimum MSE
+            maximize_metrics = {"r2_delta"}
+            # minimize_metrics = {"mse_util",  "mse_delta"}
+            best_by_metric = {}
+
+            for metric in maximize_metrics:
+                best_by_metric[metric] = max(
+                    results, key=lambda r: results[r][metric]
+                )
+
+            # for metric in minimize_metrics:
+            #     best_by_metric[metric] = min(
+            #         results, key=lambda r: results[r][metric]
+            #     )
+            
+            print(
+                f"  Best rank by {selection_metric:>10}: "
+                f"rank={best_by_metric[selection_metric]}"
+            )
 
             # --- Train final model with best rank ---
             model = als.FMRegression(
-                n_iter=2000,
-                rank=best_rank,
+                n_iter=1000,
+                rank=best_by_metric[selection_metric],
                 l2_reg_w=0.01,
-                l2_reg_V=0.01,
+                l2_reg_V=0.1,
                 random_state=42
             )
             model.fit(X_train_fm, y_train)
@@ -502,59 +577,170 @@ class ContextAttribution:
             attr = w + 0.5 * F.sum(axis=1)
 
             return model, attr, F
+        
+        elif sur_type == "myfm_tuning":
+
+            # --- Rank tuning if rank not provided ---
+            n_splits = 4
+            kf = KFold(n_splits=n_splits, shuffle=False)
+            results = {}
+
+            # for r in candidate_ranks:
+            # fold_r2 = []
+            pair_indices=np.arange(len(X_train)).reshape(-1, 2)
+            for train_idx, val_idx in kf.split(pair_indices):
+                X_tr, X_val = X_train[pair_indices[train_idx].flatten()], X_train[pair_indices[val_idx].flatten()]
+                y_tr, y_val = y_train[pair_indices[train_idx].flatten()], y_train[pair_indices[val_idx].flatten()]
+            #         model = FactorizationMachine(
+            #                 rank=r,
+            #                 alpha=0.01,        # L1 for w
+            #                 lambda_w=0.001,    # L2 for w
+            #                 lambda_v=0.01,     # L2 for V
+            #                 n_iter=500,
+            #                 fit_intercept=True,
+            #                 random_state=42,
+            #                 lr=0.005
+            #             )
+        
+            #         model.fit(X_tr, y_tr)
+            #         preds = model.predict(X_val)
+            #         pred_deltas = []
+            #         true_deltas = []
+                    
+            #         for i in range(0, len(preds), 2):
+            #             idx_with = i
+            #             idx_without = i + 1
+
+            #             pred_delta = preds[idx_with] - preds[idx_without]
+            #             true_delta = y_val[idx_with] - y_val[idx_without]
+
+            #             pred_deltas.append(pred_delta)
+            #             true_deltas.append(true_delta)
+                    
+            #         pred_deltas = np.array(pred_deltas)
+            #         true_deltas = np.array(true_deltas)
+
+            #         y_norm = (y_val - y_val.mean()) / y_val.std() + 1e-8
+            #         y_pred_norm = (preds - preds.mean()) / preds.std() + 1e-8
+            #         true_deltas_norm = (true_deltas - true_deltas.mean()) / true_deltas.std() + 1e-8
+            #         pred_deltas_norm = (pred_deltas - pred_deltas.mean()) / pred_deltas.std() + 1e-8
+
+            #         # ------------------------------------------------------------------
+            #         # 2. MSE on normalized utilities and deltas
+            #         # ------------------------------------------------------------------
+            #         # X_val is a numpy array here
+            #         s = X_val.sum(1)[1::2]
+            #         S = X_val.sum(1)
+            #         shapley_kernel_imp = 1/(s * (self.n_items - s) + 1e-6)
+            #         weights=shapley_kernel_imp / shapley_kernel_imp.sum()
+            #         mse = np.mean(weights*true_deltas_norm*(true_deltas_norm - pred_deltas_norm) ** 2)
+
+            #         Shapley_kernel_imp = 1/(S * (self.n_items - S) + 1e-6)
+            #         Weights=Shapley_kernel_imp / Shapley_kernel_imp.sum()
+            #         MSE = np.mean(Weights*(y_norm - y_pred_norm) ** 2)
+            #         # ------------------------------------------------------------------
+            #         # 3. Pairwise logistic loss (ranking)
+            #         #    Convert ONCE to torch, no tensor re-wrapping inside
+            #         # ------------------------------------------------------------------
+            #         # pred_t = torch.from_numpy(pred_deltas_norm)
+            #         # true_t = torch.from_numpy(true_deltas_norm)
+
+            #         prl = pairwise_logistic_loss(pred_deltas_norm, true_deltas_norm).item()
+            #         fold_r2.append(0.7*mse + 0.3*MSE)
+
+            #     # Average R² across folds
+            #     results[r] = np.mean(prl+mse+MSE)
+            ranks =list(range(1,10))
+            betas = [0.0, 0.25, 0.5, 0.75, 1.0]
+
+            best_score = np.inf
+            best_params = None
+
+            for r, beta in product(ranks, betas):
+                model = FactorizationMachine(
+                    rank=r,
+                    beta=beta,
+                    alpha=0.01,
+                    lambda_w=0.0,
+                    lambda_v=0.0,
+                    n_iter=500,
+                    fit_intercept=True,
+                    random_state=42,
+                    lr=0.005
+                )
+                
+                model.fit(X_tr, y_tr)
+                preds = model.predict(X_val)
+                pred_deltas = []
+                true_deltas = []
+                
+                for i in range(0, len(preds), 2):
+                    idx_with = i
+                    idx_without = i + 1
+
+                    pred_delta = preds[idx_with] - preds[idx_without]
+                    true_delta = y_val[idx_with] - y_val[idx_without]
+
+                    pred_deltas.append(pred_delta)
+                    true_deltas.append(true_delta)
+                
+                pred_deltas = np.array(pred_deltas)
+                true_deltas = np.array(true_deltas)
+
+                # Scale y_val and preds to be between 0 and 1
+                # scaler = MinMaxScaler()
+                # preds = scaler.fit_transform(preds.reshape(-1, 1)).flatten()
+                # y_val = scaler.fit_transform(y_val.reshape(-1, 1)).flatten()
 
 
-        elif sur_type == "fmsgd":
-            weights = shapley_kernel_weight(X_train)
-            # ablations: list[tuple] -> X, utilities -> y
-            X_train = np.array(ablations, dtype=np.int32)
-            y_train = np.array(utilities, dtype=np.float32)
-            best_rank=tune_fm_rank_cv(
-                            X_train,
-                            y_train,
-                            shapley_kernel_weights=weights,
-                            ranks=(1,2,4,8),
-                            n_splits=5,
-                            n_epochs=30,
-                            lambda_l2_w=1e-3,
-                            lambda_l2_V=1e-3,
-                            device='cuda',
-                            verbose=False,
-                            warm_start=True,
+                y_norm = (y_val - y_val.mean()) / y_val.std() + 1e-8
+                y_pred_norm = (preds - preds.mean()) / preds.std() + 1e-8
+                true_deltas_norm = (true_deltas - true_deltas.mean()) / true_deltas.std() + 1e-8
+                pred_deltas_norm = (pred_deltas - pred_deltas.mean()) / pred_deltas.std() + 1e-8
+
+                s = X_val.sum(1)[1::2]
+                S = X_val.sum(1)
+                shapley_kernel_imp = 1/(s * (self.n_items - s) + 1e-6)
+                weights=shapley_kernel_imp / shapley_kernel_imp.sum()
+                mse = np.mean((true_deltas_norm - pred_deltas_norm) ** 2)
+
+                Shapley_kernel_imp = 1/(S * (self.n_items - S) + 1e-6)
+                Weights=Shapley_kernel_imp / Shapley_kernel_imp.sum()
+                MSE = np.mean((y_norm - y_pred_norm) ** 2)
+                # print(f"Rank={r}, Beta={beta} => MSE on deltas: {mse:.4f}, MSE on utilities: {MSE:.4f}")
+                score = beta*mse + (1-beta)*MSE
+                # score = ndcg_score([y_val], [preds])
+
+                if score < best_score:
+                    best_score = score
+                    best_params = {"rank": r, "beta": beta}
+                    # best_model = model
+
+            print("Best params:", best_params)
+
+
+            # Pick rank with maximum R² instead of minimum MSE
+            # best_rank = min(results, key=results.get)
+            # print(f"Selected rank={best_rank} (Combined loss={results[best_rank]:.4f})")
+
+            # --- Train final model with best rank ---
+            model = FactorizationMachine(
+                            rank=best_params["rank"],
+                            alpha=0.01,        # L1 for w
+                            lambda_w=0.0,    # L2 for w
+                            lambda_v=0.0,     # L2 for V
+                            n_iter=500,
+                            fit_intercept=True,
                             random_state=42,
+                            lr=0.005,
+                            beta=best_params["beta"]
                         )
-            print(f"Best rank selected: {best_rank}")
-            wrapper_model, attr, F = train_torch_fm_surrogate_shapley_als(
-                                                X_train,
-                                                y_train,
-                                                shapley_kernel_weights=weights,
-                                                rank= best_rank,
-                                                lambda_l2_w= 1e-3,
-                                                lambda_l2_V= 1e-3,
-                                                n_epochs= 200,
-                                                device="cuda" ,
-                                                verbose= False)
-            return wrapper_model, attr, F
+            model.fit(X_train, y_train)
 
-        
-        elif sur_type == "full_poly2":
-            poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=True)
-            X_poly = poly.fit_transform(X_train)
-            model = Ridge(alpha=0.01, fit_intercept=True) # Small alpha for stability
-            model.fit(X_poly, y_train)
-            
-            n = X_train.shape[1]
-            linear, pairs = model.coef_[:n], np.zeros((n, n))
-            idx = n
-            for i in range(n):
-                for j in range(i + 1, n):
-                    pairs[i, j] = pairs[j, i] = model.coef_[idx]
-                    idx += 1
-            importance = linear + 0.5 * pairs.sum(axis=1)
-            return model, importance, pairs
-        
-        else:
-            print("Please insert a valid surrogate type")
+            attr, F = model.get_shapley_attributions()
+
+            return model, attr, F
+       
 
     def compute_contextcite(self, num_samples: int, seed: int = None):
 
@@ -596,337 +782,172 @@ class ContextAttribution:
         )
         return weights, model
 
-    
-    def compute_wss_dynamic_pruning_reuse_utility(self, num_samples: int, seed: int = None,
-                                                initial_rank: int = 1, final_rank: int = 2,
-                                                pruning_strategy: str = 'top_k', # New parameter: 'elbow' or 'top_k'
-                                                 sur_type="fm", sampling_method="kernelshap"):
-        """
-        Computes attributions using a two-stage process with a choice of pruning strategies.
-        - 'elbow': Dynamically finds the drop-off point in importance scores.
-        - 'top_k': Keeps the top n_items / 2 most important documents.
-        """
-        
-        # === STAGE 1: Initial Low-Rank Model to Identify Important Documents ===
-        
-        # 1a. Generate initial samples and utilities (no changes here)
-        sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling_method, seed=seed)
-        utilities_for_samples = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in sampled_tuples]
-        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u is not None and u != -float('inf')]
-        sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
-        utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
 
-        # 1b. Train initial low-rank surrogate model (no changes here)
-        _,initial_attr , _ = self._train_surrogate(
-           sampled_tuples_for_train, 
-            utilities_for_train,
-            rank=initial_rank,
-            sur_type="fm"
-        )
-        # initial_attr=np.sum(in_weight+initial_F, axis=1)
-        if initial_attr is None:
-            raise ValueError("Initial surrogate model failed to train. Cannot proceed with pruning.")
-        
-        # 1c. === DYNAMIC PRUNING LOGIC ===
-        
-        abs_attr = np.abs(initial_attr)
-        print(f'Initial scores: {abs_attr}')
-        # print(f'Initial scores no abs: {initial_attr}')
-        sorted_indices = np.argsort(initial_attr)[::-1] # Sort indices from most to least important
-        sorted_attr = initial_attr[sorted_indices]
-        if pruning_strategy == 'elbow':
-            gaps = sorted_attr[:-1] / sorted_attr[1:]  
-            if len(gaps) > 0:
-                elbow_point = np.argmax(gaps) + 1
-            else:
-                elbow_point = len(sorted_indices)
-            
-            docs_to_keep_indices = sorted_indices[:elbow_point]
-
-        elif pruning_strategy == 'top_k':
-            # Keep the top half of the documents
-            num_to_keep = 10
-            # Ensure we keep at least one document
-            if num_to_keep == 0 and self.n_items > 0:
-                num_to_keep = 1
-                
-            docs_to_keep_indices = sorted_indices[:num_to_keep]
-        elif pruning_strategy== "hybrid":
-            Q1, Q3 = np.percentile(sorted_attr, [25, 75])
-            IQR = Q3 - Q1
-            upper_cutoff = Q3 + 1.5 * IQR
-            lower_cutoff = Q1 - 1.5 * IQR
-
-            # Also ensure you always keep top 10%
-            upper_quant = np.quantile(sorted_attr, 0.9)
-            lower_quant = np.quantile(sorted_attr, 0.1)
-
-            upper_final = max(upper_cutoff, upper_quant)
-            lower_final = min(lower_cutoff, lower_quant)
-
-            docs_to_keep_indices = np.where((sorted_attr >= upper_final) | (sorted_attr <= lower_final))[0]
-        else:
-            raise ValueError(f"Unknown pruning_strategy: '{pruning_strategy}'. Choose 'elbow' or 'top_k'.")
-
-        # The rest of the logic remains the same...
-        docs_to_prune_indices = np.setdiff1d(np.arange(self.n_items), docs_to_keep_indices)
-
-        if len(docs_to_keep_indices) == self.n_items:
-            return self.compute_wss(num_samples, seed, rank=final_rank, utility_mode=self.utility_mode, sur_type=sur_type)
-        if len(docs_to_keep_indices) == 0:
-            return np.zeros(self.n_items), np.zeros((self.n_items, self.n_items)), None
-        print(f'We are keeping {len(docs_to_keep_indices)} documents')
-        # === STAGE 2: High-Rank Model on Pruned Document Set with Reused Utilities ===
-        
-        # 2a. Create the new, smaller training set
-        pruned_sampled_tuples = [tuple(np.array(t)[docs_to_keep_indices]) for t in sampled_tuples_for_train]
-
-        # 2b. Reuse the original utilities
-        reused_utilities = utilities_for_train
-
-        # 2c. Train the final, higher-rank model
-        final_model_pruned, attr_pruned, F_pruned = self._train_surrogate(
-            pruned_sampled_tuples,
-            reused_utilities,
-            sur_type=sur_type,
-            rank=final_rank if final_rank<len(docs_to_keep_indices) else len(docs_to_keep_indices)
-        )
-        if attr_pruned is None:
-            raise ValueError("Final surrogate model failed to train.")
-
-        # 2d. Re-integrate the results back into the original M-dimensional space
-        final_attr = np.zeros(self.n_items)
-        final_F = np.zeros((self.n_items, self.n_items))
-        
-        final_attr[docs_to_keep_indices] = attr_pruned
-        
-        # Reconstruct the interaction matrix
-        for i_idx, i_original in enumerate(docs_to_keep_indices):
-            for j_idx, j_original in enumerate(docs_to_keep_indices):
-                if i_idx < F_pruned.shape[0] and j_idx < F_pruned.shape[1]:
-                    final_F[i_original, j_original] = F_pruned[i_idx, j_idx]
-
-        model_info = (final_model_pruned, docs_to_keep_indices)
-        return final_attr, final_F, model_info
-
-    def compute_wss(self, num_samples: int, seed: int = None, sampling=None, sur_type="fmsgd",rank=None, candidate_ranks=[1,2,4,8]):
+    def compute_wss(self, num_samples: int, seed: int = None, sampling_method=None, sur_type=None ,rank=None, candidate_ranks=[1,2,4,8], selection_metric=None):
   
         # Generate subsets and compute utilities
-        sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling, seed=seed)
-        utilities_for_samples = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in sampled_tuples]
+        sampled_tuples = self._generate_sampled_ablations(num_samples, sampling_method=sampling_method, seed=seed)
+        # expand sampled_tuples to include a pair after each subset by flipping randomly one bit
+        # sampled_tuples_expanded = []
+        # for v_tuple in sampled_tuples:
+        #     sampled_tuples_expanded.append(v_tuple)
+        #     v_np = np.array(v_tuple)
+        #     flip_idx = np.random.randint(0, self.n_items)
+        #     v_np[flip_idx] = 1 - v_np[flip_idx]
+            # sampled_tuples_expanded.append(tuple(v_np))
 
-        # Filter invalid utilities
-        valid_indices = [i for i, u in enumerate(utilities_for_samples) if u != -float('inf')]
-        sampled_tuples_for_train = [sampled_tuples[i] for i in valid_indices]
-        utilities_for_train = [utilities_for_samples[i] for i in valid_indices]
+        utilities_for_samples = [self.get_utility(tuple(v_tuple), mode=self.utility_mode) for v_tuple in sampled_tuples]
 
         # Train surrogate model
         model, attr, F = self._train_surrogate(
-            sampled_tuples_for_train, 
-            utilities_for_train, 
-            sur_type=sur_type, rank=rank, candidate_ranks=candidate_ranks
+            sampled_tuples, 
+            utilities_for_samples, 
+            sur_type=sur_type, rank=rank, candidate_ranks=candidate_ranks, selection_metric=selection_metric
         )
         return attr, F, model
 
-    def compute_tmc_shap(self, num_iterations_max: int, performance_tolerance: float, 
-                        max_unique_lookups: int, seed: int = None, 
-                        shared_cache: dict = None, utility_mode="log-perplexity"):
-        """
-        Computes Shapley values using Truncated Monte Carlo sampling.
+
+    def compute_facilehp(self, num_samples: int, seed: int = None):
         
-        This version uses a provided shared_cache to store and retrieve utilities,
-        and manages its own lookup budget independently of the cache's total size.
-        It runs on the main process.
-        """
-        if not self.accelerator.is_main_process:
-            return np.zeros(self.n_items)
-            
-        if seed is not None:
-            random.seed(seed)
-            np.random.seed(seed)
-            
-        # Use the provided shared cache or the instance's own cache if none is given.
-        cache = shared_cache if shared_cache is not None else self.utility_cache
+        rank_candidates = [1,2, 4, 8]
+        beta_candidates = [0.0, 0.25, 0.5, 0.75, 1.0]
+
+        # Step 1: Sample subsets
+        sampled_tuples = self._generate_sampled_ablations(num_samples // 2, sampling_method="kernelshap", seed=seed)
+
+        # Step 2: Expand tuples by flipping one random bit
+        sampled_tuples_expanded = []
+        rng = np.random.default_rng(seed)
+        for v_tuple in sampled_tuples:
+            sampled_tuples_expanded.append(v_tuple)
+            v_np = np.array(v_tuple)
+            flip_idx = rng.integers(0, self.n_items)
+            v_np[flip_idx] = 1 - v_np[flip_idx]
+            sampled_tuples_expanded.append(tuple(v_np))
+
+        # Step 3: Compute utilities
+        utilities_for_samples = [self.get_utility(tuple(v_tuple), mode=self.utility_mode)
+                                for v_tuple in sampled_tuples_expanded]
         
-        # This method's own counter for its budget.
-        lookups_made_by_this_call = 0
+        X = np.array(sampled_tuples_expanded, dtype=np.float32) 
+        y = np.array(utilities_for_samples, dtype=np.float32) 
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        shapley_values = np.zeros(self.n_items)
-        marginal_counts = np.zeros(self.n_items, dtype=int)
-        
-        # Nested function to handle on-demand utility calls while tracking budget.
-        def get_utility_with_budget(subset_tuple):
-            nonlocal lookups_made_by_this_call
-            # Always return from cache if available, without penalty to budget.
-            if subset_tuple in cache:
-                return cache[subset_tuple]
-                
-            # If not in cache, check if we have budget to compute it.
-            if lookups_made_by_this_call >= max_unique_lookups:
-                return -float('inf') # Budget exceeded, return failure.
-            
-            # Compute, cache, increment budget counter, and return.
-            utility = self._compute_response_metric(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)), mode=utility_mode)
-            cache[subset_tuple] = utility
-            lookups_made_by_this_call += 1
-            return utility
+        # Step 4: Prepare data
+        n_splits = 4
+        kf = KFold(n_splits=n_splits, shuffle=False)
 
-        v_empty_util = get_utility_with_budget(tuple([0] * self.n_items))
-        v_full_util = get_utility_with_budget(tuple([1] * self.n_items))
-        
-        truncation_possible = v_empty_util > -float('inf') and v_full_util > -float('inf')
+        best_loss = np.inf
+        best_rank = None
+        best_beta = None
 
-        indices = list(range(self.n_items))
-        pbar = tqdm(range(num_iterations_max), desc="TMC Iterations (Corrected)", disable=not self.verbose)
-        
-        for t in pbar:
-            if lookups_made_by_this_call >= max_unique_lookups:
-                if self.verbose: print(f"TMC: Budget of {max_unique_lookups} lookups reached.")
-                pbar.close()
-                break 
-                
-            permutation = random.sample(indices, self.n_items)
-            v_prev_util = v_empty_util
-            current_subset_np = np.zeros(self.n_items, dtype=int) 
+        # Grid search with cross-validation
+        for rank in rank_candidates:
+            for beta in beta_candidates:
 
-            for item_idx_to_add in permutation:
-                # If the chain has already failed (e.g., v_prev_util is -inf), no point continuing.
-                if v_prev_util == -float('inf'):
-                    marginal_contribution = 0.0 # Cannot compute a valid marginal.
-                    v_curr_util = -float('inf') # The chain remains broken.
-                else:
-                    can_truncate = t > 0 and truncation_possible and (abs(v_full_util - v_prev_util) < performance_tolerance)
-                    if can_truncate:
-                        v_curr_util = v_prev_util
-                    else:
-                        v_curr_np = current_subset_np.copy(); v_curr_np[item_idx_to_add] = 1
-                        v_curr_util = get_utility_with_budget(tuple(v_curr_np))
-                    
-                    marginal_contribution = v_curr_util - v_prev_util if v_curr_util > -float('inf') else 0.0
-                
-                k_count = marginal_counts[item_idx_to_add] + 1
-                shapley_values[item_idx_to_add] = ((k_count - 1) / k_count) * shapley_values[item_idx_to_add] + (1 / k_count) * marginal_contribution
-                marginal_counts[item_idx_to_add] = k_count
-                
-                # CRITICAL: Update state for the next step in the permutation.
-                v_prev_util = v_curr_util
-                current_subset_np[item_idx_to_add] = 1
-        
-        return shapley_values
+                fold_losses = []
 
-    def compute_beta_shap(self, num_iterations_max: int, beta_a: float, beta_b: float,  
-                        max_unique_lookups: int, seed: int = None,
-                        shared_cache: dict = None, utility_mode="log-perplexity"):
-        """
-        Computes Shapley values using BetaShap sampling. This version uses a
-        provided shared cache and manages its own lookup budget. It runs on the main process.
-        """
-        if not self.accelerator.is_main_process:
-            return np.zeros(self.n_items)
-            
-        if beta_dist is None: raise ImportError("BetaShap requires scipy.")
-        if seed is not None: random.seed(seed); np.random.seed(seed)
-            
-        cache = shared_cache if shared_cache is not None else self.utility_cache
-        lookups_made_by_this_call = 0
+                for train_idx, val_idx in kf.split(X):
+                    X_train = torch.tensor(X[train_idx], dtype=torch.float32, device=device)
+                    y_train = torch.tensor(y[train_idx], dtype=torch.float32, device=device)
 
-        weighted_marginal_sums = np.zeros(self.n_items)
-        total_weights_for_item = np.zeros(self.n_items)
-        
-        def get_utility_with_budget(subset_tuple):
-            nonlocal lookups_made_by_this_call
-            if subset_tuple in cache: return cache[subset_tuple]
-            if lookups_made_by_this_call >= max_unique_lookups: return -float('inf')
-            
-            utility = self._compute_response_metric(context_str=self._get_ablated_context_from_vector(np.array(subset_tuple)), mode=utility_mode)
-            cache[subset_tuple] = utility
-            lookups_made_by_this_call += 1
-            return utility
+                    X_val = torch.tensor(X[val_idx], dtype=torch.float32, device=device)
+                    y_val = torch.tensor(y[val_idx], dtype=torch.float32, device=device)
 
-        v_empty_util = get_utility_with_budget(tuple([0] * self.n_items))
-        if v_empty_util == -float('inf') and self.verbose:
-            print("BetaShap Warning: Utility of empty set is -inf. This may lead to zero scores.")
+                    model = TorchFactorizationMachine(
+                        p=X.shape[1],
+                        rank=rank,
+                        alpha=0,
+                        lambda_w=0.1,
+                        lambda_v=0.1,
+                        beta=beta,
+                        device=device
+                    ).to(device)
 
-        indices = list(range(self.n_items))
-        pbar = tqdm(range(num_iterations_max), desc="BetaShap Iterations (Corrected)", disable=not self.verbose)
-        
-        for t in pbar:
-            if lookups_made_by_this_call >= max_unique_lookups:
-                if self.verbose: print(f"BetaShap: Budget of {max_unique_lookups} lookups reached.")
-                pbar.close()
-                break
+                    # Train on train fold
+                    train_fm(
+                        model,
+                        X_train,
+                        y_train,
+                        lr=1e-2,
+                        n_iter=50,
+                        verbose=False
+                    )
 
-            permutation = random.sample(indices, self.n_items)
-            v_prev_util = v_empty_util
-            current_subset_np = np.zeros(self.n_items, dtype=int)
+                    # Validation loss
+                    val_loss = model.loss(X_val, y_val).detach().cpu().item()
+                    fold_losses.append(val_loss)
 
-            for k, item_idx_to_add in enumerate(permutation):
-                # If the chain has already failed, break from this permutation.
-                if v_prev_util == -float('inf'):
-                    break
+                mean_val_loss = np.mean(fold_losses)
 
-                v_curr_np = current_subset_np.copy(); v_curr_np[item_idx_to_add] = 1
-                v_curr_util = get_utility_with_budget(tuple(v_curr_np))
-                
-                # Only proceed if the new utility is valid
-                if v_curr_util > -float('inf'):
-                    marginal_contribution = v_curr_util - v_prev_util
-                    
-                    # Calculate Beta weight
-                    if self.n_items > 1: x_pos = k / (self.n_items - 1)
-                    else: x_pos = 0.5
-                    
-                    try:
-                        weight = beta_dist.pdf(x_pos, beta_a, beta_b)
-                        if not np.isfinite(weight): weight = 1e6 # Use large stable weight if PDF is infinite
-                    except Exception: weight = 1.0 # Fallback
-                    
-                    weighted_marginal_sums[item_idx_to_add] += weight * marginal_contribution
-                    total_weights_for_item[item_idx_to_add] += weight
-                
-                v_prev_util = v_curr_util
-                current_subset_np[item_idx_to_add] = 1
-                
-        pbar.close()
-        
-        shapley_values = np.zeros(self.n_items)
-        non_zero_mask = total_weights_for_item > 1e-9
-        shapley_values[non_zero_mask] = weighted_marginal_sums[non_zero_mask] / total_weights_for_item[non_zero_mask]
+                if mean_val_loss < best_loss:
+                    best_loss = mean_val_loss
+                    best_rank = rank
+                    best_beta = beta
 
-        return shapley_values
+        # --------------------------------------------------
+        # Re-train best model on full dataset
+        # --------------------------------------------------
+        X_t = torch.tensor(X, dtype=torch.float32, device=device)
+        y_t = torch.tensor(y, dtype=torch.float32, device=device)
 
-    def compute_loo(self):
-        """
-        Computes general Leave-One-Out (LOO) scores for each item
-        using the specified utility function mode.
-        """
-        loo_scores = [0.0] * self.n_items
-        
-        # V(FullSet) for the given utility mode
-        utility_full_context = self.get_utility(
-            tuple([1] * self.n_items), 
-            mode=self.utility_mode
+        best_model = TorchFactorizationMachine(
+            p=X.shape[1],
+            rank=best_rank,
+            alpha=0.0,
+            lambda_w=0.1,
+            lambda_v=0.1,
+            beta=best_beta,
+            device=device
+        ).to(device)
+
+        train_fm(
+            best_model,
+            X_t,
+            y_t,
+            lr=1e-2,
+            n_iter=100,
+            verbose=False
         )
 
-        for i in range(self.n_items):
-            v_loo_tuple = tuple(1 if j != i else 0 for j in range(self.n_items))
-            utility_ablated = self.get_utility(v_loo_tuple, mode=self.utility_mode)
-            
-            if utility_full_context > -float('inf') and utility_ablated > -float('inf'):
-                loo_scores[i] = utility_full_context - utility_ablated
-            else:
-                loo_scores[i] = 0.0 # Or some other indicator of failure
+        best_shapley, best_F = best_model.get_shapley_attributions()
 
-        return loo_scores
+        print(
+            f"Best CV loss: {best_loss:.4f}, "
+            f"rank={best_rank}, beta={best_beta}"
+        )
 
-    def compute_arc_jsd(self):
-        """
-        Computes ARC-JSD scores. This is a specific application of Leave-One-Out
-        using a divergence-based utility.
-        """
-        # This is now just a convenient wrapper around the general LOO method.
-        return self.compute_loo(utility_mode="divergence_utility")
+        return best_shapley, best_F, best_model
+    
+    
+    def compute_facile(self, X, y, all_pairs,loss_type, rank):
+         
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
+        model = TorchFactorizationMachine(
+            p=X.shape[1],
+            rank=rank,
+            alpha=0.01,
+            lambda_w=0.01,
+            lambda_v=0.01,
+            loss_type=loss_type,
+            device=device,
+        ).to(device)
+        X_t = torch.tensor(X, dtype=torch.float32, device=device)
+        y_t = torch.tensor(y, dtype=torch.float32, device=device)
+
+        train_fm(
+            model,
+            X_t,
+            y_t,
+            lr=1e-2,
+            n_iter= 100,
+            verbose=True,
+            all_pairs=all_pairs
+        )
+        shapley_values, F = model.get_shapley_attributions()
+
+        return shapley_values.numpy(), F.numpy(), model
 
     def _make_value_function(self, utility_mode: str, scale=False):
         """
@@ -1045,7 +1066,7 @@ class ContextAttribution:
     # Helper & Internal Methods
     # --------------------------------------------------------------------------
     
-    def compute_jsd_for_ablated_indices(self, ablated_indices):
+    def compute_jsd_for_ablated_indices(self, ablated_indices) -> float:
 
         # Create ablated context by removing specified documents
         ablated_items = [item for j, item in enumerate(self.items) if j not in ablated_indices]
@@ -1076,32 +1097,37 @@ class ContextAttribution:
         return total_jsd
     
     def lds(self, results_dict, n_eval_util, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
+
+        # eval_subsets, _ = sample_paired_coalitions(self.n_items, n_eval_util,seed=seed)
+        # sampled_tuples_expanded = []
+        # for v_tuple in eval_subsets:
+        #     sampled_tuples_expanded.append(v_tuple)
+        #     v_np = np.array(v_tuple)
+        #     flip_idx = np.random.randint(0, self.n_items)
+        #     v_np[flip_idx] = 1 - v_np[flip_idx]
+        #     sampled_tuples_expanded.append(tuple(v_np))
         X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in eval_subsets]
+        exact_utilities = [self.get_utility(tuple(v_tuple), mode=self.utility_mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         lds = {}
         # Predict effects for all subsets using surrogates
         for method_name, scores in results_dict.items():
-            if "FM" in method_name:
-                model_or_info = models[method_name]
-                # Check if this is a pruned model (i.e., we stored a tuple)
-                if isinstance(model_or_info, tuple):
-                    model, kept_indices = model_or_info
-                    # Slice the full evaluation data to get the pruned feature space
-                    X_pruned = X_all[:, kept_indices]
-                    X_pruned_sparse = csr_matrix(X_pruned)
-                    predicted_effect = model.predict(X_pruned_sparse)
-                else:
-                    # This is a standard, non-pruned model
-                    model = model_or_info
-                    predicted_effect = model.predict(X_all_sparse)
-            elif "II" in method_name:
+            if "FACILE" in method_name:
+                model = models[method_name]                
+                predicted_effect = model.predict(X_all_sparse)
+            elif "II" in method_name or "pex" in method_name in method_name:
                 predicted_effect = np.zeros(len(X_all))
                 for i, x in enumerate(X_all):
                     for loc, coef in models[method_name].items():
                         if all(x[l] == 1 for l in loc):
                             predicted_effect[i] += coef
+            elif "ContextCite" in method_name:
+                predicted_effect=models[method_name].predict(X_all)
+            
+            # elif "Facile" in method_name:
+            #     model=models[method_name]
+            #     predicted_effect= model.predict(torch.tensor(X_all, dtype=torch.float32, device="cuda"))
             else:
                 predicted_effect = [np.dot(scores, i) for i in X_all]
 
@@ -1113,70 +1139,46 @@ class ContextAttribution:
         return lds
     
     def r2(self, results_dict, n_eval_util, models):
-        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='uniform', seed=2)
+        # eval_subsets, _ = sample_paired_coalitions(self.n_items, n_eval_util, seed=seed)
+        eval_subsets = self._generate_sampled_ablations(n_eval_util, sampling_method='kernelshap', seed=2)
+
+        # eval_subsets, _ = sample_paired_coalitions(self.n_items, n_eval_util,seed=seed)
+        # sampled_tuples_expanded = []
+        # for v_tuple in eval_subsets:
+        #     sampled_tuples_expanded.append(v_tuple)
+        #     v_np = np.array(v_tuple)
+        #     flip_idx = np.random.randint(0, self.n_items)
+        #     v_np[flip_idx] = 1 - v_np[flip_idx]
+        #     sampled_tuples_expanded.append(tuple(v_np))
         X_all = np.array(eval_subsets)
-        exact_utilities = [self.get_utility(v_tuple, mode=self.utility_mode) for v_tuple in eval_subsets]
-        # exact_utilities_perplexity = [self.get_utility(v_tuple, mode="log-perplexity") for v_tuple in eval_subsets]
+        exact_utilities = [self.get_utility(tuple(v_tuple), mode=self.utility_mode) for v_tuple in eval_subsets]
         X_all_sparse = csr_matrix(X_all)
         r2_scores={}
         for method_name, scores in results_dict.items():
-            if "FM" in method_name:
-                # --- THIS IS THE NEW LOGIC ---
-                model_or_info = models[method_name]
-                # print(f"for {method_name} type is {isinstance(model_or_info, tuple)}")
-                # Check if this is a pruned model (i.e., we stored a tuple)
-                if isinstance(model_or_info, tuple):
-                    model, kept_indices = model_or_info
-                    
-                    # Slice the full evaluation data to get the pruned feature space
-                    X_pruned = X_all[:, kept_indices]
-                    X_pruned_sparse = csr_matrix(X_pruned)
-                    
-                    predicted_effect = model.predict(X_pruned_sparse)
-                else:
-                    # This is a standard, non-pruned model
-                    model = model_or_info
-                    predicted_effect = model.predict(X_all_sparse)
+            if "FACILE" in method_name:
+                model = models[method_name]
+                predicted_effect = model.predict(X_all_sparse)
+
             elif "ContextCite" in method_name:
                 predicted_effect=models[method_name].predict(X_all)
-            elif "II" in method_name:
+            
+            # elif "Facile" in method_name:
+            #     model=models[method_name]
+            #     predicted_effect= model.predict(torch.tensor(X_all, dtype=torch.float32, device="cuda"))
+
+            elif "II" in method_name or "pex" in method_name in method_name:
                 predicted_effect = np.zeros(len(X_all))
                 for i, x in enumerate(X_all):
                     for loc, coef in models[method_name].items():
                         # print(loc)
                         if all(x[l] == 1 for l in loc):
                             predicted_effect[i] += coef
+
             else:
                 predicted_effect=[np.dot(scores, i) for i in X_all]
-            try:
-                # if "FSI" in method_name or "FB" in method_name or "Spex" in method_name:
-                #     r2[method_name]=r2_score(exact_utilities_perplexity, predicted_effect)
-                # else:
-                r2_scores[method_name]=r2_score(exact_utilities, predicted_effect)
-            except Exception: pass
+
+            r2_scores[method_name]=r2_score(exact_utilities, predicted_effect)
         return r2_scores
-
-    def compute_exhaustive_top_k(self, k: int, search_list, model=None):
-        n = self.n_items
-        best_k_indices_to_remove = None
-        min_utility_after_removal = float('inf') # We want to minimize V(N - S_removed)
-
-        possible_indices_to_remove = list(itertools.combinations(search_list, k))
-    
-        for k_indices_tuple in possible_indices_to_remove:
-            ablated_set_np = np.ones(n, dtype=int)
-            ablated_set_np[list(k_indices_tuple)] = 0
-            # ablated_set_tuple = tuple(ablated_set_np)
-            if model:
-                utility_of_ablated_set = model.predict(csr_matrix(ablated_set_np))
-            else:
-                utility_of_ablated_set = self.get_utility(tuple(ablated_set_np), mode=self.utility_mode)
-            if utility_of_ablated_set < min_utility_after_removal:
-                min_utility_after_removal = utility_of_ablated_set
-                best_k_indices_to_remove = k_indices_tuple
-
-        return best_k_indices_to_remove
-
 
 
     def recall_at_k(self, gtset_k, results_dict, k_val ):
@@ -1189,136 +1191,68 @@ class ContextAttribution:
             recall[method_name]=rec
         return recall
         
-    def delta_r2(self, results_dict, num_samples=100, models=None):
+    def delta_r2(self, results_dict, num_samples, models=None):
 
         # Generate evaluation samples using KernelSHAP distribution
-        eval_subsets = self._generate_sampled_ablations(num_samples, sampling_method='uniform', seed=2)
-        
-        # Compute actual deltas between S and S\{i}
-        actual_deltas = []
-        subset_player_pairs = []  # Track which (S,i) pairs we computed
-        
-        # For progress tracking
-        total_pairs = sum(sum(s) for s in eval_subsets)  # Number of 1s across all subsets
-        if self.verbose:
-            print(f"Computing actual utility deltas for {total_pairs} (subset, player) pairs...")
-        
-        for S in eval_subsets:
-            S_array = np.array(S)
-            S_utility = self.get_utility(tuple(S), mode=self.utility_mode)
+        # sampled_tuples, _ = sample_paired_coalitions(n=self.n_items, num_samples=num_samples, seed=seed)
+        eval_subsets = self._generate_sampled_ablations(num_samples, sampling_method='kernelshap', seed=2)
+
+        # eval_subsets, _ = sample_paired_coalitions(self.n_items, n_eval_util,seed=seed)
+        sampled_tuples_expanded = []
+        for v_tuple in eval_subsets:
+            sampled_tuples_expanded.append(v_tuple)
+            v_np = np.array(v_tuple)
+            flip_idx = np.random.randint(0, self.n_items)
+            v_np[flip_idx] = 1 - v_np[flip_idx]
+            sampled_tuples_expanded.append(tuple(v_np))
+        X=np.array(sampled_tuples_expanded)
+        y =np.array( [self.get_utility(tuple(v_tuple), mode=self.utility_mode) for v_tuple in sampled_tuples_expanded])
+        # Build delta pairs
+        all_indecies = pairs_hamming_1_bitmask(X)
+
+        true_delta = y[all_indecies[:,0]] - y[all_indecies[:,1]]
+
             
-            # Only consider removing present players (where S[i] = 1)
-            for i in np.where(S_array == 1)[0]:
-                # Create S\{i} by flipping bit i
-                S_without_i = S_array.copy()
-                S_without_i[i] = 0
-                
-                # Only compute delta if both utilities are valid
-                if S_utility is not None and S_utility != -float('inf'):
-                    utility_without_i = self.get_utility(tuple(S_without_i), mode=self.utility_mode)
-                    if utility_without_i is not None and utility_without_i != -float('inf'):
-                        actual_deltas.append(S_utility - utility_without_i)
-                        subset_player_pairs.append((S, i))
-        
-        if not actual_deltas:  # If no valid deltas found
-            return {method: 0.0 for method in results_dict.keys()}
-            
-        actual_deltas = np.array(actual_deltas)
         delta_r2_scores = {}
         
         # For each method, compute predicted deltas and calculate R²
         for method_name, scores in results_dict.items():
-            if self.verbose:
-                print(f"Computing delta R² for {method_name}...")
-                
-            predicted_deltas = []
             
             # Handle factorization machine models
-            if "FM" in method_name and models is not None:
+            if "FACILE" in method_name:
                 # Prepare all S vectors and S\{i} vectors in batch
-                all_S = []
-                all_S_without_i = []
-                all_kept_indices = []
                 
-                model_or_info = models[method_name]
-                if isinstance(model_or_info, tuple):
-                    model, kept_indices = model_or_info
-                    # For pruned models, need to track which indices to use for each prediction
-                    for S, i in subset_player_pairs:
-                        S_pruned = np.array(S)[kept_indices]
-                        S_without_i_pruned = S_pruned.copy()
-                        if i in kept_indices:
-                            idx = np.where(kept_indices == i)[0][0]
-                            S_without_i_pruned[idx] = 0
-                        all_S.append(S_pruned)
-                        all_S_without_i.append(S_without_i_pruned)
-                        all_kept_indices.append(kept_indices)
-                else:
-                    model = model_or_info
-                    # For standard models, use full feature space
-                    for S, i in subset_player_pairs:
-                        S_array = np.array(S)
-                        S_without_i = S_array.copy()
-                        S_without_i[i] = 0
-                        all_S.append(S_array)
-                        all_S_without_i.append(S_without_i)
-                        all_kept_indices.append(None)
+                model = models[method_name]
                 
-                # Batch predict for all S and S\{i}
-                all_S = np.stack(all_S)
-                all_S_without_i = np.stack(all_S_without_i)
-                
-                # Convert to sparse matrices
-                S_sparse = csr_matrix(all_S)
-                S_without_i_sparse = csr_matrix(all_S_without_i)
-                
-                # Get predictions
-                pred_S = model.predict(S_sparse)
-                pred_S_without_i = model.predict(S_without_i_sparse)
-                predicted_deltas = pred_S - pred_S_without_i
+                X_sparse= csr_matrix(X)
+                y_pred = model.predict(X_sparse)
+                pred_deltas = y_pred[all_indecies[:,0]] - y_pred[all_indecies[:,1]]
             
             # Handle interaction-based models
-            elif "II" in method_name and models is not None:
-                for S, i in subset_player_pairs:
-                    S_array = np.array(S)
-                    S_without_i = S_array.copy()
-                    S_without_i[i] = 0
-                    
-                    # Accumulate predictions from interaction terms
-                    pred_S = 0.0
-                    pred_S_without_i = 0.0
-                    
+            elif "II" in method_name or "pex" in method_name in method_name:
+                y_pred = np.zeros(len(X))
+                for i, x in enumerate(X):
                     for loc, coef in models[method_name].items():
-                        # Add coefficient if all players in interaction are present
-                        if all(S_array[l] == 1 for l in loc):
-                            pred_S += coef
-                        if all(S_without_i[l] == 1 for l in loc):
-                            pred_S_without_i += coef
-                            
-                    predicted_deltas.append(pred_S - pred_S_without_i)
+                        if all(x[l] == 1 for l in loc):
+                            y_pred[i] += coef
+                pred_deltas = y_pred[all_indecies[:,0]] - y_pred[all_indecies[:,1]]
+
+            elif "ContextCite" in method_name:
+                model=models[method_name]
+                y_pred= model.predict(X)
+                pred_deltas = y_pred[all_indecies[:,0]] - y_pred[all_indecies[:,1]]
+
+            # elif "Facile" in method_name:
+            #     model=models[method_name]
+            #     y_pred= model.predict(torch.tensor(X, dtype=torch.float32, device="cuda"))
+            #     pred_deltas = y_pred[all_indecies[:,0]] - y_pred[all_indecies[:,1]]
             
             # Handle linear attribution models
             else:
-                # Direct prediction using attribution scores (linear model)
-                for S, i in subset_player_pairs:
-                    pred_S = np.dot(scores, S)
-                    S_without_i = list(S)
-                    S_without_i[i] = 0
-                    pred_S_without_i = np.dot(scores, S_without_i)
-                    predicted_deltas.append(pred_S - pred_S_without_i)
+                pred_deltas = np.dot(X[all_indecies[:,0]], scores)- np.dot(X[all_indecies[:,1]], scores)
             
-            predicted_deltas = np.array(predicted_deltas)
-            
-            # Calculate R² between actual and predicted deltas
-            if len(predicted_deltas) > 0:
-                delta_r2_scores[method_name] = r2_score(actual_deltas, predicted_deltas)
-                if self.verbose:
-                    print(f"{method_name} delta R² score: {delta_r2_scores[method_name]:.4f}")
-            else:
-                delta_r2_scores[method_name] = 0.0
-                if self.verbose:
-                    print(f"Warning: No valid predictions for {method_name}")
-                
+            delta_r2_scores[method_name] = r2_score(true_delta, pred_deltas)
+                        
         return delta_r2_scores
     
     
@@ -1391,85 +1325,286 @@ def shapley_kernel_weight(ablations: np.ndarray) -> np.ndarray:
     return weights
 
 
-def soft_threshold(z, alpha):
-    if z > alpha:
-        return z - alpha
-    if z < -alpha:
-        return z + alpha
-    return 0.0
+
+def soft_threshold(x: float, threshold: float) -> float:
+    """Soft thresholding operator for LASSO."""
+    if x > threshold:
+        return x - threshold
+    elif x < -threshold:
+        return x + threshold
+    else:
+        return 0.0
 
 
-class FactorizationMachine:
+
+class TorchFactorizationMachine(nn.Module):
     def __init__(
         self,
-        rank=0,
-        alpha=1.0,        # L1 for w
-        lambda_v=0.1,     # L2 for V
-        n_iter=50,
-        fit_intercept=True,
-        random_state=42
+        p: int,
+        rank: int = 0,
+        alpha: float = 0.01,
+        lambda_w: float = 0.01,
+        lambda_v: float = 0.01,
+        fit_intercept: bool = True,
+        loss_type: str = None,
+        device: str = "cuda"
     ):
+        super().__init__()
         self.rank = rank
         self.alpha = alpha
+        self.lambda_w = lambda_w
         self.lambda_v = lambda_v
-        self.n_iter = n_iter
         self.fit_intercept = fit_intercept
-        self.random_state = random_state
+        self.device = device
+        self.loss_type = loss_type
 
-    def predict(self, X):
+        self.w = nn.Parameter(torch.zeros(p, device=device))
+
+        if fit_intercept:
+            self.w0 = nn.Parameter(torch.zeros(1, device=device))
+        else:
+            self.register_parameter("w0", None)
+
+        if rank > 0:
+            self.V = nn.Parameter(
+                0.01 * torch.randn(p, rank, device=device)
+            )
+        else:
+            self.register_parameter("V", None)
+
+    # ------------------------------------------------------------------
+    def forward(self, X: torch.Tensor) -> torch.Tensor:
         y = X @ self.w
+
         if self.fit_intercept:
-            y += self.w0
+            y = y + self.w0
 
         if self.rank > 0:
             XV = X @ self.V
-            y += 0.5 * np.sum(
+            interaction = 0.5 * torch.sum(
                 XV ** 2 - (X ** 2) @ (self.V ** 2),
-                axis=1
+                dim=1
             )
+            y = y + interaction
 
         return y
 
-    def fit(self, X, y):
-        n, p = X.shape
-        rng = np.random.default_rng(self.random_state)
+    # ------------------------------------------------------------------
+    def loss(self, X: torch.Tensor, y: torch.Tensor, all_pairs: list) -> torch.Tensor:
+        y_pred = self.forward(X)
+        pairs = torch.tensor(all_pairs, device=X.device)
+        if self.loss_type == "util_mse":
+            mse = torch.mean((y - y_pred) ** 2)
+        elif self.loss_type == "delta_mse":
+            # return all possible pairs with Hamming distance 1
+           
 
-        self.w = np.zeros(p)
-        self.w0 = y.mean() if self.fit_intercept else 0.0
+            # Calculate the MSE over the deltas between pairs
+            i, j = pairs[:, 0], pairs[:, 1]
+
+            pred_deltas = y_pred[i] - y_pred[j]
+            true_deltas = y[i] - y[j]
+            weights = torch.abs(true_deltas)
+            weights = weights / (weights.mean() + 1e-8)
+            mse = torch.mean(weights*(true_deltas - pred_deltas) ** 2)
+                    
+        # Regularization
+        reg = (
+            self.alpha * torch.sum(torch.abs(self.w)) +
+            0.5 * self.lambda_w * torch.sum(self.w ** 2)
+        )
 
         if self.rank > 0:
-            self.V = rng.normal(scale=0.01, size=(p, self.rank))
-        else:
-            self.V = None
+            reg = reg + 0.5 * self.lambda_v * torch.sum(self.V ** 2)
 
-        for _ in range(self.n_iter):
-            # ---- Update bias ----
-            if self.fit_intercept:
-                self.w0 = np.mean(y - self.predict(X) + self.w0)
+        return mse + reg
 
-            # ---- Update linear weights (LASSO via CD) ----
-            for j in range(p):
-                r = y - self.predict(X) + self.w[j] * X[:, j]
-                rho = X[:, j].T @ r / n
-                z = (X[:, j] ** 2).mean()
-                self.w[j] = soft_threshold(rho, self.alpha) / (z + 1e-12)
+    # ------------------------------------------------------------------
+    @torch.no_grad()
+    def get_shapley_attributions(self) -> Tuple[torch.Tensor, torch.Tensor]:
+        if self.rank == 0 or self.V is None:
+            return self.w.detach().clone(), None
 
-            # ---- Update factors via ALS ----
-            if self.rank > 0:
-                for f in range(self.rank):
-                    s_f = X @ self.V[:, f]
-                    for j in range(p):
-                        xj = X[:, j]
-                        tmp = s_f - self.V[j, f] * xj
+        F = self.V @ self.V.T
+        F.fill_diagonal_(0.0)
 
-                        r = (
-                            y
-                            - self.predict(X)
-                            + self.V[j, f] * xj * tmp
-                        )
+        attr = self.w + 0.5 * F.sum(dim=1)
+        return attr.detach().cpu(), F.detach().cpu()
+    
+    def predict(self, X: torch.Tensor) -> np.ndarray:
+        """
+        Predict with the trained FM model.
+        Returns CPU NumPy array.
+        """
+        self.eval()
+        with torch.no_grad():
+            y_pred = self(X)
+        return y_pred.detach().cpu().numpy()
 
-                        numer = (xj * tmp @ r) / n
-                        denom = ((xj * tmp) ** 2).mean() + self.lambda_v
-                        self.V[j, f] = numer / denom
 
-        return self
+
+def train_fm(
+    model: TorchFactorizationMachine,
+    X: torch.Tensor,
+    y: torch.Tensor,
+    lr: float = 1e-2,
+    n_iter: int = 200,
+    verbose: bool = True,
+    all_pairs: list = None
+):
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # train half of the itterations with util_mse then the rest with delta_mse
+    for it in range(n_iter):
+        optimizer.zero_grad()
+        loss = model.loss(X, y, all_pairs)
+        loss.backward()
+        optimizer.step()
+
+# def train_fm(
+#     model: TorchFactorizationMachine,
+#     X: torch.Tensor,
+#     y: torch.Tensor,
+#     lr: float = 1e-2,
+#     n_iter: int = 200,
+#     verbose: bool = True,
+#     all_pairs: list = None
+# ):
+#     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+#     half = n_iter // 2
+
+#     # ------------------------
+#     # Phase 1: util_mse
+#     # ------------------------
+#     model.loss_type = "util_mse"
+#     for it in range(half):
+#         optimizer.zero_grad()
+#         loss = model.loss(X, y, all_pairs)
+#         loss.backward()
+#         optimizer.step()
+
+#         # if verbose and it % 20 == 0:
+#         #     print(f"[util_mse] Iter {it:4d} | loss={loss.item():.6f}")
+
+#     # ------------------------
+#     # Phase 2: delta_mse
+#     # ------------------------
+#     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+#     model.loss_type = "delta_mse"
+#     for it in range(half, n_iter):
+#         optimizer.zero_grad()
+#         loss = model.loss(X, y, all_pairs)
+#         loss.backward()
+#         optimizer.step()
+
+
+
+
+
+def pairs_hamming_1_bitmask(vectors):
+    masks = [int("".join(map(str, v)), 2) for v in vectors]
+    result = []
+
+    for i, j in itertools.combinations(range(len(masks)), 2):
+        x = masks[i] ^ masks[j]
+        if x and (x & (x - 1)) == 0:  # power of two → one differing bit
+            result.append((i, j))
+    # print(f"Found {len(result)} pairs with Hamming distance 1.")
+    return np.array(result)
+
+def pairs_hamming_1_torch(X):
+    """
+    X: torch.Tensor (N, d), values in {0,1} or {0.0,1.0}
+    returns: list of (i, j, diff_idx)
+    """
+    N, d = X.shape
+
+    masks = (X << torch.arange(d, device=X.device)).sum(dim=1)
+
+    result = []
+    for i in range(N):
+        xor = masks[i] ^ masks[i+1:]
+        valid = (xor != 0) & ((xor & (xor - 1)) == 0)
+
+        js = torch.nonzero(valid, as_tuple=False).flatten() + i + 1
+        for j in js.tolist():
+            result.append((i, j))
+
+    return result
+
+def pairwise_logistic_loss(pred_deltas, true_deltas):
+    """
+    Pairwise logistic (RankNet) loss.
+    """
+    # Labels: no gradients needed
+    true_deltas = true_deltas.detach()
+
+    # Pairwise comparisons
+    true_i = true_deltas.unsqueeze(1)   # [n, 1]
+    true_j = true_deltas.unsqueeze(0)   # [1, n]
+    mask = (true_i > true_j).float()    # [n, n]
+
+    pred_i = pred_deltas.unsqueeze(1)   # [n, 1]
+    pred_j = pred_deltas.unsqueeze(0)   # [1, n]
+    pred_diff = pred_i - pred_j         # [n, n]
+
+    # Numerically stable logistic loss
+    loss_mat = F.softplus(-pred_diff)
+
+    loss = (mask * loss_mat).sum()
+    num_pairs = mask.sum()
+
+    if num_pairs > 0:
+        loss = loss / num_pairs
+
+    return loss
+
+
+
+def sample_paired_coalitions(n, num_samples, seed=None):
+    """
+    Sampling method with reproducible randomness
+    """
+    rng = np.random.default_rng(seed)
+
+    num_pairs = num_samples // 2
+    sampled_tuples = []
+    pair_indices = []
+    
+    # KernelSHAP distribution over |S|
+    sizes = np.arange(1, n)
+    weights = (n - 1) / (sizes * (n - sizes))
+    probabilities = weights / weights.sum()
+    
+    sampled_sizes = rng.choice(
+        sizes,
+        size=num_pairs,
+        p=probabilities
+    )
+    
+    for k in sampled_sizes:
+        # sample player i
+        i = rng.integers(0, n)
+        
+        # sample S ⊆ N \ {i}, |S| = k
+        others = [j for j in range(n) if j != i]
+        chosen = rng.choice(
+            others,
+            size=min(k, len(others)),
+            replace=False
+        )
+        
+        S_without_i = np.zeros(n, dtype=int)
+        S_without_i[chosen] = 1
+        
+        S_with_i = S_without_i.copy()
+        S_with_i[i] = 1
+        
+        idx_with = len(sampled_tuples)
+        sampled_tuples.append(S_with_i)
+        
+        idx_without = len(sampled_tuples)
+        sampled_tuples.append(S_without_i)
+        
+        pair_indices.append((idx_with, idx_without))
+    
+    return sampled_tuples, np.array(pair_indices)

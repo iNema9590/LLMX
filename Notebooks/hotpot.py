@@ -57,7 +57,7 @@ if accelerator_main.is_main_process:
     print("Main Script: Model prepared and set to eval.")
 
 # Define utility cache
-utility_cache_base_dir = f"../Experiment_data/sampled_hotpot/more_players/{model_path.split('/')[1]}"
+utility_cache_base_dir = f"../Experiment_data/sampled_hotpot/{model_path.split('/')[1]}"
 accelerator_main.wait_for_everyone()
 
 num_questions_to_run = len(df)
@@ -78,7 +78,7 @@ for i in range(num_questions_to_run):
     if accelerator_main.is_main_process:
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
-    docs = df.reordered_sentences[i][:20]
+    docs = df.reordered_sentences[i][:10]
     utility_cache_filename = f"utilities_q_idx{i}.pkl"
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
 
@@ -105,8 +105,8 @@ for i in range(num_questions_to_run):
 
         m_samples_map = {"XS":32, "S":64, "M":128, "L":264, "XL":528, "XXL":724}
         fm_models = {}
-        # methods_results['Exact-Shap']=harness._calculate_exact(method='SV')
-        # methods_results['Exact-Banzhaf']=harness._calculate_exact(method='BV')
+        methods_results['Exact-Shap']=harness._calculate_exact(method='SV')
+        methods_results['Exact-Banzhaf']=harness._calculate_exact(method='BV')
         for size_key, actual_samples in m_samples_map.items():
             print(f"Running sample size: {actual_samples}")
             methods_results[f"ContextCite_{actual_samples}"], fm_models[f"ContextCite_{actual_samples}"] = harness.compute_contextcite(
@@ -160,22 +160,22 @@ for i in range(num_questions_to_run):
             extra_results.update({
                 f"Shapiq-B_{actual_samples}":interactionshapiq
                                                                         })
-            # try:
-            #     attributionshap, interactionshap, fm_models[f"Spex-S_{actual_samples}"] = harness.compute_spex(sample_budget=actual_samples, max_order=harness.n_items, method='FSII')
-            #     methods_results[f"Spex-S_{actual_samples}"] = attributionshap
+            try:
+                attributionshap, interactionshap, fm_models[f"Spex-S_{actual_samples}"] = harness.compute_spex(sample_budget=actual_samples, max_order=harness.n_items, method='FSII')
+                methods_results[f"Spex-S_{actual_samples}"] = attributionshap
 
-            #     extra_results.update({
-            #     f"Spex-S_{actual_samples}":interactionshap
-            #                                                             })
+                extra_results.update({
+                f"Spex-S_{actual_samples}":interactionshap
+                                                                        })
 
-            #     attributionshap, interactionshap, fm_models[f"Spex-B_{actual_samples}"] = harness.compute_spex(sample_budget=actual_samples, max_order=harness.n_items, method='FBII')
-            #     methods_results[f"Spex-B_{actual_samples}"] = attributionshap
+                attributionshap, interactionshap, fm_models[f"Spex-B_{actual_samples}"] = harness.compute_spex(sample_budget=actual_samples, max_order=harness.n_items, method='FBII')
+                methods_results[f"Spex-B_{actual_samples}"] = attributionshap
 
-            #     extra_results.update({
-            #     f"Spex-B_{actual_samples}":interactionshap
-            #                                                             })
-            # except Exception: 
-            #     pass
+                extra_results.update({
+                f"Spex-B_{actual_samples}":interactionshap
+                                                                        })
+            except Exception: 
+                pass
 
             try:
                 attributionban, interactionban, fm_models[f"ProxySpex-S_{actual_samples}"] = harness.compute_proxyspex(sample_budget=actual_samples, max_order=harness.n_items, method='FSII')
@@ -194,19 +194,19 @@ for i in range(num_questions_to_run):
 
     #     methods_results["LOO"] = harness.compute_loo()
     #     methods_results["ARC-JSD"] = harness.compute_arc_jsd()
-    #     attributionxs, interactionxs, fm_models["Exact-FSII"] = harness.compute_exact_faith(max_order=2, method='FSII')
+        attributionxs, interactionxs, fm_models["Exact-FSII"] = harness.compute_exact_faith(max_order=2, method='FSII')
 
-    #     extra_results.update({
-    #     "Exact-FSII": interactionxs
-    # })
-    #     methods_results["Exact-FBII"]=attributionxs
+        extra_results.update({
+        "Exact-FSII": interactionxs
+    })
+        methods_results["Exact-FBII"]=attributionxs
 
-    #     attributionxs, interactionxs, fm_models["Exact-FBII"] = harness.compute_exact_faith(max_order=2, method='FBII')
+        attributionxs, interactionxs, fm_models["Exact-FBII"] = harness.compute_exact_faith(max_order=2, method='FBII')
 
-    #     extra_results.update({
-    #     "Exact-FBII": interactionxs
-    # })
-    #     methods_results["Exact-FBII"]=attributionxs
+        extra_results.update({
+        "Exact-FBII": interactionxs
+    })
+        methods_results["Exact-FBII"]=attributionxs
 
         # --- Evaluation Metrics ---
         metrics_results["topk_probability"] = harness.evaluate_topk_performance(

@@ -42,8 +42,8 @@ accelerator_main = Accelerator(mixed_precision="fp16")
 if accelerator_main.is_main_process:
     print("Main Script: Loading model...")
 # model_path = "mistralai/Mistral-7B-Instruct-v0.3"
-model_path = "meta-llama/Llama-3.1-8B-Instruct"
-# model_path = "Qwen/Qwen2.5-3B-Instruct"
+# model_path = "meta-llama/Llama-3.1-8B-Instruct"
+model_path = "Qwen/Qwen2.5-3B-Instruct"
 
 model_cpu = AutoModelForCausalLM.from_pretrained(
     model_path,
