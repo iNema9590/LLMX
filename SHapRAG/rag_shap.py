@@ -15,7 +15,7 @@ import functools
 import spectralexplain as spex
 import shapiq
 import numpy as np
-from scipy.special import comb
+import scipy
 import torch
 import torch.nn.functional as F
 from accelerate import Accelerator
@@ -520,21 +520,21 @@ class ContextAttribution:
                     model.fit(X_tr, y_tr)
                     preds = model.predict(X_val)
                     pairs = pairs_hamming_1_bitmask(np.asarray(X_train[val_idx]).astype(np.uint8))
-                    if len(pairs)==0:
+                    if len(pairs)<2:
                         continue
 
                     i, j = pairs[:, 0], pairs[:, 1]
 
                     pred_deltas = preds[i] - preds[j]
                     true_deltas = y_val[i] - y_val[j]
-                    weights = np.abs(true_deltas)
-                    weights = weights / (weights.mean() + 1e-8)               
+                    # weights = np.abs(true_deltas)
+                    # weights = weights / (weights.mean() + 1e-8)               
                     
-                    # r2_util = model.score(X_val, y_val)
-                    r2_delta = r2_score(true_deltas, pred_deltas, sample_weight=weights)
+                    r2_util = model.score(X_val, y_val)
+                    r2_delta = r2_score(true_deltas, pred_deltas)
                     # mse_util = mean_squared_error(y_val, preds)
                     # mse_delta = mean_squared_error(true_deltas,pred_deltas, sample_weight=weights)
-                    # fold_metrics["r2_util"].append(r2_util)
+                    fold_metrics["r2_util"].append(r2_util)
                     fold_metrics["r2_delta"].append(r2_delta)
                     # fold_metrics["mse_util"].append(mse_util)
                     # fold_metrics["mse_delta"].append(mse_delta)
@@ -542,7 +542,7 @@ class ContextAttribution:
                 results[r] = {k: np.mean(v) for k, v in fold_metrics.items()}
 
             # Pick rank with maximum R² instead of minimum MSE
-            maximize_metrics = {"r2_delta"}
+            maximize_metrics = {"r2_delta", "r2_util"}
             # minimize_metrics = {"mse_util",  "mse_delta"}
             best_by_metric = {}
 
@@ -564,7 +564,7 @@ class ContextAttribution:
             # --- Train final model with best rank ---
             model = als.FMRegression(
                 n_iter=1000,
-                rank=best_by_metric[selection_metric],
+                rank=best_by_metric["r2_util"],
                 l2_reg_w=0.01,
                 l2_reg_V=0.1,
                 random_state=42
@@ -794,7 +794,7 @@ class ContextAttribution:
         #     v_np = np.array(v_tuple)
         #     flip_idx = np.random.randint(0, self.n_items)
         #     v_np[flip_idx] = 1 - v_np[flip_idx]
-            # sampled_tuples_expanded.append(tuple(v_np))
+        #     sampled_tuples_expanded.append(tuple(v_np))
 
         utilities_for_samples = [self.get_utility(tuple(v_tuple), mode=self.utility_mode) for v_tuple in sampled_tuples]
 
@@ -941,7 +941,7 @@ class ContextAttribution:
             X_t,
             y_t,
             lr=1e-2,
-            n_iter= 100,
+            n_iter= 300,
             verbose=True,
             all_pairs=all_pairs
         )
@@ -1125,9 +1125,9 @@ class ContextAttribution:
             elif "ContextCite" in method_name:
                 predicted_effect=models[method_name].predict(X_all)
             
-            # elif "Facile" in method_name:
-            #     model=models[method_name]
-            #     predicted_effect= model.predict(torch.tensor(X_all, dtype=torch.float32, device="cuda"))
+            elif "Facile" in method_name:
+                model=models[method_name]
+                predicted_effect= model.predict(torch.tensor(X_all, dtype=torch.float32, device="cuda"))
             else:
                 predicted_effect = [np.dot(scores, i) for i in X_all]
 
@@ -1162,9 +1162,9 @@ class ContextAttribution:
             elif "ContextCite" in method_name:
                 predicted_effect=models[method_name].predict(X_all)
             
-            # elif "Facile" in method_name:
-            #     model=models[method_name]
-            #     predicted_effect= model.predict(torch.tensor(X_all, dtype=torch.float32, device="cuda"))
+            elif "Facile" in method_name:
+                model=models[method_name]
+                predicted_effect= model.predict(torch.tensor(X_all, dtype=torch.float32, device="cuda"))
 
             elif "II" in method_name or "pex" in method_name in method_name:
                 predicted_effect = np.zeros(len(X_all))
@@ -1242,10 +1242,10 @@ class ContextAttribution:
                 y_pred= model.predict(X)
                 pred_deltas = y_pred[all_indecies[:,0]] - y_pred[all_indecies[:,1]]
 
-            # elif "Facile" in method_name:
-            #     model=models[method_name]
-            #     y_pred= model.predict(torch.tensor(X, dtype=torch.float32, device="cuda"))
-            #     pred_deltas = y_pred[all_indecies[:,0]] - y_pred[all_indecies[:,1]]
+            elif "Facile" in method_name:
+                model=models[method_name]
+                y_pred= model.predict(torch.tensor(X, dtype=torch.float32, device="cuda"))
+                pred_deltas = y_pred[all_indecies[:,0]] - y_pred[all_indecies[:,1]]
             
             # Handle linear attribution models
             else:
@@ -1319,7 +1319,7 @@ def shapley_kernel_weight(ablations: np.ndarray) -> np.ndarray:
     mask = (coalition_sizes > 0) & (coalition_sizes < n_features)
     
     weights[mask] = ((n_features - 1) / 
-                     (comb(n_features, coalition_sizes[mask]) * 
+                     (scipy.special.comb(n_features, coalition_sizes[mask]) * 
                       coalition_sizes[mask] * (n_features - coalition_sizes[mask])))
     
     return weights
@@ -1393,8 +1393,12 @@ class TorchFactorizationMachine(nn.Module):
     def loss(self, X: torch.Tensor, y: torch.Tensor, all_pairs: list) -> torch.Tensor:
         y_pred = self.forward(X)
         pairs = torch.tensor(all_pairs, device=X.device)
+        from scipy.special import comb
         if self.loss_type == "util_mse":
-            mse = torch.mean((y - y_pred) ** 2)
+            # calculate the shapley kernel weights for the X
+            shapley_weights = shapley_kernel_weight(X.cpu().numpy())
+            shapley_weights = torch.tensor(shapley_weights, device=X.device, dtype=torch.float32)
+            mse = torch.mean(shapley_weights*(y - y_pred) ** 2)
         elif self.loss_type == "delta_mse":
             # return all possible pairs with Hamming distance 1
            
@@ -1404,7 +1408,9 @@ class TorchFactorizationMachine(nn.Module):
 
             pred_deltas = y_pred[i] - y_pred[j]
             true_deltas = y[i] - y[j]
-            weights = torch.abs(true_deltas)
+            shapley_weights = shapley_kernel_weight(X[i].cpu().numpy())
+            shapley_weights = torch.tensor(shapley_weights, device=X.device, dtype=torch.float32)
+            weights = torch.abs(true_deltas)*shapley_weights
             weights = weights / (weights.mean() + 1e-8)
             mse = torch.mean(weights*(true_deltas - pred_deltas) ** 2)
                     

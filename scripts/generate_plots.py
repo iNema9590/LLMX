@@ -20,8 +20,8 @@ from sklearn.metrics import ndcg_score, average_precision_score
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-# DATA_CSV = Path("../data/sampled_musique.csv")
-DATA_CSV = Path("../data/sampled_hotpot.csv")
+DATA_CSV = Path("../data/sampled_musique.csv")
+# DATA_CSV = Path("../data/sampled_hotpot.csv")
 UTILITY_CACHE_BASE_DIR_ROOT = Path(f"../Experiment_data/{DATA_CSV.stem}")
 
 MODEL_PATH = "meta-llama/Llama-3.1-8B-Instruct"  # change as needed
@@ -32,16 +32,15 @@ FIGURE_BASE = Path("../Figures") /DATA_CSV.stem/ MODEL_PATH.split("/")[1].split(
 
 # plotting aesthetics
 METHOD_COLORS = {
-    "FM-Shapley": "#ff7f0e",
-    "Spex": "#d62728",
-    "Shapiq": "#2ca02c",
-    "ProxySpex": "#9467bd",
-    "Exact-FSII": "#8c564b",
-    "Exact-Shap": "#e377c2",
-    "LOO": "#7f7f7f",
-    "ARC-JSD": "#bcbd22",
-    "ContextCite": "#1f77b4",
-    "default": "#17becf",
+    "FACILE": "#DD6B07",
+    "Spex": "#D10505",
+    "Shapiq": "#018d01",
+    "ProxySpex": "#760adb",
+    "Exact-Shapley": "#f2f27a",
+    "Exact-FSII": "#04B49D",
+
+    "ContextCite": "#0f91ee",
+    "default": "#0d0aaf",
 }
 mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=list(METHOD_COLORS.values()))
 plt.rcParams.update({'font.size': 24})
@@ -56,8 +55,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(mes
 
 def family_of(method_key: str) -> str:
     """Map a method key to a color family."""
-    if method_key.startswith("FM"):
-        return "FM-Shapley"
+    if method_key.startswith("FACILE"):
+        return "FACILE"
     elif method_key.startswith("Spex"):
         return "Spex"
     elif method_key.startswith("Shapiq"):
@@ -66,7 +65,7 @@ def family_of(method_key: str) -> str:
         return "ProxySpex"
     elif method_key.startswith("ContextCite"):
         return "ContextCite"
-    elif method_key in ("Exact-FSII", "Exact-Shap", "LOO", "ARC-JSD"):
+    elif method_key in ("Exact-FSII", "Exact-Shapley", "LOO", "ARC-JSD"):
         return method_key
     return "default"
 
@@ -100,25 +99,25 @@ def load_inputs():
     return dfin, all_results, extras
 
 
-# def GT(dfin, i):
-#     """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
-#     t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
-#     if t == "2hop":
-#         return [0, 1]
-#     if t == "3hop":
-#         return [0, 1, 2]
-#     if t == "4hop":
-#         return [0, 1, 2, 3]
-#     # fallback: empty
-#     return []
-
 def GT(dfin, i):
-    if dfin["len_gt"][i]==2:
-        return [0,1]
-    elif dfin["len_gt"][i]==3:
-        return [0,1,2]
-    elif dfin["len_gt"][i]==4:
-        return [0,1,2,3]
+    """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
+    t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
+    if t == "2hop":
+        return [0, 1]
+    if t == "3hop":
+        return [0, 1, 2]
+    if t == "4hop":
+        return [0, 1, 2, 3]
+    # fallback: empty
+    return []
+
+# def GT(dfin, i):
+#     if dfin["len_gt"][i]==2:
+#         return [0,1]
+#     elif dfin["len_gt"][i]==3:
+#         return [0,1,2]
+#     elif dfin["len_gt"][i]==4:
+#         return [0,1,2,3]
 
 # ---------------------
 # 1. Marginal metrics summary
@@ -150,7 +149,7 @@ def compute_marginal_ndcg_vs_budget(all_results, save_path):
     for method_res in all_results:
         for method, attribution in method_res['methods'].items():
             if "Exact" not in method:
-                ref, att = scale_pair_preserve_order(method_res['methods']["Exact-Shap"], attribution)
+                ref, att = scale_pair_preserve_order(method_res['methods']["Exact-Shapley"], attribution)
                 # compute NDCG with k=5 (as in original code)
                 try:
                     spear = ndcg_score([ref], [att], k=5)
@@ -199,7 +198,7 @@ def compute_ndcg_per_k(all_results, save_path):
         for method, attribution in method_res['methods'].items():
             if "Exact" in method:
                 continue
-            ref, att = scale_pair_preserve_order(method_res['methods']["Exact-Shap"], attribution)
+            ref, att = scale_pair_preserve_order(method_res['methods']["Exact-Shapley"], attribution)
             for k in K_VALUES:
                 try:
                     score = ndcg_score([ref], [att], k=k)
@@ -304,7 +303,7 @@ def compute_prauc(all_results, dfin, save_path):
             aps[method].append(float(ap))
 
     # separate constant/budgeted methods
-    constant_methods_list = ['Exact-Shap', 'Exact-FSII']  # modify if needed
+    constant_methods_list = ['Exact-Shapley', 'Exact-FSII']  # modify if needed
     budgeted_data = defaultdict(list)
     constant_data = {}
     for method, values in aps.items():
@@ -379,7 +378,7 @@ def summarize_and_print(all_results, k_values=[1, 2, 3, 4, 5]):
 
 def plot_surrogate_metrics(df_summary, save_path):
     df_reset = df_summary.reset_index().rename(columns={'index': 'method'})
-    constant_methods_set = ['LOO', 'ARC-JSD', 'Exact-FSII', 'Exact-Shap']
+    constant_methods_set = ['LOO', 'ARC-JSD', 'Exact-FSII', 'Exact-Shapley']
     df_const = df_reset[df_reset['method'].isin(constant_methods_set)]
     df_budgeted = df_reset[~df_reset['method'].isin(constant_methods_set)].copy()
 
@@ -451,7 +450,7 @@ def plot_surrogate_metrics(df_summary, save_path):
     logging.info("Saved %s", out)
 
     # Plot recall at fixed budget
-    metric = f"Recall@"
+    metric = f"Recall@k"
     plt.figure(figsize=(8, 6))
     plt.xlabel("K-Values")
     plt.ylabel("Recall@K")
@@ -512,20 +511,20 @@ def extract_budget(key):
 
 
 def extract_family(key):
-    if key.startswith("FM_dynamc_"):
-        return key
     if key.startswith("FM"):
-        return "FM"
-    if key.startswith("Spex"):
+        return 'FM'
+    
+    elif key.startswith("Spex"):
         return "Spex"
-    if key.startswith("ProxySpex"):
+
+    elif key.startswith("ProxySpex"):
         return "ProxySpex"
-    if key.startswith("Flk"):
-        parts = key.split("_")
-        return parts[0] + "_" + parts[1] if len(parts) > 1 else key
-    if key.startswith("Shapiq"):
+
+    elif key.startswith("Shapiq"):
         return "Shapiq"
-    return key
+
+    elif key.startswith("FACILE"):
+        return "FACILE"
 
 
 def pairs_from_exact(extras):
@@ -570,10 +569,10 @@ def interaction_rr_and_ndcg(extras, dfin, save_path):
         values = [budget_rrs[b] for b in budgets]
         plt.plot(budgets, values, marker='o', label=family, color=get_color(family))
     plt.xlabel('Budget')
-    plt.ylabel('RR@5')
+    plt.ylabel('RR@4')
     plt.grid(True)
     plt.tight_layout()
-    out = save_path / "rr_at_5.pdf"
+    out = save_path / "rr_at_4.pdf"
     plt.savefig(out, bbox_inches='tight')
     plt.close()
     logging.info("Saved %s", out)
@@ -617,15 +616,15 @@ def interaction_rr_and_ndcg(extras, dfin, save_path):
         ys = [bd[x] for x in xs]
         plt.plot(xs, ys, marker='o', label=fam, color=get_color(fam))
     # constant lines for known constant methods if present
-    constant_methods = ['Exact-FSII', 'Exact-Shap', 'LOO', 'ARC-JSD']
+    constant_methods = ['Exact-FSII', 'Exact-Shapley', 'LOO', 'ARC-JSD']
     for cm in constant_methods:
         if cm in avg_ndcg:
             plt.axhline(y=avg_ndcg[cm], linestyle='--', label=cm)
     plt.xlabel('Budget')
-    plt.ylabel('NDCG@5 (interaction)')
+    plt.ylabel('NDCG@4 (interaction)')
     plt.grid(True)
     plt.tight_layout()
-    out = save_path / "ndcg_at_5_interactions.pdf"
+    out = save_path / "ndcg_at_4_interactions.pdf"
     plt.savefig(out, bbox_inches='tight')
     plt.close()
     logging.info("Saved %s", out)
