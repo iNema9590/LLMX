@@ -24,9 +24,9 @@ DATA_CSV = Path("../data/sampled_musique.csv")
 # DATA_CSV = Path("../data/sampled_hotpot.csv")
 UTILITY_CACHE_BASE_DIR_ROOT = Path(f"../Experiment_data/{DATA_CSV.stem}")
 
-MODEL_PATH = "meta-llama/Llama-3.1-8B-Instruct"  # change as needed
+# MODEL_PATH = "meta-llama/Llama-3.1-8B-Instruct"  # change as needed
 # MODEL_PATH = "mistralai/Mistral-7B-Instruct-v0.3"
-# MODEL_PATH = "Qwen/Qwen2.5-3B-Instruct"
+MODEL_PATH = "Qwen/Qwen2.5-3B-Instruct"
 
 FIGURE_BASE = Path("../Figures") /DATA_CSV.stem/ MODEL_PATH.split("/")[1].split("-")[0]
 
@@ -358,10 +358,12 @@ def summarize_and_print(all_results, k_values=[1, 2, 3, 4, 5]):
             for k in k_values:
                 if k in k_dict:
                     table_data[method_name][f"topk_probability_k{k}"].append(k_dict[k])
-        for method_name, k_dict in metrics.get("Recall", {}).items():
-            for k in k_values:
-                if len(k_dict) >= k:
-                    table_data[method_name][f"Recall@{k}"].append(k_dict[k-1])
+        for method_name, k_list in metrics.get("Recall", {}).items():
+            for idx, k in enumerate(k_values):
+                if idx < len(k_list):  # k_list is [recall@1, recall@2, ..., recall@k_max]
+                    col_name = f"Recall@{k}"
+                    table_data[method_name][col_name].append(k_list[idx])
+
 
     # compute averages and stds
     avg_table = {}
@@ -377,108 +379,134 @@ def summarize_and_print(all_results, k_values=[1, 2, 3, 4, 5]):
 
 
 def plot_surrogate_metrics(df_summary, save_path):
+    """Plot R2, Delta_R2, LDS, and Recall@k metrics vs budget."""
+    logging.info("Plotting surrogate metrics...")
+    
+    # Separate constant and budgeted methods
+    constant_methods = ['Exact-Shapley', 'Exact-FSII', 'Exact-FBII', 'LOO', 'ARC-JSD']
     df_reset = df_summary.reset_index().rename(columns={'index': 'method'})
-    constant_methods_set = ['LOO', 'ARC-JSD', 'Exact-FSII', 'Exact-Shapley']
-    df_const = df_reset[df_reset['method'].isin(constant_methods_set)]
-    df_budgeted = df_reset[~df_reset['method'].isin(constant_methods_set)].copy()
-
-    # extract family and budget safely
-    def parse_family_budget(x):
-        parts = x.split("_")
-        if len(parts) >= 2 and parts[-1].isdigit():
-            family = "_".join(parts[:-1])
-            budget = int(parts[-1])
-        else:
-            family, budget = x, None
-        return family, budget
-
-    df_budgeted[['family', 'budget']] = df_budgeted['method'].apply(lambda x: pd.Series(parse_family_budget(x)))
+    df_budgeted = df_reset[~df_reset['method'].isin(constant_methods)].copy()
+    df_const = df_reset[df_reset['method'].isin(constant_methods)]
+    
+    # Extract family and budget for budgeted methods
+    df_budgeted['family'] = df_budgeted['method'].apply(
+        lambda x: "_".join(x.split("_")[:-1]) if "_" in x else x
+    )
+    df_budgeted['budget'] = df_budgeted['method'].apply(
+        lambda x: int(x.split("_")[-1]) if x.split("_")[-1].isdigit() else None
+    )
     df_budgeted = df_budgeted.sort_values(by=['family', 'budget'])
 
+    # Function to plot a single metric
     def plot_metric(metric, ylabel):
         plt.figure(figsize=(8, 6))
+        
+        # Plot budgeted families
         families = df_budgeted['family'].unique()
         for fam in families:
             subset = df_budgeted[df_budgeted['family'] == fam]
-            if subset.empty:
-                continue
-            # need to ignore rows where metric is NaN
-            subset = subset.dropna(subset=[metric])
-            if subset.empty:
-                continue
-            plt.plot(subset['budget'], subset[metric], marker='o', label=fam, color=get_color(fam))
+            if metric in subset.columns:
+                subset_clean = subset.dropna(subset=[metric])
+                if not subset_clean.empty:
+                    
+                    plt.plot(subset_clean['budget'], subset_clean[metric], 
+                                marker='o', label=fam, color=get_color(fam))
+        
+        # Plot constant methods as horizontal lines
+        # for _, row in df_const.iterrows():
+        #     if metric in row.index and pd.notna(row[metric]):
+        #         plt.axhline(y=row[metric], linestyle='--', label=row['method'], 
+        #                    color=get_color(row['method']))
+        
         plt.xlabel("Budget")
         plt.ylabel(ylabel)
+        # plt.legend()
         plt.grid(True)
         plt.tight_layout()
-        out = save_path / f"{metric.lower()}_vs_budget_marginal.pdf"
+        
+        out = save_path / f"{metric.lower()}_vs_budget.pdf"
         plt.savefig(out, bbox_inches='tight')
         plt.close()
         logging.info("Saved %s", out)
 
-    for metric, ylabel in [("R2", "R2"), ("LDS", "LDS"), ("Delta_R2", "Delta R2")]:
-        if metric in df_budgeted.columns:
-            plot_metric(metric, ylabel)
+    # Plot R2, Delta_R2, LDS
+    plot_metric("R2", "R²")
+    plot_metric("Delta_R2", "ΔR²")
+    plot_metric("LDS", "LDS")
+    
+    # Plot Recall@k vs k at fixed budget
+    df_budgeted_fixed = df_budgeted[df_budgeted['budget'] == FIXED_BUDGET]
+    
+    if not df_budgeted_fixed.empty:
+        recall_metrics = [f"Recall@{k}" for k in K_VALUES]
+        k_values = list(K_VALUES)
         
-    #Plot topk_probability at fixed budget 
-    metric = f"topk_probability_k"
+        plt.figure(figsize=(8, 6))
+        
+        # Plot budgeted families at fixed budget
+        for fam in df_budgeted_fixed['family'].unique():
+            subset = df_budgeted_fixed[df_budgeted_fixed['family'] == fam]
+            if not subset.empty:
+                row = subset.iloc[0]
+                recalls = [row[col] for col in recall_metrics 
+                          if col in row.index and pd.notna(row[col])]
+                
+                if recalls:
+                    plt.plot(k_values[:len(recalls)], recalls, marker='o', 
+                            label=fam, color=get_color(fam))
+        
+        # Plot constant methods
+        # for _, row in df_const.iterrows():
+        # #     recalls = [row[col] for col in recall_metrics 
+        # #               if col in row.index and pd.notna(row[col])]
+        # #     if recalls:
+        # #         avg_recall = float(np.nanmean(recalls))
+        #         plt.axhline(y=avg_recall, linestyle='--', label=row['method'], 
+        #                    color=get_color(row['method']))
+        
+        plt.xlabel("k")
+        plt.ylabel("Recall@k")
+        # plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        
+        out = save_path / f"recall_at_k_{FIXED_BUDGET}.pdf"
+        plt.savefig(out, bbox_inches='tight')
+        plt.close()
+        logging.info("Saved %s", out)
+    else:
+        logging.warning(f"No methods found at budget {FIXED_BUDGET} for recall plotting")
 
-    plt.figure(figsize=(8, 6))
-    plt.xlabel("K-Values")
-    plt.ylabel("Top-K Utility Drop")
-    for fam in df_budgeted['family'].unique():
-        subset = df_budgeted[df_budgeted['family'] == fam]
-        if subset.empty:
-            continue
-        ks = []
-        vals = []
-        for k in K_VALUES:
-            col_name = f"{metric}{k}"
-            row = subset[subset['budget'] == 528]
-            if not row.empty and col_name in row.columns:
-                val = row.iloc[0][col_name]
-                if not pd.isna(val):
-                    ks.append(k)
-                    vals.append(val)
-        if ks and vals:
-            plt.plot(ks, vals, marker='o', label=fam, color=get_color(fam))
-    plt.grid(True)
-    plt.tight_layout()
-    out = save_path / f"topk_probability_vs_k_fixed_budget_{FIXED_BUDGET}.pdf"
-    plt.savefig(out, bbox_inches='tight')
-    plt.close()
-    logging.info("Saved %s", out)
-
-    # Plot recall at fixed budget
-    metric = f"Recall@k"
-    plt.figure(figsize=(8, 6))
-    plt.xlabel("K-Values")
-    plt.ylabel("Recall@K")
-    for fam in df_budgeted['family'].unique():
-        subset = df_budgeted[df_budgeted['family'] == fam]
-        if subset.empty:
-            continue
-        ks = []
-        vals = []
-        for k in K_VALUES:
-            col_name = f"{metric}{k}"
-            row = subset[subset['budget'] == 528]
-            if not row.empty and col_name in row.columns:
-                val = row.iloc[0][col_name]
-                if not pd.isna(val):
-                    ks.append(k)
-                    vals.append(val)
-        if ks and vals:
-            plt.plot(ks, vals, marker='o', label=fam, color=get_color(fam))
-    plt.grid(True)
-    plt.tight_layout()
-    out = save_path / f"recall_vs_k_fixed_budget_{FIXED_BUDGET}.pdf"
-    plt.savefig(out, bbox_inches='tight')
-    plt.close()
-    logging.info("Saved %s", out)
-       
-
-
+    if not df_budgeted_fixed.empty:
+        topk_metrics = [f"topk_probability_k{k}" for k in K_VALUES]
+        k_values = list(K_VALUES)
+        
+        plt.figure(figsize=(8, 6))
+        
+        # Plot budgeted families at fixed budget
+        for fam in df_budgeted_fixed['family'].unique():
+            subset = df_budgeted_fixed[df_budgeted_fixed['family'] == fam]
+            if not subset.empty:
+                row = subset.iloc[0]
+                topk_vals = [row[col] for col in topk_metrics 
+                            if col in row.index and pd.notna(row[col])]
+                
+                if topk_vals:
+                    plt.plot(k_values[:len(topk_vals)], topk_vals, marker='o', 
+                            label=fam, color=get_color(fam))
+        
+        plt.xlabel('k')
+        plt.ylabel('Top-k Removal Drop')
+        # plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        
+        out = save_path / f"topk_removal_{FIXED_BUDGET}.pdf"
+        plt.savefig(out, bbox_inches='tight')
+        plt.close()
+        logging.info("Saved %s", out)
+    else:
+        logging.warning(f"No methods found at budget {FIXED_BUDGET} for top-k plotting")
 # ---------------------
 # 3. Interaction quality (RR, NDCG over pairs)
 # ---------------------
