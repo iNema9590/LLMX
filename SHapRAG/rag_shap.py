@@ -501,7 +501,7 @@ class ContextAttribution:
             X_train_fm = csr_matrix(X_train)
 
             # --- Rank tuning if rank not provided ---
-            n_splits = 4
+            n_splits = 2
             kf = KFold(n_splits=n_splits, shuffle=True)
             results = {}
 
@@ -527,14 +527,14 @@ class ContextAttribution:
 
                     pred_deltas = preds[i] - preds[j]
                     true_deltas = y_val[i] - y_val[j]
-                    # weights = np.abs(true_deltas)
-                    # weights = weights / (weights.mean() + 1e-8)               
+                    weights = np.abs(true_deltas)
+                    weights = weights / (weights.mean() + 1e-8)               
                     
-                    r2_util = model.score(X_val, y_val)
+                    # r2_util = model.score(X_val, y_val)
                     r2_delta = r2_score(true_deltas, pred_deltas)
                     # mse_util = mean_squared_error(y_val, preds)
                     # mse_delta = mean_squared_error(true_deltas,pred_deltas, sample_weight=weights)
-                    fold_metrics["r2_util"].append(r2_util)
+                    # fold_metrics["r2_util"].append(r2_util)
                     fold_metrics["r2_delta"].append(r2_delta)
                     # fold_metrics["mse_util"].append(mse_util)
                     # fold_metrics["mse_delta"].append(mse_delta)
@@ -542,8 +542,8 @@ class ContextAttribution:
                 results[r] = {k: np.mean(v) for k, v in fold_metrics.items()}
 
             # Pick rank with maximum R² instead of minimum MSE
-            maximize_metrics = {"r2_delta", "r2_util"}
-            # minimize_metrics = {"mse_util",  "mse_delta"}
+            maximize_metrics = { "r2_delta"}
+            # minimize_metrics = {"mse_util"}
             best_by_metric = {}
 
             for metric in maximize_metrics:
@@ -564,7 +564,7 @@ class ContextAttribution:
             # --- Train final model with best rank ---
             model = als.FMRegression(
                 n_iter=1000,
-                rank=best_by_metric["r2_util"],
+                rank=best_by_metric[selection_metric],
                 l2_reg_w=0.01,
                 l2_reg_V=0.1,
                 random_state=42
@@ -1113,7 +1113,7 @@ class ContextAttribution:
         lds = {}
         # Predict effects for all subsets using surrogates
         for method_name, scores in results_dict.items():
-            if "FACILE" in method_name:
+            if "FACILE" in method_name or "FM" in method_name:
                 model = models[method_name]                
                 predicted_effect = model.predict(X_all_sparse)
             elif "II" in method_name or "pex" in method_name in method_name:
@@ -1155,7 +1155,7 @@ class ContextAttribution:
         X_all_sparse = csr_matrix(X_all)
         r2_scores={}
         for method_name, scores in results_dict.items():
-            if "FACILE" in method_name:
+            if "FACILE" in method_name or "FM" in method_name:
                 model = models[method_name]
                 predicted_effect = model.predict(X_all_sparse)
 
@@ -1219,7 +1219,7 @@ class ContextAttribution:
         for method_name, scores in results_dict.items():
             
             # Handle factorization machine models
-            if "FACILE" in method_name:
+            if "FACILE" in method_name or "FM" in method_name:
                 # Prepare all S vectors and S\{i} vectors in batch
                 
                 model = models[method_name]

@@ -57,7 +57,7 @@ if accelerator_main.is_main_process:
     print("Main Script: Model prepared and set to eval.")
 
 # Define utility cache
-utility_cache_base_dir = f"../Experiment_data/sampled_hotpot/{model_path.split('/')[1]}"
+utility_cache_base_dir = f"../Experiment_data/sampled_hotpot/more_players/{model_path.split('/')[1]}"
 accelerator_main.wait_for_everyone()
 
 num_questions_to_run = len(dfin)
@@ -78,7 +78,7 @@ for i in range(num_questions_to_run):
     if accelerator_main.is_main_process:
         print(f"\n--- Question {i+1}/{num_questions_to_run}: {query[:60]}... ---")
 
-    docs = dfin.reordered_sentences[i][:10]
+    docs = dfin.reordered_sentences[i][:20]
     utility_cache_filename = f"utilities_q_idx{i}.pkl"
     current_utility_path = os.path.join(utility_cache_base_dir, utility_cache_filename)
 
@@ -105,7 +105,7 @@ for i in range(num_questions_to_run):
 
         m_samples_map = {"XS":32, "S":64, "M":128, "L":264, "XL":528, "XXL":724}
         fm_models = {}
-        methods_results['Exact-Shapley']=harness._calculate_exact(method='SV')
+        # methods_results['Exact-Shapley']=harness._calculate_exact(method='SV')
         for size_key, actual_samples in m_samples_map.items():
             print(f"Running sample size: {actual_samples}")
             methods_results[f"ContextCite_{actual_samples}"], fm_models[f"ContextCite_{actual_samples}"] = harness.compute_contextcite(
@@ -144,12 +144,12 @@ for i in range(num_questions_to_run):
             except Exception: 
                 pass
 
-        attributionxs, interactionxs, fm_models["Exact-FSII"] = harness.compute_exact_faith(max_order=2, method='FSII')
+    #     attributionxs, interactionxs, fm_models["Exact-FSII"] = harness.compute_exact_faith(max_order=2, method='FSII')
 
-        extra_results.update({
-        "Exact-FSII": interactionxs
-    })
-        methods_results["Exact-FSII"]=attributionxs
+    #     extra_results.update({
+    #     "Exact-FSII": interactionxs
+    # })
+    #     methods_results["Exact-FSII"]=attributionxs
 
         # --- Evaluation Metrics ---
         metrics_results["topk_probability"] = harness.evaluate_topk_performance(

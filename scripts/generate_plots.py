@@ -19,9 +19,11 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import ndcg_score, average_precision_score
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LogLocator
 
-DATA_CSV = Path("../data/sampled_musique.csv")
-# DATA_CSV = Path("../data/sampled_hotpot.csv")
+
+# DATA_CSV = Path("../data/sampled_musique.csv")
+DATA_CSV = Path("../data/sampled_hotpot.csv")
 UTILITY_CACHE_BASE_DIR_ROOT = Path(f"../Experiment_data/{DATA_CSV.stem}")
 
 # MODEL_PATH = "meta-llama/Llama-3.1-8B-Instruct"  # change as needed
@@ -30,7 +32,7 @@ MODEL_PATH = "Qwen/Qwen2.5-3B-Instruct"
 
 FIGURE_BASE = Path("../Figures") /DATA_CSV.stem/ MODEL_PATH.split("/")[1].split("-")[0]
 
-# plotting aesthetics
+# plotting aesthetics   
 METHOD_COLORS = {
     "FACILE": "#DD6B07",
     "Spex": "#D10505",
@@ -42,6 +44,19 @@ METHOD_COLORS = {
     "ContextCite": "#0f91ee",
     "default": "#0d0aaf",
 }
+
+METHOD_MARKERS = {
+    "FACILE": "*",
+    "Spex": "s",
+    "Shapiq": "D",
+    "ProxySpex": "^",
+    "Exac-Shapley": "p",
+    "Exac-FBII": "<",
+    "Exac-FSII": ">",
+    "ContextCite": "v",
+    "default": ".",
+}
+
 mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=list(METHOD_COLORS.values()))
 plt.rcParams.update({'font.size': 24})
 plt.rcParams['pdf.fonttype'] = 42
@@ -73,6 +88,9 @@ def family_of(method_key: str) -> str:
 def get_color(method_key: str) -> str:
     return METHOD_COLORS.get(family_of(method_key), METHOD_COLORS["default"])
 
+def get_marker(method_key: str) -> str:
+    return METHOD_MARKERS.get(family_of(method_key), METHOD_MARKERS["default"])
+
 
 def ensure_dirs():
     FIGURE_BASE.mkdir(parents=True, exist_ok=True)
@@ -99,25 +117,25 @@ def load_inputs():
     return dfin, all_results, extras
 
 
-def GT(dfin, i):
-    """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
-    t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
-    if t == "2hop":
-        return [0, 1]
-    if t == "3hop":
-        return [0, 1, 2]
-    if t == "4hop":
-        return [0, 1, 2, 3]
-    # fallback: empty
-    return []
-
 # def GT(dfin, i):
-#     if dfin["len_gt"][i]==2:
-#         return [0,1]
-#     elif dfin["len_gt"][i]==3:
-#         return [0,1,2]
-#     elif dfin["len_gt"][i]==4:
-#         return [0,1,2,3]
+#     """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
+#     t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
+#     if t == "2hop":
+#         return [0, 1]
+#     if t == "3hop":
+#         return [0, 1, 2]
+#     if t == "4hop":
+#         return [0, 1, 2, 3]
+#     # fallback: empty
+#     return []
+
+def GT(dfin, i):
+    if dfin["len_gt"][i]==2:
+        return [0,1]
+    elif dfin["len_gt"][i]==3:
+        return [0,1,2]
+    elif dfin["len_gt"][i]==4:
+        return [0,1,2,3]
 
 # ---------------------
 # 1. Marginal metrics summary
@@ -180,9 +198,12 @@ def compute_marginal_ndcg_vs_budget(all_results, save_path):
         else:
             xs = sorted(results.keys())
             ys = [results[b] for b in xs]
-            plt.plot(xs, ys, marker='o', label=method, color=get_color(method))
+            plt.plot(xs, ys, marker=get_marker(method), label=method, color=get_color(method))
     plt.xlabel("Budget")
-    plt.ylabel("NDCG")
+    plt.ylabel("NDCG@5")
+    plt.xscale('log', base=2)
+    plt.xticks([32, 128, 512], labels=[str(t) for t in [32, 128, 512]])
+    plt.gca().xaxis.set_major_locator(LogLocator(base=2))
     plt.grid(True)
     plt.tight_layout()
     out = save_path / "ndcg_vs_budget_marginal.pdf"
@@ -239,7 +260,7 @@ def compute_ndcg_per_k(all_results, save_path):
     for method, k_dict in fixed_results.items():
         ks_sorted = sorted(k_dict.keys())
         ys = [k_dict[kk] for kk in ks_sorted]
-        plt.plot(ks_sorted, ys, marker='o', label=method, color=get_color(method))
+        plt.plot(ks_sorted, ys, marker=get_marker(method), label=method, color=get_color(method))
     plt.xlabel("k")
     plt.ylabel("NDCG")
     plt.grid(True)
@@ -325,10 +346,13 @@ def compute_prauc(all_results, dfin, save_path):
         items_sorted = sorted(items, key=lambda x: x[0])
         budgets = [b for b, _ in items_sorted]
         means = [m for _, m in items_sorted]
-        plt.plot(budgets, means, marker='o', label=family, color=get_color(family))
+        plt.plot(budgets, means, marker=get_marker(family), label=family, color=get_color(family))
 
     plt.xlabel("Budget")
     plt.ylabel("PR-AUC (mean AP)")
+    plt.xscale('log', base=2)
+    plt.xticks([32, 128, 512], labels=[str(t) for t in [32, 128, 512]])
+    plt.gca().xaxis.set_major_locator(LogLocator(base=2))
     plt.grid(True)
     plt.tight_layout()
     out = save_path / "prauc_vs_budget_marginal.pdf"
@@ -410,7 +434,7 @@ def plot_surrogate_metrics(df_summary, save_path):
                 if not subset_clean.empty:
                     
                     plt.plot(subset_clean['budget'], subset_clean[metric], 
-                                marker='o', label=fam, color=get_color(fam))
+                                marker=get_marker(fam), label=fam, color=get_color(fam))
         
         # Plot constant methods as horizontal lines
         # for _, row in df_const.iterrows():
@@ -420,6 +444,9 @@ def plot_surrogate_metrics(df_summary, save_path):
         
         plt.xlabel("Budget")
         plt.ylabel(ylabel)
+        plt.xscale('log', base=2)
+        plt.xticks([32, 128, 512], labels=[str(t) for t in [32, 128, 512]])
+        plt.gca().xaxis.set_major_locator(LogLocator(base=2))
         # plt.legend()
         plt.grid(True)
         plt.tight_layout()
@@ -452,7 +479,7 @@ def plot_surrogate_metrics(df_summary, save_path):
                           if col in row.index and pd.notna(row[col])]
                 
                 if recalls:
-                    plt.plot(k_values[:len(recalls)], recalls, marker='o', 
+                    plt.plot(k_values[:len(recalls)], recalls, marker=get_marker(fam), 
                             label=fam, color=get_color(fam))
         
         # Plot constant methods
@@ -492,7 +519,7 @@ def plot_surrogate_metrics(df_summary, save_path):
                             if col in row.index and pd.notna(row[col])]
                 
                 if topk_vals:
-                    plt.plot(k_values[:len(topk_vals)], topk_vals, marker='o', 
+                    plt.plot(k_values[:len(topk_vals)], topk_vals, marker=get_marker(fam), 
                             label=fam, color=get_color(fam))
         
         plt.xlabel('k')
@@ -595,9 +622,12 @@ def interaction_rr_and_ndcg(extras, dfin, save_path):
     for family, budget_rrs in rr_avg.items():
         budgets = sorted(budget_rrs.keys())
         values = [budget_rrs[b] for b in budgets]
-        plt.plot(budgets, values, marker='o', label=family, color=get_color(family))
+        plt.plot(budgets, values, marker=get_marker(family), label=family, color=get_color(family))
     plt.xlabel('Budget')
-    plt.ylabel('RR@4')
+    plt.ylabel('RR@5')
+    plt.xscale('log', base=2)
+    plt.xticks([32, 128, 512], labels=[str(t) for t in [32, 128, 512]])
+    plt.gca().xaxis.set_major_locator(LogLocator(base=2))
     plt.grid(True)
     plt.tight_layout()
     out = save_path / "rr_at_4.pdf"
@@ -642,14 +672,17 @@ def interaction_rr_and_ndcg(extras, dfin, save_path):
     for fam, bd in family_budget_avg.items():
         xs = sorted(bd.keys())
         ys = [bd[x] for x in xs]
-        plt.plot(xs, ys, marker='o', label=fam, color=get_color(fam))
+        plt.plot(xs, ys, marker=get_marker(fam), label=fam, color=get_color(fam))
     # constant lines for known constant methods if present
     constant_methods = ['Exact-FSII', 'Exact-Shapley', 'LOO', 'ARC-JSD']
     for cm in constant_methods:
         if cm in avg_ndcg:
             plt.axhline(y=avg_ndcg[cm], linestyle='--', label=cm)
     plt.xlabel('Budget')
-    plt.ylabel('NDCG@4 (interaction)')
+    plt.ylabel('NDCG@5 (interaction)')
+    plt.xscale('log', base=2)
+    plt.xticks([32, 128, 512], labels=[str(t) for t in [32, 128, 512]])
+    plt.gca().xaxis.set_major_locator(LogLocator(base=2))
     plt.grid(True)
     plt.tight_layout()
     out = save_path / "ndcg_at_4_interactions.pdf"
