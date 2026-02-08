@@ -22,8 +22,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import LogLocator
 
 
-# DATA_CSV = Path("../data/sampled_musique.csv")
-DATA_CSV = Path("../data/sampled_hotpot.csv")
+DATA_CSV = Path("../data/sampled_musique.csv")
+# DATA_CSV = Path("../data/sampled_hotpot.csv")
 UTILITY_CACHE_BASE_DIR_ROOT = Path(f"../Experiment_data/{DATA_CSV.stem}")
 
 # MODEL_PATH = "meta-llama/Llama-3.1-8B-Instruct"  # change as needed
@@ -46,7 +46,7 @@ METHOD_COLORS = {
 }
 
 METHOD_MARKERS = {
-    "FACILE": "*",
+    "FACILE": "o",
     "Spex": "s",
     "Shapiq": "D",
     "ProxySpex": "^",
@@ -58,9 +58,14 @@ METHOD_MARKERS = {
 }
 
 mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=list(METHOD_COLORS.values()))
-plt.rcParams.update({'font.size': 24})
+plt.rcParams.update({'font.size': 32})
+plt.rcParams['axes.labelsize'] = 40
+plt.rcParams['xtick.labelsize'] = 30
+plt.rcParams['ytick.labelsize'] = 30
 plt.rcParams['pdf.fonttype'] = 42
 plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['lines.linewidth'] = 3
+plt.rcParams['lines.markersize'] = 13
 
 K_VALUES = [1, 2, 3, 4, 5]
 FIXED_BUDGET = 264
@@ -117,25 +122,25 @@ def load_inputs():
     return dfin, all_results, extras
 
 
-# def GT(dfin, i):
-#     """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
-#     t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
-#     if t == "2hop":
-#         return [0, 1]
-#     if t == "3hop":
-#         return [0, 1, 2]
-#     if t == "4hop":
-#         return [0, 1, 2, 3]
-#     # fallback: empty
-#     return []
-
 def GT(dfin, i):
-    if dfin["len_gt"][i]==2:
-        return [0,1]
-    elif dfin["len_gt"][i]==3:
-        return [0,1,2]
-    elif dfin["len_gt"][i]==4:
-        return [0,1,2,3]
+    """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
+    t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
+    if t == "2hop":
+        return [0, 1]
+    if t == "3hop":
+        return [0, 1, 2]
+    if t == "4hop":
+        return [0, 1, 2, 3]
+    # fallback: empty
+    return []
+
+# def GT(dfin, i):
+#     if dfin["len_gt"][i]==2:
+#         return [0,1]
+#     elif dfin["len_gt"][i]==3:
+#         return [0,1,2]
+#     elif dfin["len_gt"][i]==4:
+#         return [0,1,2,3]
 
 # ---------------------
 # 1. Marginal metrics summary
@@ -190,15 +195,16 @@ def compute_marginal_ndcg_vs_budget(all_results, save_path):
             parsed.setdefault(key, {})[None] = avg_val
 
     budgets = sorted(budgets) if budgets else [0, 1]
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(9, 7))
     for method, results in parsed.items():
         if None in results:
             plt.hlines(results[None], xmin=min(budgets), xmax=max(budgets),
-                       linestyles='--', label=method, colors=get_color(method))
+                       linestyles='--', label=method, colors=get_color(method), linewidth=3)
         else:
             xs = sorted(results.keys())
             ys = [results[b] for b in xs]
-            plt.plot(xs, ys, marker=get_marker(method), label=method, color=get_color(method))
+            plt.plot(xs, ys, marker=get_marker(method), label=method, color=get_color(method), 
+                    markersize= 13, linewidth=3)
     plt.xlabel("Budget")
     plt.ylabel("NDCG@5")
     plt.xscale('log', base=2)
@@ -256,11 +262,12 @@ def compute_ndcg_per_k(all_results, save_path):
             elif None in results:
                 fixed_results.setdefault(method, {})[k] = results[None]
     pd.DataFrame(fixed_results).to_csv(save_path / f"ndcg@k{FIXED_BUDGET}.csv")
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(9, 7))
     for method, k_dict in fixed_results.items():
         ks_sorted = sorted(k_dict.keys())
         ys = [k_dict[kk] for kk in ks_sorted]
-        plt.plot(ks_sorted, ys, marker=get_marker(method), label=method, color=get_color(method))
+        plt.plot(ks_sorted, ys, marker=get_marker(method), label=method, color=get_color(method),
+                markersize= 13, linewidth=3)
     plt.xlabel("k")
     plt.ylabel("NDCG")
     plt.grid(True)
@@ -341,12 +348,13 @@ def compute_prauc(all_results, dfin, save_path):
             else:
                 constant_data[method] = mean_val
 
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(9, 7))
     for family, items in budgeted_data.items():
         items_sorted = sorted(items, key=lambda x: x[0])
         budgets = [b for b, _ in items_sorted]
         means = [m for _, m in items_sorted]
-        plt.plot(budgets, means, marker=get_marker(family), label=family, color=get_color(family))
+        plt.plot(budgets, means, marker=get_marker(family), label=family, color=get_color(family),
+                markersize= 13, linewidth=3)
 
     plt.xlabel("Budget")
     plt.ylabel("PR-AUC (mean AP)")
@@ -423,7 +431,7 @@ def plot_surrogate_metrics(df_summary, save_path):
 
     # Function to plot a single metric
     def plot_metric(metric, ylabel):
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(9, 7))
         
         # Plot budgeted families
         families = df_budgeted['family'].unique()
@@ -434,7 +442,8 @@ def plot_surrogate_metrics(df_summary, save_path):
                 if not subset_clean.empty:
                     
                     plt.plot(subset_clean['budget'], subset_clean[metric], 
-                                marker=get_marker(fam), label=fam, color=get_color(fam))
+                                marker=get_marker(fam), label=fam, color=get_color(fam),
+                                markersize= 13, linewidth=3)
         
         # Plot constant methods as horizontal lines
         # for _, row in df_const.iterrows():
@@ -468,7 +477,7 @@ def plot_surrogate_metrics(df_summary, save_path):
         recall_metrics = [f"Recall@{k}" for k in K_VALUES]
         k_values = list(K_VALUES)
         
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(9, 7))
         
         # Plot budgeted families at fixed budget
         for fam in df_budgeted_fixed['family'].unique():
@@ -480,7 +489,7 @@ def plot_surrogate_metrics(df_summary, save_path):
                 
                 if recalls:
                     plt.plot(k_values[:len(recalls)], recalls, marker=get_marker(fam), 
-                            label=fam, color=get_color(fam))
+                            label=fam, color=get_color(fam), markersize= 13, linewidth=3)
         
         # Plot constant methods
         # for _, row in df_const.iterrows():
@@ -508,7 +517,7 @@ def plot_surrogate_metrics(df_summary, save_path):
         topk_metrics = [f"topk_probability_k{k}" for k in K_VALUES]
         k_values = list(K_VALUES)
         
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(9, 7))
         
         # Plot budgeted families at fixed budget
         for fam in df_budgeted_fixed['family'].unique():
@@ -520,7 +529,7 @@ def plot_surrogate_metrics(df_summary, save_path):
                 
                 if topk_vals:
                     plt.plot(k_values[:len(topk_vals)], topk_vals, marker=get_marker(fam), 
-                            label=fam, color=get_color(fam))
+                            label=fam, color=get_color(fam), markersize= 13, linewidth=3)
         
         plt.xlabel('k')
         plt.ylabel('Top-k Removal Drop')
@@ -618,11 +627,12 @@ def interaction_rr_and_ndcg(extras, dfin, save_path):
                 rr_by_method_budget[family][budget].append(rr)
     rr_avg = {fam: {b: float(np.mean(vals)) for b, vals in bd.items()} for fam, bd in rr_by_method_budget.items()}
 
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(9, 7))
     for family, budget_rrs in rr_avg.items():
         budgets = sorted(budget_rrs.keys())
         values = [budget_rrs[b] for b in budgets]
-        plt.plot(budgets, values, marker=get_marker(family), label=family, color=get_color(family))
+        plt.plot(budgets, values, marker=get_marker(family), label=family, color=get_color(family),
+                markersize= 13, linewidth=3)
     plt.xlabel('Budget')
     plt.ylabel('RR@5')
     plt.xscale('log', base=2)
@@ -668,11 +678,12 @@ def interaction_rr_and_ndcg(extras, dfin, save_path):
 
     family_budget_avg = {fam: {b: float(np.mean(vals)) for b, vals in bd.items()} for fam, bd in family_budget.items()}
 
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(9, 7))
     for fam, bd in family_budget_avg.items():
         xs = sorted(bd.keys())
         ys = [bd[x] for x in xs]
-        plt.plot(xs, ys, marker=get_marker(fam), label=fam, color=get_color(fam))
+        plt.plot(xs, ys, marker=get_marker(fam), label=fam, color=get_color(fam),
+                markersize= 13, linewidth=3)
     # constant lines for known constant methods if present
     constant_methods = ['Exact-FSII', 'Exact-Shapley', 'LOO', 'ARC-JSD']
     for cm in constant_methods:
