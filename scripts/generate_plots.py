@@ -22,8 +22,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import LogLocator
 
 
-DATA_CSV = Path("../data/sampled_musique.csv")
-# DATA_CSV = Path("../data/sampled_hotpot.csv")
+# DATA_CSV = Path("../data/sampled_musique.csv")
+DATA_CSV = Path("../data/sampled_hotpot.csv")
 UTILITY_CACHE_BASE_DIR_ROOT = Path(f"../Experiment_data/{DATA_CSV.stem}")
 
 # MODEL_PATH = "meta-llama/Llama-3.1-8B-Instruct"  # change as needed
@@ -122,25 +122,25 @@ def load_inputs():
     return dfin, all_results, extras
 
 
-def GT(dfin, i):
-    """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
-    t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
-    if t == "2hop":
-        return [0, 1]
-    if t == "3hop":
-        return [0, 1, 2]
-    if t == "4hop":
-        return [0, 1, 2, 3]
-    # fallback: empty
-    return []
-
 # def GT(dfin, i):
-#     if dfin["len_gt"][i]==2:
-#         return [0,1]
-#     elif dfin["len_gt"][i]==3:
-#         return [0,1,2]
-#     elif dfin["len_gt"][i]==4:
-#         return [0,1,2,3]
+#     """Ground-truth indices for query i based on id_type column (2hop, 3hop, 4hop)."""
+#     t = dfin["id_type"].iloc[i] if "id_type" in dfin.columns else None
+#     if t == "2hop":
+#         return [0, 1]
+#     if t == "3hop":
+#         return [0, 1, 2]
+#     if t == "4hop":
+#         return [0, 1, 2, 3]
+#     # fallback: empty
+#     return []
+
+def GT(dfin, i):
+    if dfin["len_gt"][i]==2:
+        return [0,1]
+    elif dfin["len_gt"][i]==3:
+        return [0,1,2]
+    elif dfin["len_gt"][i]==4:
+        return [0,1,2,3]
 
 # ---------------------
 # 1. Marginal metrics summary
@@ -206,7 +206,7 @@ def compute_marginal_ndcg_vs_budget(all_results, save_path):
             plt.plot(xs, ys, marker=get_marker(method), label=method, color=get_color(method), 
                     markersize= 13, linewidth=3)
     plt.xlabel("Budget")
-    plt.ylabel("NDCG@5")
+    plt.ylabel("NDCG@5 (marg.)")
     plt.xscale('log', base=2)
     plt.xticks([32, 128, 512], labels=[str(t) for t in [32, 128, 512]])
     plt.gca().xaxis.set_major_locator(LogLocator(base=2))
@@ -269,7 +269,7 @@ def compute_ndcg_per_k(all_results, save_path):
         plt.plot(ks_sorted, ys, marker=get_marker(method), label=method, color=get_color(method),
                 markersize= 13, linewidth=3)
     plt.xlabel("k")
-    plt.ylabel("NDCG")
+    plt.ylabel("NDCG (marg.)")
     plt.grid(True)
     plt.tight_layout()
     out = save_path / f"ndcg_vs_k_fixed_budget_{FIXED_BUDGET}.pdf"
@@ -357,7 +357,7 @@ def compute_prauc(all_results, dfin, save_path):
                 markersize= 13, linewidth=3)
 
     plt.xlabel("Budget")
-    plt.ylabel("PR-AUC (mean AP)")
+    plt.ylabel("PR-AUC (marg.)")
     plt.xscale('log', base=2)
     plt.xticks([32, 128, 512], labels=[str(t) for t in [32, 128, 512]])
     plt.gca().xaxis.set_major_locator(LogLocator(base=2))
@@ -466,8 +466,8 @@ def plot_surrogate_metrics(df_summary, save_path):
         logging.info("Saved %s", out)
 
     # Plot R2, Delta_R2, LDS
-    plot_metric("R2", "R²")
-    plot_metric("Delta_R2", "ΔR²")
+    plot_metric("R2", r"$R^2_{util}$")
+    plot_metric("Delta_R2", r"$R^2_{\Delta}$")
     plot_metric("LDS", "LDS")
     
     # Plot Recall@k vs k at fixed budget
@@ -532,7 +532,7 @@ def plot_surrogate_metrics(df_summary, save_path):
                             label=fam, color=get_color(fam), markersize= 13, linewidth=3)
         
         plt.xlabel('k')
-        plt.ylabel('Top-k Removal Drop')
+        plt.ylabel('Top-k Drop')
         # plt.legend()
         plt.grid(True)
         plt.tight_layout()
@@ -690,7 +690,7 @@ def interaction_rr_and_ndcg(extras, dfin, save_path):
         if cm in avg_ndcg:
             plt.axhline(y=avg_ndcg[cm], linestyle='--', label=cm)
     plt.xlabel('Budget')
-    plt.ylabel('NDCG@5 (interaction)')
+    plt.ylabel('NDCG@5 (inter.)')
     plt.xscale('log', base=2)
     plt.xticks([32, 128, 512], labels=[str(t) for t in [32, 128, 512]])
     plt.gca().xaxis.set_major_locator(LogLocator(base=2))
