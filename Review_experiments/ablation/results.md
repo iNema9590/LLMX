@@ -13,7 +13,7 @@ The reported delta is **full system minus ablated variant, paired per question**
 positive delta means removing the component *hurt*, i.e. the component earns its place.
 
 | Component removed | mean NDCG@5 | delta vs full |
-|---|---|---|---|
+|---|---|---|
 | Core set construction | 0.9230 | +0.01 |
 | Neighbor expansion | 0.9430 | +0.03 |
 | Pure kernel sampling | 0.9137 | −0.01 |
