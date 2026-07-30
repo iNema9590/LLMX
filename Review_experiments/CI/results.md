@@ -16,11 +16,11 @@ The expanded evaluation **confirms the same overall trends** observed in the ori
 
 ## Marginal attribution: claim holds
 
-![nDCG@5 to Exact-Shapley](figures_ci/ndcg_at_5.png)
+![nDCG@5 to Exact-Shapley](ndcg_at_5.png)
 
 FACILE is above ContextCite at **every** budget.
 
-![PR-AUC](figures_ci/pr_auc.png)
+![PR-AUC](pr_auc.png)
 
 Same direction, significant at all budgets, but the advantage **decays with budget**
 (≈ +0.035 at M = 32 down to ≈ +0.009 at M = 728).
@@ -29,14 +29,14 @@ Same direction, significant at all budgets, but the advantage **decays with budg
 
 ## Surrogate fidelity: claim does not hold at low budget
 
-![R²_util](figures_ci/r2_util.png)
+![R²_util](r2_util.png)
 
-![LDS](figures_ci/lds.png)
+![LDS](lds.png)
 
 The two methods align
 around M ≈ 80. Above it FACILE pulls clearly ahead and ContextCite flattens.
 
-![R²_Δ](figures_ci/r2_delta.png)
+![R²_Δ](r2_delta.png)
 
 Here FACILE wins from the start.
 
@@ -44,6 +44,6 @@ Here FACILE wins from the start.
 
 ## Gold-document retrieval: no measurable difference
 
-![Recall@k](figures_ci/recall_by_k_budget264.png)
+![Recall@k](recall_by_k_budget264.png)
 
-![Top-k drop](figures_ci/topk_drop_by_k_budget264.png)
+![Top-k drop](topk_drop_by_k_budget264.png)
